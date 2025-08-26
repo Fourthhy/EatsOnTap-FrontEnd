@@ -15,21 +15,21 @@ export default function StudentID() {
     const studentCollection = {
         "22-00100MBS": {
             name: "Mark Joseph Santos",
-            course: "Ikaw of course",
-            section: "Sa section namin",
-            eligibility: "Pwedng pwede ser"
+            course: "STEM",
+            section: "12-Mark",
+            eligibility: "Ineligible"
         },
         "22-00208AKS": {
             name: "Aerrol Kyle Santos",
-            course: "main course",
-            section: "Sa section nila",
-            eligibility: "ser, di po pwede"
+            course: "HUMSS",
+            section: "11-Aerrol",
+            eligibility: "Eligible"
         },
         "22-00164JUM": {
             name: "John Miguel Mamabo",
-            course: "python crash course",
-            section: "Sa section ni ano HEHE",
-            eligibility: "ser, tapos na po"
+            course: "GAS",
+            section: "12-Michael",
+            eligibility: "Eligible"
         }
     }
 
