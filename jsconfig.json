@@ -1,9 +1,5 @@
 {
     "compilerOptions": {
-        "target": "ES6",
-        "module": "commonjs",
-        "checkJs": true,
-        "jsx": "react",
         "baseUrl": ".",
         "paths": {
             "@/*": ["src/*"]
