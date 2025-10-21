@@ -1,6 +1,48 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+  font-family: geist;
+  src: url('./assets/fonts/Geist-Regular.ttf');
+}
+
+@theme {
+  --font-geist: geist, "sans-serif";
+}
+
+@font-face {
+  font-family: tolkien;
+  src: url('./assets/fonts/Tolkien.ttf');
+}
+
+@theme {
+  --font-tolkien: tolkien, "serif";
+}
+
+@font-face {
+  font-family: tiroTamil;
+  src: url('./assets/fonts/TiroTamil-Italic.ttf');
+}
+
+@theme {
+  --font-tiroTamil: tiroTamil, "serif";
+}
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
