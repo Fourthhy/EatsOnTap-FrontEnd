@@ -5,6 +5,7 @@ import { Button } from "./components/ui/button";
 import { Label } from "@/components/ui/label"
 import { FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { loginApi } from "./functions/loginAuth"
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -13,10 +14,42 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
     setLoading(true);
     setError('');
+
+    try {
+      const data = await loginApi(email, password);
+      switch (data.role) {
+        case 'ADMIN':
+          navigate('/admin');
+          break;
+        case 'ADMIN-ASSISTANT':
+          navigate('/adminAssistant');
+          break;
+        case 'CANTEEN-STAFF':
+          navigate('/canteenStaff');
+          break;
+        case 'CHANCELLOR':
+          navigate('/chancellor');
+          break;
+        case 'CLASS-ADVISER':
+          navigate('/classAdviser');
+          break;
+        case 'FOOD-SERVER':
+          navigate('/foodServer');
+          break;
+        case 'SUPER-ADMIN':
+          navigate('/superAdmin')
+          break;
+      }
+      //use switch case for scanning data.role
+      switch (data.role) {
+
+      }
+    } catch (error) {
+      setError(error.message || 'Network Error')
+    }
   }
 
   const BREAKPOINTS = {
@@ -104,7 +137,11 @@ export default function Login() {
                             border: `${error == "" ? "" : "red 1px solid"}`
                           }}
                           type="email"
-                          placeholder="Email" />
+                          placeholder="Email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          disabled={loading}
+                        />
                       </div>
                       <div style={{ position: 'relative' }}>
                         <Input
@@ -120,6 +157,9 @@ export default function Login() {
                           }}
                           type="password"
                           placeholder="Password"
+                          disabled={loading}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
                         />
                         {error === "" ? "" :
                           <>
@@ -160,7 +200,9 @@ export default function Login() {
                             width: '23vw',
                             height: buttonHeight,
                             backgroundColor: '#254280',
-                          }}>
+                          }}
+                          onClick={handleSubmit}
+                          >
                           Login
                         </Button>
                       </div>
