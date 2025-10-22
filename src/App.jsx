@@ -54,10 +54,10 @@ function App() {
               className={`absolute left-3 transition-all duration-200 pointer-events-none px-1
                 ${
                   emailFocused
-                    ? "text-xs -top-2 bg-white text-blue-700"
-                    : email
-                    ? "text-xs -top-2 bg-white text-gray-400"
-                    : "text-sm top-3 text-gray-400 bg-transparent"
+                      ? "text-xs -top-2 bg-white text-blue-700"
+                      : email
+                      ? "text-xs -top-2 bg-white text-gray-400"
+                      : "text-sm top-3 text-gray-400 bg-transparent"
                 }`}
             >
               Email
