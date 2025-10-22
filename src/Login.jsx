@@ -6,8 +6,7 @@ import { Label } from "@/components/ui/label"
 import { FaEyeSlash } from "react-icons/fa";
 
 export default function Login() {
-  const [errorMessageEmail, setErrorMessageEmail] = useState("");
-  const [errorMessagePassword, setErrorMessagePassword] = useState("")
+  const [error, setError] = useState("");
 
   const BREAKPOINTS = {
     'mobile-md': 375,
@@ -55,13 +54,15 @@ export default function Login() {
                 {/*LOGIN MODAL*/}
                 <div className="w-[100%] h-[100%] flex flex-col items-center justify-center">
 
-                  <div className="flex flex-col items-center" style={{ marginBottom: '15px' }}>
-                    <p className="font-tolkien text-white text-[1.5vw]">
+                  <div className="flex flex-col items-center" style={{ marginBottom: '20px' }}>
+                    {/*LV IMAGE*/}
+                    <img style={{ width: '5vw', marginBottom: '10px' }} src="/lv-logo.svg" alt="lv logo" />
+                    <p style={{ marginBottom: '3px' }} className="font-tolkien text-white text-[1.6vw]">
                       LA VERDAD CHRISITIAN COLLEGE
                     </p>
                     <p className="font-tiroTamil text-white text-[1.5vh]">
-                      {/* MacArthur Highway, Sampaloc, Apalit, Pampanga 2016 */}
-                      {breakpoint}
+                      MacArthur Highway, Sampaloc, Apalit, Pampanga 2016
+                      {/* {breakpoint} */}
                     </p>
                   </div>
 
@@ -69,17 +70,18 @@ export default function Login() {
                     // className="w-[100%] h-[80%] bg-contain bg-center bg-no-repeat"
                     // style={{ backgroundImage: "url('/login-card.svg')" }}
                     className="
-                      w-100 h-120
+                      w-100 h-100
                       [border-top-left-radius:32px]
                       [border-bottom-right-radius:32px]
-                      shadow-xl
-                      bg-gradient-to-br
-                      from-blue-600 via-pink-400 to-yellow-300"
+                      shadow-xl"
+                    style={{
+                      border: '1px solid white'
+                    }}
                   >
 
                     <div className="w-[100%] h-[100%] flex flex-col gap-4 items-center justify-center">
-                      <img style={{ width: '5vw' }} src="/lv-logo.svg" alt="lv logo" />
-                      <p className="font-geist text-white text-[.97vw]">Please enter your details to get started.</p>
+
+                      {/* <p className="font-geist text-white text-[.97vw]">Please enter your details to get started.</p> */}
                       <div>
                         <Input
                           style={{
@@ -87,26 +89,11 @@ export default function Login() {
                             width: '23vw',
                             height: inputBoxHeight,
                             paddingLeft: '5px',
-                            font: 'geist'
+                            font: 'geist',
+                            border: `${error == "" ? "" : "red 1px solid"}`
                           }}
                           type="email"
                           placeholder="Email" />
-                        {errorMessageEmail === "" ? "" :
-                          <>
-                            <Label>
-                              <p style={{
-                                fontFamily: 'geist',
-                                font: 'regular',
-                                color: '#D13B3B',
-                                paddingTop: '2px'
-                              }}
-                                className="text-[1vw]"
-                              >
-                                {errorMessageEmail}
-                              </p>
-                            </Label>
-                          </>
-                        }
                       </div>
                       <div style={{ position: 'relative' }}>
                         <Input
@@ -118,22 +105,24 @@ export default function Login() {
                             paddingRight: '30px', // add right padding to avoid text overlap with icon
                             fontFamily: 'geist', // corrected font property
                             boxSizing: 'border-box', // to manage padding correctly
+                            border: `${error == "" ? "" : "red 1px solid"}`
                           }}
                           type="password"
                           placeholder="Password"
                         />
-                        {errorMessagePassword === "" ? "" :
+                        {error === "" ? "" :
                           <>
                             <Label>
                               <p style={{
                                 fontFamily: 'geist',
                                 font: 'regular',
                                 color: '#D13B3B',
-                                paddingTop: '2px'
+                                paddingTop: '3px',
+                                paddingLeft: '5px'
                               }}
                                 className="text-[1vw]"
                               >
-                                {errorMessagePassword}
+                                {error}
                               </p>
                             </Label>
                           </>
@@ -178,26 +167,28 @@ export default function Login() {
                           style={{
                             width: '35%',
                             height: '1px',
-                            backgroundColor: '#4C4B4B',
+                            backgroundColor: 'white',
                             marginRight: '16px',
                           }}
                         />
                         <span
                           style={{
-                            color: '#4C4B4B',
+                            color: 'white',
                             margin: '8px',
                             fontSize: '1vw',
                             fontFamily: 'sans-serif',
                             fontWeight: 'normal',
                           }}
                         >
-                          or
+                          <p style={{ color: 'white' }} className="text-[1vw]">
+                            or
+                          </p>
                         </span>
                         <div
                           style={{
                             width: '35%',
                             height: '1px',
-                            backgroundColor: '#4C4B4B',
+                            backgroundColor: 'white',
                             marginLeft: '16px',
                           }}
                         />
@@ -250,14 +241,14 @@ export default function Login() {
               >
 
                 <div className="w-[100%] h-[100%] flex flex-col items-center justify-center">
-
+                  <img style={{ width: '7vh', marginBottom: '5px' }} src="/lv-logo.svg" alt="lv logo" />
                   <div className="flex flex-col items-center" style={{ marginBottom: '15px' }}>
-                    <p className="font-tolkien text-white text-[1.5vh]">
+                    <p style={{ marginBottom: '5px' }}className="font-tolkien text-white text-[1.5vh]">
                       LA VERDAD CHRISITIAN COLLEGE
                     </p>
                     <p className="font-tiroTamil text-white text-[1.5vh]">
-                      {/* MacArthur Highway, Sampaloc, Apalit, Pampanga 2016 */}
-                      {breakpoint}
+                      MacArthur Highway, Sampaloc, Apalit, Pampanga 2016
+                      {/* {breakpoint} */}
                     </p>
                   </div>
 
@@ -265,17 +256,18 @@ export default function Login() {
                     // className="w-[100%] h-[80%] bg-contain bg-center bg-no-repeat"
                     // style={{ backgroundImage: "url('/login-card.svg')" }}
                     className="
-                      w-95 h-120
+                      w-100 h-100
                       [border-top-left-radius:32px]
                       [border-bottom-right-radius:32px]
-                      shadow-xl
-                      bg-gradient-to-br
-                      from-blue-600 via-pink-400 to-yellow-300"
+                      shadow-xl"
+                    style={{
+                      border: '1px solid white'
+                    }}
                   >
 
                     <div className="w-[100%] h-[100%] flex flex-col gap-4 items-center justify-center">
-                      <img style={{ width: '7vh' }} src="/lv-logo.svg" alt="lv logo" />
-                      <p className="font-geist text-white text-[1.5vh]">Please enter your details to get started.</p>
+
+                      {/* <p className="font-geist text-white text-[1.5vh]">Please enter your details to get started.</p> */}
                       <div>
                         <Input
                           style={{
@@ -283,26 +275,11 @@ export default function Login() {
                             width: '80vw',
                             height: inputBoxHeight,
                             paddingLeft: '5px',
-                            font: 'geist'
+                            font: 'geist',
+                            border: `${error == "" ? "" : "red 1px solid"}`
                           }}
                           type="email"
                           placeholder="Email" />
-                        {errorMessageEmail === "" ? "" :
-                          <>
-                            <Label>
-                              <p style={{
-                                fontFamily: 'geist',
-                                font: 'regular',
-                                color: '#D13B3B',
-                                paddingTop: '2px'
-                              }}
-                                className="text-[1.5vh]"
-                              >
-                                {errorMessageEmail}
-                              </p>
-                            </Label>
-                          </>
-                        }
                       </div>
                       <div style={{ position: 'relative' }}>
                         <Input
@@ -314,11 +291,12 @@ export default function Login() {
                             paddingRight: '30px', // add right padding to avoid text overlap with icon
                             fontFamily: 'geist', // corrected font property
                             boxSizing: 'border-box', // to manage padding correctly
+                            border: `${error == "" ? "" : "red 1px solid"}`
                           }}
                           type="password"
                           placeholder="Password"
                         />
-                        {errorMessagePassword === "" ? "" :
+                        {error === "" ? "" :
                           <>
                             <Label>
                               <p style={{
@@ -329,7 +307,7 @@ export default function Login() {
                               }}
                                 className="text-[1.5vh]"
                               >
-                                {errorMessagePassword}
+                                {error}
                               </p>
                             </Label>
                           </>
@@ -377,7 +355,7 @@ export default function Login() {
                           style={{
                             width: '35%',
                             height: '1px',
-                            backgroundColor: '#4C4B4B',
+                            backgroundColor: 'white',
                             marginRight: '16px',
                           }}
                         />
@@ -390,13 +368,15 @@ export default function Login() {
                             fontWeight: 'normal',
                           }}
                         >
-                          or
+                          <p style={{ color: 'white' }} className="text-[1.5vh]">
+                            or
+                          </p>
                         </span>
                         <div
                           style={{
                             width: '35%',
                             height: '1px',
-                            backgroundColor: '#4C4B4B',
+                            backgroundColor: 'white',
                             marginLeft: '16px',
                           }}
                         />
