@@ -4,9 +4,20 @@ import { Input } from "@/components/ui/input"
 import { Button } from "./components/ui/button";
 import { Label } from "@/components/ui/label"
 import { FaEyeSlash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+  }
 
   const BREAKPOINTS = {
     'mobile-md': 375,
@@ -243,7 +254,7 @@ export default function Login() {
                 <div className="w-[100%] h-[100%] flex flex-col items-center justify-center">
                   <img style={{ width: '7vh', marginBottom: '5px' }} src="/lv-logo.svg" alt="lv logo" />
                   <div className="flex flex-col items-center" style={{ marginBottom: '15px' }}>
-                    <p style={{ marginBottom: '5px' }}className="font-tolkien text-white text-[1.5vh]">
+                    <p style={{ marginBottom: '5px' }} className="font-tolkien text-white text-[1.5vh]">
                       LA VERDAD CHRISITIAN COLLEGE
                     </p>
                     <p className="font-tiroTamil text-white text-[1.5vh]">
