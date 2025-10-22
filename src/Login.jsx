@@ -140,7 +140,7 @@ export default function Login() {
                           }}
                         />
                       </div>
-                      <p className="w-[23vw] text-right font-geist text-[#3F6AC9] text-[.97vw] hover:underline hover:cursor-pointer">Forgot Password?</p>
+                      <p className="w-[23vw] text-right font-geist text-white text-[.97vw] hover:underline hover:cursor-pointer">Forgot Password?</p>
                       <div>
 
                         <Button
@@ -326,7 +326,7 @@ export default function Login() {
                         />
                       </div>
                       <p
-                        className="w-[80vw] text-right font-geist text-[#3F6AC9] text-[1.4vh] hover:underline hover:cursor-pointer">
+                        className="w-[80vw] text-right font-geist text-white text-[1.4vh] hover:underline hover:cursor-pointer">
                         Forgot Password?
                       </p>
                       <div>
