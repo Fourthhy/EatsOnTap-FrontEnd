@@ -1,8 +1,11 @@
 import { logout } from "../../functions/logoutAuth"
 import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
+import { useParams } from "react-router-dom";
 
 export default function SubmitMealList() {
+    const { section } = useParams();
+
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -11,7 +14,7 @@ export default function SubmitMealList() {
     };
     return (
         <>
-            This is submit meal list for class advisers
+            this is section { section } of class advisers
             <Button onClick={handleLogout}>
                 Log out
             </Button>

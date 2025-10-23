@@ -20,6 +20,9 @@ export default function Login() {
 
     try {
       const data = await loginApi(email, password);
+      if (data.section) {
+        navigate(`/classAdviser/${data.section}`);
+      }
       switch (data.role) {
         case 'ADMIN':
           navigate('/admin');
@@ -33,9 +36,6 @@ export default function Login() {
         case 'CHANCELLOR':
           navigate('/chancellor');
           break;
-        case 'CLASS-ADVISER':
-          navigate('/classAdviser');
-          break;
         case 'FOOD-SERVER':
           navigate('/foodServer');
           break;
@@ -43,10 +43,7 @@ export default function Login() {
           navigate('/superAdmin')
           break;
       }
-      //use switch case for scanning data.role
-      switch (data.role) {
 
-      }
     } catch (error) {
       setError(error.message || 'Network Error')
     }
@@ -202,7 +199,7 @@ export default function Login() {
                             backgroundColor: '#254280',
                           }}
                           onClick={handleSubmit}
-                          >
+                        >
                           Login
                         </Button>
                       </div>
@@ -283,7 +280,7 @@ export default function Login() {
         </> :
         screenType === "handheld" ?
           <>
-            <div className="h-[100vh] w-[100vw]">
+            <div className="h-[100vh] w-[100vw] overflow-hidden">
               <div
                 className="h-[100vh] w-[100vw] flex flex-col items-center justify-center"
                 style={{
@@ -296,10 +293,10 @@ export default function Login() {
                 <div className="w-[100%] h-[100%] flex flex-col items-center justify-center">
                   <img style={{ width: '7vh', marginBottom: '5px' }} src="/lv-logo.svg" alt="lv logo" />
                   <div className="flex flex-col items-center" style={{ marginBottom: '15px' }}>
-                    <p style={{ marginBottom: '5px' }} className="font-tolkien text-white text-[1.5vh]">
+                    <p style={{ marginBottom: '5px' }} className="font-tolkien text-white text-[4.3vw]">
                       LA VERDAD CHRISITIAN COLLEGE
                     </p>
-                    <p className="font-tiroTamil text-white text-[1.5vh]">
+                    <p className="font-tiroTamil text-white text-[2.6vw]">
                       MacArthur Highway, Sampaloc, Apalit, Pampanga 2016
                       {/* {breakpoint} */}
                     </p>
@@ -332,7 +329,11 @@ export default function Login() {
                             border: `${error == "" ? "" : "red 1px solid"}`
                           }}
                           type="email"
-                          placeholder="Email" />
+                          placeholder="Email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          disabled={loading}
+                        />
                       </div>
                       <div style={{ position: 'relative' }}>
                         <Input
@@ -348,6 +349,9 @@ export default function Login() {
                           }}
                           type="password"
                           placeholder="Password"
+                          disabled={loading}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
                         />
                         {error === "" ? "" :
                           <>
@@ -379,7 +383,7 @@ export default function Login() {
                         />
                       </div>
                       <p
-                        className="w-[80vw] text-right font-geist text-white text-[1.4vh] hover:underline hover:cursor-pointer">
+                        className="w-[80vw] text-right font-geist text-white text-[3.4vw] hover:underline hover:cursor-pointer">
                         Forgot Password?
                       </p>
                       <div>
@@ -390,7 +394,9 @@ export default function Login() {
                             width: '80vw',
                             height: buttonHeight,
                             backgroundColor: '#254280',
-                          }}>
+                          }}
+                          onClick={handleSubmit}
+                          >
                           Login
                         </Button>
                       </div>
@@ -451,7 +457,7 @@ export default function Login() {
                               style={{
                                 paddingTop: '2px',
                               }}
-                              className="pt-[1px] font-geist text-[1.5vh] font-medium text-black">
+                              className="pt-[1px] font-geist text-[3.5vw] font-medium text-black">
                               Continue with Google
                             </p>
                           </div>
