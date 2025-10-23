@@ -9,6 +9,9 @@ import SubmitMealList from "../pages/classAdviser/SubmitMealList";
 import FreeMealClaim from "../pages/foodServer/FreeMealClaim";
 import SuperAdminDashboard from "../pages/superAdmin/SuperAdminDashboard";
 
+import Sidebar from "../Sample";
+
+
 export default function Routers() {
     return (
         <>
@@ -16,6 +19,8 @@ export default function Routers() {
                 <Routes>
                     {/*Login is always public*/}
                     <Route path="/" element={<Login />} />
+
+                    <Route path="/sample" element={<Sidebar />} />
 
                     <Route path="/admin" element={
                         <ProtectedRoute>
