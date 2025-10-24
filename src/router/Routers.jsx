@@ -42,7 +42,7 @@ export default function Routers() {
                             <ChancellorDashboard />
                         </ProtectedRoute>
                     } />
-                    <Route path="/classAdviser/:section" element={
+                    <Route path="/classAdviser/:section/:userID" element={
                         <ProtectedRoute>
                             <SubmitMealList />
                         </ProtectedRoute>

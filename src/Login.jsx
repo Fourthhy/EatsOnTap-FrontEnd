@@ -14,14 +14,14 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async () => {
     setLoading(true);
     setError('');
 
     try {
       const data = await loginApi(email, password);
       if (data.section) {
-        navigate(`/classAdviser/${data.section}`);
+        navigate(`/classAdviser/${data.section}/${data.userID}`);
       }
       switch (data.role) {
         case 'ADMIN':
@@ -46,6 +46,12 @@ export default function Login() {
 
     } catch (error) {
       setError(error.message || 'Network Error')
+      setTimeout(() => {
+        setError('');
+        setLoading(false);
+        setEmail('')
+        setPassword('')
+      }, 3000)
     }
   }
 
