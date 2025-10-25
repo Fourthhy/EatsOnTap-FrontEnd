@@ -1,13 +1,13 @@
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
-export default async function submitMealList(userID, section, forEligible) {
+export async function SubmitStudentMealList(userID, section, forEligible) {
     const response = await fetch(`${VITE_BASE_URL}/api/eligibility/submitListforBasicEduc`, {
         method: 'POST',
         headers: { 'Content-type': 'application/json' },
         body: JSON.stringify({
-            userID: userID,
+            requesterID: userID,
             section: section,
-            forEligible: forEligible
+            forEligibleStudentIDs: forEligible
         })
     });
     const data = await response.json();

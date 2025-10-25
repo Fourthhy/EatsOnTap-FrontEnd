@@ -6,6 +6,8 @@ import { Menu, Check, MessageCircleWarning } from "lucide-react"
 import { useState, useEffect } from "react";
 import { fetchStudentsBySection } from "../../functions/fetchStudentBySection";
 
+import { SubmitStudentMealList } from "../../functions/SubmitStudentMealList"
+
 export default function SubmitMealList() {
   const { section, userID } = useParams();
   const [students, setStudents] = useState([]);
@@ -54,10 +56,10 @@ export default function SubmitMealList() {
     navigate('/'); // redirect to login/home
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     try {
-
-    } catch (error) {
+      await SubmitStudentMealList(userID, section, selected);
+    } catch (error) { 
       console.log(error);
     }
   }
@@ -129,6 +131,7 @@ export default function SubmitMealList() {
         onConfirm={() => {
           setIsSubmitted(true);
           setShowModal(false);
+          handleSubmit();
         }}
       />
       <div
