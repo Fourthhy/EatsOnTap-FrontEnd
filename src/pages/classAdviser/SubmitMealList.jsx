@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom"
 import { useParams } from "react-router-dom";
 import { Menu, Check, MessageCircleWarning } from "lucide-react"
 import { useState, useEffect } from "react";
-import { fetchStudentsBySection } from "../../functions/fetchStudentBySection";
-
-import { SubmitStudentMealList } from "../../functions/SubmitStudentMealList"
+import { fetchStudentsBySection } from "../../functions/classAdviser/fetchStudentBySection";
+import { SubmitStudentMealList } from "../../functions/classAdviser/SubmitStudentMealList"
+import { isStudentMealSubmitted } from "../../functions/classAdviser/isStudentMealSubmitted";
 
 export default function SubmitMealList() {
   const { section, userID } = useParams();
@@ -28,6 +28,13 @@ export default function SubmitMealList() {
         setStudents(studentsArray);
       })
       .finally(() => setLoading(false));
+
+    isStudentMealSubmitted(section)
+      .then((result) => {
+        setIsSubmitted(result);
+        console.log(result);
+      })
+      .finally(() =>  setLoading(false));
   }, [section]);
 
   const isAllSelected = students.length > 0 && selected.length === students.length;
@@ -59,7 +66,9 @@ export default function SubmitMealList() {
   const handleSubmit = async () => {
     try {
       await SubmitStudentMealList(userID, section, selected);
-    } catch (error) { 
+      setIsSubmitted(true);
+    } catch (error) {
+      setIsSubmitted(false);
       console.log(error);
     }
   }
@@ -332,8 +341,8 @@ export default function SubmitMealList() {
                             </>
                           ) : (
                             <>
-                              <td className="p-4 font-geist">{s.studentID}
-
+                              <td className="p-4 font-geist">
+                                {s.studentID}
                               </td>
                             </>
                           )}
