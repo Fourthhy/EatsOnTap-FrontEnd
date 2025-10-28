@@ -1,28 +1,45 @@
 import { logout } from "../../functions/logoutAuth"
-import { Button } from "../../components/ui/button"
+// import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { useParams } from "react-router-dom";
 import { Menu, Check, MessageCircleWarning } from "lucide-react"
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { fetchStudentsBySection } from "../../functions/classAdviser/fetchStudentBySection";
 import { SubmitStudentMealList } from "../../functions/classAdviser/SubmitStudentMealList"
 import { isStudentMealSubmitted } from "../../functions/classAdviser/isStudentMealSubmitted";
+import { useBreakpoint } from "use-breakpoint"
+import { useOutletContext } from 'react-router-dom';
 
 export default function SubmitMealList() {
   const { section, userID } = useParams();
   const [students, setStudents] = useState([]);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [isSubmitted, setIsSubmitted] = useState(false);
-
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
+
+  const context = useOutletContext() || {};
+  const handleToggleSidebar = context.handleToggleSidebar || (() => { });
+
+
+  const BREAKPOINTS = {
+    'mobile-md': 375,
+    'mobile-lg': 425,
+    'tablet': 768,
+    'laptop-md': 1024,
+    'laptop-lg': 1440,
+  };
+
+  const { breakpoint } = useBreakpoint(BREAKPOINTS, 'mobile-md');
+  const screenType =
+    breakpoint === 'laptop-md' || breakpoint === 'laptop-lg' ? "laptop" :
+      breakpoint === 'mobile-md' || breakpoint === 'mobile-lg' || breakpoint === "tablet" ? "handheld" : "";
 
   useEffect(() => {
     setLoading(true);
     fetchStudentsBySection(section)
       .then((result) => {
-        // If result is { students: [...] }
         const studentsArray = Array.isArray(result.students) ? result.students : [];
         console.log("Fetched:", studentsArray); // You'll see the actual array!
         setStudents(studentsArray);
@@ -34,7 +51,7 @@ export default function SubmitMealList() {
         setIsSubmitted(result);
         console.log(result);
       })
-      .finally(() =>  setLoading(false));
+      .finally(() => setLoading(false));
   }, [section]);
 
   const isAllSelected = students.length > 0 && selected.length === students.length;
@@ -49,14 +66,10 @@ export default function SubmitMealList() {
     );
   }
 
-
   // Toggle all checkboxes
   function handleSelectAll(e) {
     setSelected(e.target.checked ? students.map((s) => s.studentID) : []);
   }
-
-
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
@@ -75,7 +88,6 @@ export default function SubmitMealList() {
 
   function ConfirmModal({ visible, onCancel, onConfirm }) {
     if (!visible) return null; // Don't render if not visible
-
     return (
       <>
         <div
@@ -134,233 +146,254 @@ export default function SubmitMealList() {
 
   return (
     <>
-      <ConfirmModal
-        visible={showModal}
-        onCancel={() => setShowModal(false)}
-        onConfirm={() => {
-          setIsSubmitted(true);
-          setShowModal(false);
-          handleSubmit();
-        }}
-      />
-      <div
-        style={{ backgroundColor: '#142345', }}
-        className="h-[100vh] w-[100vw]">
-        <div
-          style={{ background: 'white' }}
-          className="h-[80px] w-[100%] flex">
+      {screenType === "handheld" ?
+        <>
+          <ConfirmModal
+            visible={showModal}
+            onCancel={() => setShowModal(false)}
+            onConfirm={() => {
+              setIsSubmitted(true);
+              setShowModal(false);
+              handleSubmit();
+            }}
+          />
           <div
-            className="w-[50%] flex items-center justify-start gap-2">
-            <img
-              style={{
-                width: '10vw',
-                marginLeft: '10px'
-              }}
-              src="/lv-logo.svg"
-              alt="lv logo" />
-            <p className="font-geist text-[5vw]">
-              Eat's on tap
-            </p>
-          </div>
-          <div
-            style={{ marginRight: '10px' }}
-            className="w-[50%] flex justify-end items-center">
-            <Menu onClick={handleLogout} />
-          </div>
-        </div>
-        <div
-          style={{
-            paddingLeft: '10px',
-            paddingRight: '10px'
-          }}
-          className="h-[80px] w-[100vw] flex items-center">
-          <div className="h-[60px] w-[60px]">
-            <img className="rounded-[12px]" src="/classAdviser/teacher.jpg" alt="teacher image" />
-          </div>
-          <div>
-            <p
-              style={{
-                paddingLeft: '8px',
-                fontWeight: 'normal'
-              }}
-              className="font-geist text-[4.2vw] text-white">
-              Hi, Adviser!
-            </p>
-            <p
-              style={{
-                paddingLeft: '8px',
-                fontWeight: 'lighter'
-              }}
-              className="font-geist text-[3vw] text-[#D9D9D9] text-top">
-              Submit a list for today
-            </p>
-          </div>
-        </div>
-        <div
-          style={{
-            backgroundColor: 'white',
-            borderTopLeftRadius: '30px',
-            borderTopRightRadius: '30px'
-          }}
-          className="h-[100%] w-[100vw] border-white border-[1px]">
-          <div className="h-[60px] w-[100vw] flex">
-            <div className="w-[50%] h-[100%] flex items-center justify-start">
-              <p
-                style={{
-                  fontWeight: "normal",
-                  paddingLeft: "23px"
-                }}
-                className="text-[3.2vw] font-geist"
-              >
-                Total: <span style={{ fontWeight: 'bold' }}> {selected.length} </span>
-              </p>
-            </div>
-            <div className="w-[50%] h-[100%] flex items-center justify-end">
-              {isSubmitted == true ? (
-                <>
-                  <div
-                    style={{ marginRight: '17px' }}
-                    className="w-[100%] h-[100%] flex justify-end items-center">
-                    <p className="font-geist text-[3.3vw] text-[#505050]">Submitted</p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <button
-                    className="w-[28vw] h-[30px] flex items-center justify-center gap-1"
-                    style={{
-                      backgroundColor: '#385BA7',
-                      marginRight: '10px',
-                      borderRadius: '12px'
-                    }}
-                    onClick={() => setShowModal(true)}
-                  >
-                    <Check color="#FFFFFf" size="4vw" />
-                    <p className="font-geist text-[3.1vw] text-white">Submit</p>
-                  </button>
-                </>
-              )}
-
-
-            </div>
-          </div>
-          <div
-            style={{
-              marginLeft: '10px',
-              marginRight: '10px',
-              height: 'auto'
-            }} >
-            <p className="text-[3.2] font-bold font-geist">{section}</p>
-
+            style={{ backgroundColor: '#142345', }}
+            className="h-[100vh] w-[100vw]">
             <div
-              style={{ borderRadius: '12px' }}
-              className="bg-[#EDF9FE]">
+              style={{ background: 'white' }}
+              className="h-[80px] w-[100%] flex">
+              <div
+                className="w-[50%] flex items-center justify-start gap-2">
+                <img
+                  style={{
+                    width: '10vw',
+                    marginLeft: '10px'
+                  }}
+                  src="/lv-logo.svg"
+                  alt="lv logo" />
+                <p className="font-geist text-[5vw]">
+                  Eat's on tap
+                </p>
+              </div>
+              <div
+                style={{ marginRight: '10px' }}
+                className="w-[50%] flex justify-end items-center">
+                <Menu onClick={handleLogout} />
+              </div>
+            </div>
+            <div
+              style={{
+                paddingLeft: '10px',
+                paddingRight: '10px'
+              }}
+              className="h-[80px] w-[100vw] flex items-center">
+              <div className="h-[60px] w-[60px]">
+                <img className="rounded-[12px]" src="/classAdviser/teacher.jpg" alt="teacher image" />
+              </div>
+              <div>
+                <p
+                  style={{
+                    paddingLeft: '8px',
+                    fontWeight: 'normal'
+                  }}
+                  className="font-geist text-[4.2vw] text-white">
+                  Hi, Adviser!
+                </p>
+                <p
+                  style={{
+                    paddingLeft: '8px',
+                    fontWeight: 'lighter'
+                  }}
+                  className="font-geist text-[3vw] text-[#D9D9D9] text-top">
+                  Submit a list for today
+                </p>
+              </div>
+            </div>
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderTopLeftRadius: '30px',
+                borderTopRightRadius: '30px'
+              }}
+              className="h-[100%] w-[100vw] border-white border-[1px]">
+              <div className="h-[60px] w-[100vw] flex">
+                <div className="w-[50%] h-[100%] flex items-center justify-start">
+                  <p
+                    style={{
+                      fontWeight: "normal",
+                      paddingLeft: "23px"
+                    }}
+                    className="text-[3.2vw] font-geist"
+                  >
+                    Total: <span style={{ fontWeight: 'bold' }}> {selected.length} </span>
+                  </p>
+                </div>
+                <div className="w-[50%] h-[100%] flex items-center justify-end">
+                  {isSubmitted == true ? (
+                    <>
+                      <div
+                        style={{ marginRight: '17px' }}
+                        className="w-[100%] h-[100%] flex justify-end items-center">
+                        <p className="font-geist text-[3.3vw] text-[#505050]">Submitted</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="w-[28vw] h-[30px] flex items-center justify-center gap-1"
+                        style={{
+                          backgroundColor: '#385BA7',
+                          marginRight: '10px',
+                          borderRadius: '12px'
+                        }}
+                        onClick={() => setShowModal(true)}
+                      >
+                        <Check color="#FFFFFf" size="4vw" />
+                        <p className="font-geist text-[3.1vw] text-white">Submit</p>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div
+                style={{
+                  marginLeft: '10px',
+                  marginRight: '10px',
+                  height: 'auto'
+                }} >
+                <p className="text-[3.2] font-bold font-geist">{section}</p>
 
-              <div className="p-4 max-w-2xl mx-auto bg-white rounded-xl">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-[#EFF4FF] h-[42px]">
-                    <tr>
-                      {isSubmitted ? "" : (
-                        <>
-                          <th className="p-4">
-                            <input
-                              type="checkbox"
-                              checked={isAllSelected}
-                              indeterminate={isPartiallySelected ? "indeterminate" : undefined}
-                              onChange={handleSelectAll}
-                              className="form-checkbox h-5 w-5 border-[#777877] border-[1px]"
-                            />
-                          </th>
-                        </>
-                      )}
-                      <th className="p-4 text-center text-gray-500 font-semibold text-geist">
-                        Student Name
-                      </th>
-                      {isSubmitted ? (
-                        <>
-                          <th className="p-4 text-left text-gray-500 font-semibold text-geist">
-                            Status
-                          </th>
-                        </>
-                      ) : (
-                        <>
-                          <th className="p-4 text-left text-gray-500 font-semibold text-geist">
-                            Student ID
-                          </th>
-                        </>
-                      )}
-                    </tr>
-                  </thead>
+                <div
+                  style={{ borderRadius: '12px' }}
+                  className="bg-[#EDF9FE]">
 
-                  <tbody className="bg-white divide-y divide-gray-100">
-                    {loading ? (
-                      <tr>
-                        <td colSpan={3} className="p-8 text-center text-gray-500">Loading students...</td>
-                      </tr>
-                    ) : Array.isArray(students) && students.length > 0 ? (
-                      students.map((s) => (
-                        <tr key={s.studentID} className={`h-[42px] w-[100%] ${selected.includes(s.studentID) ? "bg-[#EFF4FF]" : ""}`}>
+                  <div className="p-4 max-w-2xl mx-auto bg-white rounded-xl">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-[#EFF4FF] h-[42px]">
+                        <tr>
                           {isSubmitted ? "" : (
                             <>
-                              <td className="p-4">
+                              <th className="p-4">
                                 <input
                                   type="checkbox"
-                                  style={{
-                                    marginLeft: '10px',
-                                    marginRight: '10px'
-                                  }}
-                                  className="form-checkbox h-5 w-5"
-                                  checked={selected.includes(s.studentID)}
-                                  onChange={() => handleToggle(s.studentID)}
+                                  checked={isAllSelected}
+                                  indeterminate={isPartiallySelected ? "indeterminate" : undefined}
+                                  onChange={handleSelectAll}
+                                  className="form-checkbox h-5 w-5 border-[#777877] border-[1px]"
                                 />
-                              </td>
+                              </th>
                             </>
                           )}
-                          <td className="h-[42px] p-4 flex items-center gap-3">
-                            <img
-                              src="https://randomuser.me/api/portraits/lego/8.jpg"
-                              alt="avatar"
-                              className="h-8 w-8 rounded-full bg-gray-300 object-cover"
-                            />
-                            <span className="font-geist">
-                              {s.last_name}, {s.first_name} {s.middle_name}
-                            </span>
-                          </td>
+                          <th className="p-4 text-center text-gray-500 font-semibold text-geist">
+                            Student Name
+                          </th>
                           {isSubmitted ? (
                             <>
-                              <td className="p-4 font-geist">
-                                <span
-                                  style={{
-                                    padding: '2px 6px 2px 6px',
-                                    borderRadius: '16px'
-                                  }}
-                                  className="text-[#9291A5] bg-[#E5E5F2]">
-                                  {s.mealEligibilityStatus == "INELIGIBLE" ? "Pending" : ""}
-                                </span>
-                              </td>
+                              <th className="p-4 text-left text-gray-500 font-semibold text-geist">
+                                Status
+                              </th>
                             </>
                           ) : (
                             <>
-                              <td className="p-4 font-geist">
-                                {s.studentID}
-                              </td>
+                              <th className="p-4 text-left text-gray-500 font-semibold text-geist">
+                                Student ID
+                              </th>
                             </>
                           )}
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={3} className="p-8 text-center text-gray-500">No students found.</td>
-                      </tr>
-                    )}
-                  </tbody>
+                      </thead>
 
-                </table>
+                      <tbody className="bg-white divide-y divide-gray-100">
+                        {loading ? (
+                          <tr>
+                            <td colSpan={3} className="p-8 text-center text-gray-500">Loading students...</td>
+                          </tr>
+                        ) : Array.isArray(students) && students.length > 0 ? (
+                          students.map((s) => (
+                            <tr key={s.studentID} className={`h-[42px] w-[100%] ${selected.includes(s.studentID) ? "bg-[#EFF4FF]" : ""}`}>
+                              {isSubmitted ? "" : (
+                                <>
+                                  <td className="p-4">
+                                    <input
+                                      type="checkbox"
+                                      style={{
+                                        marginLeft: '10px',
+                                        marginRight: '10px'
+                                      }}
+                                      className="form-checkbox h-5 w-5"
+                                      checked={selected.includes(s.studentID)}
+                                      onChange={() => handleToggle(s.studentID)}
+                                    />
+                                  </td>
+                                </>
+                              )}
+                              <td className="h-[42px] p-4 flex items-center gap-3">
+                                <img
+                                  src="https://randomuser.me/api/portraits/lego/8.jpg"
+                                  alt="avatar"
+                                  className="h-8 w-8 rounded-full bg-gray-300 object-cover"
+                                />
+                                <span className="font-geist">
+                                  {s.last_name}, {s.first_name} {s.middle_name}
+                                </span>
+                              </td>
+                              {isSubmitted ? (
+                                <>
+                                  <td className="p-4 font-geist">
+                                    <span
+                                      style={{
+                                        padding: '2px 6px 2px 6px',
+                                        borderRadius: '16px'
+                                      }}
+                                      className="text-[#9291A5] bg-[#E5E5F2]">
+                                      {s.mealEligibilityStatus == "INELIGIBLE" ? "Pending" : ""}
+                                    </span>
+                                  </td>
+                                </>
+                              ) : (
+                                <>
+                                  <td className="p-4 font-geist">
+                                    {s.studentID}
+                                  </td>
+                                </>
+                              )}
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={3} className="p-8 text-center text-gray-500">No students found.</td>
+                          </tr>
+                        )}
+                      </tbody>
+
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </> :
+        screenType === "laptop" ?
+          <>
+            <div 
+              style={{ backgroundColor: "#F4FDFF" }}
+              className="flex-1 h-[100vh] flex justify-center items-start">
+              <div
+                style={{ 
+                  paddingLeft: '10px',
+                  background: "linear-gradient(180deg, rgba(214,221,224,0.32) 0%, rgba(255,255,255,0) 100%)",
+                  boxShadow: "0 10px 24px 0 rgba(214, 221, 224, 0.32)"
+                }}
+                className="h-[60px] flex-1 flex items-center gap-4">
+                <Menu size={20} onClick={handleToggleSidebar} className="hover:cursor-pointer"/>
+                <p
+                  style={{ fontWeight: '500' }}
+                  className="font-geist text-[2vh]"> Eat's on Tap</p>
+              </div>
+            </div>
+          </> : ""}
+
     </>
   )
-}
+}  

@@ -1,4 +1,6 @@
+import { logout } from "../../functions/logoutAuth";
 import { useState, useRef, useEffect } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
     Ticket,
@@ -8,6 +10,8 @@ import {
     LogOut,
 } from "lucide-react";
 import logo from "/lv-logo.svg";
+
+
 
 // Sidebar Item Component
 const SidebarItem = ({ icon, text, expanded, active, onClick, index }) => {
@@ -66,6 +70,14 @@ const SidebarItem = ({ icon, text, expanded, active, onClick, index }) => {
 
 // Sidebar with Animated Indicator
 const Sidebar = () => {
+
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/'); // redirect to login/home
+    };
+
     const [isExpanded, setIsExpanded] = useState(true);
     const [activeIndex, setActiveIndex] = useState(1);
     const [indicatorStyle, setIndicatorStyle] = useState({});
@@ -196,6 +208,7 @@ const Sidebar = () => {
                             cursor: "pointer",
                             border: "none",
                         }}
+                        onClick={handleLogout}
                         onMouseEnter={(e) =>
                             (e.currentTarget.style.backgroundColor = "#52728F")
                         }
@@ -213,7 +226,7 @@ const Sidebar = () => {
             </div>
 
             {/* Main Content Area */}
-            
+
             <div
                 style={{
                     flexGrow: 1, // Fill remaining space beside sidebar
@@ -222,11 +235,10 @@ const Sidebar = () => {
                     overflowY: "auto",
                 }}
             >
-                content
+                <Outlet />
             </div>
         </div>
     );
-
 };
 
 export default Sidebar;

@@ -9,8 +9,8 @@ import SubmitMealList from "../pages/classAdviser/SubmitMealList";
 import FreeMealClaim from "../pages/foodServer/FreeMealClaim";
 import SuperAdminDashboard from "../pages/superAdmin/SuperAdminDashboard";
 
-import Sidebar from "../Sample";
-
+import SidebarLayout from "../components/custom/SidebarLayout";
+import LandingClassAdviser from "@/pages/classAdviser/LandingClassAdviser";
 
 export default function Routers() {
     return (
@@ -20,7 +20,7 @@ export default function Routers() {
                     {/*Login is always public*/}
                     <Route path="/" element={<Login />} />
 
-                    <Route path="/sample" element={<Sidebar />} />
+                    <Route path="/sample" element={<SidebarLayout />} />
 
                     <Route path="/admin" element={
                         <ProtectedRoute>
@@ -44,9 +44,11 @@ export default function Routers() {
                     } />
                     <Route path="/classAdviser/:section/:userID" element={
                         <ProtectedRoute>
-                            <SubmitMealList />
+                            <LandingClassAdviser />
                         </ProtectedRoute>
-                    } />
+                    }>
+                        <Route path="submitMealList" element={<SubmitMealList />} />
+                    </Route>
                     <Route path="/foodServer" element={
                         <ProtectedRoute>
                             <FreeMealClaim />

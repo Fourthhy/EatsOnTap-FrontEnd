@@ -21,7 +21,7 @@ export default function Login() {
     try {
       const data = await loginApi(email, password);
       if (data.section) {
-        navigate(`/classAdviser/${data.section}/${data.userID}`);
+        navigate(`/classAdviser/${data.section}/${data.userID}/submitMealList`);
       }
       switch (data.role) {
         case 'ADMIN':
