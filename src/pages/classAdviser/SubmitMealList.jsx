@@ -376,22 +376,212 @@ export default function SubmitMealList() {
         </> :
         screenType === "laptop" ?
           <>
-            <div 
+            <div
               style={{ backgroundColor: "#F4FDFF" }}
-              className="flex-1 h-[100vh] flex justify-center items-start">
+              className="w-full h-[100vh] flex flex-col justify-start border-black border-[1px] overflow-hidden">
               <div
-                style={{ 
-                  paddingLeft: '10px',
-                  background: "linear-gradient(180deg, rgba(214,221,224,0.32) 0%, rgba(255,255,255,0) 100%)",
-                  boxShadow: "0 10px 24px 0 rgba(214, 221, 224, 0.32)"
-                }}
-                className="h-[60px] flex-1 flex items-center gap-4">
-                <Menu size={20} onClick={handleToggleSidebar} className="hover:cursor-pointer"/>
-                <p
-                  style={{ fontWeight: '500' }}
-                  className="font-geist text-[2vh]"> Eat's on Tap</p>
+                style={{ height: '60px' }}
+                className="w-full flex flex-col">
+                <div
+                  style={{
+                    paddingLeft: '10px',
+                    background: "white",
+                    boxShadow: "0 10px 24px 0 rgba(214, 221, 224, 0.32)"
+                  }}
+                  className="flex-1 flex items-center gap-4">
+                  <Menu size={20} onClick={handleToggleSidebar} className="hover:cursor-pointer" />
+                  <p
+                    style={{ fontWeight: '500' }}
+                    className="font-geist text-[2vh]"> Eat's on Tap
+                  </p>
+                </div>
+              </div>
+              {/* CLASS ADVISER CONTENT */}
+              <div className="h-[85vh] w-full border-black border-[1px]">
+                <div
+                  style={{
+                    borderRadius: '10px',
+                    marginTop: '20px',
+                    marginLeft: '20px',
+                    marginRight: '20px',
+                    boxShadow: "0 10px 24px 0 rgba(214, 221, 224, 0.32)"
+                  }}
+                  className="h-full w-auto bg-white ">
+                  <div className="flex justify-between">
+                    <p
+                      style={{
+                        fontWeight: '500',
+                        paddingTop: '55px',
+                        paddingBottom: '10px',
+                        paddingLeft: '20px',
+                      }}
+                      className="font-geist text-[2.4vh] w-full">
+                      {section}
+                      <span
+                        style={{ paddingLeft: '10px' }}
+                        className="font-geist text-[1.6vh] text-[#505050]">
+                        Submitted
+                      </span>
+                    </p>
+
+                    <div className="flex flex-col items-end justify-between">
+                      <div
+                        style={{ paddingTop: '10px' }}
+                        >
+                        <button
+                          className="w-[7vw] h-[30px] flex items-center justify-center gap-1 hover:cursor-pointer"
+                          style={{
+                            backgroundColor: '#385BA7',
+                            marginRight: '10px',
+                            borderRadius: '12px'
+                          }}
+                          onClick={() => setShowModal(true)}
+                        >
+                          <Check color="#FFFFFf" size="2.5vh" />
+                          <p className="font-geist text-[1.7vh] text-white">Submit</p>
+                        </button>
+                      </div>
+                      <p
+                        style={{
+                          paddingRight: '20px',
+                          paddingBottom: '10px',
+                        }}
+                        className="flex gap-3 items-center">
+                        Total: <span style={{ fontWeight: 'bold' }}> {selected.length} </span>
+                      </p>
+                    </div>
+
+                  </div>
+
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-[#FCFCFD] h-[42px]">
+                      <tr>
+                        <th className="p-4 text-center text-gray-500 font-semibold text-geist">
+
+                        </th>
+                        <th
+                          style={{
+                            fontWeight: '400',
+                            paddingLeft: '10px'
+                          }}
+                          className="p-4 text-left text-gray-500 font-geist text-[2vh]">
+                          Student Name
+                        </th>
+                        {isSubmitted ? (
+                          <>
+                            <th className="p-4 text-left text-gray-500 font-semibold text-geist">
+                              Status
+                            </th>
+                          </>
+                        ) : (
+                          <>
+                            <th
+                              style={{
+                                fontWeight: '400',
+                                paddingLeft: '10px'
+                              }}
+                              className="p-4 text-left text-gray-500 font-geist text-[2vh]">
+                              Student ID
+                            </th>
+                          </>
+                        )}
+                        {isSubmitted ? "" : (
+                          <>
+                            <th className="p-4">
+                              <div className="h-[100%] w-[100%] flex justify-center items-center">
+                                <input
+                                  type="checkbox"
+                                  checked={isAllSelected}
+                                  indeterminate={isPartiallySelected ? "indeterminate" : undefined}
+                                  onChange={handleSelectAll}
+                                  className="form-checkbox h-5 w-5 border-[#777877] border-[1px]"
+                                />
+                              </div>
+                            </th>
+                          </>
+                        )}
+                      </tr>
+                    </thead>
+
+                    <tbody className="bg-white divide-y divide-gray-100">
+                      {loading ? (
+                        <tr>
+                          <td colSpan={3} className="p-8 text-center text-gray-500">Loading students...</td>
+                        </tr>
+                      ) : Array.isArray(students) && students.length > 0 ? (
+                        students.map((s, index) => (
+                          <tr key={s.studentID} className={`h-[42px] w-[100%] ${selected.includes(s.studentID) ? "bg-[#EFF4FF]" : ""}`}>
+                            <td>
+                              <p
+                                className="font-geist text-[1.8vh] text-center">
+                                {index + 1}
+                              </p>
+                            </td>
+                            <td className="h-[42px] p-4 flex items-center gap-3">
+                              <img
+                                src="https://randomuser.me/api/portraits/lego/3.jpg"
+                                alt="avatar"
+                                className="h-8 w-8 rounded-full bg-gray-300 object-cover"
+                              />
+                              <span className="font-geist text-[1.9vh]">
+                                {s.last_name}, {s.first_name} {s.middle_name}
+                              </span>
+                            </td>
+                            {isSubmitted ? (
+                              <>
+                                <td className="p-4 font-geist">
+                                  <span
+                                    style={{
+                                      padding: '2px 6px 2px 6px',
+                                      borderRadius: '16px'
+                                    }}
+                                    className="text-[#9291A5] bg-[#E5E5F2]">
+                                    {s.mealEligibilityStatus == "INELIGIBLE" ? "Pending" : ""}
+                                  </span>
+                                </td>
+                              </>
+                            ) : (
+                              <>
+                                <td
+                                  style={{ paddingLeft: '10px' }}
+                                  className="p-4 font-geist text-[1.9vh]">
+                                  {s.studentID}
+                                </td>
+                              </>
+                            )}
+                            {isSubmitted ? "" : (
+                              <>
+                                <td className="p-4">
+                                  <div className="h-[100%] w-[100%] flex justify-center items-center">
+                                    <input
+                                      type="checkbox"
+                                      style={{
+                                        marginLeft: '10px',
+                                        marginRight: '10px',
+                                        marginTop: '-3px',
+                                      }}
+                                      className="form-checkbox h-5 w-5 border-[#777877]"
+                                      checked={selected.includes(s.studentID)}
+                                      onChange={() => handleToggle(s.studentID)}
+                                    />
+                                  </div>
+                                </td>
+                              </>
+                            )}
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={3} className="p-8 text-center text-gray-500">No students found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+
+                  </table>
+                </div>
               </div>
             </div>
+
           </> : ""}
 
     </>

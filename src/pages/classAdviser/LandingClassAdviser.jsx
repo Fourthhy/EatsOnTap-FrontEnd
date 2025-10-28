@@ -123,6 +123,7 @@ export default function LandingClassAdviser() {
                         width: "100%",
                         height: "100vh",
                         overflow: "hidden",
+                        backgroundColor: "#F4FDFF",
                     }}
                 >
                     {/* Sidebar */}
@@ -157,21 +158,24 @@ export default function LandingClassAdviser() {
                                         transition: "all 300ms ease",
                                     }}
                                 />
-                                <div
-                                    style={{ marginLeft: '10px'}}
-                                    className="h-auto w-auto flex flex-col justify-center gap-0"
-                                >
-                                    <p 
-                                        style={{ fontWeight: "bold"}}
-                                        className="font-geist text-[2.3vh] h-auto flex items-end">
-                                        Eat's on Tap
-                                    </p>
-                                    <p 
-                                        style={{ fontWeight: 'regular'}}
-                                        className="font-geist text-[2vh] h-auto flex items-start">
-                                        La Verdad Chrisitan College
-                                    </p>
-                                </div>
+                                {isExpanded === true ?
+                                    <>
+                                        <div
+                                            style={{ marginLeft: '10px' }}
+                                            className="h-auto w-auto flex flex-col justify-center gap-0"
+                                        >
+                                            <p
+                                                style={{ fontWeight: "bold" }}
+                                                className="font-geist text-[2.3vh] h-auto flex items-end">
+                                                Eat's on Tap
+                                            </p>
+                                            <p
+                                                style={{ fontWeight: 'regular' }}
+                                                className="font-geist text-[2vh] h-auto flex items-start">
+                                                La Verdad Chrisitan College
+                                            </p>
+                                        </div>
+                                    </> : ""}
                             </div>
 
                             <nav
@@ -197,29 +201,6 @@ export default function LandingClassAdviser() {
                         </div>
 
                         <div style={{ padding: "1rem" }}>
-                            {/* <button
-                                onClick={() => setIsExpanded(!isExpanded)}
-                                style={{
-                                    position: "relative",
-                                    right: "-12px",
-                                    backgroundColor: "#3a24a0",
-                                    color: "white",
-                                    padding: "0.25rem",
-                                    borderRadius: "9999px",
-                                    transition: "all 300ms ease",
-                                    border: "none",
-                                    cursor: "pointer",
-                                }}
-                                onMouseEnter={(e) =>
-                                    (e.currentTarget.style.backgroundColor = "#4b34c9")
-                                }
-                                onMouseLeave={(e) =>
-                                    (e.currentTarget.style.backgroundColor = "#3a24a0")
-                                }
-                            >
-                                {isExpanded ? "<" : ">"}
-                            </button> */}
-
                             <button
                                 style={{
                                     display: "flex",
