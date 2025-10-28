@@ -116,7 +116,7 @@ export default function LandingClassAdviser() {
             breakpoint === 'mobile-md' || breakpoint === 'mobile-lg' || breakpoint === "tablet" ? "handheld" : "";
     return (
         <>
-            {screenType === "laptop"? (
+            {screenType === "laptop" ? (
                 <div
                     style={{
                         display: "flex", // Place sidebar and content side by side
@@ -157,6 +157,21 @@ export default function LandingClassAdviser() {
                                         transition: "all 300ms ease",
                                     }}
                                 />
+                                <div
+                                    style={{ marginLeft: '10px'}}
+                                    className="h-auto w-auto flex flex-col justify-center gap-0"
+                                >
+                                    <p 
+                                        style={{ fontWeight: "bold"}}
+                                        className="font-geist text-[2.3vh] h-auto flex items-end">
+                                        Eat's on Tap
+                                    </p>
+                                    <p 
+                                        style={{ fontWeight: 'regular'}}
+                                        className="font-geist text-[2vh] h-auto flex items-start">
+                                        La Verdad Chrisitan College
+                                    </p>
+                                </div>
                             </div>
 
                             <nav
@@ -246,7 +261,7 @@ export default function LandingClassAdviser() {
                             overflowY: "auto",
                         }}
                     >
-                        <Outlet context={{ handleToggleSidebar }}/>
+                        <Outlet context={{ handleToggleSidebar }} />
                     </div>
                 </div>
             ) : screenType === "handheld" ? (
