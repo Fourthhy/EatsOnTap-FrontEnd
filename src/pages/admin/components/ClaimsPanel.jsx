@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ClaimsPanel({ claims }) {
+function ClaimsPanel({ claims }) {
   return (
     <div style={{ background: "#fff", borderRadius: 8, padding: 18 }}>
       <h4>Recent Claims</h4>
@@ -17,4 +17,8 @@ export default function ClaimsPanel({ claims }) {
       )}
     </div>
   );
+}
+
+export {
+  ClaimsPanel
 }

@@ -418,7 +418,7 @@ export default function SubmitMealList() {
                 </div>
               </div>
               {/* CLASS ADVISER CONTENT */}
-              <div className="h-[85vh] w-full ">
+              <div className="h-[85vh] w-full">
                 <div
                   style={{
                     borderRadius: '10px',
@@ -427,7 +427,7 @@ export default function SubmitMealList() {
                     marginRight: '20px',
                     boxShadow: "0 10px 24px 0 rgba(214, 221, 224, 0.32)"
                   }}
-                  className="h-full w-auto bg-white ">
+                  className="h-full w-auto bg-white">
                   <div className="flex justify-between">
                     <p
                       style={{

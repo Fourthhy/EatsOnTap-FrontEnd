@@ -2,12 +2,12 @@ function StatsCard({ title, value, subtitle }) {
     return (
         <div style={{
             background: "#fff", borderRadius: 12, boxShadow: "0 2px 6px #e5eaf0",
-            padding: 20, display: "flex", flexDirection: "column", width: 220, justifyContent: "center"
+            padding: 20, display: "flex", flexDirection: "column", width: 'auto', justifyContent: "center"
         }}>
             <span
                 style={{
                     fontWeight: "500",
-                    fontSize: 13,
+                    fontSize: 12,
                     color: "#4C4B4B",
                     fontFamily: "geist"
                 }}

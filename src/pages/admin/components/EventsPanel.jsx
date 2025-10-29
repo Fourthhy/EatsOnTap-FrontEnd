@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function EventsPanel({ events }) {
+function EventsPanel({ events }) {
   return (
     <div style={{ background: "#fff", borderRadius: 8, padding: 18, marginBottom: 18 }}>
       <h4>Upcoming Events</h4>
@@ -16,4 +16,8 @@ export default function EventsPanel({ events }) {
       ))}
     </div>
   );
+}
+
+export {
+  EventsPanel
 }

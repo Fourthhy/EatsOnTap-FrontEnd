@@ -11,6 +11,7 @@ import SuperAdminDashboard from "../pages/superAdmin/SuperAdminDashboard";
 
 import SidebarLayout from "../components/custom/SidebarLayout";
 import ClassAdviserLanding from "@/pages/classAdviser/ClassAdviserLanding";
+import AdminLanding from "@/pages/admin/AdminLanding";
 
 export default function Routers() {
     return (
@@ -24,9 +25,11 @@ export default function Routers() {
 
                     <Route path="/admin" element={
                         <ProtectedRoute>
-                            <AdminDashboard />
+                            <AdminLanding />
                         </ProtectedRoute>
-                    } />
+                    }>
+                        <Route path="landing" element={<AdminDashboard />} />
+                    </Route>
                     <Route path="/adminAssistant" element={
                         <ProtectedRoute>
                             <AdminAssistantDashboard />

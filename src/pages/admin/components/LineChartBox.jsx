@@ -1,7 +1,7 @@
 import React from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
-export default function LineChartBox({ data }) {
+function LineChartBox({ data }) {
   return (
     <div style={{ background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px #eee", padding: 20, marginTop: 18 }}>
       <h3 style={{ marginBottom: 12 }}>Student Meal Claim Trends</h3>
@@ -19,4 +19,8 @@ export default function LineChartBox({ data }) {
       </ResponsiveContainer>
     </div>
   );
+}
+
+export {
+  LineChartBox
 }

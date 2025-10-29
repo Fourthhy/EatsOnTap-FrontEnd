@@ -1,16 +1,22 @@
 import { logout } from "../../../functions/logoutAuth";
 import { useState, useRef, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
-import { StudentsIcon } from "hugeicons-react";
+import {
+    LayoutDashboard,
+    Ticket,
+    CalendarDays,
+    ShoppingBag,
+    BookOpen,
+    LogOut,
+} from "lucide-react";
 import { useBreakpoint } from "use-breakpoint"
 import logo from "/lv-logo.svg";
 
 import { SidebarItem } from "../../../components/custom/SidebarItem";
 
 function Sidebar() {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [activeIndex, setActiveIndex] = useState(1);
+    const [isExpanded, setIsExpanded] = useState(true);
+    const [activeIndex, setActiveIndex] = useState(0);
     const [indicatorStyle, setIndicatorStyle] = useState({});
     const containerRef = useRef(null);
     const navigate = useNavigate();
@@ -26,7 +32,11 @@ function Sidebar() {
 
 
     const menuItems = [
-        { icon: <StudentsIcon size={20} />, text: "Voucher Management" },
+        { icon: <LayoutDashboard size={20} />, text: "Dashboard" },
+        { icon: <Ticket size={20} />, text: "Voucher Management" },
+        { icon: <CalendarDays size={20} />, text: "Schedule of Student Eligibility" },
+        { icon: <ShoppingBag size={20} />, text: "Meal Recipient Orders" },
+        { icon: <BookOpen size={20} />, text: "Records" },
     ];
 
     useEffect(() => {
@@ -133,7 +143,7 @@ function Sidebar() {
                                     icon={item.icon}
                                     text={item.text}
                                     expanded={isExpanded}
-                                    active={true}
+                                    active={activeIndex === i}
                                     onClick={setActiveIndex}
                                 />
                             ))}

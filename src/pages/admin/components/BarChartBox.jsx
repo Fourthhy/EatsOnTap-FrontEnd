@@ -1,7 +1,7 @@
 import React from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
-export default function BarChartBox({ data }) {
+function BarChartBox({ data }) {
   return (
     <div style={{ background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px #eee", padding: 20, marginTop: 24 }}>
       <h3 style={{ marginBottom: 12 }}>Week Count</h3>
@@ -17,4 +17,8 @@ export default function BarChartBox({ data }) {
       </ResponsiveContainer>
     </div>
   );
+}
+
+export {
+  BarChartBox
 }
