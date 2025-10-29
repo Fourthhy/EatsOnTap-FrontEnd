@@ -69,7 +69,7 @@ const SidebarItem = ({ icon, text, expanded, active, onClick, index }) => {
 };
 
 export default function LandingClassAdviser() {
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
     const [activeIndex, setActiveIndex] = useState(1);
     const [indicatorStyle, setIndicatorStyle] = useState({});
     const containerRef = useRef(null);

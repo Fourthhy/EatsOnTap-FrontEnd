@@ -1,3 +1,20 @@
+::-webkit-scrollbar {
+  width: 10px; /* Set width */
+}
+
+::-webkit-scrollbar-track {
+  background: #FFFFFF; /* Track color */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d8d8d8; /* Thumb (draggable part) color */
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  cursor: pointer;
+}
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -27,6 +44,9 @@
 @theme {
   --font-tiroTamil: tiroTamil, "serif";
 }
+
+
+
 
 
 * {
