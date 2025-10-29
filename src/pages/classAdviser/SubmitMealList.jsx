@@ -1,5 +1,4 @@
 import { logout } from "../../functions/logoutAuth"
-// import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { useParams } from "react-router-dom";
 import { Menu, Check, MessageCircleWarning } from "lucide-react"
@@ -15,7 +14,7 @@ export default function SubmitMealList() {
   const [students, setStudents] = useState([]);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isSubmitted, setIsSubmitted] = useState(true);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
@@ -86,7 +85,7 @@ export default function SubmitMealList() {
     }
   }
 
-  function ConfirmModal({ visible, onCancel, onConfirm }) {
+  function ConfirmModal({ visible, onCancel, onConfirm, onLaptop }) {
     if (!visible) return null; // Don't render if not visible
     return (
       <>
@@ -99,30 +98,41 @@ export default function SubmitMealList() {
               className="text-lg mb-3 font-geist w-[100%]"
               style={{
                 paddingLeft: '20px',
-                paddingTop: '20px'
+                paddingTop: onLaptop ? '24px' : '20px'
               }}
             >
               Confirm
             </div>
-            <div className="my-3">
-              <MessageCircleWarning size='10vw' color="#667085" />
+
+            <div 
+              style={{ paddingTop: '24px' }}
+              className="my-3">
+              <MessageCircleWarning 
+                size={ onLaptop ? '5vh' : '10vw'} 
+                color="#667085" />
             </div>
+
             <div
-              className="mb-6 text-center font-geist text-[#4C4B4B] text-[3.4vw]"
-              style={{ paddingTop: '5px' }}
+              className="mb-6 text-center font-geist text-[#4C4B4B]"
+              style={{ 
+                paddingTop: onLaptop ? '11px' : '5px',
+                fontSize: onLaptop ? '2vh' : '3.4vh' 
+              }}
             >
               Are you sure you want to submit the list?
             </div>
             <div
-              className="flex w-full gap-4 justify-center"
-              style={{ marginTop: '40px' }}
+              className="flex gap-4 justify-center"
+              style={{ 
+                marginTop: onLaptop ? '20px' : '40px' }}
             >
               <button
                 style={{
                   borderRadius: '10px',
-                  marginLeft: '10px'
+                  marginLeft: '10px',
+                  width: onLaptop ? '14vw' : '35vw'
                 }}
-                className="py-2 bg-gray-200 text-gray-700 font-semibold h-[40px] w-[35vw]"
+                className="py-2 bg-gray-200 text-gray-700 font-semibold h-[40px] hover:cursor-pointer"
                 onClick={onCancel}
               >
                 Cancel
@@ -130,9 +140,10 @@ export default function SubmitMealList() {
               <button
                 style={{
                   borderRadius: '10px',
-                  marginRight: '10px'
+                  marginRight: '10px',
+                  width: onLaptop ? '14vw' : '35vw'
                 }}
-                className="py-2 bg-[#4864d8] text-white font-semibold h-[40px] w-[35vw]"
+                className="py-2 bg-[#4864d8] text-white font-semibold h-[40px] hover:cursor-pointer"
                 onClick={onConfirm}
               >
                 Yes
@@ -376,6 +387,16 @@ export default function SubmitMealList() {
         </> :
         screenType === "laptop" ?
           <>
+            <ConfirmModal
+              visible={showModal}
+              onCancel={() => setShowModal(false)}
+              onConfirm={() => {
+                setIsSubmitted(true);
+                setShowModal(false);
+                handleSubmit();
+              }}
+              onLaptop={true}
+            />
             <div
               style={{ backgroundColor: "#F4FDFF" }}
               className="w-full h-[100vh] flex flex-col justify-start border-black border-[1px] overflow-hidden">
