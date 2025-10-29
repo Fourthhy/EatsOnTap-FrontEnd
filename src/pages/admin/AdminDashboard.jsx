@@ -1,6 +1,7 @@
 import { logout } from "../../functions/logoutAuth"
 import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
+import { StatsCard } from "./components/StatsCard"
 
 export default function AdminDashboard() {
     const navigate = useNavigate();
@@ -12,10 +13,11 @@ export default function AdminDashboard() {
 
     return (
         <>
-            This is the admin dashboard.
             <Button onClick={handleLogout}>
                 Log out
             </Button>
+
+            {/* <StatsCard title={"Total Claims Today"} value={575} subtitle={"12% vs yesterday"}/> */}
         </>
     )
 }
