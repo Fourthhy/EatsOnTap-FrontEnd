@@ -28,14 +28,18 @@ export default function AdminDashboard({ data }) {
     };
 
     const pieChartData = [
-        { name: "Claimed", value: 1280 },
-        { name: "Unclaimed", value: 420 },
-        { name: "Waived", value: 132 }
+        { property: "Claimed", value: 575 },
+        { property: "Unclaimed", value: 788 },
+        { property: "Waived", value: 92 }
     ]
 
     const barChartData = [
-        { dish: "Miswa / Monggo", Claimed: 2200, Unclaimed: 200 },
-        { dish: "Burger Steak", Claimed: 1603, Unclaimed: 429 },
+        { dish: "Miswa / Monggo", Claimed: 210, Unclaimed: 2100 },
+        { dish: "Burger Steak", Claimed: 420, Unclaimed: 1503 },
+        { dish: "Menudo / Adobo", Claimed: 100, Unclaimed: 2175 },
+        { dish: "Fried Chicken / Ampalaya", Claimed: 200, Unclaimed: 1863 },
+        { dish: "Tortang Talong / Ampalaya", Claimed: 632, Unclaimed: 1698 },
+        { dish: "Hotdog / Egg", Claimed: 0, Unclaimed: 423 },
     ]
 
     const trendsData = [
@@ -135,15 +139,125 @@ export default function AdminDashboard({ data }) {
                                 <StatsCard title="Virtual Credit Used" value={"₱34,500"} subtitle={"Daily 60-pesos credit"} />
                                 <StatsCard title="Waived Meals" value={92} subtitle={"12 yesterday"} />
                             </div>
+                            <div className="w-full mx-auto mt-8 bg-white shadow rounded-lg overflow-hidden flex">
+                                <div
+                                    style={{
+                                        marginTop: 4,
+                                        marginRight: 6,
+                                        marginLeft: 10,
+                                        marginRight: 6
+                                    }}
+                                    className="w-[60%]">
+                                    <div className="px-6 py-4 border-b border-gray-200">
+                                        <h2
+                                            style={{
+                                                padding: "8px 0px 8px 0px",
+                                                color: '#4C4B4B',
+                                                fontWeight: '500',
+                                                fontSize: 13
+                                            }}>
+                                            Program Status Claim (Today)
+                                        </h2>
+                                    </div>
+                                    <table className="min-w-full">
+                                        <thead>
+                                            <tr className="bg-gray-50 text-gray-700">
+                                                <th
+                                                    style={{
+                                                        padding: "10px 2px 10px 2px",
+                                                        fontSize: 14,
+                                                        color: "#667085"
+                                                    }}
+                                                    className="text-left font-medium">
+                                                    All
+                                                </th>
+                                                <th
+                                                    style={{
+                                                        padding: "10px 2px 10px 2px",
+                                                        fontSize: 14,
+                                                        color: "#076560"
+                                                    }}
+                                                    className="text-left font-medium">
+                                                    Claimed
+                                                </th>
+                                                <th
+                                                    style={{
+                                                        padding: "10px 2px 10px 2px",
+                                                        fontSize: 14,
+                                                        color: "#CF7171"
+                                                    }}
+                                                    className="text-left font-medium">
+                                                    Unclaimed
+                                                </th>
+                                                <th
+                                                    style={{
+                                                        padding: "10px 2px 10px 2px",
+                                                        fontSize: 14,
+                                                        color: "#9291A5"
+                                                    }}
+                                                    className="text-left font-medium">
+                                                    Waived
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {programStatus.map((item, idx) => (
+                                                <tr key={item.category} className="border-b last:border-none">
+                                                    <td
+                                                        style={{
+                                                            padding: "10px 2px 10px 2px",
+                                                            fontSize: 13
+                                                        }}
+                                                        className="font-geist">
+                                                        {item.program}
+                                                    </td>
+                                                    <td
+                                                        style={{
+                                                            padding: "10px 2px 10px 2px",
+                                                            fontSize: 14,
+                                                            fontWeight: '500',
+                                                            color: "#076560"
+                                                        }}
+                                                        className="font-geist">
+                                                        {item.claimed}
+                                                    </td>
+                                                    <td
+                                                        style={{
+                                                            padding: "10px 2px 10px 2px",
+                                                            fontSize: 14,
+                                                            fontWeight: '500',
+                                                            color: "#CF7171"
+                                                        }}
+                                                        className="font-geist">
+                                                        {item.unclaimed}
+                                                    </td>
+                                                    <td
+                                                        style={{
+                                                            padding: "10px 2px 10px 2px",
+                                                            fontSize: 14,
+                                                            fontWeight: '500',
+                                                            color: "#9291A5"
+                                                        }}
+                                                        className="font-geist">
+                                                        {item.waived}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="w-[40%] h-full">
+                                    <PieChartBox data={pieChartData} />
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <QuickActions />
                         </div>
-
-
                     </div>
                 </div>
             </div>
+
             <div style={{ display: "flex", minHeight: "100vh", background: "#F9FBFC" }}>
                 {/* Left Sidebar */}
                 {/* <aside style={{ width: "72px", background: "#183A6D", padding: "24px 0" }}>
@@ -174,41 +288,11 @@ export default function AdminDashboard({ data }) {
                     </div>
 
                     {/* Top Stats Row */}
-                    <section style={{ display: "flex", gap: 24, marginTop: 32 }}>
-                        {/* <StatsCard title="Total Claims (Today)" value={data.claimsToday} subtitle={data.claimsChange} />
-                        <StatsCard title="Eligible (Today)" value={data.eligibleToday} subtitle={data.eligibleChange} />
-                        <StatsCard title="Virtual Credit Used" value={`₱${data.creditUsed.toLocaleString()}`} subtitle={data.creditSubtitle} />
-                        <StatsCard title="Waived Meals" value={data.waivedMeals} subtitle={data.waivedChange} /> */}
-                        <StatsCard title="Total Claims (Today)" value={252} subtitle={"12% vs yesterday"} />
-                        <StatsCard title="Eligible (Today)" value={1380} subtitle={"320 not eligible"} />
-                        <StatsCard title="Virtual Credit Used" value={"₱34,500"} subtitle={"Daily 60-pesos credit"} />
-                        <StatsCard title="Waived Meals" value={92} subtitle={"12 yesterday"} />
-                    </section>
 
                     <section style={{ display: "flex", gap: 24, marginTop: 24 }}>
                         {/* Left Column - Claims Table & Pie */}
                         <div style={{ flex: 2 }}>
-                            <div style={{ background: "#fff", borderRadius: 12, padding: 28, boxShadow: "0 2px 8px #eee" }}>
-                                {/* Program Status Table & Pie */}
-                                <div style={{ display: "flex", gap: 24 }}>
-                                    <table style={{ flex: 1, fontSize: 14 }}>
-                                        <thead>
-                                            <tr><th></th><th>Claimed</th><th>Unclaimed</th><th>Waived</th></tr>
-                                        </thead>
-                                        <tbody>
-                                            {programStatus.map(row => (
-                                                <tr key={row.program}>
-                                                    <td>{row.program}</td>
-                                                    <td style={{ color: "#16B67A" }}>{row.claimed}</td>
-                                                    <td style={{ color: "#FF5757" }}>{row.unclaimed}</td>
-                                                    <td style={{ color: "#B8B8B8" }}>{row.waived ?? "-"}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                    <PieChartBox data={pieChartData} />
-                                </div>
-                            </div>
+
 
                             {/* Week Count Bar Chart */}
                             <BarChartBox data={barChartData} />
