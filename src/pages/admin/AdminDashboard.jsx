@@ -43,7 +43,12 @@ export default function AdminDashboard({ data }) {
     ]
 
     const trendsData = [
-        { month: "Jan", "Pre-packed Food": 1500, "Customized Order": 900, "Unused vouchers": 500 }
+        { month: "Jan", "Pre-packed Food": 1500, "Customized Order": 900, "Unused vouchers": 500 },
+        { month: "Feb", "Pre-packed Food": 900, "Customized Order": 500, "Unused vouchers": 1500 },
+        { month: "Mar", "Pre-packed Food": 500, "Customized Order": 1200, "Unused vouchers": 900 },
+        { month: "Apr", "Pre-packed Food": 1200, "Customized Order": 900, "Unused vouchers": 500 },
+        { month: "May", "Pre-packed Food": 900, "Customized Order": 500, "Unused vouchers": 1200 },
+        { month: "Jun", "Pre-packed Food": 500, "Customized Order": 1200, "Unused vouchers": 900 },
     ]
 
     const upcomingEvents = [
@@ -128,7 +133,7 @@ export default function AdminDashboard({ data }) {
                             marginTop: '20px',
                             marginLeft: '40px',
                             marginRight: '40px',
-                            boxShadow: "0 10px 24px 0 rgba(214, 221, 224, 0.32)",
+                            
                             backgroundColor: "#F7F9F9"
                         }}
                         className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
@@ -152,10 +157,9 @@ export default function AdminDashboard({ data }) {
                                     }}
                                     className="w-[60%] min-h-full flex flex-col justify-center">
                                     <div
-                                        style={{ padding: "6px 4px 6px 4px " }}>
+                                        style={{ padding: "15px 4px 10px 10px " }}>
                                         <h2
                                             style={{
-                                                padding: "8px 0px 8px 0px",
                                                 color: '#4C4B4B',
                                                 fontWeight: '500',
                                                 fontSize: 13
@@ -163,12 +167,14 @@ export default function AdminDashboard({ data }) {
                                             Program Status Claim (Today)
                                         </h2>
                                     </div>
-                                    <table className="min-w-full min-h-auto">
-                                        <thead>
+                                    <table 
+                                        style={{ marginBottom: "10px" }}
+                                        className="min-w-full min-h-auto border-gray-200 border-[1px]">
+                                        <thead className="border-gray-200 border-[1px] bg-[#FCFCFD]">
                                             <tr className="bg-gray-50 text-gray-700">
                                                 <th
                                                     style={{
-                                                        padding: "10px 2px 10px 2px",
+                                                        padding: "10px 2px 10px 10px",
                                                         fontSize: 14,
                                                         color: "#667085"
                                                     }}
@@ -209,7 +215,7 @@ export default function AdminDashboard({ data }) {
                                                 <tr key={item.category} className="border-b last:border-none">
                                                     <td
                                                         style={{
-                                                            padding: "10px 2px 10px 2px",
+                                                            padding: "10px 2px 10px 10px",
                                                             fontSize: 13
                                                         }}
                                                         className="font-geist">
@@ -255,9 +261,14 @@ export default function AdminDashboard({ data }) {
                                 </div>
                             </div>
 
-                            <div className="w-full h-[45vh] mx-auto mt-8 bg-white shadow rounded-lg flex">
+                            <div className="w-full h-[45vh] mx-auto bg-white shadow rounded-lg flex">
                                 <div className="h-auto w-full">
                                     <BarChartBox data={barChartData} />
+                                </div>
+                            </div>
+                            <div className="w-full h-[45vh] mx-auto bg-white shadow rounded-lg flex">
+                                <div className="h-auto w-full">
+                                    <LineChartBox data={trendsData} />
                                 </div>
                             </div>
 
@@ -311,7 +322,7 @@ export default function AdminDashboard({ data }) {
                             {/* <BarChartBox data={barChartData} /> */}
 
                             {/* Trends Line Chart */}
-                            {/* <LineChartBox data={trendsData} /> */}
+
                         </div>
 
                         {/* Right Column - Actions, Events, Claims */}
