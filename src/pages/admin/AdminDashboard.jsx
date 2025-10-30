@@ -147,13 +147,12 @@ export default function AdminDashboard({ data }) {
                             <div className="w-full h-[50vh] mx-auto mt-8 bg-white shadow rounded-lg flex">
                                 <div
                                     style={{
-                                        marginTop: 4,
                                         marginRight: 6,
                                         marginLeft: 10,
-                                        marginRight: 6
                                     }}
-                                    className="w-[60%]">
-                                    <div className="px-6 py-4 border-b border-gray-200">
+                                    className="w-[60%] min-h-full flex flex-col justify-center">
+                                    <div
+                                        style={{ padding: "6px 4px 6px 4px " }}>
                                         <h2
                                             style={{
                                                 padding: "8px 0px 8px 0px",
@@ -164,7 +163,7 @@ export default function AdminDashboard({ data }) {
                                             Program Status Claim (Today)
                                         </h2>
                                     </div>
-                                    <table className="min-w-full">
+                                    <table className="min-w-full min-h-auto">
                                         <thead>
                                             <tr className="bg-gray-50 text-gray-700">
                                                 <th
@@ -256,7 +255,7 @@ export default function AdminDashboard({ data }) {
                                 </div>
                             </div>
 
-                            <div className="w-full h-[50vh] mx-auto mt-8 bg-white shadow rounded-lg flex">
+                            <div className="w-full h-[45vh] mx-auto mt-8 bg-white shadow rounded-lg flex">
                                 <div className="h-auto w-full">
                                     <BarChartBox data={barChartData} />
                                 </div>

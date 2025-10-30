@@ -109,7 +109,7 @@ function BarChartBox({ data }) {
           <h3 style={{ fontFamily: "geist", color: "#4C4B4B", fontSize: 15, fontWeight: '500' }}>Week Count</h3>
           <p style={{ fontFamily: "geist", fontSize: 12, fontWeight: '400', color: "#475569" }}>  August 18 - August 22, 2025</p>
         </div>
-        <ResponsiveContainer width="100%" height={260}>
+        <ResponsiveContainer width="100%" height={230}>
           <BarChart data={data}>
             <CartesianGrid stroke="#ccc" strokeDashoffset="3" vertical={false} />
             <defs>
@@ -123,7 +123,7 @@ function BarChartBox({ data }) {
               tick={<DishTick />}
             />
             <YAxis
-              tickCount={10}               // More ticks, smoother increment
+              tickCount={7}               // More ticks, smoother increment
               fontSize={12}                // Larger font
               tick={{ fontFamily: "geist", fill: "#000", fontWeight: '500' }} // Custom style
               domain={[0, 'dataMax']}      // Ensures axis goes to max value in your data
