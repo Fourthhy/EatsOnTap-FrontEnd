@@ -15,7 +15,7 @@ import logo from "/lv-logo.svg";
 import { SidebarItem } from "../../../components/custom/SidebarItem";
 
 function Sidebar() {
-    const [isExpanded, setIsExpanded] = useState(true);
+    const [isExpanded, setIsExpanded] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const [indicatorStyle, setIndicatorStyle] = useState({});
     const containerRef = useRef(null);

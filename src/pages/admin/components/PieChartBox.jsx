@@ -52,7 +52,7 @@ export function PieChartBox({ data }) {
 
   return (
     <div className="flex flex-col justify-center items-center w-full max-w-md mx-auto">
-      <PieChart width="auto" height="auto">
+      <PieChart width={320} height={300}>
         <Pie
           data={data}
           cx="50%"

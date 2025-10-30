@@ -34,12 +34,12 @@ export default function AdminDashboard({ data }) {
     ]
 
     const barChartData = [
-        { dish: "Miswa / Monggo", Claimed: 210, Unclaimed: 2100 },
-        { dish: "Burger Steak", Claimed: 420, Unclaimed: 1503 },
-        { dish: "Menudo / Adobo", Claimed: 100, Unclaimed: 2175 },
-        { dish: "Fried Chicken / Ampalaya", Claimed: 200, Unclaimed: 1863 },
-        { dish: "Tortang Talong / Ampalaya", Claimed: 632, Unclaimed: 1698 },
-        { dish: "Hotdog / Egg", Claimed: 0, Unclaimed: 423 },
+        { dayOfWeek: "Monday", dish1: "Miswa", dish2: "Monggo", Claimed: 210, Unclaimed: 2100 },
+        { dayOfWeek: "Tuesday", dish1: "Burger Steak", dish2: "", Claimed: 420, Unclaimed: 1503 },
+        { dayOfWeek: "Wednesday", dish1: "Menudo", dish2: "Adobo", Claimed: 100, Unclaimed: 2175 },
+        { dayOfWeek: "Thursday", dish1: "Fried Chicken", dish2: "Ampalaya", Claimed: 200, Unclaimed: 1863 },
+        { dayOfWeek: "Friday", dish1: "Tortang Talong", dish2: "Ampalaya", Claimed: 632, Unclaimed: 1698 },
+        { dayOfWeek: "Saturday", dish1: "Hotdog", dish2: "Egg", Claimed: 0, Unclaimed: 423 },
     ]
 
     const trendsData = [
@@ -100,7 +100,7 @@ export default function AdminDashboard({ data }) {
         <>
             <div
                 style={{ backgroundColor: "#F7F9F9" }}
-                className="w-full h-[100vh] flex flex-col justify-start overflow-hidden">
+                className="w-full h-auto flex flex-col justify-start">
                 {/*HEADER*/}
                 <div
                     style={{ height: '60px' }}
@@ -119,8 +119,9 @@ export default function AdminDashboard({ data }) {
                         </p>
                     </div>
                 </div>
+
                 {/* CONTENT */}
-                <div className="h-[85vh] w-full">
+                <div className="h-auto w-full">
                     <div
                         style={{
                             borderRadius: '10px',
@@ -131,15 +132,19 @@ export default function AdminDashboard({ data }) {
                             backgroundColor: "#F7F9F9"
                         }}
                         className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
+
                         <div className="w-full h-auto flex flex-col gap-4">
+
                             <GreetingCard subtitle={"Here’s everything you need to know!"} />
+
                             <div className="grid grid-cols-4 gap-4">
                                 <StatsCard title="Total Claims (Today)" value={252} subtitle={"12% vs yesterday"} />
                                 <StatsCard title="Eligible (Today)" value={1380} subtitle={"320 not eligible"} />
                                 <StatsCard title="Virtual Credit Used" value={"₱34,500"} subtitle={"Daily 60-pesos credit"} />
                                 <StatsCard title="Waived Meals" value={92} subtitle={"12 yesterday"} />
                             </div>
-                            <div className="w-full mx-auto mt-8 bg-white shadow rounded-lg overflow-hidden flex">
+
+                            <div className="w-full h-[50vh] mx-auto mt-8 bg-white shadow rounded-lg flex">
                                 <div
                                     style={{
                                         marginTop: 4,
@@ -246,11 +251,21 @@ export default function AdminDashboard({ data }) {
                                         </tbody>
                                     </table>
                                 </div>
-                                <div className="w-[40%] h-full">
+                                <div className="w-[40%] h-[100%]">
                                     <PieChartBox data={pieChartData} />
                                 </div>
                             </div>
+
+                            <div className="w-full h-[50vh] mx-auto mt-8 bg-white shadow rounded-lg flex">
+                                <div className="h-auto w-full">
+                                    <BarChartBox data={barChartData} />
+                                </div>
+                            </div>
+
+
                         </div>
+
+
                         <div>
                             <QuickActions />
                         </div>
@@ -258,7 +273,7 @@ export default function AdminDashboard({ data }) {
                 </div>
             </div>
 
-            <div style={{ display: "flex", minHeight: "100vh", background: "#F9FBFC" }}>
+            <div style={{ display: "flex", minHeight: "0", background: "#F9FBFC" }}>
                 {/* Left Sidebar */}
                 {/* <aside style={{ width: "72px", background: "#183A6D", padding: "24px 0" }}>
                     <img src={SCHOOL_LOGO} alt="School Logo" style={{ width: 48, borderRadius: "50%", margin: "0 auto" }} />
@@ -270,21 +285,20 @@ export default function AdminDashboard({ data }) {
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
 
                         {/* Header */}
-                        <div>
+                        {/* <div>
                             <h1 style={{ margin: 0 }}>Good Morning!</h1>
                             <small>Here's everything you need to know!</small>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-                            <img src={USER_AVATAR} alt="User" style={{ width: 32, borderRadius: "50%" }} />
+                        </div> */}
 
+                        {/* <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+                            <img src={USER_AVATAR} alt="User" style={{ width: 32, borderRadius: "50%" }} />
                             <div>
-                                {/* <span style={{ fontWeight: "bold" }}>{data.user.name}</span> */}
                                 <span style={{ fontWeight: "bold" }}>Sample User Name</span>
                                 <br />
                                 <span style={{ fontSize: 12, color: "#777" }}>Admin</span>
                             </div>
+                        </div> */}
 
-                        </div>
                     </div>
 
                     {/* Top Stats Row */}
@@ -295,22 +309,22 @@ export default function AdminDashboard({ data }) {
 
 
                             {/* Week Count Bar Chart */}
-                            <BarChartBox data={barChartData} />
+                            {/* <BarChartBox data={barChartData} /> */}
 
                             {/* Trends Line Chart */}
-                            <LineChartBox data={trendsData} />
+                            {/* <LineChartBox data={trendsData} /> */}
                         </div>
 
                         {/* Right Column - Actions, Events, Claims */}
                         <div style={{ flex: 1 }}>
-                            <QuickActions />
-                            <EventsPanel events={upcomingEvents} />
-                            <ClaimsPanel claims={recentClaims} />
-                            <div style={{ background: "#fff", marginTop: 12, borderRadius: 8, padding: 16, fontWeight: "bold", fontSize: 18 }}>
+                            {/* <EventsPanel events={upcomingEvents} />
+                            <ClaimsPanel claims={recentClaims} /> */}
+
+                            {/* <div style={{ background: "#fff", marginTop: 12, borderRadius: 8, padding: 16, fontWeight: "bold", fontSize: 18 }}>
                                 Default Meal Allowance<br />
-                                {/* <span style={{ color: "#16B67A", fontSize: 22 }}>PHP {data.mealAllowance}</span> */}
                                 <span style={{ color: "#16B67A", fontSize: 22 }}>PHP {60}</span>
-                            </div>
+                            </div> */}
+
                         </div>
                     </section>
                 </main>
