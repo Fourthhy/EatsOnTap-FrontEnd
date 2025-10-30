@@ -22,7 +22,6 @@ function QuickActions() {
         background: "#fff",
         borderRadius: 8,
         padding: 18,
-        marginBottom: 18
       }}>
       <h4
         style={{

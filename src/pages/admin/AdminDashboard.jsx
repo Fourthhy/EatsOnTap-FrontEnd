@@ -43,22 +43,27 @@ export default function AdminDashboard({ data }) {
     ]
 
     const trendsData = [
-        { month: "Jan", "Pre-packed Food": 1500, "Customized Order": 900, "Unused vouchers": 500 },
-        { month: "Feb", "Pre-packed Food": 900, "Customized Order": 500, "Unused vouchers": 1500 },
-        { month: "Mar", "Pre-packed Food": 500, "Customized Order": 1200, "Unused vouchers": 900 },
-        { month: "Apr", "Pre-packed Food": 1200, "Customized Order": 900, "Unused vouchers": 500 },
-        { month: "May", "Pre-packed Food": 900, "Customized Order": 500, "Unused vouchers": 1200 },
-        { month: "Jun", "Pre-packed Food": 500, "Customized Order": 1200, "Unused vouchers": 900 },
+        { month: "Jan", "Pre-packed Food": 200, "Customized Order": 200, "Unused vouchers": 300 },
+        { month: "Feb", "Pre-packed Food": 1300, "Customized Order": 300, "Unused vouchers": 100 },
+        { month: "Mar", "Pre-packed Food": 1200, "Customized Order": 100, "Unused vouchers": 500 },
+        { month: "Apr", "Pre-packed Food": 900, "Customized Order": 50, "Unused vouchers": 50 },
+        { month: "May", "Pre-packed Food": 1000, "Customized Order": 300, "Unused vouchers": 300 },
+        { month: "Jun", "Pre-packed Food": 500, "Customized Order": 500, "Unused vouchers": 200 },
     ]
 
     const upcomingEvents = [
-        { title: "Teachers' Day", date: "Oct 5, 2025" },
-        { title: "President' Day", date: "Nov 25, 2025" },
-        { title: "College Intramurals", date: "Dec 15, 2025" }
+        { link: "#", title: "Teachers' Day", date: "Oct 5, 2025" },
+        { link: "#", title: "President' Day", date: "Nov 25, 2025" },
+        { link: "#", title: "College Intramurals", date: "Dec 15, 2025" }
     ]
 
     const recentClaims = [
-        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://logo.clearbit.com/facebook.com", claimId: "854-S" },
+        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
+        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
+        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
+        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
+        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
+        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
     ]
 
     const programStatus = [
@@ -104,7 +109,10 @@ export default function AdminDashboard({ data }) {
     return (
         <>
             <div
-                style={{ backgroundColor: "#F7F9F9" }}
+                style={{ 
+                    backgroundColor: "#F7F9F9", 
+                    marginBottom: "30px"
+                }}
                 className="w-full h-auto flex flex-col justify-start">
                 {/*HEADER*/}
                 <div
@@ -126,18 +134,16 @@ export default function AdminDashboard({ data }) {
                 </div>
 
                 {/* CONTENT */}
-                <div className="h-auto w-full">
+                <div className="h-full w-full">
                     <div
                         style={{
                             borderRadius: '10px',
                             marginTop: '20px',
                             marginLeft: '40px',
                             marginRight: '40px',
-                            
                             backgroundColor: "#F7F9F9"
                         }}
                         className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
-
                         <div className="w-full h-auto flex flex-col gap-4">
 
                             <GreetingCard subtitle={"Here’s everything you need to know!"} />
@@ -167,7 +173,7 @@ export default function AdminDashboard({ data }) {
                                             Program Status Claim (Today)
                                         </h2>
                                     </div>
-                                    <table 
+                                    <table
                                         style={{ marginBottom: "10px" }}
                                         className="min-w-full min-h-auto border-gray-200 border-[1px]">
                                         <thead className="border-gray-200 border-[1px] bg-[#FCFCFD]">
@@ -271,73 +277,53 @@ export default function AdminDashboard({ data }) {
                                     <LineChartBox data={trendsData} />
                                 </div>
                             </div>
-
-
                         </div>
 
 
-                        <div>
-                            <QuickActions />
+                        <div className="h-auto flex flex-col gap-4">
+                            <div>
+                                <QuickActions />
+                            </div>
+                            <div>
+                                <EventsPanel events={upcomingEvents} />
+                            </div>
+                            <div>
+                                <ClaimsPanel claims={recentClaims} />
+                            </div>
+                            <div>
+                                <div
+                                    style={{
+                                        background: "#fff",
+                                        borderRadius: 8,
+                                        padding: 16
+                                    }}
+                                    className="w-full h-auto flex flex-col items-center"
+                                >
+                                    <span
+                                        style={{
+                                            fontWeight: "bold",
+                                            fontSize: 13,
+                                            fontFamily: 'geist',
+                                            paddingBottom: "20px"
+                                        }}
+                                        className="w-full h-auto flex items-center"
+                                    >
+                                        Default Meal Allowance
+                                    </span>
+                                    <div
+                                        style={{
+                                            background: "#E6FBF9",
+                                            padding: 10
+                                        }}
+                                        className="w-full h-auto flex justify-center rounded-lg"
+                                    >
+                                        <span style={{ color: "#000", fontSize: 20, fontFamily: "geist" }}>PHP {60}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div style={{ display: "flex", minHeight: "0", background: "#F9FBFC" }}>
-                {/* Left Sidebar */}
-                {/* <aside style={{ width: "72px", background: "#183A6D", padding: "24px 0" }}>
-                    <img src={SCHOOL_LOGO} alt="School Logo" style={{ width: 48, borderRadius: "50%", margin: "0 auto" }} />
-                </aside> */}
-
-
-                {/* Main Content */}
-                <main style={{ flexGrow: 1, padding: 24 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between" }}>
-
-                        {/* Header */}
-                        {/* <div>
-                            <h1 style={{ margin: 0 }}>Good Morning!</h1>
-                            <small>Here's everything you need to know!</small>
-                        </div> */}
-
-                        {/* <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-                            <img src={USER_AVATAR} alt="User" style={{ width: 32, borderRadius: "50%" }} />
-                            <div>
-                                <span style={{ fontWeight: "bold" }}>Sample User Name</span>
-                                <br />
-                                <span style={{ fontSize: 12, color: "#777" }}>Admin</span>
-                            </div>
-                        </div> */}
-
-                    </div>
-
-                    {/* Top Stats Row */}
-
-                    <section style={{ display: "flex", gap: 24, marginTop: 24 }}>
-                        {/* Left Column - Claims Table & Pie */}
-                        <div style={{ flex: 2 }}>
-
-
-                            {/* Week Count Bar Chart */}
-                            {/* <BarChartBox data={barChartData} /> */}
-
-                            {/* Trends Line Chart */}
-
-                        </div>
-
-                        {/* Right Column - Actions, Events, Claims */}
-                        <div style={{ flex: 1 }}>
-                            {/* <EventsPanel events={upcomingEvents} />
-                            <ClaimsPanel claims={recentClaims} /> */}
-
-                            {/* <div style={{ background: "#fff", marginTop: 12, borderRadius: 8, padding: 16, fontWeight: "bold", fontSize: 18 }}>
-                                Default Meal Allowance<br />
-                                <span style={{ color: "#16B67A", fontSize: 22 }}>PHP {60}</span>
-                            </div> */}
-
-                        </div>
-                    </section>
-                </main>
             </div>
         </>
     )

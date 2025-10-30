@@ -101,9 +101,9 @@ function LineChartBox({ data }) {
           <YAxis />
           <Tooltip content={<CustomTooltip />} />
           <CartesianGrid stroke="#e6e6e6" />
-          <Line type="monotone" dot={false} dataKey="Pre-packed Food" stroke="#1C6E81" strokeWidth={2} />
-          <Line type="monotone" dot={false} dataKey="Customized Order" stroke="#6C43A7" strokeWidth={2} />
-          <Line type="monotone" dot={false} dataKey="Unused vouchers" stroke="#D13B3B" strokeWidth={2} />
+          <Line type="linear" dataKey="Pre-packed Food" stroke="#1C6E81" strokeWidth={2} />
+          <Line type="linear" dataKey="Customized Order" stroke="#6C43A7" strokeWidth={2} />
+          <Line type="linear" dataKey="Unused vouchers" stroke="#D13B3B" strokeWidth={2} />
           <Legend content={<CustomLegend />} alignItems={"center"} />
         </LineChart>
       </ResponsiveContainer>
