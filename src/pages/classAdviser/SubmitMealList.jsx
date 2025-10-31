@@ -104,27 +104,28 @@ export default function SubmitMealList() {
               Confirm
             </div>
 
-            <div 
+            <div
               style={{ paddingTop: '24px' }}
               className="my-3">
-              <MessageCircleWarning 
-                size={ onLaptop ? '5vh' : '10vw'} 
+              <MessageCircleWarning
+                size={onLaptop ? '5vh' : '10vw'}
                 color="#667085" />
             </div>
 
             <div
               className="mb-6 text-center font-geist text-[#4C4B4B]"
-              style={{ 
+              style={{
                 paddingTop: onLaptop ? '11px' : '5px',
-                fontSize: onLaptop ? '2vh' : '3.4vh' 
+                fontSize: onLaptop ? '2vh' : '3.4vh'
               }}
             >
               Are you sure you want to submit the list?
             </div>
             <div
               className="flex gap-4 justify-center"
-              style={{ 
-                marginTop: onLaptop ? '20px' : '40px' }}
+              style={{
+                marginTop: onLaptop ? '20px' : '40px'
+              }}
             >
               <button
                 style={{
@@ -438,11 +439,15 @@ export default function SubmitMealList() {
                       }}
                       className="font-geist text-[2.4vh] w-full">
                       {section}
-                      <span
-                        style={{ paddingLeft: '10px' }}
-                        className="font-geist text-[1.6vh] text-[#505050]">
-                        Submitted
-                      </span>
+                      {isSubmitted ?
+                        <>
+                          <span
+                            style={{ paddingLeft: '10px' }}
+                            className="font-geist text-[1.6vh] text-[#505050]">
+                            Submitted
+                          </span>
+                        </>
+                        : ""}
                     </p>
 
                     <div className="flex flex-col items-end justify-between">
