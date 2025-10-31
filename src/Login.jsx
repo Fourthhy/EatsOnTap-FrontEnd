@@ -130,6 +130,9 @@ export default function Login() {
 
                       {/* <p className="font-geist text-white text-[.97vw]">Please enter your details to get started.</p> */}
                       <div>
+                        <div style={{ color: "#FFF", fontFamily: "geist", paddingBottom: "5px", }}>
+                          <Label style={{ fontWeight: 400 }} >Email</Label>
+                        </div>
                         <Input
                           style={{
                             background: '#FFFFFF',
@@ -140,13 +143,16 @@ export default function Login() {
                             border: `${error == "" ? "" : "red 1px solid"}`
                           }}
                           type="email"
-                          placeholder="Email"
+                          placeholder="example@laverdad.edu.ph"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           disabled={loading}
                         />
                       </div>
                       <div style={{ position: 'relative' }}>
+                        <div style={{ color: "#FFF", fontFamily: "geist", paddingBottom: "5px", }}>
+                          <Label style={{ fontWeight: 400 }} >Password</Label>
+                        </div>
                         <Input
                           style={{
                             background: '#FFFFFF',
@@ -187,7 +193,7 @@ export default function Login() {
                             width: '2vw',
                             position: 'absolute',
                             right: '10px',
-                            top: '50%',
+                            top: '67%',
                             transform: 'translateY(-50%)',
                             cursor: 'pointer',
                             pointerEvents: 'auto', // icon will be clickable later if needed
@@ -402,7 +408,7 @@ export default function Login() {
                             backgroundColor: '#254280',
                           }}
                           onClick={handleSubmit}
-                          >
+                        >
                           Login
                         </Button>
                       </div>
