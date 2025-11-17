@@ -4,6 +4,8 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import { Button } from "@/components/ui/button"
 
+import { Button } from './components/ui/button'
+
 function App() {
   const [count, setCount] = useState(0)
 
@@ -19,9 +21,12 @@ function App() {
       </div>
       <h1>Welcome Back, Roylyn</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
+        {/* <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
-        </button>
+        </button> */}
+        <Button onClick={() => setCount((count) => count + 1)}>
+          click me, count is {count}
+        </Button>
         <p>
           Edit <code>src/App.jsx</code> and save to test HMR
         </p>

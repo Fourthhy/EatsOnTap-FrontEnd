@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { LayoutDashboard, Ticket, CalendarDays, ShoppingBag, BookOpen, LogOut } from "lucide-react";
-import logo from "/pictures/logo.png"; 
+import logo from "/pictures/logo.png";
+
 
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(true);
+
 
   return (
     <div
@@ -21,9 +23,11 @@ const Sidebar = () => {
           />
         </div>
 
+
         <p className={`text-gray-400 text-xs px-4 ${isExpanded ? "block" : "hidden"}`}>
           Main
         </p>
+
 
         {/* Nav Items */}
         <nav className="mt-2 space-y-1 ">
@@ -57,6 +61,7 @@ const Sidebar = () => {
         </nav>
       </div>
 
+
       {/* Logout Button */}
       <div className="p-4">
         <button
@@ -66,6 +71,7 @@ const Sidebar = () => {
           {isExpanded ? "<" : ">"}
         </button>
 
+
         <button className="flex items-center justify-center w-full gap-2 bg-white/30 hover:bg-[#52728F] py-3 rounded-lg transition">
           <LogOut size={18} />
           {isExpanded && <span className="text-sm">Logout</span>}
@@ -74,6 +80,7 @@ const Sidebar = () => {
     </div>
   );
 };
+
 
 // Sidebar Item Component
 const SidebarItem = ({ icon, text, expanded, active }) => {
@@ -98,8 +105,10 @@ const SidebarItem = ({ icon, text, expanded, active }) => {
   </span>
 )}
 
+
     </div>
   );
 };
+
 
 export default Sidebar;
