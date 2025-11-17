@@ -1,7 +1,6 @@
 import { logout } from "../../functions/logoutAuth"
 import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
-import { StatsCard } from "./components/StatsCard";
 import { StatsCardGroup } from "./components/StatsCardGroup"
 import { PieChartBox } from "./components/PieChartBox";
 import { BarChartBox } from "./components/BarChartBox";
@@ -9,10 +8,11 @@ import { LineChartBox } from "./components/LineChartBox";
 import { QuickActions } from "./components/QuickActions";
 import { EventsPanel } from "./components/EventsPanel";
 import { ClaimsPanel } from "./components/ClaimsPanel";
-import { GreetingCard } from "./components/GreetingCard";
+import { AnalyticTabs } from "./components/FluidTab";
 import { useOutletContext } from 'react-router-dom';
 import { Menu } from "lucide-react"
 import { RiNotification2Fill } from "react-icons/ri";
+
 
 // Example logo API usage
 const SCHOOL_LOGO = "https://logo.clearbit.com/up.edu.ph";
@@ -237,7 +237,12 @@ export default function AdminDashboard({ data }) {
 
                             </div>
 
-                            <div className="w-full h-[50vh] mx-auto mt-8 bg-white shadow rounded-lg flex">
+                            <AnalyticTabs />
+
+
+                            <div className="w-full h-auto mx-auto mt-8 bg-white shadow rounded-lg flex">
+
+
                                 <div
                                     style={{
                                         marginRight: 6,
@@ -255,6 +260,7 @@ export default function AdminDashboard({ data }) {
                                             Program Status Claim (Today)
                                         </h2>
                                     </div>
+
                                     <table
                                         style={{ marginBottom: "10px" }}
                                         className="min-w-full min-h-auto border-gray-200 border-[1px]">

@@ -62,7 +62,6 @@ export function StatsCardGroup({ title1, title2, title3, title4, subtitle1, subt
                                 fontFamily: "geist",
                                 width: "fit-content",
                                 height: "fit-content",
-
                             }}
                         >
                             Meal Eligibility List Count
