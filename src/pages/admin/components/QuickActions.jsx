@@ -19,9 +19,8 @@ function QuickActions() {
   return (
     <div
       style={{
-        background: "#fff",
-        borderRadius: 8,
-        padding: 18,
+        background: "#fff", borderRadius: 12, boxShadow: "0 2px 6px #e5eaf0",
+        padding: 18, display: "flex", flexDirection: "column", width: 'auto', justifyContent: "center"
       }}>
       <h4
         style={{

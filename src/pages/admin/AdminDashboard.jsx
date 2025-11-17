@@ -2,6 +2,7 @@ import { logout } from "../../functions/logoutAuth"
 import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { StatsCard } from "./components/StatsCard";
+import { StatsCardGroup } from "./components/StatsCardGroup"
 import { PieChartBox } from "./components/PieChartBox";
 import { BarChartBox } from "./components/BarChartBox";
 import { LineChartBox } from "./components/LineChartBox";
@@ -18,6 +19,8 @@ const SCHOOL_LOGO = "https://logo.clearbit.com/up.edu.ph";
 const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
 
 export default function AdminDashboard({ data }) {
+
+
     const navigate = useNavigate();
 
     const context = useOutletContext() || {};
@@ -44,12 +47,12 @@ export default function AdminDashboard({ data }) {
     ]
 
     const trendsData = [
-        { month: "Jan", "Pre-packed Food": 200, "Customized Order": 200, "Unused vouchers": 300 },
-        { month: "Feb", "Pre-packed Food": 1300, "Customized Order": 300, "Unused vouchers": 100 },
-        { month: "Mar", "Pre-packed Food": 1200, "Customized Order": 100, "Unused vouchers": 500 },
-        { month: "Apr", "Pre-packed Food": 900, "Customized Order": 50, "Unused vouchers": 50 },
-        { month: "May", "Pre-packed Food": 1000, "Customized Order": 300, "Unused vouchers": 300 },
-        { month: "Jun", "Pre-packed Food": 500, "Customized Order": 500, "Unused vouchers": 200 },
+        { dataSpan: "Jan", "Pre-packed Food": 200, "Customized Order": 200, "Unused vouchers": 300 },
+        { dataSpan: "Feb", "Pre-packed Food": 1300, "Customized Order": 300, "Unused vouchers": 100 },
+        { dataSpan: "Mar", "Pre-packed Food": 1200, "Customized Order": 100, "Unused vouchers": 500 },
+        { dataSpan: "Apr", "Pre-packed Food": 900, "Customized Order": 50, "Unused vouchers": 50 },
+        { dataSpan: "May", "Pre-packed Food": 1000, "Customized Order": 300, "Unused vouchers": 300 },
+        { dataSpan: "Jun", "Pre-packed Food": 500, "Customized Order": 500, "Unused vouchers": 200 },
     ]
 
     const upcomingEvents = [
@@ -171,8 +174,8 @@ export default function AdminDashboard({ data }) {
                                             color: "#B1AFB0",
                                             fontWeight: "500",
                                             fontSize: 11,
-                                            }}
-                                            className="w-[100%] flex justify-end"
+                                        }}
+                                        className="w-[100%] flex justify-end"
                                     >Role</p>
                                 </div>
                             </div>
@@ -197,13 +200,41 @@ export default function AdminDashboard({ data }) {
                         className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
                         <div className="w-full h-auto flex flex-col gap-4">
 
-                            <GreetingCard subtitle={"Here’s everything you need to know!"} />
 
-                            <div className="grid grid-cols-4 gap-4">
-                                <StatsCard title="Total Claims (Today)" value={252} subtitle={"12% vs yesterday"} />
-                                <StatsCard title="Eligible (Today)" value={1380} subtitle={"320 not eligible"} />
-                                <StatsCard title="Virtual Credit Used" value={"₱34,500"} subtitle={"Daily 60-pesos credit"} />
-                                <StatsCard title="Waived Meals" value={92} subtitle={"12 yesterday"} />
+
+                            <div className="grid grid-cols-5 gap-4">
+
+                                <div className="col-span-3">
+                                    <StatsCardGroup
+                                        title1={"Accepted Request Rate"}
+                                        title2={"Accepted Request Count"}
+                                        subtitle1={"Overall"}
+                                        subtitle2={"Today"}
+                                        value1={100}
+                                        value2={34}
+                                        acceptanceRate1={95}
+                                        expectingPostiveResult1={true}
+                                        isPercentage={true}
+
+                                        title3={"Rejected Request Rate"}
+                                        title4={"Rejected Request Count"}
+                                        subtitle3={"Overall"}
+                                        subtitle4={"Today"}
+                                        value3={0}
+                                        value4={0}
+                                        acceptanceRate2={5}
+                                        expectingPostiveResult2={false}
+                                    />
+                                </div>
+
+                                <div className="col-span-2">
+                                    <QuickActions />
+                                </div>
+
+                                {/* <div className="col-span-1 h-full">
+                                    <GreetingCard subtitle={"Here’s everything you need to know!"} />
+                                </div> */}
+
                             </div>
 
                             <div className="w-full h-[50vh] mx-auto mt-8 bg-white shadow rounded-lg flex">
@@ -332,9 +363,6 @@ export default function AdminDashboard({ data }) {
 
 
                         <div className="h-auto flex flex-col gap-4">
-                            <div>
-                                <QuickActions />
-                            </div>
                             <div>
                                 <EventsPanel events={upcomingEvents} />
                             </div>

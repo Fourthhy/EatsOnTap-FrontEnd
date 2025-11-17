@@ -88,7 +88,7 @@ function LineChartBox({ data }) {
       <ResponsiveContainer width="100%" height={230}>
         <LineChart data={data}>
           <XAxis
-            dataKey="month"
+            dataKey="dataSpan"
             tick={{
               fontFamily: "geist",      // Your custom font
               fontSize: 13,             // Increase or decrease for readability
