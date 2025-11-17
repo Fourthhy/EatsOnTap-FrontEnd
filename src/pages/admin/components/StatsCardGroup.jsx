@@ -106,6 +106,7 @@ export function StatsCardGroup({ title1, title2, title3, title4, subtitle1, subt
                         : <>
                             <StatsCard title={title1} value={value1} subtitle={subtitle1} acceptanceRate={acceptanceRate1} expectingPostiveResult={expectingPostiveResult1} isPercentage={isPercentage} />
                             <StatsCard title={title2} value={value2} subtitle={subtitle2} />
+                            <StatsCard title={title2} value={value2} subtitle={subtitle2} />
                         </>}
 
                 </div>

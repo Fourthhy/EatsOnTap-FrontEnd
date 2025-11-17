@@ -1,6 +1,8 @@
 import { logout } from "../../functions/logoutAuth"
 import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
+import { StatsCard } from "./components/StatsCard"
+import { CustomStatsCard } from "./components/CustomStatsCard"
 import { StatsCardGroup } from "./components/StatsCardGroup"
 import { PieChartBox } from "./components/PieChartBox";
 import { BarChartBox } from "./components/BarChartBox";
@@ -202,7 +204,7 @@ export default function AdminDashboard({ data }) {
 
 
 
-                            <div className="grid grid-cols-5 gap-4">
+                            <div className="grid grid-cols-4 gap-4">
 
                                 <div className="col-span-3">
                                     <StatsCardGroup
@@ -227,8 +229,8 @@ export default function AdminDashboard({ data }) {
                                     />
                                 </div>
 
-                                <div className="col-span-2">
-                                    <QuickActions />
+                                <div className="col-span-1 h-full">
+                                    <CustomStatsCard title={"Daily Virtual Credit Used"} value={"P60,000"} subtitle={"Daily 60 pesos credit"}/>
                                 </div>
 
                                 {/* <div className="col-span-1 h-full">
@@ -369,6 +371,9 @@ export default function AdminDashboard({ data }) {
 
 
                         <div className="h-auto flex flex-col gap-4">
+                            <div>
+                                <QuickActions />
+                            </div>
                             <div>
                                 <EventsPanel events={upcomingEvents} />
                             </div>

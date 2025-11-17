@@ -7,7 +7,7 @@ function AnalyticTabs() {
         <>
             <div>
                 <div className="w-full bg-[#F7F9F9]">
-                    <div style={{marginBottom: 5}}>
+                    <div style={{ marginBottom: 5 }}>
                         <span
                             style={{
                                 fontWeight: "500",
@@ -38,6 +38,7 @@ function AnalyticTabs() {
                                 cursor: "pointer",
                                 fontFamily: "geist",
                                 fontSize: 12,
+                                fontWeight: 500,
                                 backgroundColor: selectedTab === 1 ? "#9da7e380" : "#f8fafaff"
                             }}
                             onClick={() => { setSelectedTab(1) }}
@@ -62,6 +63,7 @@ function AnalyticTabs() {
                                 cursor: "pointer",
                                 fontFamily: "geist",
                                 fontSize: 12,
+                                fontWeight: 500,
                                 backgroundColor: selectedTab === 2 ? "#9da7e380" : "#f8fafaff"
                             }}
                             onClick={() => { setSelectedTab(2) }}
@@ -86,6 +88,7 @@ function AnalyticTabs() {
                                 cursor: "pointer",
                                 fontFamily: "geist",
                                 fontSize: 12,
+                                fontWeight: 500,
                                 backgroundColor: selectedTab === 3 ? "#9da7e380" : "#f8fafaff"
                             }}
                             onClick={() => { setSelectedTab(3) }}
@@ -110,6 +113,7 @@ function AnalyticTabs() {
                                 cursor: "pointer",
                                 fontFamily: "geist",
                                 fontSize: 12,
+                                fontWeight: 500,
                                 backgroundColor: selectedTab === 4 ? "#9da7e380" : "#f8fafaff"
                             }}
                             onClick={() => { setSelectedTab(4) }}
@@ -120,8 +124,33 @@ function AnalyticTabs() {
                             <div
                                 className=" h-full w-full bg-[#F7F9F9]"
                                 style={{
-                                    borderBottomRightRadius: selectedTab === 4 ? 0 : selectedTab === 4 ? 10 : 0,
+                                    borderBottomRightRadius: selectedTab === 4 ? 0 : selectedTab === 5 ? 10 : 0,
                                     borderBottomLeftRadius: selectedTab === 4 ? 10 : 0,
+                                }}
+                            >
+                            </div>
+                        </div>
+                        <button
+                            style={{
+                                borderTopLeftRadius: 6,
+                                borderTopRightRadius: 6,
+                                padding: "10px 50px",
+                                cursor: "pointer",
+                                fontFamily: "geist",
+                                fontSize: 12,
+                                fontWeight: 500,
+                                backgroundColor: selectedTab === 5 ? "#9da7e380" : "#f8fafaff"
+                            }}
+                            onClick={() => { setSelectedTab(5) }}
+                        >
+                            Select a date
+                        </button>
+                        <div className="w-3 bg-[#9da7e380]">
+                            <div
+                                className=" h-full w-full bg-[#F7F9F9]"
+                                style={{
+                                    borderBottomRightRadius: selectedTab === 5 ? 0 : selectedTab === 5 ? 10 : 0,
+                                    borderBottomLeftRadius: selectedTab === 5 ? 10 : 0,
                                 }}
                             >
                             </div>
@@ -136,7 +165,6 @@ function AnalyticTabs() {
                             borderTopRightRadius: 3,
                         }}
                     >
-
                     </div>
                     <div className="w-full h-auto bg-[#FFFFFF]">
                         some content

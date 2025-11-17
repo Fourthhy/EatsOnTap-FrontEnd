@@ -15,7 +15,7 @@ function StatsCard({ title, value, subtitle, acceptanceRate, expectingPostiveRes
 
     return (
         <div style={{
-            background: "#fff", borderRadius: 12, boxShadow: "0 2px 6px #e5eaf0",
+            background: "#fff", borderRadius: 12, boxShadow: "0 1px 6px #e5eaf0",
             padding: 20, display: "flex", flexDirection: "column", width: 'auto', justifyContent: "center"
         }}>
             <span
