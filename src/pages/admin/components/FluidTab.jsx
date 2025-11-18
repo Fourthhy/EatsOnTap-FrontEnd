@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { BandedChartBox } from "./BandedChartBox"
+import { CustomStatsCard } from "./CustomStatsCard";
 
 function AnalyticTabs() {
     const [selectedTab, setSelectedTab] = useState(1);
@@ -171,8 +173,15 @@ function AnalyticTabs() {
                         }}
                     >
                     </div>
-                    <div className="w-full h-auto bg-[#FFFFFF]">
-                        some content
+                    <div className="w-full h-[100%] bg-[#FFFFFF]">
+                        <div className="flex h-full w-full">
+                            <div className="w-[20%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40 }}>
+                                <CustomStatsCard title={"Used Credit Rate"} value={50} subtitle={"Today"} isPercentage={true} />
+                            </div>
+                            <div className="h-[100%] w-[80%] flex justify-end items-center">
+                                <BandedChartBox />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

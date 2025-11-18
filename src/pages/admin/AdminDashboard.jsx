@@ -192,12 +192,12 @@ export default function AdminDashboard({ data }) {
                 {/* CONTENT */}
                 <div className="h-full w-full">
 
-                    <div className="grid grid-cols-6 gap-4" style={{ margin: 15 }}>
-                        <div className="col-span-1 h-full">
+                    <div className="grid grid-cols-[20%_48%_28.5%] gap-4" style={{ margin: 15 }}>
+                        <div className="h-full">
                             <CustomStatsCard title={"Daily Virtual Credit Used"} value={"P60,000"} subtitle={"vs P65,000 allotted"} />
                         </div>
 
-                        <div className="col-span-3">
+                        <div className="">
                             <StatsCardGroup
                                 title1={"Accepted Request Rate"}
                                 title2={"Accepted Request Count"}
@@ -225,7 +225,7 @@ export default function AdminDashboard({ data }) {
                                 expectingPostiveResult2={false}
                             />
                         </div>
-                        <div className="col-span-2">
+                        <div className="">
                             <QuickActions />
                         </div>
                     </div>

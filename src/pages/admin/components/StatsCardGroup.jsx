@@ -3,7 +3,7 @@ import { useState } from "react"
 
 export function StatsCardGroup({ title1, title2, title3, title4, title5, title6, subtitle1, subtitle2, subtitle3, subtitle4, subtitle5, subtitle6, value1, value2, value3, value4, value5, value6, acceptanceRate1, acceptanceRate2, expectingPostiveResult1, expectingPostiveResult2, isPercentage }) {
     const [viewRejectedClaims, setViewRejectedClaims] = useState(false);
-    const [pendingMealRequest, setPendingMealRequest] = useState(1)
+    const [pendingMealRequest, setPendingMealRequest] = useState(0)
 
     function getTodayDate() {
         const today = new Date();

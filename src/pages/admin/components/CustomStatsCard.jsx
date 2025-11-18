@@ -1,4 +1,4 @@
-export function CustomStatsCard({ title, value, subtitle }) {
+export function CustomStatsCard({ title, value, subtitle, isPercentage }) {
     return (
         <>
             <div style={{
@@ -31,7 +31,7 @@ export function CustomStatsCard({ title, value, subtitle }) {
                         }}
 
                     >
-                        {value}
+                        {value}{isPercentage ? "%" : ""}
                     </span>
                 </div>
                 <div className="w-full h-full flex justify-center items-end">
