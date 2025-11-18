@@ -191,6 +191,44 @@ export default function AdminDashboard({ data }) {
 
                 {/* CONTENT */}
                 <div className="h-full w-full">
+
+                    <div className="grid grid-cols-6 gap-4" style={{ margin: 15 }}>
+                        <div className="col-span-1 h-full">
+                            <CustomStatsCard title={"Daily Virtual Credit Used"} value={"P60,000"} subtitle={"vs P65,000 allotted"} />
+                        </div>
+
+                        <div className="col-span-3">
+                            <StatsCardGroup
+                                title1={"Accepted Request Rate"}
+                                title2={"Accepted Request Count"}
+                                title5={"Total Eligible Students"}
+                                subtitle1={"Overall"}
+                                subtitle2={"Today"}
+                                subtitle5={"Today"}
+                                value1={100}
+                                value2={34}
+                                value5={1500}
+                                acceptanceRate1={95}
+                                expectingPostiveResult1={true}
+                                isPercentage={true}
+
+                                title3={"Rejected Request Rate"}
+                                title4={"Rejected Request Count"}
+                                title6={"Total Waived Students"}
+                                subtitle3={"Overall"}
+                                subtitle4={"Today"}
+                                subtitle6={"Today"}
+                                value3={0}
+                                value4={0}
+                                value6={0}
+                                acceptanceRate2={5}
+                                expectingPostiveResult2={false}
+                            />
+                        </div>
+                        <div className="col-span-2">
+                            <QuickActions />
+                        </div>
+                    </div>
                     <div
                         style={{
                             borderRadius: '10px',
@@ -202,45 +240,7 @@ export default function AdminDashboard({ data }) {
                         className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
                         <div className="w-full h-auto flex flex-col gap-4">
 
-
-
-                            <div className="grid grid-cols-4 gap-4">
-
-                                <div className="col-span-3">
-                                    <StatsCardGroup
-                                        title1={"Accepted Request Rate"}
-                                        title2={"Accepted Request Count"}
-                                        subtitle1={"Overall"}
-                                        subtitle2={"Today"}
-                                        value1={100}
-                                        value2={34}
-                                        acceptanceRate1={95}
-                                        expectingPostiveResult1={true}
-                                        isPercentage={true}
-
-                                        title3={"Rejected Request Rate"}
-                                        title4={"Rejected Request Count"}
-                                        subtitle3={"Overall"}
-                                        subtitle4={"Today"}
-                                        value3={0}
-                                        value4={0}
-                                        acceptanceRate2={5}
-                                        expectingPostiveResult2={false}
-                                    />
-                                </div>
-
-                                <div className="col-span-1 h-full">
-                                    <CustomStatsCard title={"Daily Virtual Credit Used"} value={"P60,000"} subtitle={"Daily 60 pesos credit"}/>
-                                </div>
-
-                                {/* <div className="col-span-1 h-full">
-                                    <GreetingCard subtitle={"Here’s everything you need to know!"} />
-                                </div> */}
-
-                            </div>
-
                             <AnalyticTabs />
-
 
                             <div className="w-full h-auto mx-auto mt-8 bg-white shadow rounded-lg flex">
 
@@ -371,9 +371,7 @@ export default function AdminDashboard({ data }) {
 
 
                         <div className="h-auto flex flex-col gap-4">
-                            <div>
-                                <QuickActions />
-                            </div>
+
                             <div>
                                 <EventsPanel events={upcomingEvents} />
                             </div>

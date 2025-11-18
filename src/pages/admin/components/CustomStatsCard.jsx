@@ -12,9 +12,10 @@ export function CustomStatsCard({ title, value, subtitle }) {
                             fontWeight: "500",
                             fontSize: 12,
                             color: "#000000",
-                            fontFamily: "geist"
+                            fontFamily: "geist",
+                            width: "fit-content",
+                            height: "fit-content",
                         }}
-                        
                     >
                         {title}
                     </span>
@@ -28,7 +29,7 @@ export function CustomStatsCard({ title, value, subtitle }) {
                             color: "#4C4B4B",
                             fontFamily: "geist"
                         }}
-                        
+
                     >
                         {value}
                     </span>
@@ -40,7 +41,7 @@ export function CustomStatsCard({ title, value, subtitle }) {
                             fontSize: 11,
                             fontFamily: "geist"
                         }}
-                        
+
                     >
                         {subtitle}
                     </span>

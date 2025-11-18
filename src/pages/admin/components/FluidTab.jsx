@@ -39,7 +39,8 @@ function AnalyticTabs() {
                                 fontFamily: "geist",
                                 fontSize: 12,
                                 fontWeight: 500,
-                                backgroundColor: selectedTab === 1 ? "#9da7e380" : "#f8fafaff"
+                                boxShadow: "2px 0 5px #e5eaf0",
+                                backgroundColor: selectedTab === 1 ? "#9da7e380" : "#FFFFFF"
                             }}
                             onClick={() => { setSelectedTab(1) }}
                         >
@@ -64,7 +65,8 @@ function AnalyticTabs() {
                                 fontFamily: "geist",
                                 fontSize: 12,
                                 fontWeight: 500,
-                                backgroundColor: selectedTab === 2 ? "#9da7e380" : "#f8fafaff"
+                                boxShadow: "2px 0 5px #e5eaf0",
+                                backgroundColor: selectedTab === 2 ? "#9da7e380" : "#FFFFFF"
                             }}
                             onClick={() => { setSelectedTab(2) }}
                         >
@@ -89,7 +91,8 @@ function AnalyticTabs() {
                                 fontFamily: "geist",
                                 fontSize: 12,
                                 fontWeight: 500,
-                                backgroundColor: selectedTab === 3 ? "#9da7e380" : "#f8fafaff"
+                                boxShadow: "2px 0 5px #e5eaf0",
+                                backgroundColor: selectedTab === 3 ? "#9da7e380" : "#FFFFFF"
                             }}
                             onClick={() => { setSelectedTab(3) }}
                         >
@@ -114,7 +117,8 @@ function AnalyticTabs() {
                                 fontFamily: "geist",
                                 fontSize: 12,
                                 fontWeight: 500,
-                                backgroundColor: selectedTab === 4 ? "#9da7e380" : "#f8fafaff"
+                                boxShadow: "2px 0 5px #e5eaf0",
+                                backgroundColor: selectedTab === 4 ? "#9da7e380" : "#FFFFFF"
                             }}
                             onClick={() => { setSelectedTab(4) }}
                         >
@@ -139,7 +143,8 @@ function AnalyticTabs() {
                                 fontFamily: "geist",
                                 fontSize: 12,
                                 fontWeight: 500,
-                                backgroundColor: selectedTab === 5 ? "#9da7e380" : "#f8fafaff"
+                                boxShadow: "2px 0 5px #e5eaf0",
+                                backgroundColor: selectedTab === 5 ? "#9da7e380" : "#FFFFFF"
                             }}
                             onClick={() => { setSelectedTab(5) }}
                         >

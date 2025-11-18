@@ -1,8 +1,9 @@
 import { StatsCard } from "./StatsCard"
 import { useState } from "react"
 
-export function StatsCardGroup({ title1, title2, title3, title4, subtitle1, subtitle2, subtitle3, subtitle4, value1, value2, value3, value4, acceptanceRate1, acceptanceRate2, expectingPostiveResult1, expectingPostiveResult2, isPercentage }) {
+export function StatsCardGroup({ title1, title2, title3, title4, title5, title6, subtitle1, subtitle2, subtitle3, subtitle4, subtitle5, subtitle6, value1, value2, value3, value4, value5, value6, acceptanceRate1, acceptanceRate2, expectingPostiveResult1, expectingPostiveResult2, isPercentage }) {
     const [viewRejectedClaims, setViewRejectedClaims] = useState(false);
+    const [pendingMealRequest, setPendingMealRequest] = useState(1)
 
     function getTodayDate() {
         const today = new Date();
@@ -78,10 +79,11 @@ export function StatsCardGroup({ title1, title2, title3, title4, subtitle1, subt
                         </span>
                     </div>
                     <div className="h-full flex items-center">
+
                         <button
                             style={{
                                 marginBottom: 2,
-                                marginRight: 2,
+                                marginRight: 5,
                                 borderRadius: 6,
                                 padding: "10px 12px",
                                 cursor: "pointer",
@@ -93,8 +95,27 @@ export function StatsCardGroup({ title1, title2, title3, title4, subtitle1, subt
                             onClick={() => { setViewRejectedClaims(!viewRejectedClaims) }}
                         >
                             {viewRejectedClaims ? "View Accepted Claims" : "View Rejected Claims"}
-
                         </button>
+
+                        {pendingMealRequest != 0
+                            ? <>
+                                <button
+                                    style={{
+                                        marginBottom: 2,
+                                        marginRight: 2,
+                                        borderRadius: 6,
+                                        padding: "10px 12px",
+                                        cursor: "pointer",
+                                        fontFamily: "geist",
+                                        fontSize: 12,
+                                        boxShadow: "0 2px 6px #e5eaf0",
+                                    }}
+                                    className="hover:cursor-pointer bg-[#ffe6daff] hover:bg-[#ffd5c1ff]"
+                                >
+                                    {`Pending Meal Requests (${pendingMealRequest})`}
+                                </button>
+                            </>
+                            : ""}
                     </div>
                 </div>
                 <div className="flex flex-row justify-evenly">
@@ -102,11 +123,12 @@ export function StatsCardGroup({ title1, title2, title3, title4, subtitle1, subt
                         ? <>
                             <StatsCard title={title3} value={value3} subtitle={subtitle3} acceptanceRate={acceptanceRate2} expectingPostiveResult={expectingPostiveResult2} isPercentage={isPercentage} />
                             <StatsCard title={title4} value={value4} subtitle={subtitle4} />
+                            <StatsCard title={title6} value={value6} subtitle={subtitle6} />
                         </>
                         : <>
                             <StatsCard title={title1} value={value1} subtitle={subtitle1} acceptanceRate={acceptanceRate1} expectingPostiveResult={expectingPostiveResult1} isPercentage={isPercentage} />
                             <StatsCard title={title2} value={value2} subtitle={subtitle2} />
-                            <StatsCard title={title2} value={value2} subtitle={subtitle2} />
+                            <StatsCard title={title5} value={value5} subtitle={subtitle5} />
                         </>}
 
                 </div>
