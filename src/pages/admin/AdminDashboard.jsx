@@ -2,6 +2,7 @@ import { logout } from "../../functions/logoutAuth"
 import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { StatsCard } from "./components/StatsCard"
+import { BandedChartBox } from "./components/charts/BandedChartTADMC"
 import { CustomStatsCard } from "./components/CustomStatsCard"
 import { StatsCardGroup } from "./components/StatsCardGroup"
 import { PieChartBox } from "./components/PieChartBox";
@@ -10,7 +11,7 @@ import { LineChartBox } from "./components/LineChartBox";
 import { QuickActions } from "./components/QuickActions";
 import { EventsPanel } from "./components/EventsPanel";
 import { ClaimsPanel } from "./components/ClaimsPanel";
-import { AnalyticTabs } from "./components/FluidTab";
+import { AnalyticTabs } from "./components/AnalyticTabs";
 import { useOutletContext } from 'react-router-dom';
 import { Menu } from "lucide-react"
 import { RiNotification2Fill } from "react-icons/ri";
@@ -240,7 +241,18 @@ export default function AdminDashboard({ data }) {
                         className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
                         <div className="w-full h-auto flex flex-col gap-4">
 
-                            <AnalyticTabs />
+                            <AnalyticTabs>
+                                <div className="w-full h-[100%] bg-[#FFFFFF]">
+                                    <div className="flex h-full w-[100%]">
+                                        <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20 }}>
+                                            <CustomStatsCard title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} />
+                                        </div>
+                                        <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                            <BandedChartBox />
+                                        </div>
+                                    </div>
+                                </div>
+                            </AnalyticTabs>
 
                             <div className="w-full h-auto mx-auto mt-8 bg-white shadow rounded-lg flex">
 

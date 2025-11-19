@@ -1,196 +1,107 @@
-import { logout } from "../../../functions/logoutAuth";
-import { useState, useRef, useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import React from 'react';
 import {
-    LayoutDashboard,
-    Ticket,
-    CalendarDays,
-    ShoppingBag,
-    BookOpen,
-    LogOut,
-} from "lucide-react";
-import { useBreakpoint } from "use-breakpoint"
-import logo from "/lv-logo.svg";
+  ComposedChart,
+  Line,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer, // <-- 1. Import ResponsiveContainer
+  DefaultLegendContent,
+  DefaultTooltipContent,
+} from 'recharts';
 
-import { SidebarItem } from "../../../components/custom/SidebarItem";
+// #region Sample data for KPI-003 (TADMC)
+const tadmcData = [
+  { Day: 'Mon 1', AcceptableRange: [58, 62], TADMC: 60.50 },
+  { Day: 'Tue 2', AcceptableRange: [58, 62], TADMC: 61.25 },
+  { Day: 'Wed 3', AcceptableRange: [58, 62], TADMC: 59.80 },
+  { Day: 'Thu 4', AcceptableRange: [58, 62], TADMC: 57.90 },
+  { Day: 'Fri 5', AcceptableRange: [58, 62], TADMC: 63.50 },
+  { Day: 'Mon 6', AcceptableRange: [58, 62], TADMC: 61.90 },
+];
+// #endregion
 
-function Sidebar({ menuItems }) {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [activeIndex, setActiveIndex] = useState(0);
-    const [indicatorStyle, setIndicatorStyle] = useState({});
-    const containerRef = useRef(null);
-    const navigate = useNavigate();
+// Utility to hide the band data key ('AcceptableRange') from the tooltip
+const renderTooltipWithoutRange = ({ payload, content, ...rest }) => {
+  if (!payload) return <DefaultTooltipContent {...rest} />;
+  
+  const newPayload = payload.filter(x => x.dataKey !== 'AcceptableRange');
+  return <DefaultTooltipContent payload={newPayload} {...rest} />;
+};
 
-    const handleLogout = () => {
-        logout();
-        navigate('/'); // redirect to login/home
-    };
+// Utility to hide the band data key ('AcceptableRange') from the legend
+const renderLegendWithoutRange = ({ payload, content, ref, ...rest }) => {
+  if (!payload) return <DefaultLegendContent {...rest} />;
 
-    const handleToggleSidebar = () => {
-        setIsExpanded(!isExpanded)
-    }
+  const newPayload = payload
+    .filter(x => x.dataKey !== 'AcceptableRange')
+    .map(item => ({
+      ...item,
+      value: item.dataKey === 'TADMC' ? 'Actual Daily Cost' : item.value 
+    }));
+    
+  if (payload.some(x => x.dataKey === 'AcceptableRange')) {
+    newPayload.unshift({
+      dataKey: 'AcceptableRange',
+      color: '#cccccc',
+      type: 'square',
+      value: 'Target Range (₱58-₱62)'
+    });
+  }
+  return <DefaultLegendContent payload={newPayload} {...rest} />;
+};
 
+export function BandedChartBox() {
+  const totalTADMC = tadmcData.reduce((sum, item) => sum + item.TADMC, 0);
+  const averageTADMC = (totalTADMC / tadmcData.length).toFixed(2);
+  
+  return (
+    // Set a controlled size for the container of the chart (e.g., max-width 500px, height 300px)
+    // The chart will now fill 100% of this parent div's dimensions.
+    <div className="border-black border-[1px]" style={{ padding: '20px', width: '100%', maxWidth: '700px', height: '300px', display: "flex", justifyContent: "start", alignItems: "end" }}>
 
-    useEffect(() => {
-        const container = containerRef.current;
-        if (container && container.children[activeIndex]) {
-            const activeItem = container.children[activeIndex];
-            const { offsetTop, offsetHeight } = activeItem;
-            setIndicatorStyle({
-                top: offsetTop + 4 + "px",
-                height: offsetHeight - 8 + "px",
-                transition: "top 0.3s ease",
-            });
-        }
-    }, [activeIndex, isExpanded]);
-
-    const BREAKPOINTS = {
-        'mobile-md': 375,
-        'mobile-lg': 425,
-        'tablet': 768,
-        'laptop-md': 1024,
-        'laptop-lg': 1440,
-    };
-
-    const { breakpoint } = useBreakpoint(BREAKPOINTS, 'mobile-md');
-    const screenType =
-        breakpoint === 'laptop-md' || breakpoint === 'laptop-lg' ? "laptop" :
-            breakpoint === 'mobile-md' || breakpoint === 'mobile-lg' || breakpoint === "tablet" ? "handheld" : "";
-
-    return (
-        <>
-            <div
-                style={{
-                    display: "flex", // Place sidebar and content side by side
-                    width: "100%",
-                    height: "100vh",
-                    overflow: "hidden",
-                    backgroundColor: "#F4FDFF",
-                }}
-            >
-                {/* Sidebar */}
-                <div
-                    style={{
-                        width: isExpanded ? "288px" : "72px",
-                        height: "100vh",
-                        background: "linear-gradient(to bottom, #263C70, #142345)",
-                        color: "white",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        transition: "width 300ms ease",
-                        position: "relative",
-                    }}
-                >
-                    <div>
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                marginTop: "1rem",
-                                marginBottom: "1.5rem",
-                            }}
-                        >
-                            <img
-                                src={logo}
-                                alt="Logo"
-                                style={{
-                                    width: isExpanded ? "3.5rem" : "2.5rem",
-                                    height: isExpanded ? "3.5rem" : "2.5rem",
-                                    transition: "all 300ms ease",
-                                }}
-                            />
-                            {isExpanded === true ?
-                                <>
-                                    <div
-                                        style={{ marginLeft: '10px' }}
-                                        className="h-auto w-auto flex flex-col justify-center gap-0"
-                                    >
-                                        <p
-                                            style={{ fontWeight: "bold" }}
-                                            className="font-geist text-[2.3vh] h-auto flex items-end">
-                                            Eat's on Tap
-                                        </p>
-                                        <p
-                                            style={{ fontWeight: 'regular' }}
-                                            className="font-geist text-[2vh] h-auto flex items-start">
-                                            La Verdad Chrisitan College
-                                        </p>
-                                    </div>
-                                </> : ""}
-                        </div>
-
-                        <nav
-                            style={{
-                                marginTop: "0.5rem",
-                                position: "relative",
-                                overflow: "visible",
-                            }}
-                            ref={containerRef}
-                        >
-                            {menuItems.map((item, i) => (
-                                <SidebarItem
-                                    key={i}
-                                    index={i}
-                                    icon={item.icon}
-                                    text={item.text}
-                                    expanded={isExpanded}
-                                    active={activeIndex === i}
-                                    onClick={setActiveIndex}
-                                />
-                            ))}
-                        </nav>
-                    </div>
-
-                    <div style={{ padding: "1rem" }}>
-                        <button
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                width: "100%",
-                                gap: "0.5rem",
-                                backgroundColor: "rgba(255, 255, 255, 0.3)",
-                                paddingTop: "0.75rem",
-                                paddingBottom: "0.75rem",
-                                borderRadius: "0.5rem",
-                                transition: "all 150ms ease",
-                                cursor: "pointer",
-                                border: "none",
-                            }}
-                            onClick={handleLogout}
-                            onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor = "#52728F")
-                            }
-                            onMouseLeave={(e) =>
-                            (e.currentTarget.style.backgroundColor =
-                                "rgba(255, 255, 255, 0.3)")
-                            }
-                        >
-                            <LogOut size={18} />
-                            {isExpanded && (
-                                <span style={{ fontSize: "0.875rem" }}>Logout</span>
-                            )}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Main Content Area */}
-
-                <div
-                    style={{
-                        flexGrow: 1, // Fill remaining space beside sidebar
-                        backgroundColor: "#f9fafb", // optional light background
-                        overflowY: "auto",
-                    }}
-                >
-                    <Outlet context={{ handleToggleSidebar }} />
-                </div>
-            </div>
-        </>
-    )
-}
-
-export {
-    Sidebar
+      {/* 2. Wrap the chart in ResponsiveContainer */}
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart
+          // Removed fixed size styles here (width, maxWidth, maxHeight)
+          // The ComposedChart will now take 100% of the ResponsiveContainer's size.
+          data={tadmcData}
+          margin={{ top: 0, right: 30, left: -20, bottom: 5 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="Day" />
+          <YAxis 
+              label={{ value: 'Cost (in ₱)', angle: -90, position: 'insideLeft' }} 
+              domain={[55, 65]}
+          />
+          <Tooltip content={renderTooltipWithoutRange} />
+          
+          <Area 
+              type="monotone" 
+              dataKey="AcceptableRange" 
+              stroke="none" 
+              fill="#cccccc"
+              connectNulls 
+              dot={false} 
+              activeDot={false} 
+          />
+          
+          <Line 
+              type="monotone" 
+              dataKey="TADMC" 
+              name="Actual Daily Cost" 
+              stroke="#1919b5ff"
+              strokeWidth={2} 
+              connectNulls 
+          />
+          
+          <Legend content={renderLegendWithoutRange} />
+        </ComposedChart>
+      </ResponsiveContainer>
+    
+    </div>
+  );
 }
