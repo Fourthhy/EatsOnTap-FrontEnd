@@ -25,7 +25,7 @@ export default function Login() {
       }
       switch (data.role) {
         case 'ADMIN':
-          navigate('/admin/landing');
+          navigate('/admin/dashboard');
           break;
         case 'ADMIN-ASSISTANT':
           navigate('/adminAssistant');

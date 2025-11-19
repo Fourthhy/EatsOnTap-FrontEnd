@@ -175,8 +175,8 @@ function AnalyticTabs() {
                     </div>
                     <div className="w-full h-[100%] bg-[#FFFFFF]">
                         <div className="flex h-full w-full">
-                            <div className="w-[20%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40 }}>
-                                <CustomStatsCard title={"Used Credit Rate"} value={50} subtitle={"Today"} isPercentage={true} />
+                            <div className="w-[20%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20 }}>
+                                <CustomStatsCard title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true}/>
                             </div>
                             <div className="h-[100%] w-[80%] flex justify-end items-center">
                                 <BandedChartBox />

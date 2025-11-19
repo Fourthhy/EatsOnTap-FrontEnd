@@ -13,6 +13,11 @@ import SidebarLayout from "../components/custom/SidebarLayout";
 import ClassAdviserLanding from "@/pages/classAdviser/ClassAdviserLanding";
 import AdminLanding from "@/pages/admin/AdminLanding";
 
+import MealRecipientOrder from "../pages/admin/MealRecipientOrder";
+import Records from "../pages/admin/Records";
+import ScheduleStudentEligibility from "../pages/admin/ScheduleStudentEligibility";
+import VoucherManagement from "../pages/admin/VoucherManagement";
+
 export default function Routers() {
     return (
         <>
@@ -28,7 +33,13 @@ export default function Routers() {
                             <AdminLanding />
                         </ProtectedRoute>
                     }>
-                        <Route path="landing" element={<AdminDashboard />} />
+                        <Route index element={<AdminDashboard />} />
+                        <Route path="dashboard" element={<AdminDashboard />} />
+                        <Route path="voucher" element={<VoucherManagement />} /> 
+                        <Route path="schedule" element={<ScheduleStudentEligibility />} /> 
+                        <Route path="order" element={<MealRecipientOrder />} /> 
+                        <Route path="record" element={<Records />} /> 
+
                     </Route>
                     <Route path="/adminAssistant" element={
                         <ProtectedRoute>

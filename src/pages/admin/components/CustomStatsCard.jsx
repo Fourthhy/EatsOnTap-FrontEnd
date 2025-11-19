@@ -1,4 +1,4 @@
-export function CustomStatsCard({ title, value, subtitle, isPercentage }) {
+export function CustomStatsCard({ title, value, subtitle, isPercentage, isPeso }) {
     return (
         <>
             <div style={{
@@ -16,6 +16,7 @@ export function CustomStatsCard({ title, value, subtitle, isPercentage }) {
                             width: "fit-content",
                             height: "fit-content",
                         }}
+                        className="text-center"
                     >
                         {title}
                     </span>
@@ -31,7 +32,7 @@ export function CustomStatsCard({ title, value, subtitle, isPercentage }) {
                         }}
 
                     >
-                        {value}{isPercentage ? "%" : ""}
+                        {isPeso ? "₱" : ""}{value}{isPercentage ? "%" : ""}
                     </span>
                 </div>
                 <div className="w-full h-full flex justify-center items-end">
