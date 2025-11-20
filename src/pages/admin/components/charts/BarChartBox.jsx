@@ -2,6 +2,7 @@ import React from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid } from "recharts";
 
 function BarChartBox({ data }) {
+  const geistTickStyle = { fontFamily: 'geist', fontSize: 12, fill: '#666' };
 
   function DishTick({ x, y, payload }) {
     const { dish1, dish2, dayOfWeek } = data[payload.index];
@@ -9,63 +10,70 @@ function BarChartBox({ data }) {
       <>
         <g transform={`translate(${x},${y})`}>
           <text x={0} y={8} dy={0} textAnchor="middle" fill="#000" fontSize={11} fontFamily="geist">
-            {dish1} {dish2 && "/"}
+            {/* {dish1} {dish2 && "/"} */}
+            {dayOfWeek}
           </text>
-          {dish2 && (
+          {/* {dish2 && (
             <text x={0} y={8} dy={14} textAnchor="middle" fill="#000" fontSize={11} fontFamily="geist">
               {dish2}
             </text>
-          )}
+          )} */}
         </g>
       </>
     );
   }
 
-  function CustomTooltip({ active, payload, label }) {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "8px",
-            padding: "10px 12px",
-            border: "1px solid #eaebec",
-            fontFamily: "geist",
-            fontSize: 13,
-            color: "#2d3748",
-            minWidth: 140
-          }}
-        >
-          {payload[0].payload && payload[0].payload.dayOfWeek && (
-            <div style={{ fontWeight: 700, fontSize: 14, color: "#222", marginBottom: 5 }}>
-              {payload[0].payload.dayOfWeek}
-            </div>
-          )}
-          {payload.map((entry) => (
-            <div key={entry.dataKey} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
-              {/* Solid Color Box */}
-              <div style={{
-                width: 14,
-                height: 14,
-                background: entry.color,
-                borderRadius: 3,
-                marginRight: 8,
-                display: 'block'
-              }} />
-              
-              <span style={{ fontWeight: 700, marginRight: 6, color: "#252525" }}>
-                {entry.name || entry.dataKey}:
-              </span>
-              <span style={{ fontWeight: 400, color: "#475569" }}>
-                {entry.value}
-              </span>
-            </div>
-          ))}
+function CustomTooltip({ active, payload, label }) {
+  if (active && payload && payload.length) {
+    // Access the data object for the current hover item
+    const data = payload[0].payload;
+
+    return (
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: "8px",
+          padding: "10px 12px",
+          border: "1px solid #eaebec",
+          fontFamily: "geist",
+          fontSize: 13,
+          color: "#2d3748",
+          minWidth: 140,
+          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" // Optional: Added slight shadow for depth
+        }}
+      >
+        {/* Header: Dish Names */}
+        <div style={{ fontWeight: 600, fontSize: 14, color: "#111", marginBottom: 8 }}>
+          {data.dish1}
+          {data.dish2 ? ` / ${data.dish2}` : ""}
         </div>
-      );
-    }
-    return null;
+
+        {/* Body: Statistics */}
+        {payload.map((entry) => (
+          <div key={entry.dataKey} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+            {/* Solid Color Box */}
+            <div style={{
+              width: 14,
+              height: 14,
+              background: entry.color,
+              borderRadius: 3,
+              marginRight: 8,
+              display: 'block'
+            }} />
+            
+            <span style={{ fontWeight: 400, marginRight: 6, color: "#252525" }}>
+              {entry.name || entry.dataKey}:
+            </span>
+            <span style={{ fontWeight: 400, color: "#475569" }}>
+              {entry.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
   }
+  return null;
+}
 
   function StyledLegend({ payload }) {
     return (
@@ -73,7 +81,7 @@ function BarChartBox({ data }) {
         style={{
           display: "flex",
           flexDirection: "row",
-          justifyContent: "center",
+          justifyContent: "end",
           alignItems: "center",
           gap: 28,
           marginTop: 5,
@@ -149,12 +157,12 @@ function BarChartBox({ data }) {
             
             <XAxis
               dataKey="dish1"
-              tick={<DishTick />}
+              tick={geistTickStyle}
             />
             <YAxis
               tickCount={7}
               fontSize={12}
-              tick={{ fontFamily: "geist", fill: "#000", fontWeight: '500' }}
+              tick={geistTickStyle}
               domain={[0, 'dataMax']}
               interval={0}
               tickFormatter={v => Math.round(v)}

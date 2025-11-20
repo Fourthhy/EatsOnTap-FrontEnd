@@ -7,13 +7,13 @@ import { BandedChartCUR } from "./components/charts/BandedChartCUR"
 import { BandedChartOCF } from "./components/charts/BandedChartOCF"
 import { CustomStatsCard } from "./components/CustomStatsCard"
 import { StatsCardGroup } from "./components/StatsCardGroup"
-import { PieChartBox } from "./components/PieChartBox";
+import { PieChartBox } from "./components/charts/PieChartBox";
 import { BarChartBox } from "./components/charts/BarChartBox";
-import { LineChartBox } from "./components/LineChartBox";
+import { LineChartBox } from "./components/charts/LineChartBox";
 import { QuickActions } from "./components/QuickActions";
 import { EventsPanel } from "./components/EventsPanel";
-import { ClaimsPanel } from "./components/ClaimsPanel";
 import { AnalyticTabs } from "./components/AnalyticTabs";
+import { MealAllowanceCard } from "./components/MealAllowanceCard";
 import { useOutletContext } from 'react-router-dom';
 import { Menu } from "lucide-react"
 import { RiNotification2Fill } from "react-icons/ri";
@@ -43,7 +43,6 @@ export default function AdminDashboard({ data }) {
     ]
 
     const barChartData = [
-        { dayOfWeek: "Monday", dish1: "Miswa", dish2: "Monggo", Claimed: 210, Unclaimed: 2100 },
         { dayOfWeek: "Tuesday", dish1: "Burger Steak", dish2: "", Claimed: 420, Unclaimed: 1503 },
         { dayOfWeek: "Wednesday", dish1: "Menudo", dish2: "Adobo", Claimed: 100, Unclaimed: 2175 },
         { dayOfWeek: "Thursday", dish1: "Fried Chicken", dish2: "Ampalaya", Claimed: 200, Unclaimed: 1863 },
@@ -56,8 +55,6 @@ export default function AdminDashboard({ data }) {
         { dataSpan: "Feb", "Pre-packed Food": 1300, "Customized Order": 300, "Unused vouchers": 100 },
         { dataSpan: "Mar", "Pre-packed Food": 1200, "Customized Order": 100, "Unused vouchers": 500 },
         { dataSpan: "Apr", "Pre-packed Food": 900, "Customized Order": 50, "Unused vouchers": 50 },
-        { dataSpan: "May", "Pre-packed Food": 1000, "Customized Order": 300, "Unused vouchers": 300 },
-        { dataSpan: "Jun", "Pre-packed Food": 500, "Customized Order": 500, "Unused vouchers": 200 },
     ]
 
     const upcomingEvents = [
@@ -275,141 +272,24 @@ export default function AdminDashboard({ data }) {
 
                                     <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
                                         <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
-                                            <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} />
+                                            <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
                                         </div>
                                         <div className="h-[100%] w-[75%] flex justify-end items-center">
                                             <BarChartBox data={barChartData} />
                                         </div>
                                     </div>
 
-                                </div>
-                            </AnalyticTabs>
-
-                            <div className="w-full h-auto mx-auto mt-8 bg-white shadow rounded-lg flex">
-
-
-                                <div
-                                    style={{
-                                        marginRight: 6,
-                                        marginLeft: 10,
-                                    }}
-                                    className="w-[60%] min-h-full flex flex-col justify-center">
-                                    <div
-                                        style={{ padding: "15px 4px 10px 10px " }}>
-                                        <h2
-                                            style={{
-                                                color: '#4C4B4B',
-                                                fontWeight: '500',
-                                                fontSize: 13
-                                            }}>
-                                            Program Status Claim (Today)
-                                        </h2>
+                                    <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                        <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
+                                            <CustomStatsCard title={"Unclaim Count"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
+                                        </div>
+                                        <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                            <LineChartBox data={trendsData} />
+                                        </div>
                                     </div>
 
-                                    <table
-                                        style={{ marginBottom: "10px" }}
-                                        className="min-w-full min-h-auto border-gray-200 border-[1px]">
-                                        <thead className="border-gray-200 border-[1px] bg-[#FCFCFD]">
-                                            <tr className="bg-gray-50 text-gray-700">
-                                                <th
-                                                    style={{
-                                                        padding: "10px 2px 10px 10px",
-                                                        fontSize: 14,
-                                                        color: "#667085"
-                                                    }}
-                                                    className="text-left font-medium">
-                                                    All
-                                                </th>
-                                                <th
-                                                    style={{
-                                                        padding: "10px 2px 10px 2px",
-                                                        fontSize: 14,
-                                                        color: "#076560"
-                                                    }}
-                                                    className="text-left font-medium">
-                                                    Claimed
-                                                </th>
-                                                <th
-                                                    style={{
-                                                        padding: "10px 2px 10px 2px",
-                                                        fontSize: 14,
-                                                        color: "#CF7171"
-                                                    }}
-                                                    className="text-left font-medium">
-                                                    Unclaimed
-                                                </th>
-                                                <th
-                                                    style={{
-                                                        padding: "10px 2px 10px 2px",
-                                                        fontSize: 14,
-                                                        color: "#9291A5"
-                                                    }}
-                                                    className="text-left font-medium">
-                                                    Waived
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {programStatus.map((item, idx) => (
-                                                <tr key={item.category} className="border-b last:border-none">
-                                                    <td
-                                                        style={{
-                                                            padding: "10px 2px 10px 10px",
-                                                            fontSize: 13
-                                                        }}
-                                                        className="font-geist">
-                                                        {item.program}
-                                                    </td>
-                                                    <td
-                                                        style={{
-                                                            padding: "10px 2px 10px 2px",
-                                                            fontSize: 14,
-                                                            fontWeight: '500',
-                                                            color: "#076560"
-                                                        }}
-                                                        className="font-geist">
-                                                        {item.claimed}
-                                                    </td>
-                                                    <td
-                                                        style={{
-                                                            padding: "10px 2px 10px 2px",
-                                                            fontSize: 14,
-                                                            fontWeight: '500',
-                                                            color: "#CF7171"
-                                                        }}
-                                                        className="font-geist">
-                                                        {item.unclaimed}
-                                                    </td>
-                                                    <td
-                                                        style={{
-                                                            padding: "10px 2px 10px 2px",
-                                                            fontSize: 14,
-                                                            fontWeight: '500',
-                                                            color: "#9291A5"
-                                                        }}
-                                                        className="font-geist">
-                                                        {item.waived}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
                                 </div>
-                                <div className="w-[40%] h-[100%]">
-                                    <PieChartBox data={pieChartData} />
-                                </div>
-                            </div>
-
-                            <div className="w-full h-[45vh] mx-auto bg-white shadow rounded-lg flex">
-                                <div className="h-auto w-full">
-                                    <BarChartBox data={barChartData} />
-                                </div>
-                            </div>
-                            <div className="w-full h-[45vh] mx-auto bg-white shadow rounded-lg flex">
-                                <div className="h-auto w-full">
-                                    <LineChartBox data={trendsData} />
-                                </div>
-                            </div>
+                            </AnalyticTabs>
                         </div>
 
 
@@ -419,38 +299,7 @@ export default function AdminDashboard({ data }) {
                                 <EventsPanel events={upcomingEvents} />
                             </div>
                             <div>
-                                <ClaimsPanel claims={recentClaims} />
-                            </div>
-                            <div>
-                                <div
-                                    style={{
-                                        background: "#fff",
-                                        borderRadius: 8,
-                                        padding: 16
-                                    }}
-                                    className="w-full h-auto flex flex-col items-center"
-                                >
-                                    <span
-                                        style={{
-                                            fontWeight: "bold",
-                                            fontSize: 13,
-                                            fontFamily: 'geist',
-                                            paddingBottom: "20px"
-                                        }}
-                                        className="w-full h-auto flex items-center"
-                                    >
-                                        Default Meal Allowance
-                                    </span>
-                                    <div
-                                        style={{
-                                            background: "#E6FBF9",
-                                            padding: 10
-                                        }}
-                                        className="w-full h-auto flex justify-center rounded-lg"
-                                    >
-                                        <span style={{ color: "#000", fontSize: 20, fontFamily: "geist" }}>PHP {60}</span>
-                                    </div>
-                                </div>
+                                <MealAllowanceCard />
                             </div>
                         </div>
                     </div>
