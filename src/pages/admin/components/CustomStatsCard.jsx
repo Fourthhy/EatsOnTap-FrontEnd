@@ -1,8 +1,12 @@
-export function CustomStatsCard({ title, value, subtitle, isPercentage, isPeso }) {
+export function CustomStatsCard({ title, value, subtitle, isPercentage, isPeso, acceptableRate, isHasAcceptableRange }) {
+
+    const acceptableIndicator = 
+        isHasAcceptableRange ? (value >= acceptableRate[0] && value <= acceptableRate[1] ? "#0e7973ff" : "#CF7171") : "#4C4B4B";
+
     return (
         <>
             <div style={{
-                background: "#fff", borderRadius: 12, boxShadow: "0 1px 6px #e5eaf0",
+                background: "#fff", borderRadius: 12, boxShadow: "0 1px 10px #e5eaf0",
                 padding: 20, display: "grid", gridColumn: 1, gridRow: 3, flexDirection: "column", width: 'auto', height: "100%"
             }}
             >
@@ -27,7 +31,7 @@ export function CustomStatsCard({ title, value, subtitle, isPercentage, isPeso }
                             fontSize: 25,
                             fontWeight: "500",
                             margin: "8px 0",
-                            color: "#4C4B4B",
+                            color: isHasAcceptableRange ? acceptableIndicator : "#4C4B4B",
                             fontFamily: "geist"
                         }}
 

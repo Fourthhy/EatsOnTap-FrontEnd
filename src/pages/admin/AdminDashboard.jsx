@@ -2,7 +2,9 @@ import { logout } from "../../functions/logoutAuth"
 import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { StatsCard } from "./components/StatsCard"
-import { BandedChartBox } from "./components/charts/BandedChartTADMC"
+import { BandedChartTADMC } from "./components/charts/BandedChartTADMC"
+import { BandedChartCUR } from "./components/charts/BandedChartCUR"
+import { BandedChartOCF } from "./components/charts/BandedChartOCF"
 import { CustomStatsCard } from "./components/CustomStatsCard"
 import { StatsCardGroup } from "./components/StatsCardGroup"
 import { PieChartBox } from "./components/PieChartBox";
@@ -242,15 +244,35 @@ export default function AdminDashboard({ data }) {
                         <div className="w-full h-auto flex flex-col gap-4">
 
                             <AnalyticTabs>
-                                <div className="w-full h-[100%] bg-[#FFFFFF]">
-                                    <div className="flex h-full w-[100%]">
+                                <div className="w-[100%] flex flex-col items-center h-[100%] bg-[#FFFFFF]">
+
+                                    <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
                                         <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20 }}>
-                                            <CustomStatsCard title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} />
+                                            <CustomStatsCard title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} />
                                         </div>
                                         <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <BandedChartBox />
+                                            <BandedChartTADMC />
                                         </div>
                                     </div>
+
+                                    <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                        <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
+                                            <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} />
+                                        </div>
+                                        <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                            <BandedChartCUR />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                        <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
+                                            <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} />
+                                        </div>
+                                        <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                            <BandedChartOCF />
+                                        </div>
+                                    </div>
+
                                 </div>
                             </AnalyticTabs>
 

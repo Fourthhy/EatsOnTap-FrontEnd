@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { BandedChartBox } from "./charts/BandedChartTADMC"
+import { BandedChartTADMC } from "./charts/BandedChartTADMC"
 import { CustomStatsCard } from "./CustomStatsCard";
 
 function AnalyticTabs({ children }) {
