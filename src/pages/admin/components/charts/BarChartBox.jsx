@@ -16,11 +16,6 @@ function BarChartBox({ data }) {
               {dish2}
             </text>
           )}
-          {/* {dayOfWeek && (
-            <text x={0} y={0} dy={28} textAnchor="middle" fill="#6C778B" fontSize={10} fontFamily="geist">
-              {dayOfWeek}
-            </text>
-          )} */}
         </g>
       </>
     );
@@ -41,7 +36,6 @@ function BarChartBox({ data }) {
             minWidth: 140
           }}
         >
-          {/* Example: show dayOfWeek, you can adjust as needed */}
           {payload[0].payload && payload[0].payload.dayOfWeek && (
             <div style={{ fontWeight: 700, fontSize: 14, color: "#222", marginBottom: 5 }}>
               {payload[0].payload.dayOfWeek}
@@ -49,30 +43,16 @@ function BarChartBox({ data }) {
           )}
           {payload.map((entry) => (
             <div key={entry.dataKey} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
-              {/* Icon: solid color box or gradient */}
-              {entry.color && entry.color.startsWith("url") ? (
-                // Use a unique gradient id for tooltip legend if needed
-                <svg width={14} height={14} style={{ borderRadius: 3, marginRight: 8, display: 'block' }}>
-                  <defs>
-                    <linearGradient id="unclaimedGradientTooltip" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#1F3463" />
-                      <stop offset="100%" stopColor="#3F6AC9" />
-                    </linearGradient>
-                  </defs>
-                  {/* Use fill that matches the Bar's gradient */}
-                  <rect x={0} y={0} width={14} height={14} rx={3} fill="url(#unclaimedGradientTooltip)" />
-                </svg>
-              ) : (
-                <div style={{
-                  width: 14,
-                  height: 14,
-                  background: entry.color,
-                  borderRadius: 3,
-                  marginRight: 8,
-                  display: 'block'
-                }} />
-              )}
-              {/* Key/Label bold, value regular */}
+              {/* Solid Color Box */}
+              <div style={{
+                width: 14,
+                height: 14,
+                background: entry.color,
+                borderRadius: 3,
+                marginRight: 8,
+                display: 'block'
+              }} />
+              
               <span style={{ fontWeight: 700, marginRight: 6, color: "#252525" }}>
                 {entry.name || entry.dataKey}:
               </span>
@@ -87,8 +67,6 @@ function BarChartBox({ data }) {
     return null;
   }
 
-
-
   function StyledLegend({ payload }) {
     return (
       <div
@@ -102,7 +80,7 @@ function BarChartBox({ data }) {
         }}
         className="my-2"
       >
-        <div
+        {/* <div
           style={{ padding: "0px 0px 15px 10px" }}
           className="w-full h-auto"
         >
@@ -122,7 +100,7 @@ function BarChartBox({ data }) {
           }}>
             August 18 - August 22, 2025
           </p>
-        </div>
+        </div> */}
         <div
           style={{
             marginRight: "20px"
@@ -137,34 +115,18 @@ function BarChartBox({ data }) {
               }}
             >
               {/* Solid color box */}
-              {entry.color.startsWith('#')
-                ? <div style={{
+              <div style={{
                   width: 18,
                   height: 18,
                   background: entry.color,
                   borderRadius: 4,
                 }} />
-                : (
-                  // Gradient box: SVG rect referencing same gradient as chart
-                  <svg width={18} height={18} style={{
-                    borderRadius: 4,
-                    display: 'block'
-                  }}>
-                    <defs>
-                      <linearGradient id="unclaimedGradientLegend" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#1F3463" />
-                        <stop offset="100%" stopColor="#3F6AC9" />
-                      </linearGradient>
-                    </defs>
-                    <rect x={0} y={0} width={18} height={18} rx={4} fill="url(#unclaimedGradientLegend)" />
-                  </svg>
-                )
-              }
+
               <span style={{
                 fontFamily: "geist",
                 color: "#252525",
                 fontSize: 13,
-                fontWeight: 600,
+                fontWeight: 400,
                 letterSpacing: ".01em"
               }}>
                 {entry.value}
@@ -180,35 +142,34 @@ function BarChartBox({ data }) {
     <>
       <div className="h-full w-full mx-auto flex flex-col items-center overflow-visible">
 
-        <ResponsiveContainer width="98%" height={290}>
+        <ResponsiveContainer width="100%" height={280}>
           <BarChart data={data}>
             <CartesianGrid stroke="#ccc" strokeDashoffset="3" vertical={false} />
-            <defs>
-              <linearGradient id="unclaimedGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#1F3463" />
-                <stop offset="100%" stopColor="#3F6AC9" />
-              </linearGradient>
-            </defs>
+            {/* Removed <defs> as gradients are no longer used */}
+            
             <XAxis
               dataKey="dish1"
               tick={<DishTick />}
             />
             <YAxis
-              tickCount={7}               // More ticks, smoother increment
-              fontSize={12}                // Larger font
-              tick={{ fontFamily: "geist", fill: "#000", fontWeight: '500' }} // Custom style
-              domain={[0, 'dataMax']}      // Ensures axis goes to max value in your data
-              interval={0}                 // Shows all ticks if space allows
-              tickFormatter={v => Math.round(v)} // Rounds tick labels for clarity
+              tickCount={7}
+              fontSize={12}
+              tick={{ fontFamily: "geist", fill: "#000", fontWeight: '500' }}
+              domain={[0, 'dataMax']}
+              interval={0}
+              tickFormatter={v => Math.round(v)}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend
               content={<StyledLegend />}
-              verticalAlign="top"      // or 'bottom'
+              verticalAlign="top"
               align="center"
             />
-            <Bar dataKey="Claimed" fill="#5594E2" radius={[5, 5, 5, 5]} />
-            <Bar dataKey="Unclaimed" fill="url(#unclaimedGradient)" radius={[5, 5, 5, 5]} />
+            {/* UPDATED: Claimed set to #0e7973ff */}
+            <Bar dataKey="Claimed" fill="#0e7973ff" radius={[5, 5, 5, 5]} />
+            
+            {/* UPDATED: Unclaimed set to #CF7171 */}
+            <Bar dataKey="Unclaimed" fill="#CF7171" radius={[5, 5, 5, 5]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

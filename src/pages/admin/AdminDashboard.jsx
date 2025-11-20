@@ -8,7 +8,7 @@ import { BandedChartOCF } from "./components/charts/BandedChartOCF"
 import { CustomStatsCard } from "./components/CustomStatsCard"
 import { StatsCardGroup } from "./components/StatsCardGroup"
 import { PieChartBox } from "./components/PieChartBox";
-import { BarChartBox } from "./components/BarChartBox";
+import { BarChartBox } from "./components/charts/BarChartBox";
 import { LineChartBox } from "./components/LineChartBox";
 import { QuickActions } from "./components/QuickActions";
 import { EventsPanel } from "./components/EventsPanel";
@@ -270,6 +270,15 @@ export default function AdminDashboard({ data }) {
                                         </div>
                                         <div className="h-[100%] w-[75%] flex justify-end items-center">
                                             <BandedChartOCF />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                        <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
+                                            <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} />
+                                        </div>
+                                        <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                            <BarChartBox data={barChartData} />
                                         </div>
                                     </div>
 
