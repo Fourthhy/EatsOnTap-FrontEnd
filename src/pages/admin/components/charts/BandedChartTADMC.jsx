@@ -47,7 +47,7 @@ const renderLegendWithoutRange = ({ payload, content, ref, ...rest }) => {
   if (payload.some(x => x.dataKey === 'AcceptableRange')) {
     newPayload.unshift({
       dataKey: 'AcceptableRange',
-      color: '#cccccc',
+      color: '#ccccccff',
       type: 'square',
       value: 'Target Range (₱58-₱62)'
     });
@@ -108,7 +108,7 @@ export function BandedChartTADMC() {
             type="monotone" 
             dataKey="AcceptableRange" 
             stroke="none" 
-            fill="#cccccc"
+            fill="#ccccccff"
             connectNulls 
             dot={false} 
             activeDot={false} 

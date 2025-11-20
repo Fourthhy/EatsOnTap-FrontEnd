@@ -173,6 +173,7 @@ function AnalyticTabs({ children }) {
                         }}
                     >
                     </div>
+                    
                     {children}
                     
                 </div>
