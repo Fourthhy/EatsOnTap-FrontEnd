@@ -121,14 +121,14 @@ export function StatsCardGroup({ title1, title2, title3, title4, title5, title6,
                 <div className="flex flex-row justify-evenly">
                     {viewRejectedClaims
                         ? <>
-                            <StatsCard title={title3} value={value3} subtitle={subtitle3} acceptanceRate={acceptanceRate2} expectingPostiveResult={expectingPostiveResult2} isPercentage={isPercentage} />
-                            <StatsCard title={title4} value={value4} subtitle={subtitle4} />
                             <StatsCard title={title6} value={value6} subtitle={subtitle6} />
+                            <StatsCard title={title4} value={value4} subtitle={subtitle4} />
+                            <StatsCard title={title3} value={value3} subtitle={subtitle3} acceptanceRate={acceptanceRate2} expectingPostiveResult={expectingPostiveResult2} isPercentage={isPercentage} />
                         </>
                         : <>
-                            <StatsCard title={title1} value={value1} subtitle={subtitle1} acceptanceRate={acceptanceRate1} expectingPostiveResult={expectingPostiveResult1} isPercentage={isPercentage} />
-                            <StatsCard title={title2} value={value2} subtitle={subtitle2} />
                             <StatsCard title={title5} value={value5} subtitle={subtitle5} />
+                            <StatsCard title={title2} value={value2} subtitle={subtitle2} />
+                            <StatsCard title={title1} value={value1} subtitle={subtitle1} acceptanceRate={acceptanceRate1} expectingPostiveResult={expectingPostiveResult1} isPercentage={isPercentage} />
                         </>}
 
                 </div>
