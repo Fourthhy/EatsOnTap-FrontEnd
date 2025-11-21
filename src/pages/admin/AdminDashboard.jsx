@@ -115,8 +115,58 @@ export default function AdminDashboard() {
                     { Day: 'Week 4', AcceptableRange: [0, 15], TADMC: 6.00 },
                 ]
             }
-        ]
+        ],
+        monthly: [
+            {
+                barChartData: [
+                    { dayOfWeek: "Month 1", dish1: "Chicken Curry", dish2: "Bistek", Claimed: 8000, Unclaimed: 2000 },
+                    { dayOfWeek: "Month 2", dish1: "Sinigang na Hipon", dish2: "Kare-Kare", Claimed: 7500, Unclaimed: 2500 },
+                    { dayOfWeek: "Month 3", dish1: "Lechon Kawali", dish2: "Dinuguan", Claimed: 9000, Unclaimed: 1000 },
+                    { dayOfWeek: "Month 4", dish1: "Pancit Canton", dish2: "Lumpia", Claimed: 8200, Unclaimed: 1800 },
+                ]
+            },
+            {
+                trendsData: [
+                    { dataSpan: "Month 1", "Pre-packed Food": 2000, "Customized Order": 500, "Unused vouchers": 200 },
+                    { dataSpan: "Month 2", "Pre-packed Food": 2200, "Customized Order": 600, "Unused vouchers": 150 },
+                    { dataSpan: "Month 3", "Pre-packed Food": 2500, "Customized Order": 700, "Unused vouchers": 100 },
+                    { dataSpan: "Month 4", "Pre-packed Food": 2300, "Customized Order": 650, "Unused vouchers": 180 },
+                ]
+            },
+            {
+                TADMCdata: [
+                    { Day: 'Month 1', AcceptableRange: [58, 62], TADMC: 60.00 },
+                    { Day: 'Month 2', AcceptableRange: [58, 62], TADMC: 59.50 },
+                    { Day: 'Month 3', AcceptableRange: [58, 62], TADMC: 61.00 },
+                    { Day: 'Month 4', AcceptableRange: [58, 62], TADMC: 60.20 },
+                ]
+            },
+            {
+                CURdata: [
+                    { Day: 'Month 1', AcceptableRange: [90, 100], TADMC: 96.00 },
+                    { Day: 'Month 2', AcceptableRange: [90, 100], TADMC: 95.50 },
+                    { Day: 'Month 3', AcceptableRange: [90, 100], TADMC: 97.00 },
+                    { Day: 'Month 4', AcceptableRange: [90, 100], TADMC: 96.50 },
+                ]
+            },
+            {
+                OCFdata: [
+                    { Day: 'Month 1', AcceptableRange: [0, 15], TADMC: 9.00 },
+                    { Day: 'Month 2', AcceptableRange: [0, 15], TADMC: 11.00 },
+                    { Day: 'Month 3', AcceptableRange: [0, 15], TADMC: 8.00 },
+                    { Day: 'Month 4', AcceptableRange: [0, 15], TADMC: 10.00 },
+                ]
+            }
+        ],
+        
     }
+
+    const upcomingEvents = [
+        { link: "#", title: "Teachers' Day", date: "Oct 5, 2025" },
+        { link: "#", title: "President' Day", date: "Nov 25, 2025" },
+        { link: "#", title: "College Intramurals", date: "Dec 15, 2025" }
+    ]
+
 
     const getTimeframeKey = (id) => {
         switch (id) {
@@ -273,13 +323,12 @@ export default function AdminDashboard() {
                         className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
                         <div className="w-full h-auto flex flex-col gap-4">
 
-                            <AnalyticTabs selectedTab={selectedTab} setSelectedTab={setSelectedTab}>
+                            <AnalyticTabs selectedTab={selectedTab} onTabChange={setSelectedTab}>
                                 <div className="w-[100%] flex flex-col items-center h-[100%] bg-[#FFFFFF]">
 
                                     <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
                                         <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
                                             <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
-                                            {selectedTab}
                                         </div>
                                         <div className="h-[100%] w-[75%] flex justify-end items-center">
                                             <BarChartBox data={getChartData('barChartData')} />
@@ -329,9 +378,9 @@ export default function AdminDashboard() {
 
                         <div className="h-auto flex flex-col gap-4">
 
-                            {/* <div>
+                            <div>
                                 <EventsPanel events={upcomingEvents} />
-                            </div> */}
+                            </div>
                             <div>
                                 <MealAllowanceCard />
                             </div>

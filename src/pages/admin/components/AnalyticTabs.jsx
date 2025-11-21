@@ -37,7 +37,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             boxShadow: "2px 0 5px #e5eaf0",
                             backgroundColor: selectedTab === 1 ? "#9da7e380" : "#FFFFFF"
                         }}
-                        onClick={() => { onTabChange(1) }}
+                        onClick={() => onTabChange(1)}
                     >
                         Daily
                     </button>
@@ -63,7 +63,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             boxShadow: "2px 0 5px #e5eaf0",
                             backgroundColor: selectedTab === 2 ? "#9da7e380" : "#FFFFFF"
                         }}
-                        onClick={() => { onTabChange(2) }}
+                        onClick={() => onTabChange(2)}
                     >
                         Weekly
                     </button>
@@ -89,7 +89,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             boxShadow: "2px 0 5px #e5eaf0",
                             backgroundColor: selectedTab === 3 ? "#9da7e380" : "#FFFFFF"
                         }}
-                        onClick={() => { onTabChange(3) }}
+                        onClick={() => onTabChange(3)}
                     >
                         Monthly
                     </button>
@@ -115,7 +115,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             boxShadow: "2px 0 5px #e5eaf0",
                             backgroundColor: selectedTab === 4 ? "#9da7e380" : "#FFFFFF"
                         }}
-                        onClick={() => { onTabChange(4) }}
+                        onClick={() => onTabChange(4)}
                     >
                         Overall
                     </button>
@@ -141,7 +141,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             boxShadow: "2px 0 5px #e5eaf0",
                             backgroundColor: selectedTab === 5 ? "#9da7e380" : "#FFFFFF"
                         }}
-                        onClick={() => { onTabChange(5) }}
+                        onClick={() => onTabChange(5)}
                     >
                         Select a date
                     </button>
