@@ -16,15 +16,7 @@ import {
 // #region Sample data for KPI-003 (TADMC)
 // UPDATED: AcceptableRange set to [0, 15]
 // UPDATED: Sample TADMC values scaled down to ~2-16 to fit visually within the new range
-const tadmcData = [
-  { Day: 'Mon 1', AcceptableRange: [0, 15], TADMC: 5.50 },
-  { Day: 'Tue 2', AcceptableRange: [0, 15], TADMC: 12.25 },
-  { Day: 'Wed 3', AcceptableRange: [0, 15], TADMC: 8.80 },
-  { Day: 'Thu 4', AcceptableRange: [0, 15], TADMC: 1.90 },
-  { Day: 'Fri 5', AcceptableRange: [0, 15], TADMC: 16.50 },
-  { Day: 'Sat 6', AcceptableRange: [0, 15], TADMC: 10.90 },
-  { Day: 'Mon 8', AcceptableRange: [0, 15], TADMC: 7.00 },
-];
+
 // #endregion
 
 const renderTooltipWithoutRange = ({ payload, content, ...rest }) => {
@@ -56,7 +48,7 @@ const renderLegendWithoutRange = ({ payload, content, ref, ...rest }) => {
   return <DefaultLegendContent payload={newPayload} {...rest} />;
 };
 
-export function BandedChartOCF() {
+export function BandedChartOCF({data}) {
   // Style object for the geist font
   const geistTickStyle = { fontFamily: 'geist', fontSize: 12, fill: '#666' };
 
@@ -65,7 +57,7 @@ export function BandedChartOCF() {
 
       <ResponsiveContainer width="100%" height="98%">
         <ComposedChart
-          data={tadmcData}
+          data={data}
           margin={{ top: 0, right: -20, left: 0, bottom: 0 }}
         >
           <CartesianGrid strokeDasharray="3 3" />

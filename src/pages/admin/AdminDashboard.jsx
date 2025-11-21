@@ -80,7 +80,27 @@ export default function AdminDashboard({ data }) {
         { Day: 'Fri 5', AcceptableRange: [58, 62], TADMC: 63.50 },
         { Day: 'Sat 6', AcceptableRange: [58, 62], TADMC: 61.90 },
         { Day: 'Mon 8', AcceptableRange: [58, 62], TADMC: 61.00 },
-    ]
+    ];
+
+    const CURdata = [
+      { Day: 'Mon 1', AcceptableRange: [90, 100], TADMC: 92.50 },
+      { Day: 'Tue 2', AcceptableRange: [90, 100], TADMC: 98.25 },
+      { Day: 'Wed 3', AcceptableRange: [90, 100], TADMC: 94.80 },
+      { Day: 'Thu 4', AcceptableRange: [90, 100], TADMC: 89.90 },
+      { Day: 'Fri 5', AcceptableRange: [90, 100], TADMC: 101.50 },
+      { Day: 'Sat 6', AcceptableRange: [90, 100], TADMC: 96.90 },
+      { Day: 'Mon 8', AcceptableRange: [90, 100], TADMC: 95.00 },
+    ];
+    
+    const OCFdata = [
+      { Day: 'Mon 1', AcceptableRange: [0, 15], TADMC: 5.50 },
+      { Day: 'Tue 2', AcceptableRange: [0, 15], TADMC: 12.25 },
+      { Day: 'Wed 3', AcceptableRange: [0, 15], TADMC: 8.80 },
+      { Day: 'Thu 4', AcceptableRange: [0, 15], TADMC: 1.90 },
+      { Day: 'Fri 5', AcceptableRange: [0, 15], TADMC: 16.50 },
+      { Day: 'Sat 6', AcceptableRange: [0, 15], TADMC: 10.90 },
+      { Day: 'Mon 8', AcceptableRange: [0, 15], TADMC: 7.00 },
+    ];
 
     const programStatus = [
         {
@@ -285,7 +305,7 @@ export default function AdminDashboard({ data }) {
                                             <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} />
                                         </div>
                                         <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <BandedChartCUR />
+                                            <BandedChartCUR data={CURdata} />
                                         </div>
                                     </div>
 
@@ -294,7 +314,7 @@ export default function AdminDashboard({ data }) {
                                             <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} />
                                         </div>
                                         <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <BandedChartOCF />
+                                            <BandedChartOCF data={OCFdata} />
                                         </div>
                                     </div>
 
