@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { useDate } from "./components/DatePicker"
+
 import { BandedChartTADMC } from "./components/charts/BandedChartTADMC"
 import { BandedChartCUR } from "./components/charts/BandedChartCUR"
 import { BandedChartOCF } from "./components/charts/BandedChartOCF"
@@ -10,6 +12,7 @@ import { QuickActions } from "./components/QuickActions";
 import { EventsPanel } from "./components/EventsPanel";
 import { AnalyticTabs } from "./components/AnalyticTabs";
 import { MealAllowanceCard } from "./components/MealAllowanceCard";
+import { DateProvider } from "./components/DatePicker"
 import { DatePicker } from "./components/DatePicker"
 import { useOutletContext } from 'react-router-dom';
 import { Menu } from "lucide-react"
@@ -21,6 +24,7 @@ const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
 
 export default function AdminDashboard() {
     const [selectedTab, setSelectedTab] = useState(1);
+    const { selectedDate } = useDate();
 
     const extractedData = {
         today: [
@@ -184,7 +188,28 @@ export default function AdminDashboard() {
             { title: "Average TADMC", value: 60.00, subtitle: "Overall" },
         ],
         consumedCredits: [
-            { title: "Total Unused Credits", value: "₱2,340", subtitle: "The actual unused credits" },  
+            { title: "Total Unused Credits", value: "₱2,340", subtitle: "The actual unused credits" },
+            { title: "Total Consumed Credits", value: "₱150,000", subtitle: "The actual consumed credits" },
+        ]
+    }
+
+    const extractedCustomDateData = {
+        dishForDay: [
+            { title: "Dish for the day", value: "Chicken Curry / Adobo", subtitle: "53.32% of total | 2,529 claims" }
+        ],
+        claimsCount: [
+            { title: "Unclaimed Count", value: 10, inPercentage: true, subtitle: "1000 claims" },
+            { title: "Food Item Claim Count", value: 40, inPercentage: true, subtitle: "6000 claims" },
+            { title: "Free Meal Claim Count", value: 50, inPercentage: true, subtitle: "7500 claims" },
+            { title: "Claim Count", value: 15000, subtitle: "Free Meal + Food Item Claim" },
+        ],
+        KPIreports: [
+            { title: "Average OCF", value: 10.00, isPercentage: true, subtitle: "Overall" },
+            { title: "Average CUR", value: 95.00, isPercentage: true, subtitle: "Overall" },
+            { title: "Average TADMC", value: 60.00, subtitle: "Overall" },
+        ],
+        consumedCredits: [
+            { title: "Total Unused Credits", value: "₱2,340", subtitle: "The actual unused credits" },
             { title: "Total Consumed Credits", value: "₱150,000", subtitle: "The actual consumed credits" },
         ]
     }
@@ -382,7 +407,6 @@ export default function AdminDashboard() {
 
                                     {selectedTab === 4
                                         ? <>
-                                            <DatePicker />
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
                                                 <StatsCardGroup
                                                     cardGroupTitle={"Dish Combination Claims Status"}
@@ -430,7 +454,65 @@ export default function AdminDashboard() {
                                                 />
                                             </div>
                                         </>
-                                        : <>
+                                        : ""}
+                                    {selectedTab === 5
+                                        ? <>
+                                            <div clasName="w-full">
+                                                <DatePicker />
+                                                {selectedDate
+                                                    ? <>
+                                                        <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                            <StatsCardGroup
+                                                                cardGroupTitle={"Dish Combination Claims Status"}
+                                                                isDualPager={false}
+
+                                                                primaryData={extractedCustomDateData.dishForDay}
+
+                                                                displayDate={false}
+                                                                urgentNotification={0}
+                                                            />
+                                                        </div>
+                                                        <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                            <StatsCardGroup
+                                                                cardGroupTitle={"Claims Count"}
+                                                                isDualPager={false}
+
+                                                                primaryData={extractedCustomDateData.claimsCount}
+
+                                                                displayDate={false}
+                                                                urgentNotification={0}
+                                                            />
+                                                        </div>
+                                                        <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                            <StatsCardGroup
+                                                                cardGroupTitle={"KPI Metrics"}
+                                                                isDualPager={false}
+
+                                                                primaryData={extractedCustomDateData.KPIreports}
+
+                                                                displayDate={false}
+                                                                urgentNotification={0}
+                                                            />
+                                                        </div>
+                                                        <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                            <StatsCardGroup
+                                                                cardGroupTitle={"Consumed Credits"}
+                                                                isDualPager={false}
+
+                                                                primaryData={extractedCustomDateData.consumedCredits}
+
+                                                                displayDate={false}
+                                                                urgentNotification={0}
+                                                            />
+                                                        </div>
+                                                    </>
+                                                    : ""}
+                                            </div>
+                                        </> : ""
+                                    }
+                                    {selectedTab !== 4 && selectedTab !== 5
+                                        ?
+                                        <>
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
                                                 <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
                                                     <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
@@ -475,7 +557,9 @@ export default function AdminDashboard() {
                                                     <BandedChartOCF data={getChartData('OCFdata')} />
                                                 </div>
                                             </div>
-                                        </>}
+                                        </>
+                                        : ""
+                                    }
                                 </div>
                             </AnalyticTabs>
                         </div>

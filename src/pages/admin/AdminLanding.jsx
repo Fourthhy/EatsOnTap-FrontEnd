@@ -1,4 +1,5 @@
 import { Sidebar } from "./components/Sidebar";
+import { DateProvider } from "./components/DatePicker";
 import {    
     LayoutDashboard,
     Ticket,
@@ -18,8 +19,8 @@ export default function AdminLanding() {
     ]
 
     return (
-        <>
+        <DateProvider>
             <Sidebar menuItems={menuItems}/>
-        </>
+        </DateProvider>
     )
 }
