@@ -514,7 +514,7 @@ export default function AdminDashboard() {
                                         ?
                                         <>
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
                                                     <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
@@ -523,7 +523,7 @@ export default function AdminDashboard() {
                                             </div>
 
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
                                                     <CustomStatsCard title={"Unclaim Count"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
@@ -532,7 +532,7 @@ export default function AdminDashboard() {
                                             </div>
 
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
                                                     <CustomStatsCard title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} />
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
@@ -541,7 +541,7 @@ export default function AdminDashboard() {
                                             </div>
 
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
                                                     <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} />
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
@@ -550,7 +550,7 @@ export default function AdminDashboard() {
                                             </div>
 
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
                                                     <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} />
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">

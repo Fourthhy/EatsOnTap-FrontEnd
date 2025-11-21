@@ -50,7 +50,7 @@ function CustomTooltip({ active, payload, label }) {
 
 function CustomLegend({ payload }) {
   return (
-    <div style={{ display: "flex", gap: 20, alignItems: "center", justifyContent: "center", marginTop: 10 }}>
+    <div style={{ display: "flex", gap: 20, alignItems: "center", justifyContent: "end", marginTop: 10, paddingBottom: 10 }}>
       {payload.map((entry) => (
         <div key={entry.value} style={{ display: "flex", alignItems: "center", flexDirection: "row", gap: 6 }}>
           {/* Colored square/box */}

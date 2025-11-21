@@ -7,7 +7,7 @@ export function CustomStatsCard({ title, value, subtitle, isPercentage, isPeso, 
         <>
             <div style={{
                 background: "#fff", borderRadius: 12, boxShadow: "0 1px 10px #e5eaf0",
-                padding: 20, display: "grid", gridColumn: 1, gridRow: 3, flexDirection: "column", width: 'auto', height: "100%"
+                padding: 20, display: "grid", gridColumn: 1, gridRow: 3, flexDirection: "column", width: '100%', height: "100%"
             }}
             >
                 <div className="w-full h-full flex justify-center">

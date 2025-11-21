@@ -53,7 +53,7 @@ export function BandedChartCUR({data}) {
   const geistTickStyle = { fontFamily: 'geist', fontSize: 12, fill: '#666' };
 
   return (
-    <div style={{ padding: '20px', width: '100%', height: '300px', display: "flex", justifyContent: "center", alignItems: "end" }}>
+    <div style={{ padding: '10px', width: '100%', height: '300px', display: "flex", justifyContent: "center", alignItems: "end" }}>
 
       <ResponsiveContainer width="100%" height="98%">
         <ComposedChart
