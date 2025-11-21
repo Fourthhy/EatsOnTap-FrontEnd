@@ -1,15 +1,23 @@
 import { StatsCard } from "./StatsCard";
 import { useState } from "react";
 
-export function StatsCardGroup({ 
-    primaryData = [], 
-    secondaryData = [], 
-    pendingMealRequest = 0,
-    // 1. NEW PROPS with default fallback text
-    successMessage = "Compliance is Excellent. Review Workflow is Highly Efficient",
-    failureMessage = "Eligibility Compliance is Low. High Volume of Rejected Submissions"
+export function StatsCardGroup({
+    cardGroupTitle, //what is the title of the card group 
+    isDualPager, //does it handle primary and secondary pages (enable switching)
+    dualPageTitles, //array, what is the title for viewing primary and secondary pages
+    
+    primaryData = [], //for displaying first page data
+    secondaryData = [], //for displaying first page data
+
+    urgentNotification, //if there is an urgent notification within the card group
+    notificationTitle, //what is the title of that notification (to be displayed in button from)
+
+    successMessage, //what is the message of a good status
+    failureMessage, //what is the message of a bad status
+    footnote, //footnote interpretation or a neutral message
+    displayDate, //boolean, if you want to display a message within that card group
 }) {
-    const [viewRejectedClaims, setViewRejectedClaims] = useState(false);
+    const [viewFirstPage, setViewFirstPage] = useState(false);
 
     function getTodayDate() {
         const today = new Date();
@@ -23,17 +31,17 @@ export function StatsCardGroup({
 
     // Determine the dataset to display based on toggle
     // Reversing to match your original Right-to-Left layout preference
-    const currentData = viewRejectedClaims 
-        ? [...secondaryData].reverse() 
+    const currentData = viewFirstPage
+        ? [...secondaryData].reverse()
         : [...primaryData].reverse();
 
     // Logic to check if the stats are "Good" or "Bad"
     // Based on the first item of the primary data
-    const mainMetric = primaryData[0] || {}; 
-    const { 
-        value: val1, 
-        acceptanceRate: rate1, 
-        expectingPositiveResult: expectPos1 
+    const mainMetric = primaryData[0] || {};
+    const {
+        value: val1,
+        acceptanceRate: rate1,
+        expectingPositiveResult: expectPos1
     } = mainMetric;
 
     const summaryResult =
@@ -57,27 +65,34 @@ export function StatsCardGroup({
             <div style={{ paddingBottom: 5 }} className="w-full h-auto flex justify-between">
                 <div style={{ display: "flex", flexDirection: "column", paddingLeft: 6 }}>
                     <span style={{ fontWeight: "500", fontSize: 14, color: "#000000", fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
-                        Meal Eligibility List Count
+                        {cardGroupTitle}
                     </span>
-                    <span style={{ color: "#353535", fontSize: 12, fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
-                        {dateToday}
-                    </span>
+                    {displayDate
+                        ? <>
+                            <span style={{ color: "#353535", fontSize: 12, fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
+                                {dateToday}
+                            </span>
+                        </>
+                        : ""}
                 </div>
                 <div className="h-full flex items-center">
-                    <button
-                        style={{ marginBottom: 2, marginRight: 5, borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontFamily: "geist", fontSize: 12, boxShadow: "0 2px 6px #e5eaf0" }}
-                        className="hover:cursor-pointer bg-[#FFFFFF] hover:bg-[#E2E2E2]"
-                        onClick={() => { setViewRejectedClaims(!viewRejectedClaims) }}
-                    >
-                        {viewRejectedClaims ? "View Accepted Claims" : "View Rejected Claims"}
-                    </button>
-
-                    {pendingMealRequest !== 0 && (
+                    {isDualPager
+                        ? <>
+                            <button
+                                style={{ marginBottom: 2, marginRight: 5, borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontFamily: "geist", fontSize: 12, boxShadow: "0 2px 6px #e5eaf0" }}
+                                className="hover:cursor-pointer bg-[#FFFFFF] hover:bg-[#E2E2E2]"
+                                onClick={() => { setViewFirstPage(!viewFirstPage) }}
+                            >
+                                {viewFirstPage ? dualPageTitles[0] : dualPageTitles[1]}
+                            </button>
+                        </>
+                        : ""}
+                    {urgentNotification !== 0 && (
                         <button
                             style={{ marginBottom: 2, marginRight: 2, borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontFamily: "geist", fontSize: 12, boxShadow: "0 2px 6px #e5eaf0" }}
                             className="hover:cursor-pointer bg-[#ffe6daff] hover:bg-[#ffd5c1ff]"
                         >
-                            {`Pending Meal Requests (${pendingMealRequest})`}
+                            {notificationTitle + "(" + urgentNotification + ")"}
                         </button>
                     )}
                 </div>
@@ -103,6 +118,9 @@ export function StatsCardGroup({
                 <p style={{ color: "#353535", fontSize: 11, fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
                     {/* 3. Uses the new props based on the calculated result */}
                     {summaryResult ? successMessage : failureMessage}
+                </p>
+                <p style={{ color: "#353535", fontSize: 11, fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
+                    {footnote}
                 </p>
             </div>
         </div>

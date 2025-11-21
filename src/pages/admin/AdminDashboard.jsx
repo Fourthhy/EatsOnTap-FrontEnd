@@ -161,20 +161,31 @@ export default function AdminDashboard() {
     }
 
     const extractedOverallData = {
-        mostMealClaimed: { title: "Most Claimed Meal", value: "Chicken Curry", subtitle: "19238 claims" },
-        leastMealClaimed: { title: "Least Claimed Meal", value: "Miswa", subtitle: "2031 claims" },
-
-        overallClaims: { title: "Overall Claim Count", value: 15000, subtitle: "Combined Free Meal and Food Item Claim" },
-        freeMealClaims: { title: "Overall Free Meal Claim Count", value: 50, inPercentage: true, subtitle: "7500 claims" },
-        foodItemClaims: { title: "Overall Food Item Claim Count", value: 40, inPercentage: true, subtitle: "6000 claims" },
-        totalUnclaims: { title: "Overall Unclaimed Count", value: 10, inPercentage: true, subtitle: "1000 claims" },
-
-        averageTADMC: { title: "Average TADMC", value: 60.00, subtitle: "Overall" },
-        averageCUR: { title: "Average CUR", value: 95.00, subtitle: "Overall" },
-        averageOCF: { title: "Average OCF", value: 10.00, subtitle: "Overall" },
-
-        totalConsumedCredits: { title: "Total Consumed Credits", value: 150000, subtitle: "The actual consumed credits" },
-        totalUnusedCredits: { title: "Total Unused Credits", value: 150000, subtitle: "The actual unused credits" }
+        mostMealClaims: [
+            { title: "Third Most Meal Claimed", value: "Hatdog", subtitle: "28.31% of total | 2,123 claims" },
+            { title: "Second Most Meal Claimed", value: "Adobo", subtitle: "31.01% of total | 2,325 claims" },
+            { title: "Most Claimed Meal", value: "Chicken Curry", subtitle: "33.72% of total | 2,529 claims" },
+        ],
+        leastMealClaims: [
+            { title: "Third Least Claimed Meal", value: "Ampalaya", subtitle: "2.47% of total | 185 claims" },
+            { title: "Second Least Claimed Meal", value: "Monggo", subtitle: "2.90% of total | 217 claims" },
+            { title: "Least Claimed Meal", value: "Miswa", subtitle: "3.30% of total | 247 claims" },
+        ],
+        claimsCount: [
+            { title: "Overall Unclaimed Count", value: 10, inPercentage: true, subtitle: "1000 claims" },
+            { title: "Overall Food Item Claim Count", value: 40, inPercentage: true, subtitle: "6000 claims" },
+            { title: "Overall Free Meal Claim Count", value: 50, inPercentage: true, subtitle: "7500 claims" },
+            { title: "Overall Claim Count", value: 15000, subtitle: "Free Meal + Food Item Claim" },
+        ],
+        KPIreports: [
+            { title: "Average TADMC", value: 60.00, subtitle: "Overall" },
+            { title: "Average CUR", value: 95.00, subtitle: "Overall" },
+            { title: "Average OCF", value: 10.00, subtitle: "Overall" },
+        ],
+        consumedCredits: [
+            { title: "Total Consumed Credits", value: "₱150,000", subtitle: "The actual consumed credits" },
+            { title: "Total Unused Credits", value: "₱150,000", subtitle: "The actual unused credits" }
+        ]
     }
 
     const upcomingEvents = [
@@ -298,7 +309,11 @@ export default function AdminDashboard() {
 
                         <div className="">
                             <StatsCardGroup
-                                pendingMealRequest={0} // Optional, just an example
+                                cardGroupTitle={"Meal Eligibilty List Count"}
+                                urgentNotification={1}
+                                isDualPager={true}
+                                dualPageTitles={["View Accepted Claims", "View Rejected Claims"]}
+                                notificationTitle={"Pending Meal Requests"}
                                 successMessage="Great job! The acceptance rate is above the target."
                                 failureMessage="Warning: Acceptance rate is critically low."
                                 // Formerly items 1, 2, and 5
@@ -366,12 +381,55 @@ export default function AdminDashboard() {
 
                                     {selectedTab === 4
                                         ? <>
-                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                <StatsCardGroup
+                                                    cardGroupTitle={"Dish Claims Status"}
+                                                    isDualPager={true}
+                                                    dualPageTitles={["View Most Claims", "View Least Claims"]}
 
+                                                    primaryData={extractedOverallData.mostMealClaims}
+                                                    secondaryData={extractedOverallData.leastMealClaims}
+
+                                                    displayDate={false}
+                                                    urgentNotification={0}
+                                                />
+                                            </div>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                <StatsCardGroup
+                                                    cardGroupTitle={"Claims Count"}
+                                                    isDualPager={false}
+
+                                                    primaryData={extractedOverallData.claimsCount}
+
+                                                    displayDate={false}
+                                                    urgentNotification={0}
+                                                />
+                                            </div>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                <StatsCardGroup
+                                                    cardGroupTitle={"KPI Metrics"}
+                                                    isDualPager={false}
+
+                                                    primaryData={extractedOverallData.KPIreports}
+
+                                                    displayDate={false}
+                                                    urgentNotification={0}
+                                                />
+                                            </div>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                <StatsCardGroup
+                                                    cardGroupTitle={"Consumed Credits"}
+                                                    isDualPager={false}
+
+                                                    primaryData={extractedOverallData.consumedCredits}
+
+                                                    displayDate={false}
+                                                    urgentNotification={0}
+                                                />
                                             </div>
                                         </>
                                         : <>
-                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
                                                 <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
                                                     <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
                                                 </div>
