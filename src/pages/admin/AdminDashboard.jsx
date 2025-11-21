@@ -10,6 +10,7 @@ import { QuickActions } from "./components/QuickActions";
 import { EventsPanel } from "./components/EventsPanel";
 import { AnalyticTabs } from "./components/AnalyticTabs";
 import { MealAllowanceCard } from "./components/MealAllowanceCard";
+import { DatePicker } from "./components/DatePicker"
 import { useOutletContext } from 'react-router-dom';
 import { Menu } from "lucide-react"
 import { RiNotification2Fill } from "react-icons/ri";
@@ -162,14 +163,14 @@ export default function AdminDashboard() {
 
     const extractedOverallData = {
         mostMealClaims: [
-            { title: "Third Most Meal Claimed", value: "Hatdog", subtitle: "28.31% of total | 2,123 claims" },
-            { title: "Second Most Meal Claimed", value: "Adobo", subtitle: "31.01% of total | 2,325 claims" },
-            { title: "Most Claimed Meal", value: "Chicken Curry", subtitle: "33.72% of total | 2,529 claims" },
+            { title: "Third Most Meal Combination", value: "Hatdog / Longganisa", subtitle: "28.31% of total | 2,123 claims" },
+            { title: "Second Most Meal Combination", value: "Adobo / Menudo", subtitle: "31.01% of total | 2,325 claims" },
+            { title: "Most Claimed Combination", value: "Chicken Curry / Burger Steak", subtitle: "33.72% of total | 2,529 claims" },
         ],
         leastMealClaims: [
-            { title: "Third Least Claimed Meal", value: "Ampalaya", subtitle: "2.47% of total | 185 claims" },
-            { title: "Second Least Claimed Meal", value: "Monggo", subtitle: "2.90% of total | 217 claims" },
-            { title: "Least Claimed Meal", value: "Miswa", subtitle: "3.30% of total | 247 claims" },
+            { title: "Third Least Claimed Combination", value: "Miswa / Sotanghon", subtitle: "3.30% of total | 247 claims" },
+            { title: "Second Least Claimed Combination", value: "Monggo / Fried Fish", subtitle: "2.90% of total | 217 claims" },
+            { title: "Least Claimed Combination", value: "Ampalaya / Itlog", subtitle: "2.47% of total | 185 claims" },
         ],
         claimsCount: [
             { title: "Overall Unclaimed Count", value: 10, inPercentage: true, subtitle: "1000 claims" },
@@ -178,13 +179,13 @@ export default function AdminDashboard() {
             { title: "Overall Claim Count", value: 15000, subtitle: "Free Meal + Food Item Claim" },
         ],
         KPIreports: [
+            { title: "Average OCF", value: 10.00, isPercentage: true, subtitle: "Overall" },
+            { title: "Average CUR", value: 95.00, isPercentage: true, subtitle: "Overall" },
             { title: "Average TADMC", value: 60.00, subtitle: "Overall" },
-            { title: "Average CUR", value: 95.00, subtitle: "Overall" },
-            { title: "Average OCF", value: 10.00, subtitle: "Overall" },
         ],
         consumedCredits: [
+            { title: "Total Unused Credits", value: "₱2,340", subtitle: "The actual unused credits" },  
             { title: "Total Consumed Credits", value: "₱150,000", subtitle: "The actual consumed credits" },
-            { title: "Total Unused Credits", value: "₱150,000", subtitle: "The actual unused credits" }
         ]
     }
 
@@ -381,9 +382,10 @@ export default function AdminDashboard() {
 
                                     {selectedTab === 4
                                         ? <>
+                                            <DatePicker />
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
                                                 <StatsCardGroup
-                                                    cardGroupTitle={"Dish Claims Status"}
+                                                    cardGroupTitle={"Dish Combination Claims Status"}
                                                     isDualPager={true}
                                                     dualPageTitles={["View Most Claims", "View Least Claims"]}
 
@@ -474,9 +476,6 @@ export default function AdminDashboard() {
                                                 </div>
                                             </div>
                                         </>}
-
-
-
                                 </div>
                             </AnalyticTabs>
                         </div>

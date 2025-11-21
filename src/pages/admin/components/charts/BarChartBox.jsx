@@ -85,6 +85,7 @@ function CustomTooltip({ active, payload, label }) {
           alignItems: "center",
           gap: 28,
           marginTop: 5,
+          paddingBottom: 10 
         }}
         className="my-2"
       >

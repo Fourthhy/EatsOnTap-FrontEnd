@@ -143,7 +143,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                         }}
                         onClick={() => onTabChange(5)}
                     >
-                        Select a date
+                        Specific Date
                     </button>
                     <div className="w-3 bg-[#9da7e380]">
                         <div
