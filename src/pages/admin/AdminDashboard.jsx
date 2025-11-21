@@ -1,13 +1,9 @@
-import { logout } from "../../functions/logoutAuth"
-import { Button } from "../../components/ui/button"
-import { useNavigate } from "react-router-dom"
-import { StatsCard } from "./components/StatsCard"
+import { useState } from "react"
 import { BandedChartTADMC } from "./components/charts/BandedChartTADMC"
 import { BandedChartCUR } from "./components/charts/BandedChartCUR"
 import { BandedChartOCF } from "./components/charts/BandedChartOCF"
 import { CustomStatsCard } from "./components/CustomStatsCard"
 import { StatsCardGroup } from "./components/StatsCardGroup"
-import { PieChartBox } from "./components/charts/PieChartBox";
 import { BarChartBox } from "./components/charts/BarChartBox";
 import { LineChartBox } from "./components/charts/LineChartBox";
 import { QuickActions } from "./components/QuickActions";
@@ -20,127 +16,134 @@ import { RiNotification2Fill } from "react-icons/ri";
 
 
 // Example logo API usage
-const SCHOOL_LOGO = "https://logo.clearbit.com/up.edu.ph";
 const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
 
-export default function AdminDashboard({ data }) {
+export default function AdminDashboard() {
+    const [selectedTab, setSelectedTab] = useState(1);
+
+    const extractedData = {
+        today: [
+            {
+                barChartData: [
+                    { dayOfWeek: "Tuesday", dish1: "Burger Steak", dish2: "", Claimed: 420, Unclaimed: 1503 },
+                    { dayOfWeek: "Wednesday", dish1: "Menudo", dish2: "Adobo", Claimed: 100, Unclaimed: 2175 },
+                    { dayOfWeek: "Thursday", dish1: "Fried Chicken", dish2: "Ampalaya", Claimed: 200, Unclaimed: 1863 },
+                    { dayOfWeek: "Friday", dish1: "Tortang Talong", dish2: "Ampalaya", Claimed: 632, Unclaimed: 1698 },
+                    { dayOfWeek: "Saturday", dish1: "Hotdog", dish2: "Egg", Claimed: 0, Unclaimed: 423 },
+                ]
+            },
+            {
+                trendsData: [
+                    { dataSpan: "Jan", "Pre-packed Food": 200, "Customized Order": 200, "Unused vouchers": 300 },
+                    { dataSpan: "Feb", "Pre-packed Food": 1300, "Customized Order": 300, "Unused vouchers": 100 },
+                    { dataSpan: "Mar", "Pre-packed Food": 1200, "Customized Order": 100, "Unused vouchers": 500 },
+                    { dataSpan: "Apr", "Pre-packed Food": 900, "Customized Order": 50, "Unused vouchers": 50 },
+                ]
+            },
+            {
+                TADMCdata: [
+                    { Day: 'Mon 1', AcceptableRange: [58, 62], TADMC: 60.50 },
+                    { Day: 'Tue 2', AcceptableRange: [58, 62], TADMC: 61.25 },
+                    { Day: 'Wed 3', AcceptableRange: [58, 62], TADMC: 59.80 },
+                    { Day: 'Thu 4', AcceptableRange: [58, 62], TADMC: 57.90 },
+                    { Day: 'Fri 5', AcceptableRange: [58, 62], TADMC: 63.50 },
+                    { Day: 'Sat 6', AcceptableRange: [58, 62], TADMC: 61.90 },
+                    { Day: 'Mon 8', AcceptableRange: [58, 62], TADMC: 61.00 },
+                ]
+            },
+            {
+                CURdata: [
+                    { Day: 'Mon 1', AcceptableRange: [90, 100], TADMC: 92.50 },
+                    { Day: 'Tue 2', AcceptableRange: [90, 100], TADMC: 98.25 },
+                    { Day: 'Wed 3', AcceptableRange: [90, 100], TADMC: 94.80 },
+                    { Day: 'Thu 4', AcceptableRange: [90, 100], TADMC: 89.90 },
+                    { Day: 'Fri 5', AcceptableRange: [90, 100], TADMC: 101.50 },
+                    { Day: 'Sat 6', AcceptableRange: [90, 100], TADMC: 96.90 },
+                    { Day: 'Mon 8', AcceptableRange: [90, 100], TADMC: 95.00 },
+                ]
+            },
+            {
+                OCFdata: [
+                    { Day: 'Mon 1', AcceptableRange: [0, 15], TADMC: 5.50 },
+                    { Day: 'Tue 2', AcceptableRange: [0, 15], TADMC: 12.25 },
+                    { Day: 'Wed 3', AcceptableRange: [0, 15], TADMC: 8.80 },
+                    { Day: 'Thu 4', AcceptableRange: [0, 15], TADMC: 1.90 },
+                    { Day: 'Fri 5', AcceptableRange: [0, 15], TADMC: 16.50 },
+                    { Day: 'Sat 6', AcceptableRange: [0, 15], TADMC: 10.90 },
+                    { Day: 'Mon 8', AcceptableRange: [0, 15], TADMC: 7.00 },
+                ]
+            }
+        ],
+        weekly: [
+            {
+                barChartData: [
+                    { dayOfWeek: "Week 1", dish1: "Burger Steak", dish2: "Adobo", Claimed: 2000, Unclaimed: 500 },
+                    { dayOfWeek: "Week 2", dish1: "Menudo", dish2: "Fried Chicken", Claimed: 1500, Unclaimed: 700 },
+                    { dayOfWeek: "Week 3", dish1: "Pork Sinigang", dish2: "Caldereta", Claimed: 2200, Unclaimed: 300 },
+                    { dayOfWeek: "Week 4", dish1: "Tilapia", dish2: "Pinakbet", Claimed: 1800, Unclaimed: 600 },
+                ]
+            },
+            {
+                trendsData: [
+                    { dataSpan: "Week 1", "Pre-packed Food": 500, "Customized Order": 100, "Unused vouchers": 50 },
+                    { dataSpan: "Week 2", "Pre-packed Food": 700, "Customized Order": 150, "Unused vouchers": 70 },
+                    { dataSpan: "Week 3", "Pre-packed Food": 600, "Customized Order": 120, "Unused vouchers": 60 },
+                    { dataSpan: "Week 4", "Pre-packed Food": 800, "Customized Order": 180, "Unused vouchers": 80 },
+                ]
+            },
+            {
+                TADMCdata: [
+                    { Day: 'Week 1', AcceptableRange: [58, 62], TADMC: 59.00 },
+                    { Day: 'Week 2', AcceptableRange: [58, 62], TADMC: 60.00 },
+                    { Day: 'Week 3', AcceptableRange: [58, 62], TADMC: 61.50 },
+                    { Day: 'Week 4', AcceptableRange: [58, 62], TADMC: 58.50 },
+                ]
+            },
+            {
+                CURdata: [
+                    { Day: 'Week 1', AcceptableRange: [90, 100], TADMC: 95.00 },
+                    { Day: 'Week 2', AcceptableRange: [90, 100], TADMC: 97.00 },
+                    { Day: 'Week 3', AcceptableRange: [90, 100], TADMC: 93.00 },
+                    { Day: 'Week 4', AcceptableRange: [90, 100], TADMC: 98.00 },
+                ]
+            },
+            {
+                OCFdata: [
+                    { Day: 'Week 1', AcceptableRange: [0, 15], TADMC: 10.00 },
+                    { Day: 'Week 2', AcceptableRange: [0, 15], TADMC: 8.00 },
+                    { Day: 'Week 3', AcceptableRange: [0, 15], TADMC: 12.00 },
+                    { Day: 'Week 4', AcceptableRange: [0, 15], TADMC: 6.00 },
+                ]
+            }
+        ]
+    }
+
+    const getTimeframeKey = (id) => {
+        switch (id) {
+            case 1: return 'today';
+            case 2: return 'weekly';
+            case 3: return 'monthly';
+            case 4: return 'overall';
+            default: return 'today';
+        }
+    };
+
+    const getChartData = (dataKey) => {
+        const timeKey = getTimeframeKey(selectedTab); // e.g., "today"
+        const timeDataArray = extractedData[timeKey]; // The array of objects
+
+        if (!timeDataArray) return []; // Safety check
+
+        // Find the object in the array that contains the key we want (e.g. "TADMCdata")
+        const foundItem = timeDataArray.find(item => item[dataKey]);
+
+        return foundItem ? foundItem[dataKey] : [];
+    };
 
 
-    const navigate = useNavigate();
 
     const context = useOutletContext() || {};
     const handleToggleSidebar = context.handleToggleSidebar || (() => { });
-
-    const handleLogout = () => {
-        logout();
-        navigate('/'); // redirect to login/home
-    };
-
-    const pieChartData = [
-        { property: "Claimed", value: 575 },
-        { property: "Unclaimed", value: 788 },
-        { property: "Waived", value: 92 }
-    ]
-
-    const barChartData = [
-        { dayOfWeek: "Tuesday", dish1: "Burger Steak", dish2: "", Claimed: 420, Unclaimed: 1503 },
-        { dayOfWeek: "Wednesday", dish1: "Menudo", dish2: "Adobo", Claimed: 100, Unclaimed: 2175 },
-        { dayOfWeek: "Thursday", dish1: "Fried Chicken", dish2: "Ampalaya", Claimed: 200, Unclaimed: 1863 },
-        { dayOfWeek: "Friday", dish1: "Tortang Talong", dish2: "Ampalaya", Claimed: 632, Unclaimed: 1698 },
-        { dayOfWeek: "Saturday", dish1: "Hotdog", dish2: "Egg", Claimed: 0, Unclaimed: 423 },
-    ]
-
-    const trendsData = [
-        { dataSpan: "Jan", "Pre-packed Food": 200, "Customized Order": 200, "Unused vouchers": 300 },
-        { dataSpan: "Feb", "Pre-packed Food": 1300, "Customized Order": 300, "Unused vouchers": 100 },
-        { dataSpan: "Mar", "Pre-packed Food": 1200, "Customized Order": 100, "Unused vouchers": 500 },
-        { dataSpan: "Apr", "Pre-packed Food": 900, "Customized Order": 50, "Unused vouchers": 50 },
-    ]
-
-    const upcomingEvents = [
-        { link: "#", title: "Teachers' Day", date: "Oct 5, 2025" },
-        { link: "#", title: "President' Day", date: "Nov 25, 2025" },
-        { link: "#", title: "College Intramurals", date: "Dec 15, 2025" }
-    ]
-
-    const recentClaims = [
-        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
-        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
-        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
-        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
-        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
-        { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
-    ]
-
-    const TADMCdata = [
-        { Day: 'Mon 1', AcceptableRange: [58, 62], TADMC: 60.50 },
-        { Day: 'Tue 2', AcceptableRange: [58, 62], TADMC: 61.25 },
-        { Day: 'Wed 3', AcceptableRange: [58, 62], TADMC: 59.80 },
-        { Day: 'Thu 4', AcceptableRange: [58, 62], TADMC: 57.90 },
-        { Day: 'Fri 5', AcceptableRange: [58, 62], TADMC: 63.50 },
-        { Day: 'Sat 6', AcceptableRange: [58, 62], TADMC: 61.90 },
-        { Day: 'Mon 8', AcceptableRange: [58, 62], TADMC: 61.00 },
-    ];
-
-    const CURdata = [
-      { Day: 'Mon 1', AcceptableRange: [90, 100], TADMC: 92.50 },
-      { Day: 'Tue 2', AcceptableRange: [90, 100], TADMC: 98.25 },
-      { Day: 'Wed 3', AcceptableRange: [90, 100], TADMC: 94.80 },
-      { Day: 'Thu 4', AcceptableRange: [90, 100], TADMC: 89.90 },
-      { Day: 'Fri 5', AcceptableRange: [90, 100], TADMC: 101.50 },
-      { Day: 'Sat 6', AcceptableRange: [90, 100], TADMC: 96.90 },
-      { Day: 'Mon 8', AcceptableRange: [90, 100], TADMC: 95.00 },
-    ];
-    
-    const OCFdata = [
-      { Day: 'Mon 1', AcceptableRange: [0, 15], TADMC: 5.50 },
-      { Day: 'Tue 2', AcceptableRange: [0, 15], TADMC: 12.25 },
-      { Day: 'Wed 3', AcceptableRange: [0, 15], TADMC: 8.80 },
-      { Day: 'Thu 4', AcceptableRange: [0, 15], TADMC: 1.90 },
-      { Day: 'Fri 5', AcceptableRange: [0, 15], TADMC: 16.50 },
-      { Day: 'Sat 6', AcceptableRange: [0, 15], TADMC: 10.90 },
-      { Day: 'Mon 8', AcceptableRange: [0, 15], TADMC: 7.00 },
-    ];
-
-    const programStatus = [
-        {
-            program: "Preschool",
-            claimed: 12,
-            unclaimed: 11,
-            waived: 0
-        },
-        {
-            program: "Primary Education",
-            claimed: 34,
-            unclaimed: 104,
-            waived: 4
-        },
-        {
-            program: "Intermediate",
-            claimed: 52,
-            unclaimed: 113,
-            waived: 12
-        },
-        {
-            program: "Junior High School",
-            claimed: 112,
-            unclaimed: 161,
-            waived: 23
-        },
-        {
-            program: "Senior High School",
-            claimed: 124,
-            unclaimed: 247,
-            waived: 37
-        },
-        {
-            program: "Higher Education",
-            claimed: 241,
-            unclaimed: 152,
-            waived: 16
-        }
-    ];
-
 
     return (
         <>
@@ -270,15 +273,16 @@ export default function AdminDashboard({ data }) {
                         className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
                         <div className="w-full h-auto flex flex-col gap-4">
 
-                            <AnalyticTabs>
+                            <AnalyticTabs selectedTab={selectedTab} setSelectedTab={setSelectedTab}>
                                 <div className="w-[100%] flex flex-col items-center h-[100%] bg-[#FFFFFF]">
 
                                     <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
                                         <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
                                             <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
+                                            {selectedTab}
                                         </div>
                                         <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <BarChartBox data={barChartData} />
+                                            <BarChartBox data={getChartData('barChartData')} />
                                         </div>
                                     </div>
 
@@ -287,7 +291,7 @@ export default function AdminDashboard({ data }) {
                                             <CustomStatsCard title={"Unclaim Count"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
                                         </div>
                                         <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <LineChartBox data={trendsData} />
+                                            <LineChartBox data={getChartData('trendsData')} />
                                         </div>
                                     </div>
 
@@ -296,7 +300,7 @@ export default function AdminDashboard({ data }) {
                                             <CustomStatsCard title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} />
                                         </div>
                                         <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <BandedChartTADMC data={TADMCdata} />
+                                            <BandedChartTADMC data={getChartData('TADMCdata')} />
                                         </div>
                                     </div>
 
@@ -305,7 +309,7 @@ export default function AdminDashboard({ data }) {
                                             <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} />
                                         </div>
                                         <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <BandedChartCUR data={CURdata} />
+                                            <BandedChartCUR data={getChartData('CURdata')} />
                                         </div>
                                     </div>
 
@@ -314,11 +318,9 @@ export default function AdminDashboard({ data }) {
                                             <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} />
                                         </div>
                                         <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <BandedChartOCF data={OCFdata} />
+                                            <BandedChartOCF data={getChartData('OCFdata')} />
                                         </div>
                                     </div>
-
-
 
                                 </div>
                             </AnalyticTabs>
@@ -327,9 +329,9 @@ export default function AdminDashboard({ data }) {
 
                         <div className="h-auto flex flex-col gap-4">
 
-                            <div>
+                            {/* <div>
                                 <EventsPanel events={upcomingEvents} />
-                            </div>
+                            </div> */}
                             <div>
                                 <MealAllowanceCard />
                             </div>
