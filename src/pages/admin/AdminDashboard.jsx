@@ -72,6 +72,16 @@ export default function AdminDashboard({ data }) {
         { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
     ]
 
+    const TADMCdata = [
+        { Day: 'Mon 1', AcceptableRange: [58, 62], TADMC: 60.50 },
+        { Day: 'Tue 2', AcceptableRange: [58, 62], TADMC: 61.25 },
+        { Day: 'Wed 3', AcceptableRange: [58, 62], TADMC: 59.80 },
+        { Day: 'Thu 4', AcceptableRange: [58, 62], TADMC: 57.90 },
+        { Day: 'Fri 5', AcceptableRange: [58, 62], TADMC: 63.50 },
+        { Day: 'Sat 6', AcceptableRange: [58, 62], TADMC: 61.90 },
+        { Day: 'Mon 8', AcceptableRange: [58, 62], TADMC: 61.00 },
+    ]
+
     const programStatus = [
         {
             program: "Preschool",
@@ -266,7 +276,7 @@ export default function AdminDashboard({ data }) {
                                             <CustomStatsCard title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} />
                                         </div>
                                         <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <BandedChartTADMC />
+                                            <BandedChartTADMC data={TADMCdata} />
                                         </div>
                                     </div>
 
