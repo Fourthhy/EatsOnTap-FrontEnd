@@ -158,7 +158,23 @@ export default function AdminDashboard() {
                 ]
             }
         ],
-        
+    }
+
+    const extractedOverallData = {
+        mostMealClaimed: { title: "Most Claimed Meal", value: "Chicken Curry", subtitle: "19238 claims" },
+        leastMealClaimed: { title: "Least Claimed Meal", value: "Miswa", subtitle: "2031 claims" },
+
+        overallClaims: { title: "Overall Claim Count", value: 15000, subtitle: "Combined Free Meal and Food Item Claim" },
+        freeMealClaims: { title: "Overall Free Meal Claim Count", value: 50, inPercentage: true, subtitle: "7500 claims" },
+        foodItemClaims: { title: "Overall Food Item Claim Count", value: 40, inPercentage: true, subtitle: "6000 claims" },
+        totalUnclaims: { title: "Overall Unclaimed Count", value: 10, inPercentage: true, subtitle: "1000 claims" },
+
+        averageTADMC: { title: "Average TADMC", value: 60.00, subtitle: "Overall" },
+        averageCUR: { title: "Average CUR", value: 95.00, subtitle: "Overall" },
+        averageOCF: { title: "Average OCF", value: 10.00, subtitle: "Overall" },
+
+        totalConsumedCredits: { title: "Total Consumed Credits", value: 150000, subtitle: "The actual consumed credits" },
+        totalUnusedCredits: { title: "Total Unused Credits", value: 150000, subtitle: "The actual unused credits" }
     }
 
     const upcomingEvents = [
@@ -282,30 +298,52 @@ export default function AdminDashboard() {
 
                         <div className="">
                             <StatsCardGroup
-                                title1={"Accepted Request Rate"}
-                                title2={"Accepted Request Count"}
-                                title5={"Total Eligible Students"}
-                                subtitle1={"Overall"}
-                                subtitle2={"Today"}
-                                subtitle5={"Today"}
-                                value1={100}
-                                value2={34}
-                                value5={1500}
-                                acceptanceRate1={95}
-                                expectingPostiveResult1={true}
-                                isPercentage={true}
+                                pendingMealRequest={0} // Optional, just an example
+                                successMessage="Great job! The acceptance rate is above the target."
+                                failureMessage="Warning: Acceptance rate is critically low."
+                                // Formerly items 1, 2, and 5
+                                primaryData={[
+                                    {
+                                        title: "Accepted Request Rate",
+                                        value: 100,
+                                        subtitle: "Overall",
+                                        acceptanceRate: 95,
+                                        expectingPositiveResult: true,
+                                        isPercentage: true
+                                    },
+                                    {
+                                        title: "Accepted Request Count",
+                                        value: 34,
+                                        subtitle: "Today"
+                                    },
+                                    {
+                                        title: "Total Eligible Students",
+                                        value: 1500,
+                                        subtitle: "Today"
+                                    }
+                                ]}
 
-                                title3={"Rejected Request Rate"}
-                                title4={"Rejected Request Count"}
-                                title6={"Total Waived Students"}
-                                subtitle3={"Overall"}
-                                subtitle4={"Today"}
-                                subtitle6={"Today"}
-                                value3={0}
-                                value4={0}
-                                value6={0}
-                                acceptanceRate2={5}
-                                expectingPostiveResult2={false}
+                                // Formerly items 3, 4, and 6
+                                secondaryData={[
+                                    {
+                                        title: "Rejected Request Rate",
+                                        value: 0,
+                                        subtitle: "Overall",
+                                        acceptanceRate: 5,
+                                        expectingPositiveResult: false, // Low rejection is good
+                                        isPercentage: true
+                                    },
+                                    {
+                                        title: "Rejected Request Count",
+                                        value: 0,
+                                        subtitle: "Today"
+                                    },
+                                    {
+                                        title: "Total Waived Students",
+                                        value: 0,
+                                        subtitle: "Today"
+                                    }
+                                ]}
                             />
                         </div>
                         <div className="">
@@ -326,50 +364,60 @@ export default function AdminDashboard() {
                             <AnalyticTabs selectedTab={selectedTab} onTabChange={setSelectedTab}>
                                 <div className="w-[100%] flex flex-col items-center h-[100%] bg-[#FFFFFF]">
 
-                                    <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                        <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
-                                            <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
-                                        </div>
-                                        <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <BarChartBox data={getChartData('barChartData')} />
-                                        </div>
-                                    </div>
+                                    {selectedTab === 4
+                                        ? <>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
 
-                                    <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                        <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
-                                            <CustomStatsCard title={"Unclaim Count"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
-                                        </div>
-                                        <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <LineChartBox data={getChartData('trendsData')} />
-                                        </div>
-                                    </div>
+                                            </div>
+                                        </>
+                                        : <>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
+                                                    <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
+                                                </div>
+                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                    <BarChartBox data={getChartData('barChartData')} />
+                                                </div>
+                                            </div>
 
-                                    <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                        <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20 }}>
-                                            <CustomStatsCard title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} />
-                                        </div>
-                                        <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <BandedChartTADMC data={getChartData('TADMCdata')} />
-                                        </div>
-                                    </div>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
+                                                    <CustomStatsCard title={"Unclaim Count"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
+                                                </div>
+                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                    <LineChartBox data={getChartData('trendsData')} />
+                                                </div>
+                                            </div>
 
-                                    <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                        <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
-                                            <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} />
-                                        </div>
-                                        <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <BandedChartCUR data={getChartData('CURdata')} />
-                                        </div>
-                                    </div>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20 }}>
+                                                    <CustomStatsCard title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} />
+                                                </div>
+                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                    <BandedChartTADMC data={getChartData('TADMCdata')} />
+                                                </div>
+                                            </div>
 
-                                    <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                        <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
-                                            <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} />
-                                        </div>
-                                        <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                            <BandedChartOCF data={getChartData('OCFdata')} />
-                                        </div>
-                                    </div>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
+                                                    <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} />
+                                                </div>
+                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                    <BandedChartCUR data={getChartData('CURdata')} />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 40, paddingBottom: 40, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
+                                                    <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} />
+                                                </div>
+                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                    <BandedChartOCF data={getChartData('OCFdata')} />
+                                                </div>
+                                            </div>
+                                        </>}
+
+
 
                                 </div>
                             </AnalyticTabs>
