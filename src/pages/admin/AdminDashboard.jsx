@@ -514,17 +514,17 @@ export default function AdminDashboard() {
                                         ?
                                         <>
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
-                                                    <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
+                                                    <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} hoverText="The count of how many claims are made for this day" />
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
                                                     <BarChartBox data={getChartData('barChartData')} />
                                                 </div>
                                             </div>
 
-                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20, paddingRight: 10, paddingLeft: 10 }}>
-                                                    <CustomStatsCard title={"Unclaim Count"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} />
+                                            <div className="flex h-[270px] w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20}}>
+                                                    <CustomStatsCard title={"Unclaim Count"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} hoverText="The count of how many claims are not claimed for this day" />
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
                                                     <LineChartBox data={getChartData('trendsData')} />
@@ -533,7 +533,8 @@ export default function AdminDashboard() {
 
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
                                                 <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
-                                                    <CustomStatsCard title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} />
+                                                    <CustomStatsCard 
+                                                        title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} hoverText="Measures how much money is actually spent on a meal when a student makes a claim." hoverValueText={"The ideal target range should be close to the currently assigned credit value (₱60)"} />
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
                                                     <BandedChartTADMC data={getChartData('TADMCdata')} />
@@ -542,7 +543,7 @@ export default function AdminDashboard() {
 
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
                                                 <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
-                                                    <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} />
+                                                    <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} hoverText={"The percentage of the total allocated credit budget that is actually consumed by the students before the unused amount is automatically removed."} hoverValueText={"A rate below 90% implies significant budget waste"}/>
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
                                                     <BandedChartCUR data={getChartData('CURdata')} />
@@ -551,7 +552,7 @@ export default function AdminDashboard() {
 
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
                                                 <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
-                                                    <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} />
+                                                    <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} hoverText={"The frequency at which students’ total food item cost exceed the assigned credit value"} hoverValueText={"An OCF above 15% means too many students are frequently forced to pay out-of-pocket, which diminishes the value and intent of the scholarship/subsidy"}/>
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
                                                     <BandedChartOCF data={getChartData('OCFdata')} />
