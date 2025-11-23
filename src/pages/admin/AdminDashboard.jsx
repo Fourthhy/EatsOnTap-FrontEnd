@@ -26,6 +26,19 @@ export default function AdminDashboard() {
     const [selectedTab, setSelectedTab] = useState(1);
     const { selectedDate } = useDate();
 
+    const extractedMealRequestData = {
+        acceptedRequests: [
+            { title: "Accepted Request Rate", value: 100, subtitle: "Overall", acceptanceRate: 95, expectingPositiveResult: true, isPercentage: true },
+            { title: "Accepted Request Count", value: 34, subtitle: "Today" },
+            { title: "Total Eligible Students", value: 1500, subtitle: "Today" }
+        ],
+        rejectedRequests: [
+            { title: "Rejected Request Rate", value: 0, subtitle: "Overall", acceptanceRate: 5, expectingPositiveResult: false, isPercentage: true },
+            { title: "Rejected Request Count", value: 0, subtitle: "Today" },
+            { title: "Total Waived Students", value: 0, subtitle: "Today" }
+        ]
+    }
+
     const extractedData = {
         today: [
             {
@@ -328,69 +341,7 @@ export default function AdminDashboard() {
                 {/* CONTENT */}
                 <div className="h-full w-full">
 
-                    <div className="grid grid-cols-[20%_48%_28.5%] gap-4" style={{ margin: 15 }}>
-                        <div className="h-full">
-                            <CustomStatsCard title={"Daily Virtual Credit Used"} value={"P60,000"} subtitle={"vs P65,000 allotted"} />
-                        </div>
 
-                        <div className="">
-                            <StatsCardGroup
-                                cardGroupTitle={"Meal Eligibilty List Count"}
-                                urgentNotification={1}
-                                isDualPager={true}
-                                dualPageTitles={["View Accepted Claims", "View Rejected Claims"]}
-                                notificationTitle={"Pending Meal Requests"}
-                                successMessage="Great job! The acceptance rate is above the target."
-                                failureMessage="Warning: Acceptance rate is critically low."
-                                // Formerly items 1, 2, and 5
-                                primaryData={[
-                                    {
-                                        title: "Accepted Request Rate",
-                                        value: 100,
-                                        subtitle: "Overall",
-                                        acceptanceRate: 95,
-                                        expectingPositiveResult: true,
-                                        isPercentage: true
-                                    },
-                                    {
-                                        title: "Accepted Request Count",
-                                        value: 34,
-                                        subtitle: "Today"
-                                    },
-                                    {
-                                        title: "Total Eligible Students",
-                                        value: 1500,
-                                        subtitle: "Today"
-                                    }
-                                ]}
-
-                                // Formerly items 3, 4, and 6
-                                secondaryData={[
-                                    {
-                                        title: "Rejected Request Rate",
-                                        value: 0,
-                                        subtitle: "Overall",
-                                        acceptanceRate: 5,
-                                        expectingPositiveResult: false, // Low rejection is good
-                                        isPercentage: true
-                                    },
-                                    {
-                                        title: "Rejected Request Count",
-                                        value: 0,
-                                        subtitle: "Today"
-                                    },
-                                    {
-                                        title: "Total Waived Students",
-                                        value: 0,
-                                        subtitle: "Today"
-                                    }
-                                ]}
-                            />
-                        </div>
-                        <div className="">
-                            <QuickActions />
-                        </div>
-                    </div>
                     <div
                         style={{
                             borderRadius: '10px',
@@ -401,6 +352,26 @@ export default function AdminDashboard() {
                         }}
                         className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
                         <div className="w-full h-auto flex flex-col gap-4">
+                            <div className="grid grid-cols-6 gap-4">
+                                <div className="h-full col-span-2">
+                                    <CustomStatsCard title={"Daily Virtual Credit Used"} value={"P60,000"} subtitle={"vs P65,000 allotted"} />
+                                </div>
+
+                                <div className="col-span-4">
+                                    <StatsCardGroup
+                                        cardGroupTitle={"Meal Eligibilty List Count"}
+                                        urgentNotification={1}
+                                        isDualPager={true}
+                                        dualPageTitles={["View Accepted Claims", "View Rejected Claims"]}
+                                        notificationTitle={"Pending Meal Requests"}
+                                        successMessage="Great job! The acceptance rate is above the target."
+                                        failureMessage="Warning: Acceptance rate is critically low."
+                                        primaryData={extractedMealRequestData.acceptedRequests}
+                                        secondaryData={extractedMealRequestData.rejectedRequests}
+                                    />
+                                </div>
+
+                            </div>
 
                             <AnalyticTabs selectedTab={selectedTab} onTabChange={setSelectedTab}>
                                 <div className="w-[100%] flex flex-col items-center h-[100%] bg-[#FFFFFF]">
@@ -523,7 +494,7 @@ export default function AdminDashboard() {
                                             </div>
 
                                             <div className="flex h-[270px] w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20}}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
                                                     <CustomStatsCard title={"Unclaim Count"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} hoverText="The count of how many claims are not claimed for this day" />
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
@@ -533,7 +504,7 @@ export default function AdminDashboard() {
 
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
                                                 <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
-                                                    <CustomStatsCard 
+                                                    <CustomStatsCard
                                                         title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} hoverText="Measures how much money is actually spent on a meal when a student makes a claim." hoverValueText={"The ideal target range should be close to the currently assigned credit value (₱60)"} />
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
@@ -543,7 +514,7 @@ export default function AdminDashboard() {
 
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
                                                 <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
-                                                    <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} hoverText={"The percentage of the total allocated credit budget that is actually consumed by the students before the unused amount is automatically removed."} hoverValueText={"A rate below 90% implies significant budget waste"}/>
+                                                    <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} hoverText={"The percentage of the total allocated credit budget that is actually consumed by the students before the unused amount is automatically removed."} hoverValueText={"A rate below 90% implies significant budget waste"} />
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
                                                     <BandedChartCUR data={getChartData('CURdata')} />
@@ -552,7 +523,7 @@ export default function AdminDashboard() {
 
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
                                                 <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
-                                                    <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} hoverText={"The frequency at which students’ total food item cost exceed the assigned credit value"} hoverValueText={"An OCF above 15% means too many students are frequently forced to pay out-of-pocket, which diminishes the value and intent of the scholarship/subsidy"}/>
+                                                    <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} hoverText={"The frequency at which students’ total food item cost exceed the assigned credit value"} hoverValueText={"An OCF above 15% means too many students are frequently forced to pay out-of-pocket, which diminishes the value and intent of the scholarship/subsidy"} />
                                                 </div>
                                                 <div className="h-[100%] w-[75%] flex justify-end items-center">
                                                     <BandedChartOCF data={getChartData('OCFdata')} />
@@ -567,6 +538,9 @@ export default function AdminDashboard() {
 
 
                         <div className="h-auto flex flex-col gap-4">
+                            <div className="">
+                                <QuickActions />
+                            </div>
 
                             <div>
                                 <EventsPanel events={upcomingEvents} />
