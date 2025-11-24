@@ -5,7 +5,10 @@ import AdminDashboard from "../pages/admin/AdminDashboard"
 import AdminAssistantLanding from "../pages/adminAssitant/AdminAssistantLanding";
 import AdminAssistantDashboard from "../pages/adminAssitant/AdminAssistantDashboard"
 import FoodItemClaim from "../pages/canteenStaff/FoodItemClaim";
+
 import ChancellorDashboard from "../pages/chancellor/ChancellorDashboard";
+import ChancellorLanding from "../pages/chancellor/ChancellorLanding";
+
 import SubmitMealList from "../pages/classAdviser/SubmitMealList";
 import FreeMealClaim from "../pages/foodServer/FreeMealClaim";
 import SuperAdminDashboard from "../pages/superAdmin/SuperAdminDashboard";
@@ -57,9 +60,13 @@ export default function Routers() {
                     } />
                     <Route path="/chancellor" element={
                         <ProtectedRoute>
-                            <ChancellorDashboard />
+                            <ChancellorLanding />
                         </ProtectedRoute>
-                    } />
+                    }>
+                        <Route index element={<ChancellorDashboard />} />
+                        <Route path="dashboard" element={<ChancellorDashboard />} />
+
+                    </Route>
                     <Route path="/classAdviser/:section/:userID" element={
                         <ProtectedRoute>
                             <ClassAdviserLanding />
