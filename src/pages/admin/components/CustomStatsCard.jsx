@@ -137,6 +137,7 @@ export function CustomStatsCard({
                             fontSize: 11,
                             fontFamily: "geist"
                         }}
+                        className="text-center"
                     >
                         {subtitle}
                     </span>

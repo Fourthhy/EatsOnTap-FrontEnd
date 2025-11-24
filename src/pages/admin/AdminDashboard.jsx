@@ -366,7 +366,6 @@ export default function AdminDashboard() {
                                         secondaryData={extractedMealRequestData.rejectedRequests}
                                     />
                                 </div>
-
                             </div>
 
                             <AnalyticTabs selectedTab={selectedTab} onTabChange={setSelectedTab}>

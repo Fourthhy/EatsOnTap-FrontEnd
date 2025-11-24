@@ -1,4 +1,4 @@
-function EventsPanel({ events }) {
+function EventsPanel({ events, isHyerlink = true, canViewAll = true }) {
   return (
     <div
       className="h-auto bg-white rounded-xl shadow p-5 w-full">
@@ -10,7 +10,7 @@ function EventsPanel({ events }) {
           Upcoming Events
         </h2>
 
-        <a
+        {canViewAll && <a
           href="#"
           style={{
             fontSize: 10,
@@ -19,11 +19,11 @@ function EventsPanel({ events }) {
             fontWeight: 500,
             paddingRight: "25px"
           }}
-          className="hover:underline">View All</a>
+          className="hover:underline">View All</a>}
       </div>
       <div
-        style={{ 
-          paddingBottom: "20px", 
+        style={{
+          paddingBottom: "20px",
           margin: "0px 10px 0px 10px",
         }}
         className="flex flex-col gap-4">
@@ -55,18 +55,22 @@ function EventsPanel({ events }) {
                 }}
                 className="text-xs text-gray-700 mt-1">{event.date}</p>
             </div>
-            <a
-              href={event.link}
-              style={{
-                fontSize: 10,
-                color: "#254280",
-                fontFamily: "geist",
-                fontWeight: 500,
-                paddingRight: "20px"
-              }}
-              className="hover:underline transition text-center">
-              View <br />Details
-            </a>
+            {isHyerlink
+              ? <>
+                <a
+                  href={event.link}
+                  style={{
+                    fontSize: 10,
+                    color: "#254280",
+                    fontFamily: "geist",
+                    fontWeight: 500,
+                    paddingRight: "20px"
+                  }}
+                  className="hover:underline transition text-center">
+                  View <br />Details
+                </a>
+              </>
+              : ""}
           </div>
         ))}
       </div>

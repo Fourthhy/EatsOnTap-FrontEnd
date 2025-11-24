@@ -44,7 +44,8 @@ function StatsCard({ title, value, subtitle, acceptanceRate, expectingPostiveRes
                     color: "#4C4B4B",
                     fontSize: 11,
                     fontFamily: "geist"
-                }}>
+                }}
+                >
                 {subtitle}
             </span>
         </div >

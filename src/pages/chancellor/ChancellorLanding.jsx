@@ -1,5 +1,6 @@
 import { Sidebar } from "../admin/components/Sidebar"
 import { LayoutDashboard } from "lucide-react"
+import { DateProvider } from "../admin/components/DatePicker";
 
 export default function ChancellorLanding() {
     const menuItems = [
@@ -12,7 +13,9 @@ export default function ChancellorLanding() {
 
     return (
         <div>
-            <Sidebar menuItems={menuItems} />
+            <DateProvider>
+                <Sidebar menuItems={menuItems} />
+            </DateProvider>
         </div>
     )
 }
