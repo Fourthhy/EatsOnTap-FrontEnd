@@ -48,6 +48,7 @@ export default function Routers() {
                         </ProtectedRoute>
                     }>
                         <Route index element={<AdminAssistantDashboard />} />
+                        <Route path="dashboard" element={<AdminAssistantDashboard />} />
                     </Route>
                     <Route path="/canteenStaff" element={
                         <ProtectedRoute>

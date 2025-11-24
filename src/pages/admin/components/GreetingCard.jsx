@@ -39,14 +39,14 @@ function GreetingCard({ title, subtitle }) {
     return (
         <div style={{
             background: "#fff", borderRadius: 12, boxShadow: "0 2px 6px #e5eaf0",
-            padding: 10, display: "flex", flexDirection: "column", width: 'auto', justifyContent: "center"
+            padding: "15px 20px", display: "flex", flexDirection: "row", width: 'auto', justifyContent: "center",
         }}>
             <div className="h-full w-full flex flex-col justify-center">
                 <span
                     style={{
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: "500",
-                        color: "#000000",
+                        color: "#2b2b2bff",
                         fontFamily: "geist"
                     }}
                 >
@@ -54,7 +54,7 @@ function GreetingCard({ title, subtitle }) {
                 </span>
                 <span
                     style={{
-                        color: "#000000",
+                        color: "#4C4B4B",
                         fontSize: 12,
                         fontFamily: "geist"
                     }}>

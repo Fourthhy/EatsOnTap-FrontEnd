@@ -1,20 +1,46 @@
 import { useOutletContext } from 'react-router-dom';
 import { Menu } from "lucide-react"
 import { RiNotification2Fill } from "react-icons/ri"
+import { GreetingCard } from '../admin/components/GreetingCard';
+import { StatsCardGroup } from '../admin/components/StatsCardGroup';
+import { QuickActions } from './componenets/QuickActions';
+import { ScheduleTabs } from './componenets/ScheduleTabs';
+import { ProgramsList } from './componenets/ProgramsList';
+import { EventsPanel } from '../admin/components/EventsPanel';
+
+import { useState } from 'react';
 
 export default function AdminAssistantDashboard() {
     const context = useOutletContext() || {};
     const handleToggleSidebar = context.handleToggleSidebar || (() => { });
     const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
 
+    const date = new Date();
+    const dayIndex = date.getDay();
+    const [selectedTab, setSelectedTab] = useState(dayIndex);
+
+    const higherEducationMealClaimStatus = [
+        { title: "Meal Claims", value: 1200, subtitle: "80% of total alotted" },
+        { title: "Meal Unclaims", value: 300, subtitle: "20% of total alotted" },
+        { title: "Total Alotted Meals", value: 1500, subtitle: "Today" },
+    ]
+
+    const upcomingEvents = [
+        { link: "#", title: "President' Day", date: "Nov 25, 2025" },
+        { link: "#", title: "College Intramurals", date: "Dec 15, 2025" }
+    ]
+
     return (
         <>
+
             <div
                 style={{
                     backgroundColor: "#F7F9F9",
                     marginBottom: "30px"
                 }}
                 className="w-full h-auto flex flex-col justify-start">
+
+                {/* HEADER */}
                 <div
                     style={{
                         height: '60px',
@@ -77,6 +103,47 @@ export default function AdminAssistantDashboard() {
                             </div>
                             <div className="w-auto h-auto">
                                 <img style={{ height: 33, width: 35, borderRadius: 15 }} src={USER_AVATAR} alt="User Avatar" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* CONTENT */}
+                <div className="h-full w-full">
+                    <div
+                        style={{
+                            borderRadius: '10px',
+                            marginTop: '20px',
+                            marginLeft: '40px',
+                            marginRight: '40px',
+                            backgroundColor: "#F7F9F9"
+                        }}
+                        className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
+                        <div className="w-full h-auto flex flex-col gap-4">
+                            {/* <GreetingCard title={"Good Morning"} subtitle={"Manage meal schedules and student eligibility for higher education students"}/> */}
+
+                            <ScheduleTabs
+                                selectedTab={selectedTab}
+                                onTabChange={setSelectedTab}
+                            >
+                                <div style={{ marginTop: 10}}>
+                                    <StatsCardGroup
+                                        cardGroupTitle={"Higher Education Claim Status"}
+                                        isDualPager={false}
+                                        urgentNotification={0}
+                                        primaryData={higherEducationMealClaimStatus}
+                                        displayDate={true}
+                                    />
+                                </div>
+                                <ProgramsList />
+                            </ScheduleTabs>
+                        </div>
+                        <div className="w-full h-auto flex flex-col gap-4">
+                            <div>
+                                <QuickActions />
+                            </div>
+                            <div>
+                                <EventsPanel events={upcomingEvents} />
                             </div>
                         </div>
                     </div>

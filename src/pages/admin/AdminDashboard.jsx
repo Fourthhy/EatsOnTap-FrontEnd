@@ -338,8 +338,6 @@ export default function AdminDashboard() {
 
                 {/* CONTENT */}
                 <div className="h-full w-full">
-
-
                     <div
                         style={{
                             borderRadius: '10px',
