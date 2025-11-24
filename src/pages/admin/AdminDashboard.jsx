@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { useDate } from "./components/DatePicker"
-
 import { BandedChartTADMC } from "./components/charts/BandedChartTADMC"
 import { BandedChartCUR } from "./components/charts/BandedChartCUR"
 import { BandedChartOCF } from "./components/charts/BandedChartOCF"
@@ -12,7 +11,6 @@ import { QuickActions } from "./components/QuickActions";
 import { EventsPanel } from "./components/EventsPanel";
 import { AnalyticTabs } from "./components/AnalyticTabs";
 import { MealAllowanceCard } from "./components/MealAllowanceCard";
-import { DateProvider } from "./components/DatePicker"
 import { DatePicker } from "./components/DatePicker"
 import { useOutletContext } from 'react-router-dom';
 import { Menu } from "lucide-react"

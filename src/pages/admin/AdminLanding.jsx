@@ -1,5 +1,4 @@
 import { Sidebar } from "./components/Sidebar";
-import { DateProvider } from "./components/DatePicker";
 import {    
     LayoutDashboard,
     Ticket,
@@ -7,6 +6,7 @@ import {
     ShoppingBag,
     BookOpen
 } from "lucide-react"
+import { DateProvider } from "./components/DatePicker";
 
 export default function AdminLanding() {
     const menuItems = [
