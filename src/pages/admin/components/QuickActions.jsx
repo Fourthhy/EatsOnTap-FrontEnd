@@ -243,7 +243,7 @@ function QuickActions() {
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed" // Disabled Style
                         : "bg-[#3B65CA] hover:bg-[#3052a6] text-white"   // Active Style
                     }
-                `}
+                `}  
                 style={{ paddingRight: 30, paddingLeft: 30, paddingTop: 15, paddingBottom: 15 }}
               >
                 {addedTodaysDish ? "Save Changes" : "Submit"}
