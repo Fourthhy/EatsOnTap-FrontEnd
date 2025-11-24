@@ -81,7 +81,7 @@ export default function AdminAssistantDashboard() {
                             <p className="text-[14px] font-medium leading-[18px] text-black">Aug 23, 2025</p> {/* Date */}
                         </div>  
 
-                        {/* card 2 */}
+                        {/* card 2*/}
                         <div className="w-full max-w-[367px] bg-[#D5DCFF] rounded-lg shadow-md" 
                         style={{padding: '20px'}}>
                             <p className="text-end text-[12px]">View</p>
@@ -136,7 +136,7 @@ export default function AdminAssistantDashboard() {
                             <p className="text-[12px] font-normal leading-[16px] text-[#4C4B4B]">Tuesday</p>  {/* Day */}
                             <p className="text-[14px] font-medium leading-[18px] text-black">Aug 28, 2025</p> {/* Date */}
                         </div>  
-                    </div>
+                    </div> 
                 </div>
             </div>
             
