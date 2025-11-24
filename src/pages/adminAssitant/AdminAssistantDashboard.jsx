@@ -126,14 +126,17 @@ export default function AdminAssistantDashboard() {
                                 selectedTab={selectedTab}
                                 onTabChange={setSelectedTab}
                             >
-                                <div style={{ marginTop: 10}}>
-                                    <StatsCardGroup
-                                        cardGroupTitle={"Higher Education Claim Status"}
-                                        isDualPager={false}
-                                        urgentNotification={0}
-                                        primaryData={higherEducationMealClaimStatus}
-                                        displayDate={true}
-                                    />
+                                <div style={{ marginTop: 10 }} className="w-full flex flex-col items-center">
+                                    <div className="w-[98%]">
+                                        <StatsCardGroup
+                                            cardGroupTitle={"Claim Status"}
+                                            isDualPager={false}
+                                            urgentNotification={0}
+                                            primaryData={higherEducationMealClaimStatus}
+                                            displayDate={true}
+                                            footnote={"That report contains from the collection of schedled programs and years listed below"}
+                                        />
+                                    </div>
                                 </div>
                                 <ProgramsList />
                             </ScheduleTabs>

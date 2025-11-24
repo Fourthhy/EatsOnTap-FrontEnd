@@ -1,19 +1,35 @@
 function ScheduleTabs({ children, selectedTab, onTabChange }) {
     return (
         <div>
-            <div className="w-full bg-[#F7F9F9]">
-                <div style={{ marginBottom: 5 }}>
+            <div className="w-full bg-white">
+                <div style={{ paddingBottom: 20 }} className="flex flex-col bg-[#F7F9F9]">
                     <span
                         style={{
                             fontWeight: "500",
-                            fontSize: 14,
+                            fontSize: 20,
                             color: "#000000",
                             fontFamily: "geist",
                             width: "fit-content",
                             height: "fit-content",
+                            paddingLeft: 15,
+                            fontFamily: "geist",
                         }}
                     >
                         Eligible Programs
+                    </span>
+                    <span
+                        style={{
+                            fontWeight: "450",
+                            fontSize: 13,
+                            color: "#2D2D2D",
+                            fontFamily: "geist",
+                            width: "fit-content",
+                            height: "fit-content",
+                            paddingLeft: 15,
+                            fontFamily: "geist",
+                        }}
+                    >
+                        For Higher Education Students
                     </span>
                 </div>
 
@@ -213,8 +229,9 @@ function ScheduleTabs({ children, selectedTab, onTabChange }) {
                     }}
                 >
                 </div>
-
-                {children}
+                <div className="w-full h-auto bg-white">
+                    {children}
+                </div>
             </div>
         </div>
     )

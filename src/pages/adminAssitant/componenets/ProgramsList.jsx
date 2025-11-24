@@ -30,7 +30,7 @@ function ProgramsList() {
     };
 
     return (
-        <div className="w-[100%] p-6 bg-gray-50 flex justify-center">
+        <div className="w-[100%] p-6 flex justify-center" style={{ marginTop: 10 }}>
             {/* grid-cols-1 for mobile, 
          md:grid-cols-2 splits it into two columns on larger screens.
          The grid naturally handles the 'odd number starts left' logic.
