@@ -116,16 +116,52 @@ const StudentList = () => {
     };
 
     // Status Badge Component (CSS kept as classNames for simplicity here)
+    // Status Badge Component
     const StatusBadge = ({ status }) => {
+        // Keep styles object for dynamic color selection
         const styles = {
-            Eligible: 'bg-emerald-100 text-emerald-700',
-            Ineligible: 'bg-red-100 text-red-700',
-            Waived: 'bg-gray-100 text-gray-600'
+            Eligible: {
+                backgroundColor: '#d1fae5', // bg-emerald-100
+                color: '#047857', // text-emerald-700
+                dotColor: '#10b981', // bg-emerald-500
+            },
+            Ineligible: {
+                backgroundColor: '#fee2e2', // bg-red-100
+                color: '#b91c1c', // text-red-700
+                dotColor: '#ef4444', // bg-red-500
+            },
+            Waived: {
+                backgroundColor: '#f3f4f6', // bg-gray-100
+                color: '#4b5563', // text-gray-600
+                dotColor: '#6b7280', // bg-gray-500
+            }
         };
 
+        const currentStyle = styles[status] || styles.Waived;
+        const currentDotColor = currentStyle.dotColor;
+
         return (
-            <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 w-fit ${styles[status] || styles.Waived}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${status === 'Eligible' ? 'bg-emerald-500' : status === 'Ineligible' ? 'bg-red-500' : 'bg-gray-500'}`}></span>
+            <span
+                className="text-xs font-medium flex items-center w-fit" // Retain classes for non-style properties
+                style={{
+                    padding: '4px 12px',      // px-3 py-1 (using 4px/12px approximation)
+                    borderRadius: 12,   // rounded-full
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',               // gap-1.5
+                    // Dynamic colors:
+                    backgroundColor: currentStyle.backgroundColor,
+                    color: currentStyle.color,
+                }}
+            >
+                <span
+                    style={{
+                        width: '6px', // w-1.5 (approximation: 1.5 units * 4px = 6px)
+                        height: '6px', // h-1.5
+                        borderRadius: 12, // rounded-full
+                        backgroundColor: currentDotColor,
+                    }}
+                ></span>
                 {status}
             </span>
         );
@@ -337,8 +373,7 @@ const StudentList = () => {
                         <button
                             key={i}
                             onClick={() => handlePageChange(i + 1)}
-                            className={`w-8 h-8 rounded-md text-sm font-medium flex items-center justify-center ${
-                                currentPage === i + 1
+                            className={`w-8 h-8 rounded-md text-sm font-medium flex items-center justify-center ${currentPage === i + 1
                                     ? 'bg-gray-900 text-white'
                                     : 'text-gray-600 hover:bg-gray-100'
                                 }`}
