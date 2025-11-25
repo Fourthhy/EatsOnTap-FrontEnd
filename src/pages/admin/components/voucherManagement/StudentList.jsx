@@ -317,7 +317,7 @@ const StudentList = () => {
                         <tbody className="divide-y divide-gray-100">
                             {currentData.map((student, index) => (
                                 <tr key={student.id} className="hover:bg-gray-50/80 transition-colors group">
-                                    <td className="font-geist text-black flex items-center justify-start" style={{ paddingTop: '10px', paddingBottom: '10px', fontSize: 13 }}>
+                                    <td className="font-geist text-black flex items-center justify-center" style={{ paddingTop: '10px', paddingBottom: '10px', fontSize: 13 }}>
                                         {startIndex + index + 1}
                                     </td>
                                     <td className="py-4 px-6">
