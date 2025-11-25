@@ -300,7 +300,7 @@ const StudentList = () => {
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500 w-16"></th>
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Student Name</th>
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-3 font-medium text-gray-500">Student ID</th>
-                                <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500 w-30">Link</th>
+                                <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500 w-30">RFID Link</th>
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">{getProgramHeaderLabel()}</th>
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Regular/Irregular</th>
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Status</th>
