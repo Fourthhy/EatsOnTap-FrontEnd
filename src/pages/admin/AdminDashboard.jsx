@@ -12,6 +12,8 @@ import { EventsPanel } from "./components/EventsPanel";
 import { AnalyticTabs } from "./components/AnalyticTabs";
 import { MealAllowanceCard } from "./components/MealAllowanceCard";
 import { DatePicker } from "./components/DatePicker"
+import { HeaderBar } from "./components/Headerbar"
+
 import { useOutletContext } from 'react-router-dom';
 import { Menu } from "lucide-react"
 import { RiNotification2Fill } from "react-icons/ri";
@@ -268,73 +270,7 @@ export default function AdminDashboard() {
                 }}
                 className="w-full h-auto flex flex-col justify-start">
                 {/*HEADER*/}
-                <div
-                    style={{
-                        height: '60px',
-                    }}
-                    className="w-full flex flex-col">
-                    <div
-                        style={{
-                            paddingLeft: '10px',
-                            background: "white",
-                            boxShadow: "0 10px 24px 0 rgba(214, 221, 224, 0.32)"
-                        }}
-                        className="flex-1 flex items-center gap-4 justify-between"
-                    >
-                        <div className="w-auto h-auto flex gap-4">
-                            <div className="w-auto h-auto">
-                                <Menu size={20} onClick={handleToggleSidebar} className="hover:cursor-pointer" />
-                            </div>
-                            <p
-                                style={{ fontWeight: '500' }}
-                                className="font-geist text-[2vh]"> Dashboard
-                            </p>
-                        </div>
-
-                        <div
-                            style={{
-                                marginRight: "20px"
-                            }}
-                            className="w-auto h-auto flex flex-row gap-5 items-center">
-                            <div
-                                style={{
-                                    margin: "0px 15px 0px 0px",
-                                    padding: 5,
-                                    borderRadius: 14
-                                }}
-                                className="bg-[#D9D9D9] w-auto h-full flex items-center">
-                                <RiNotification2Fill size={20} />
-                            </div>
-                            <div>
-                                <div className="w-[100%] h-[100%] flex flex-col items-center">
-                                    <span
-                                        style={{
-                                            fontFamily: "geist",
-                                            color: "#000",
-                                            fontWeight: "500",
-                                            fontSize: 14,
-                                        }}
-                                    >
-                                        Name Surname
-                                    </span>
-                                    <p
-                                        style={{
-                                            fontFamily: "geist",
-                                            color: "#B1AFB0",
-                                            fontWeight: "500",
-                                            fontSize: 11,
-                                        }}
-                                        className="w-[100%] flex justify-end"
-                                    >Role</p>
-                                </div>
-                            </div>
-                            <div className="w-auto h-auto">
-                                <img style={{ height: 33, width: 35, borderRadius: 15 }} src={USER_AVATAR} alt="User Avatar" />
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
+                    <HeaderBar userAvatar={USER_AVATAR} headerTitle={"Dashboard"}/>
 
                 {/* CONTENT */}
                 <div className="h-full w-full">
@@ -356,9 +292,9 @@ export default function AdminDashboard() {
                                 <div className="col-span-4">
                                     <StatsCardGroup
                                         cardGroupTitle={"Meal Eligibilty List Count"}
-                                        urgentNotification={1}
+                                        urgentNotification={0}
                                         isDualPager={true}
-                                        dualPageTitles={["View Accepted Claims", "View Rejected Claims"]}
+                                        dualPageTitles={["View Accepted Requests", "View Rejected Requests"]}
                                         notificationTitle={"Pending Meal Requests"}
                                         successMessage="Great job! The acceptance rate is above the target."
                                         failureMessage="Warning: Acceptance rate is critically low."
