@@ -58,7 +58,9 @@ export function EventDashboard() {
         <>
             {/* View Event */}
             {currentView === VIEWS.VIEW_EVENT ? (
-                <ViewRecentEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
+                <div className="h-full w-full">
+                    <ViewRecentEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
+                </div>
             ) : (
                 <>
                     <div className="h-full w-full grid grid-cols-2 gap-4">
