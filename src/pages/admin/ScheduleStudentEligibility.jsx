@@ -7,13 +7,11 @@ export default function ScheduleStudentEligibility() {
     return (
         <>
             <div
-                style={{
-                    backgroundColor: "#F7F9F9",
-                    marginBottom: "30px"
-                }}
-                className="w-full h-auto flex flex-col justify-start">
+                style={{ backgroundColor: "#F7F9F9" }}
+                className="w-full h-[100vh] flex flex-col">
+
                 <HeaderBar headerTitle="Schedule Student Eligibility" userAvatar={USER_AVATAR} />
-                <div className="w-full h-auto flex flex-col justify-start">
+                <div className="w-full flex flex-col justify-start overflow-hidden">
                     <EventDashboard />
                 </div>
             </div>
