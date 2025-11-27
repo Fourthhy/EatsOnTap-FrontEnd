@@ -319,7 +319,7 @@ export const AddEventForm = () => {
                 </div>
 
                 {selectedDepartments.length === 0 ? (
-                    <div style={{ padding: 16, backgroundColor: '#fef3c7', borderRadius: 8, textAlign: 'center', color: '#92400e' }}>
+                    <div style={{ padding: 16, backgroundColor: '#fef3c7', borderRadius: 8, textAlign: 'center', color: '#92400e', fontFamily: "geist", fontSize: 14, fontWeight: 450 }}>
                         Please select a Department first to view the available sections.
                     </div>
                 ) : (
