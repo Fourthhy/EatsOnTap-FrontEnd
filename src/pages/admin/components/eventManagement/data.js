@@ -36,10 +36,55 @@ export const upcomingEventsData = [
     { id: 1, name: "Teachers' Day", date: "October 5, 2025", count: 1532 },
     { id: 2, name: "Presidents' Day", date: "November 28, 2025", count: 2343 },
     { id: 3, name: "College Intramurals", date: "December 1-5, 2025", count: 423 },
+    { id: 3, name: "College Intramurals", date: "December 1-5, 2025", count: 423 },
 ];
 
 export const recentEventsData = [
     { id: 1, name: "Study Habits Seminar", date: "September 12, 2025", claims: 423, unclaimed: 0 },
     { id: 2, name: "Buwan ng Wika", date: "August 30, 2025", claims: 1323, unclaimed: 54 },
     { id: 3, name: "Higher Education Recogniton", date: "August 19, 2025", claims: 200, unclaimed: 0 },
+    { id: 3, name: "Higher Education Recogniton", date: "August 19, 2025", claims: 200, unclaimed: 0 },
 ];
+
+// ... existing exports ...
+
+export const eventDetailMock = {
+    title: "Teachers' Day",
+    date: "October 5, 2025",
+    department: "All Departments",
+    totalAttendance: 1532,
+    
+    sectionTotals: [
+        { name: "Pre-kinder", total: 12 },
+        { name: "Kinder", total: 15 },
+        { name: "Grade 1", total: 25 },
+        { name: "Grade 2", total: 22 },
+        { name: "Grade 3", total: 19 },
+        { name: "Grade 4", total: 25 },
+        { name: "Grade 5", total: 25 },
+        { name: "Grade 6", total: 25 },
+        { name: "Grade 8", total: 25 },
+        { name: "Grade 7", total: 25 },
+        { name: "Grade 9", total: 25 },
+        // ... (truncated for brevity)
+    ],
+    
+    studentList: [
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Dicdican, Roylyn", program: "BSIS 4", status: "Eligible", avatar: false },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+        { name: "Santos, Mark Joseph", program: "BSIS 4", status: "Eligible", avatar: true },
+    ]
+};
