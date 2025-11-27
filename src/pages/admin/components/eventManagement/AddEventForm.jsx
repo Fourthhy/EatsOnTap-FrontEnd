@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { departments, PROGRAM_STRUCTURE, getAllPrograms } from './data';
 import { Calendar, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Helper function to concatenate program arrays (Logic remains the same)
+// Helper function to concatenate program arrays
 const getProgramsForDepartments = (selectedDepts) => {
     if (selectedDepts.includes('All')) {
         return getAllPrograms();
@@ -19,16 +19,16 @@ const getProgramsForDepartments = (selectedDepts) => {
 export const AddEventForm = () => {
     // --- STATE MANAGEMENT ---
     const [eventName, setEventName] = useState('');
-    const [eventDate, setEventDate] = useState(''); // State for the date
+    const [eventDate, setEventDate] = useState('');
     const [selectedDepartments, setSelectedDepartments] = useState([]);
     const [selectedPrograms, setSelectedPrograms] = useState([]);
     const [validationError, setValidationError] = useState({});
 
-    // --- PAGINATION STATE (Unchanged) ---
+    // --- PAGINATION STATE ---
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 8;
+    const ITEMS_PER_PAGE = 5;
 
-    // --- DYNAMIC DATA & PAGINATION LOGIC (Unchanged) ---
+    // --- DYNAMIC DATA & PAGINATION LOGIC ---
     const allProgramsToDisplay = useMemo(() => {
         setCurrentPage(1);
         return getProgramsForDepartments(selectedDepartments);
@@ -43,7 +43,7 @@ export const AddEventForm = () => {
     }, [allProgramsToDisplay, currentPage]);
 
     // --- HANDLERS ---
-    
+
     const handleEventNameChange = (e) => {
         const value = e.target.value;
         setEventName(value);
@@ -51,7 +51,7 @@ export const AddEventForm = () => {
             setValidationError(prev => ({ ...prev, eventName: false }));
         }
     };
-    
+
     const handleEventDateChange = (e) => {
         const value = e.target.value;
         setEventDate(value);
@@ -62,37 +62,41 @@ export const AddEventForm = () => {
 
     const toggleDepartment = (dept) => {
         setSelectedDepartments(prevDepts => {
+            let newDepts;
+
             if (dept === 'All') {
-                return prevDepts.includes('All') ? [] : departments.filter(d => d !== 'All');
-            }
-            
-            let newDepts = prevDepts.filter(d => d !== 'All');
-
-            if (newDepts.includes(dept)) {
-                newDepts = newDepts.filter(d => d !== dept);
+                newDepts = prevDepts.includes('All') ? [] : departments.filter(d => d !== 'All');
             } else {
-                newDepts = [...newDepts, dept];
+                newDepts = prevDepts.filter(d => d !== 'All');
+                if (newDepts.includes(dept)) {
+                    newDepts = newDepts.filter(d => d !== dept);
+                } else {
+                    newDepts = [...newDepts, dept];
+                }
             }
 
+            // Auto-select 'All' if all others are picked
             const allNonAllSelected = departments.filter(d => d !== 'All').every(d => newDepts.includes(d));
             if (allNonAllSelected && newDepts.length > 0) {
-                 newDepts = ['All', ...departments.filter(d => d !== 'All')];
+                newDepts = ['All', ...departments.filter(d => d !== 'All')];
             }
 
+            // Validation Clearance Logic
             if (validationError.departments && newDepts.length > 0) {
-                 setValidationError(prev => ({ ...prev, departments: false }));
+                setValidationError(prev => ({ ...prev, departments: false }));
             }
             if (validationError.programs) {
                 setValidationError(prev => ({ ...prev, programs: false }));
             }
 
+            // Reset programs if departments are cleared
             if (newDepts.length === 0) return [];
-            
+
             return newDepts;
         });
         setSelectedPrograms([]);
     };
-    
+
     const handleProgramToggle = (program) => {
         setSelectedPrograms(prevPrograms => {
             const isSelected = prevPrograms.includes(program);
@@ -112,23 +116,14 @@ export const AddEventForm = () => {
             setCurrentPage(pageNumber);
         }
     };
-    
+
     const handleCreateEvent = (e) => {
         e.preventDefault();
         const errors = {};
 
-        if (!eventName.trim()) {
-            errors.eventName = true;
-        }
-        
-        // Validate Date
-        if (!eventDate) {
-            errors.eventDate = true;
-        }
-
-        if (selectedDepartments.length === 0) {
-            errors.departments = true;
-        }
+        if (!eventName.trim()) errors.eventName = true;
+        if (!eventDate) errors.eventDate = true;
+        if (selectedDepartments.length === 0) errors.departments = true;
 
         const mustSelectPrograms = selectedDepartments.length > 0 && allProgramsToDisplay.length > 0;
         if (mustSelectPrograms && selectedPrograms.length === 0) {
@@ -138,12 +133,19 @@ export const AddEventForm = () => {
         setValidationError(errors);
 
         if (Object.keys(errors).length === 0) {
-            console.log('✅ Form Submitted Successfully! Data:', { eventName, eventDate, selectedDepartments, selectedPrograms });
+            console.log('✅ Form Submitted Successfully!', { eventName, eventDate, selectedDepartments, selectedPrograms });
             alert(`Event "${eventName}" scheduled for ${eventDate} is valid!`);
         } else {
-             console.log('❌ Validation Failed. Errors:', errors);
+            console.log('❌ Validation Failed.', errors);
         }
     };
+
+    // --- BUTTON STATE CALCULATION ---
+    const isFormComplete = eventName.trim() && eventDate && selectedDepartments.length > 0 &&
+        (allProgramsToDisplay.length === 0 || selectedPrograms.length > 0);
+
+    const isButtonDisabled = !isFormComplete || Object.keys(validationError).length > 0;
+
 
     // --- STYLES ---
     const formContainerStyle = {
@@ -151,7 +153,8 @@ export const AddEventForm = () => {
         padding: '1.5rem',
         borderRadius: '0.75rem',
         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-        height: '100%',
+        minHeight: '100%',
+        maxHeight: 'calc(100vh - 80px)',
         display: 'flex',
         flexDirection: 'column',
         gap: 10,
@@ -172,23 +175,14 @@ export const AddEventForm = () => {
         borderRadius: 12,
         fontSize: 12,
         cursor: 'pointer',
+        // Highlighting logic: Blue if selected, Gray if not
         backgroundColor: selectedDepartments.includes(dept) ? '#3b82f6' : '#f3f4f6',
         color: selectedDepartments.includes(dept) ? 'white' : '#4b5563',
         fontFamily: "geist",
         transition: 'all 0.15s ease-in-out'
     });
-    const selectedChipStyle = {
-        padding: '5px 10px',
-        borderRadius: '9999px',
-        fontSize: 13,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        width: 'fit-content',
-        backgroundColor: '#60a5fa',
-        color: 'white',
-        fontFamily: "geist"
-    };
+    // Removed unused selectedChipStyle
+
     const labelStyle = (isError) => ({
         fontSize: 14,
         fontWeight: 450,
@@ -196,9 +190,8 @@ export const AddEventForm = () => {
         color: isError ? 'red' : 'inherit'
     });
 
-    // UPDATED STYLE: Date button/input style
     const dateButtonStyle = (isError) => ({
-        position: 'relative', // Key for positioning the hidden input
+        position: 'relative',
         padding: "5px 10px",
         fontSize: 12,
         fontFamily: "geist",
@@ -210,66 +203,82 @@ export const AddEventForm = () => {
         display: 'flex',
         alignItems: 'center',
         gap: '4px',
-        // Text color logic for the visible span
-        color: isError ? 'red' : (eventDate ? '#374151' : '#4b5563'), 
+        color: isError ? 'red' : (eventDate ? '#374151' : '#4b5563'),
     });
-    
-    // Logic to format the displayed date text
+
     const displayDateText = eventDate
         ? `Event for ${new Date(eventDate).toLocaleDateString('en-US')}`
         : 'Pick a date';
+
+    const submitButtonStyle = (isDisabled) => {
+        const activeStyles = {
+            background: 'linear-gradient(to right, #4268BD, #3F6AC9)',
+            cursor: 'pointer',
+            fontWeight: '600',
+        };
+        const disabledStyles = {
+            backgroundColor: '#cccccc',
+            background: '#cccccc',
+            cursor: 'not-allowed',
+            fontWeight: '400',
+        };
+
+        return {
+            color: 'white',
+            padding: '10px 24px',
+            borderRadius: '0.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            border: 'none',
+            fontFamily: "geist",
+            fontSize: 12,
+            ...(isDisabled ? disabledStyles : activeStyles),
+        };
+    };
 
 
     return (
         <form style={formContainerStyle} onSubmit={handleCreateEvent}>
             {/* Header */}
             <div className="flex justify-between items-center flex-shrink-0">
-                <h2 style={{
-                    fontSize: 16,
-                    fontFamily: "geist",
-                    fontWeight: 450
-                }}>
+                <h2 style={{ fontSize: 16, fontFamily: "geist", fontWeight: 450 }}>
                     Add Event
                 </h2>
-                
-                {/* 🎯 FIXED DATE INPUT COMPONENT */}
-                <label 
-                    htmlFor="event-date-picker"
-                    style={dateButtonStyle(validationError.eventDate)} 
-                    className="hover:bg-gray-50 transition-colors"
-                >
-                    {/* 1. Visible Text */}
-                    <span style={{ 
-                        color: validationError.eventDate ? 'red' : (eventDate ? '#374151' : 'inherit'),
-                        fontWeight: eventDate ? 500 : 450 
-                    }}>
-                        {displayDateText}
-                    </span>
-                    
-                    {/* 2. Calendar Icon */}
-                    <Calendar 
-                        size={12} 
-                        style={{ color: validationError.eventDate ? 'red' : '#4b5563' }} 
-                    />
-                    
-                    {/* 3. Hidden Input Type="date" */}
-                    <input
-                        id="event-date-picker"
-                        type="date"
-                        value={eventDate}
-                        onChange={handleEventDateChange}
-                        // KEY: Hide the native input but keep it functional via the parent label
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            opacity: 0, // Makes it invisible but clickable
-                            cursor: 'pointer',
-                        }}
-                    />
-                </label>
+
+                {/* FIXED DATE INPUT */}
+                <div className="flex gap-2 max-h-[40px]">
+                    <label
+                        htmlFor="event-date-picker"
+                        style={dateButtonStyle(validationError.eventDate)}
+                        className="hover:bg-gray-50 transition-colors"
+                    >
+                        <span style={{
+                            color: validationError.eventDate ? 'red' : (eventDate ? '#374151' : 'inherit'),
+                            fontWeight: eventDate ? 500 : 450
+                        }}>
+                            {displayDateText}
+                        </span>
+                        <Calendar size={12} style={{ color: validationError.eventDate ? 'red' : '#4b5563' }} />
+                        <input
+                            id="event-date-picker"
+                            type="date"
+                            value={eventDate}
+                            onChange={handleEventDateChange}
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
+                        />
+                    </label>
+                    <div className="flex justify-end flex-shrink-0">
+                        <button
+                            type="submit"
+                            disabled={isButtonDisabled}
+                            style={submitButtonStyle(isButtonDisabled)}
+                            className="transition-colors hover:bg-blue-700 shadow-md"
+                        >
+                            <span>✓</span> Submit
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Event Name */}
@@ -282,7 +291,7 @@ export const AddEventForm = () => {
                     placeholder="e.g., Celebration Day!"
                     style={{ ...inputStyle, border: validationError.eventName ? '1px solid red' : 'none' }}
                     value={eventName}
-                    onChange={handleEventNameChange} 
+                    onChange={handleEventNameChange}
                 />
             </div>
 
@@ -295,7 +304,7 @@ export const AddEventForm = () => {
                             key={i}
                             style={departmentChipStyle(dept)}
                             className="transition-colors hover:bg-gray-200"
-                            onClick={() => toggleDepartment(dept)} 
+                            onClick={() => toggleDepartment(dept)}
                         >
                             {dept}
                         </span>
@@ -303,30 +312,8 @@ export const AddEventForm = () => {
                 </div>
             </div>
 
-            {/* Selected Departments Area */}
-            <div className='flex-shrink-0'>
-                <label style={labelStyle(validationError.departments)}>Selected Department/s:</label>
-                <div style={{ border: '1px solid #e5e7eb', borderRadius: '0.5rem', padding: '1rem', minHeight: '60px' }}>
-                    <div className="flex flex-wrap gap-2.5">
-                        {selectedDepartments
-                            .filter(dept => dept !== 'All')
-                            .map((dept, i) => (
-                                <div key={i} style={selectedChipStyle}>
-                                    {dept}
-                                    <span
-                                        className="cursor-pointer"
-                                        onClick={() => toggleDepartment(dept)} 
-                                    >
-                                        ✕
-                                    </span>
-                                </div>
-                            ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Specific Sections List (The main content area that needs to grow/scroll) */}
-            <div className="flex flex-col flex-grow min-h-0">
+            {/* Specific Sections List */}
+            <div className="flex flex-col flex-grow h-auto">
                 <div style={{ marginBottom: 10 }}>
                     <label style={labelStyle(validationError.programs)}>Select specific sections and programs:</label>
                 </div>
@@ -337,7 +324,7 @@ export const AddEventForm = () => {
                     </div>
                 ) : (
                     <>
-                        {/* Search Bar & Select All */}
+                        {/* Search & Select All */}
                         <div className="w-full flex justify-between flex-shrink-0" style={{ marginBottom: 10 }}>
                             <div className="relative flex-1 max-w-md flex-row">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" size={14} />
@@ -369,17 +356,15 @@ export const AddEventForm = () => {
                             </div>
                         </div>
 
-                        {/* Program List Container */}
+                        {/* Program List */}
                         <div className="bg-blue-50 rounded-lg p-4 flex flex-col flex-grow min-h-0">
-
-                            {/* List Items */}
                             <div className="overflow-y-auto flex-grow min-h-0">
                                 {programsToDisplay.map((program, idx) => (
                                     <div
                                         key={idx}
                                         style={{ padding: 10, backgroundColor: selectedPrograms.includes(program) ? '#bfdbfe' : 'transparent' }}
                                         className="flex items-center gap-3 py-2 px-2 transition-colors hover:bg-blue-100 rounded"
-                                        onClick={() => handleProgramToggle(program)} 
+                                        onClick={() => handleProgramToggle(program)}
                                     >
                                         <input
                                             type="checkbox"
@@ -406,32 +391,22 @@ export const AddEventForm = () => {
                                     }}
                                     className="flex-shrink-0"
                                 >
-                                    {/* Previous Button */}
                                     <button
                                         type="button"
                                         onClick={() => handlePageChange(currentPage - 1)}
                                         disabled={currentPage === 1}
                                         className="hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                                         style={{
-                                            padding: '8px 12px',
-                                            borderRadius: '6px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '4px',
-                                            fontSize: '0.875rem', 
-                                            color: '#4b5563', 
-                                            backgroundColor: 'transparent',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            fontFamily: "geist",
-                                            fontSize: 12,
-                                            fontWeight: 450
+                                            padding: '8px 12px', borderRadius: '6px', display: 'flex',
+                                            alignItems: 'center', gap: '4px', fontSize: '0.875rem',
+                                            color: '#4b5563', backgroundColor: 'transparent',
+                                            border: 'none', cursor: 'pointer', fontFamily: "geist",
+                                            fontSize: 12, fontWeight: 450
                                         }}
                                     >
                                         <ChevronLeft size={16} /> Previous
                                     </button>
 
-                                    {/* Page Number Buttons */}
                                     {[...Array(totalPages)].slice(0, 3).map((_, i) => {
                                         const pageNumber = i + 1;
                                         return (
@@ -439,55 +414,30 @@ export const AddEventForm = () => {
                                                 key={pageNumber}
                                                 type="button"
                                                 onClick={() => handlePageChange(pageNumber)}
-                                                className={`
-                                                    ${currentPage === pageNumber
-                                                        ? 'bg-gray-900 text-white' 
-                                                        : 'text-gray-600 hover:bg-gray-100'
-                                                    }
-                                                `}
+                                                className={`${currentPage === pageNumber ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
                                                 style={{
-                                                    width: '32px',
-                                                    height: '32px',
-                                                    borderRadius: '6px',
-                                                    fontSize: '0.875rem',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    border: 'none',
-                                                    cursor: 'pointer',
-                                                    fontFamily: "geist",
-                                                    fontSize: 12,
-                                                    fontWeight: 450
+                                                    width: '32px', height: '32px', borderRadius: '6px',
+                                                    fontSize: '0.875rem', display: 'flex', alignItems: 'center',
+                                                    justifyContent: 'center', border: 'none', cursor: 'pointer',
+                                                    fontFamily: "geist", fontSize: 12, fontWeight: 450
                                                 }}
                                             >
                                                 {pageNumber}
                                             </button>
                                         );
                                     })}
-                                    
-                                    {/* Ellipsis */}
                                     {totalPages > 3 && <span className="text-gray-400">...</span>}
 
-                                    {/* Next Button */}
                                     <button
                                         type="button"
                                         onClick={() => handlePageChange(currentPage + 1)}
                                         disabled={currentPage === totalPages}
                                         className="hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                                         style={{
-                                            padding: '8px 12px',
-                                            borderRadius: '6px',
-                                            fontSize: '0.875rem',
-                                            color: '#4b5563',
-                                            backgroundColor: '#f3f4f6',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '4px',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            fontFamily: "geist",
-                                            fontSize: 12,
-                                            fontWeight: 450
+                                            padding: '8px 12px', borderRadius: '6px', fontSize: '0.875rem',
+                                            color: '#4b5563', backgroundColor: '#f3f4f6', display: 'flex',
+                                            alignItems: 'center', gap: '4px', border: 'none', cursor: 'pointer',
+                                            fontFamily: "geist", fontSize: 12, fontWeight: 450
                                         }}
                                     >
                                         Next <ChevronRight size={16} />
@@ -497,30 +447,6 @@ export const AddEventForm = () => {
                         </div>
                     </>
                 )}
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex justify-end flex-shrink-0">
-                <button
-                    type="submit"
-                    className="transition-colors hover:bg-blue-700 shadow-md"
-                    style={{
-                        background: 'linear-gradient(to right, #4268BD, #3F6AC9)',
-                        color: 'white',
-                        padding: '10px 24px',
-                        borderRadius: '0.5rem',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        border: 'none',
-                        fontFamily: "geist",
-                        fontSize: 12,
-                    }}
-                >
-                    <span>✓</span> Submit
-                </button>
             </div>
         </form>
     );
