@@ -35,7 +35,6 @@ export function EventDashboard() {
         fontFamily: 'sans-serif',
         display: 'flex',
         gap: '2rem',
-        margin: '0',
         overflow: 'hidden',
     };
 
@@ -62,16 +61,19 @@ export function EventDashboard() {
                 <ViewRecentEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
             ) : (
                 <>
-                    <div className="h-full w-full grid grid-cols-2 gap-2">
+                    <div className="h-full w-full grid grid-cols-2 gap-4">
 
                         {/* Right Column (Cards) */}
-                        {/* <div className="flex flex-col gap-4">
-                            
-                            <UpcomingEvents onViewDetails={handleViewDetails} />
-                            <RecentEvents />
-                        </div> */}
-                        
-                        <div className="h-[100%]">
+                        <div className="h-[90%] flex flex-col gap-2">
+                            <div className="h-auto">
+                                <UpcomingEvents onViewDetails={handleViewDetails} />
+                            </div>
+                            <div className="h-auto">
+                                <RecentEvents />
+                            </div>
+                        </div>
+
+                        <div className="h-[98%]">
                             <AddEventForm />
                         </div>
                     </div>
