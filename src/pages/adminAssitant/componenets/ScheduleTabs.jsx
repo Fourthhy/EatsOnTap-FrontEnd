@@ -12,7 +12,6 @@ function ScheduleTabs({ children, selectedTab, onTabChange }) {
                             width: "fit-content",
                             height: "fit-content",
                             paddingLeft: 15,
-                            fontFamily: "geist",
                         }}
                     >
                         Eligible Programs
@@ -26,7 +25,6 @@ function ScheduleTabs({ children, selectedTab, onTabChange }) {
                             width: "fit-content",
                             height: "fit-content",
                             paddingLeft: 15,
-                            fontFamily: "geist",
                         }}
                     >
                         For Higher Education Students

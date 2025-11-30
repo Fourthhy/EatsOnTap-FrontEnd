@@ -398,7 +398,7 @@ export const AddEventForm = () => {
                                         className="hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                                         style={{
                                             padding: '8px 12px', borderRadius: '6px', display: 'flex',
-                                            alignItems: 'center', gap: '4px', fontSize: '0.875rem',
+                                            alignItems: 'center', gap: '4px',
                                             color: '#4b5563', backgroundColor: 'transparent',
                                             border: 'none', cursor: 'pointer', fontFamily: "geist",
                                             fontSize: 12, fontWeight: 450
@@ -417,7 +417,7 @@ export const AddEventForm = () => {
                                                 className={`${currentPage === pageNumber ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'}`}
                                                 style={{
                                                     width: '32px', height: '32px', borderRadius: '6px',
-                                                    fontSize: '0.875rem', display: 'flex', alignItems: 'center',
+                                                    display: 'flex', alignItems: 'center',
                                                     justifyContent: 'center', border: 'none', cursor: 'pointer',
                                                     fontFamily: "geist", fontSize: 12, fontWeight: 450
                                                 }}
@@ -434,7 +434,7 @@ export const AddEventForm = () => {
                                         disabled={currentPage === totalPages}
                                         className="hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                                         style={{
-                                            padding: '8px 12px', borderRadius: '6px', fontSize: '0.875rem',
+                                            padding: '8px 12px', borderRadius: '6px',
                                             color: '#4b5563', backgroundColor: '#f3f4f6', display: 'flex',
                                             alignItems: 'center', gap: '4px', border: 'none', cursor: 'pointer',
                                             fontFamily: "geist", fontSize: 12, fontWeight: 450

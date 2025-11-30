@@ -386,7 +386,7 @@ const LinkIDModal = ({ isOpen, onClose, student }) => {
 
                     {/* RFID Scan Input */}
                     <div style={{ position: 'relative' }}>
-                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '8px', alignItems: 'center', gap: '8px' }}>
                             <Wifi size={16} style={{ color: '#3b82f6' }} /> Scan RFID Tag:
                         </label>
                         <input
