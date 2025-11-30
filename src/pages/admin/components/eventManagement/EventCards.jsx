@@ -188,7 +188,7 @@ export const UpcomingEvents = ({ onViewDetails }) => {
                                     </div>
                                     <div style={{ marginLeft: '1.25rem' }}>
                                         <button
-                                            onClick={() => onViewDetails(event.id)}
+                                            onClick={() => onViewDetails(event.id, "upcoming")}
                                             className="text-blue-600 text-xs cursor-pointer font-medium hover:underline"
                                             style={{ backgroundColor: 'transparent', border: 'none', fontFamily: "geist", fontWeight: 400 }}
                                         >
@@ -238,7 +238,7 @@ export const UpcomingEvents = ({ onViewDetails }) => {
 };
 
 // 3. Bottom Right: Recent Events
-export const RecentEvents = () => {
+export const RecentEvents = ({ onViewDetails }) => {
     const [showModal, setShowModal] = useState(false);
 
     const headerLabelStyle = {
@@ -307,6 +307,7 @@ export const RecentEvents = () => {
                                     <div style={{ marginLeft: '1.25rem' }}>
                                         <button
                                             className="text-blue-600 hover:underline"
+                                            onClick={() => onViewDetails(event.id, "recent")}
                                             style={{ backgroundColor: 'transparent', border: 'none', fontSize: 12, cursor: 'pointer', fontFamily: "geist", fontWeight: 400 }}
                                         >
                                             View details

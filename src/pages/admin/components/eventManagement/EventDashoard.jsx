@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { AddEventForm } from './AddEventForm';
 import { UpcomingEvents, RecentEvents } from './EventCards'; // Assuming you keep these components in EventCards.jsx or similar
 import { ViewUpcomingEvent } from './ViewUpcomingEvent';
+import { ViewRecentEvent } from './ViewRecentEvent';
 
 // --- MAIN LAYOUT ---
 
 const VIEWS = {
     DASHBOARD: 'DASHBOARD',
-    VIEW_EVENT: 'VIEW_EVENT',
+    VIEW_UPCOMING_EVENT: 'VIEW_UPCOMING_EVENT',
+    VIEW_RECENT_EVENT: 'VIEW_RECENT_EVENT',
 };
 
 export function EventDashboard() {
@@ -16,9 +18,11 @@ export function EventDashboard() {
     const [selectedEventId, setSelectedEventId] = useState(null); // To pass data to the detail screen
 
     // Function passed down to UpcomingEvents to trigger the view change
-    const handleViewDetails = (eventId) => {
+    const handleViewDetails = (eventId, eventType) => {
         setSelectedEventId(eventId);
-        setCurrentView(VIEWS.VIEW_EVENT);
+        if (eventType === "upcoming") {setCurrentView(VIEWS.VIEW_UPCOMING_EVENT);}
+        if (eventType === "recent") {setCurrentView(VIEWS.VIEW_RECENT_EVENT);}
+        
     };
 
     // Function to go back to the dashboard view (can be passed to ViewUpcomingEvent)
@@ -57,9 +61,14 @@ export function EventDashboard() {
     let content = (
         <>
             {/* View Event */}
-            {currentView === VIEWS.VIEW_EVENT ? (
+            {currentView === VIEWS.VIEW_UPCOMING_EVENT ? (
                 <div className="h-full w-full">
                     <ViewUpcomingEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
+                </div>
+            ) 
+            : currentView === VIEWS.VIEW_RECENT_EVENT ? (
+                <div className="h-full w-full">
+                    <ViewRecentEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
                 </div>
             ) : (
                 <>
@@ -71,7 +80,7 @@ export function EventDashboard() {
                                 <UpcomingEvents onViewDetails={handleViewDetails} />
                             </div>
                             <div className="h-auto">
-                                <RecentEvents />
+                                <RecentEvents onViewDetails={handleViewDetails}/>
                             </div>
                         </div>
 
