@@ -12,7 +12,7 @@ import { EventsPanel } from "./components/EventsPanel";
 import { AnalyticTabs } from "./components/AnalyticTabs";
 import { MealAllowanceCard } from "./components/MealAllowanceCard";
 import { DatePicker } from "./components/DatePicker"
-import { HeaderBar } from "./components/Headerbar"
+import { HeaderBar } from "./components/HeaderBar"
 
 import { useOutletContext } from 'react-router-dom';
 import { Menu } from "lucide-react"

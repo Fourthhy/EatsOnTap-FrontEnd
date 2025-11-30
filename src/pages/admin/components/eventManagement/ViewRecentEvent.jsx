@@ -17,7 +17,7 @@ const twColors = {
 const MIN_ITEMS = 5;
 const MAX_ITEMS = 12;
 // Estimated height of a single list item (0.75rem padding top + 0.75rem padding bottom + 1px border + font ~ 45px)
-const ITEM_HEIGHT_ESTIMATE_PX = 45; 
+const ITEM_HEIGHT_ESTIMATE_PX = 45;
 
 function ViewRecentEvent() {
     // Mock data (14 items total)
@@ -37,7 +37,7 @@ function ViewRecentEvent() {
         { name: "Grade 11", total: 25 },
         { name: "Grade 12", total: 25 },
     ];
-    
+
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(MAX_ITEMS); // Default to max, will adjust on mount
     const [pageNumbers, setPageNumbers] = useState([]);
@@ -57,12 +57,12 @@ function ViewRecentEvent() {
             const entry = entries[0];
             // 1. Get the total height of the white box container
             const totalWrapperHeight = entry.contentRect.height;
-            
+
             // 2. Define heights of static elements inside that box
             // Header: ~20px text + 0.5rem(8px) margin + 0.5rem(8px) padding + 1px border = approx 37-40px. 
             // We use 45px to be safe.
-            const HEADER_SPACE = 45; 
-            
+            const HEADER_SPACE = 45;
+
             // Padding: The wrapper has p-4 (1rem = 16px) on top and bottom. Total 32px.
             const WRAPPER_PADDING = 32;
 
@@ -80,7 +80,7 @@ function ViewRecentEvent() {
             // We ensure it doesn't drop below 0 if screen is tiny
             const safeCalculation = Math.max(0, calculatedMaxItems);
             let newItemsPerPage = Math.max(MIN_ITEMS, Math.min(MAX_ITEMS, safeCalculation));
-            
+
             setItemsPerPage(prev => {
                 if (prev !== newItemsPerPage) {
                     // Only log/update if it actually changes
@@ -135,7 +135,7 @@ function ViewRecentEvent() {
 
             <div style={{ width: '100%', height: '100%', display: 'grid', gridTemplateColumns: '2% 96% 2%' }}>
                 <div style={{ height: 'calc(100% - 10px)' }}>
-                    <div 
+                    <div
                         className="cursor-pointer hover:bg-gray-100"
                         style={{ marginTop: '1rem', borderRadius: '9999px', padding: '0.25rem', width: 'fit-content' }}
                     >
@@ -143,33 +143,33 @@ function ViewRecentEvent() {
                     </div>
                 </div>
 
-                <div 
-                    style={{ 
-                        width: '100%', 
-                        height: 'calc(100% - 10px)', 
-                        display: 'flex', 
-                        alignItems: 'flex-start', 
-                        justifyContent: 'center', 
-                        backgroundColor: 'white', 
-                        borderRadius: 8 
+                <div
+                    style={{
+                        width: '100%',
+                        height: 'calc(100% - 10px)',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'center',
+                        backgroundColor: 'white',
+                        borderRadius: 8
                     }}
                 >
 
-                    <div 
-                        style={{ 
-                            width: '100%', 
-                            height: '100%', 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            padding: 10 
+                    <div
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            padding: 10
                         }}
                     >
                         {/*HEADER*/}
-                        <div 
-                            style={{ 
-                                height: '50px', 
-                                width: '100%', 
-                                display: 'flex', 
+                        <div
+                            style={{
+                                height: '50px',
+                                width: '100%',
+                                display: 'flex',
                                 justifyContent: 'space-between',
                                 flexShrink: 0
                             }}
@@ -201,86 +201,96 @@ function ViewRecentEvent() {
                         </div>
 
                         {/*BODY*/}
-                        <div 
-                            style={{ 
-                                width: '100%', 
-                                flex: '1 1 0%', 
-                                display: 'grid', 
-                                gridTemplateColumns: 'repeat(2, 1fr)', 
-                                gap: '1rem', 
+                        <div
+                            style={{
+                                width: '100%',
+                                flex: '1 1 0%',
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(2, 1fr)',
+                                gap: '1rem',
                                 paddingTop: 15,
-                                overflow: 'hidden' 
+                                overflow: 'hidden'
                             }}
                         >
                             {/*LEFT SIDE CONTENT*/}
-                            <div 
-                                style={{ 
-                                    height: '100%', 
-                                    width: '100%', 
-                                    display: 'flex', 
-                                    flexDirection: 'column' 
+                            <div
+                                style={{
+                                    height: '100%',
+                                    width: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column'
                                 }}
                             >
                                 {/* Inputs Row */}
-                                <div 
-                                    style={{ 
-                                        display: 'flex', 
+                                <div
+                                    style={{
+                                        display: 'flex',
                                         flexDirection: 'column',
-                                        width: '100%', 
-                                        gap: '1rem', 
-                                        marginBottom: 20, 
+                                        width: '100%',
+                                        gap: '1rem',
+                                        marginBottom: 20,
                                         flexShrink: 0
                                     }}
                                 >
-                                    <div style={{ flex: '1 1 0%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><label className="font-geist" style={{ fontSize: '0.875rem', color: twColors['black'], flexShrink: 0, fontWeight: 500, marginRight: '0.5rem' }}>Event Name:</label><input type="text" defaultValue="Teachers' Day" className="focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-geist" style={{ width: '100%', backgroundColor: '#F3F4F8', height: '40px', color: twColors['gray-700'], paddingLeft: '0.75rem', paddingRight: '0.75rem', borderRadius: 4, fontSize: 13 }}/></div>
-                                    <div style={{ flex: '1 1 0%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><label className="font-geist" style={{ fontSize: '0.875rem', color: twColors['black'], flexShrink: 0, fontWeight: 500, marginRight: '0.5rem' }}>Department/s:</label><input type="text" defaultValue="All Departments" className="focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-geist" style={{ width: '100%', backgroundColor: '#F3F4F8', height: '40px', color: twColors['gray-700'], paddingLeft: '0.75rem', paddingRight: '0.75rem', borderRadius: 4, fontSize: 13 }}/></div>
+                                    <div style={{ flex: '1 1 0%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <label className="font-geist" style={{ fontSize: '0.875rem', color: twColors['black'], flexShrink: 0, fontWeight: 500, marginRight: '0.5rem' }}>
+                                            Event Name:
+                                        </label>
+                                        <input type="text" defaultValue="Teachers' Day" className="focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-geist" style={{ width: '100%', backgroundColor: '#F3F4F8', height: '40px', color: twColors['gray-700'], paddingLeft: '0.75rem', paddingRight: '0.75rem', borderRadius: 4, fontSize: 13 }} />
+                                    </div>
+                                    <div style={{ flex: '1 1 0%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <label className="font-geist" style={{ fontSize: '0.875rem', color: twColors['black'], flexShrink: 0, fontWeight: 500, marginRight: '0.5rem' }}>
+                                            Department/s:
+                                        </label>
+                                        <input type="text" defaultValue="All Departments" className="focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-geist" style={{ width: '100%', backgroundColor: '#F3F4F8', height: '40px', color: twColors['gray-700'], paddingLeft: '0.75rem', paddingRight: '0.75rem', borderRadius: 4, fontSize: 13 }} />
+                                    </div>
                                 </div>
 
                                 {/* TABLE SECTION */}
-                                <div 
-                                    className="font-geist" 
-                                    style={{ 
-                                        width: '100%', 
-                                        display: 'flex', 
-                                        flexDirection: 'column', 
-                                        flex: '1 1 0%', 
-                                        overflow: 'hidden' 
+                                <div
+                                    className="font-geist"
+                                    style={{
+                                        width: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        flex: '1 1 0%',
+                                        overflow: 'hidden'
                                     }}
                                 >
                                     <label style={{ fontSize: '0.875rem', color: twColors['black'], fontWeight: 500, marginBottom: '0.5rem', display: 'block', flexShrink: 0 }}>
                                         Sections/Programs:
                                     </label>
-                                    
+
                                     {/* TABLE WRAPPER - Observed by ResizeObserver */}
-                                    <div 
+                                    <div
                                         ref={tableWrapperRef}
-                                        style={{ 
-                                            borderWidth: '1px', 
-                                            borderColor: twColors['gray-100'], 
-                                            borderRadius: '0.5rem', 
-                                            padding: '1rem', 
-                                            display: 'flex', 
-                                            flexDirection: 'column', 
+                                        style={{
+                                            borderWidth: '1px',
+                                            borderColor: twColors['gray-100'],
+                                            borderRadius: '0.5rem',
+                                            padding: '1rem',
+                                            display: 'flex',
+                                            flexDirection: 'column',
                                             flex: '1 1 0%', // Grows/Shrinks with screen
-                                            backgroundColor: 'white', 
+                                            backgroundColor: 'white',
                                             boxShadow: '0px 0px 4px rgba(0,0,0,0.05)',
                                             minHeight: 0 // Crucial for flex shrinking
                                         }}
                                     >
                                         {/* Table Header */}
-                                        <div 
-                                            style={{ 
-                                                display: 'flex', 
-                                                justifyContent: 'space-between', 
-                                                fontSize: '0.75rem', 
-                                                color: twColors['gray-400'], 
-                                                paddingBottom: '0.5rem', 
-                                                borderBottomWidth: '1px', 
-                                                borderBottomColor: twColors['gray-50'], 
-                                                marginBottom: '0.5rem', 
-                                                paddingLeft: '0.5rem', 
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                fontSize: '0.75rem',
+                                                color: twColors['gray-400'],
+                                                paddingBottom: '0.5rem',
+                                                borderBottomWidth: '1px',
+                                                borderBottomColor: twColors['gray-50'],
+                                                marginBottom: '0.5rem',
+                                                paddingLeft: '0.5rem',
                                                 paddingRight: '0.5rem',
-                                                flexShrink: 0, 
+                                                flexShrink: 0,
                                             }}
                                         >
                                             <span>All</span>
@@ -288,9 +298,9 @@ function ViewRecentEvent() {
                                         </div>
 
                                         {/* List Content */}
-                                        <div 
-                                            style={{ 
-                                                flexGrow: 1, 
+                                        <div
+                                            style={{
+                                                flexGrow: 1,
                                                 overflowY: 'hidden', // No scrolling
                                                 paddingRight: '0.25rem',
                                                 display: 'flex',
@@ -298,22 +308,22 @@ function ViewRecentEvent() {
                                             }}
                                         >
                                             {currentItems.map((section, index) => (
-                                                <div 
-                                                    key={index} 
+                                                <div
+                                                    key={index}
                                                     className="hover:bg-gray-50"
-                                                    style={{ 
-                                                        display: 'flex', 
-                                                        justifyContent: 'space-between', 
-                                                        alignItems: 'center', 
-                                                        paddingTop: '0.75rem', 
-                                                        paddingBottom: '0.75rem', 
-                                                        borderBottomWidth: '1px', 
-                                                        borderBottomColor: twColors['gray-50'], 
-                                                        fontSize: '0.875rem', 
-                                                        color: twColors['gray-800'], 
-                                                        paddingLeft: '0.5rem', 
+                                                    style={{
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        paddingTop: '0.75rem',
+                                                        paddingBottom: '0.75rem',
+                                                        borderBottomWidth: '1px',
+                                                        borderBottomColor: twColors['gray-50'],
+                                                        fontSize: '0.875rem',
+                                                        color: twColors['gray-800'],
+                                                        paddingLeft: '0.5rem',
                                                         paddingRight: '0.5rem',
-                                                        height: ITEM_HEIGHT_ESTIMATE_PX, 
+                                                        height: ITEM_HEIGHT_ESTIMATE_PX,
                                                         flexShrink: 0
                                                     }}
                                                 >
@@ -321,11 +331,11 @@ function ViewRecentEvent() {
                                                     <span>{section.total}</span>
                                                 </div>
                                             ))}
-                                            
+
                                             {/* Padding Divs (to maintain visual consistency if items < limit) */}
-                                            {currentItems.length < itemsPerPage && 
+                                            {currentItems.length < itemsPerPage &&
                                                 Array(itemsPerPage - currentItems.length).fill(0).map((_, index) => (
-                                                    <div 
+                                                    <div
                                                         key={`pad-${index}`}
                                                         style={{
                                                             height: ITEM_HEIGHT_ESTIMATE_PX,
@@ -338,14 +348,14 @@ function ViewRecentEvent() {
                                         </div>
 
                                         {/* Pagination Footer */}
-                                        <div 
+                                        <div
                                             ref={footerRef}
-                                            style={{ 
-                                                display: 'flex', 
-                                                alignItems: 'center', 
-                                                justifyContent: 'center', 
-                                                gap: '1rem', 
-                                                paddingTop: '1rem', 
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '1rem',
+                                                paddingTop: '1rem',
                                                 marginTop: 'auto',
                                                 flexShrink: 0,
                                                 opacity: totalPages <= 1 ? 0 : 1, // Hide visually if 1 page but keep height for math
@@ -360,10 +370,10 @@ function ViewRecentEvent() {
                                             >
                                                 <ChevronLeft size={16} style={{ marginRight: '0.25rem' }} /> Previous
                                             </button>
-                                            
+
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.75rem', fontWeight: 500, color: twColors['gray-600'] }}>
                                                 {pageNumbers.map((page, index) => (
-                                                    <span 
+                                                    <span
                                                         key={index}
                                                         onClick={() => page !== '...' && setCurrentPage(page)}
                                                         className={`cursor-pointer ${page === currentPage ? 'text-black' : 'hover:text-black'}`}
@@ -402,4 +412,4 @@ function ViewRecentEvent() {
     );
 }
 
-export {ViewRecentEvent};
+export { ViewRecentEvent };
