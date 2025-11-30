@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AddEventForm } from './AddEventForm';
 import { UpcomingEvents, RecentEvents } from './EventCards'; // Assuming you keep these components in EventCards.jsx or similar
-import { ViewRecentEvent } from './ViewRecentEvent';
+import { ViewUpcomingEvent } from './ViewUpcomingEvent';
 
 // --- MAIN LAYOUT ---
 
@@ -59,7 +59,7 @@ export function EventDashboard() {
             {/* View Event */}
             {currentView === VIEWS.VIEW_EVENT ? (
                 <div className="h-full w-full">
-                    <ViewRecentEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
+                    <ViewUpcomingEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
                 </div>
             ) : (
                 <>

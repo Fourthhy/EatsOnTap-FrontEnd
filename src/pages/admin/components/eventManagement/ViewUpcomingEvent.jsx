@@ -164,7 +164,7 @@ const AvatarPlaceholder = ({ name }) => {
 };
 
 
-function ViewRecentEvent() {
+function ViewUpcomingEvent({ eventID, onBackToDashboard }) {
     // 1. DATA: Sections
     const sections = [
         { name: "Pre-kinder", total: 12 }, { name: "Kinder", total: 15 },
@@ -204,7 +204,7 @@ function ViewRecentEvent() {
 
             <div style={{ width: '100%', height: '100%', display: 'grid', gridTemplateColumns: '2% 96% 2%' }}>
                 <div style={{ height: 'calc(100% - 10px)' }}>
-                    <div className="cursor-pointer hover:bg-gray-100" style={{ marginTop: '1rem', borderRadius: '9999px', padding: '0.25rem', width: 'fit-content' }}>
+                    <div className="cursor-pointer hover:bg-gray-100" style={{ marginTop: '1rem', borderRadius: '9999px', padding: '0.25rem', width: 'fit-content' }} onClick={onBackToDashboard}>
                         <ChevronLeft />
                     </div>
                 </div>
@@ -344,4 +344,4 @@ function ViewRecentEvent() {
     );
 }
 
-export { ViewRecentEvent };
+export { ViewUpcomingEvent };
