@@ -39,7 +39,7 @@ export function EventDashboard() {
         fontFamily: 'sans-serif',
         display: 'flex',
         gap: '2rem',
-        overflow: 'auto',
+        overflow: 'hidden',
     };
 
     const columnStyle = {

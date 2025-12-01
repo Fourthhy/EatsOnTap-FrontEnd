@@ -8,7 +8,7 @@ export default function VoucherManagement() {
             <div
                 style={{
                     backgroundColor: "#F7F9F9",
-                    marginBottom: "30px"
+                    marginBottom: "30px",
                 }}
                 className="w-full h-auto flex flex-col justify-start">
                 <HeaderBar userAvatar={USER_AVATAR} headerTitle={"Voucher Management"} />
