@@ -233,7 +233,7 @@ export const UpcomingEvents = ({ onViewDetails }) => {
                     }}
                 />
             )}
-        </>
+        </> 
     );
 };
 
