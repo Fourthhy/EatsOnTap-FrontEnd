@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Search, Calendar, ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
-
+import { IoGrid } from "react-icons/io5";
 // --- Import Child Components ---
 import { PendingOrdersTable } from './PendingOrdersTable';
 import { ConfirmedOrdersTable } from './ConfirmedOrdersTable';
@@ -277,7 +277,7 @@ const MealOrdersTable = () => {
                                 <Search style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#4C4B4B' }} size={18} />
                                 <input
                                     type="text" placeholder="Search" className="focus:ring-2 focus:ring-[#4268BD] outline-none"
-                                    style={{ fontFamily: "geist", fontSize: 12, fontWeight: 400, width: '100%', paddingLeft: '2.5rem', paddingRight: '1rem', paddingTop: "8px", paddingBottom: "8px", backgroundColor: "#F0F1F6", border: 'none', borderRadius: 50, fontSize: '0.875rem' }}
+                                    style={{ fontFamily: "geist", fontSize: 12, fontWeight: 400, width: '100%', paddingLeft: '2.5rem', paddingRight: '1rem', paddingTop: "8px", paddingBottom: "8px", backgroundColor: "#F0F1F6", border: 'none', borderRadius: 50 }}
                                     value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
