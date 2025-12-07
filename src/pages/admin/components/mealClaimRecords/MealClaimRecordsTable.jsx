@@ -11,7 +11,7 @@ const MAX_ITEMS = 13;
 // Estimated row height (based on py-4 + font size + border) ~65px
 const ITEM_HEIGHT_ESTIMATE_PX = 45; 
 
-const MealClaimRecords = () => {
+const MealClaimRecordsTable = () => {
     
     // --- STATE ---
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -414,4 +414,4 @@ const MealClaimRecords = () => {
     );
 };
 
-export { MealClaimRecords };
+export { MealClaimRecordsTable };
