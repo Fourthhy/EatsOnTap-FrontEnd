@@ -30,7 +30,7 @@ function ClaimsPanel({ claims }) {
         <div key={claim.id} style={{
           display: "flex",
           alignItems: "center", gap: 14,
-          marginBottom: 13, background: "rgba(220, 224, 249, 0.5)", padding: "10px 0px 10px 10px",
+          marginBottom: 13, background: "#dce0f980", padding: "10px 0px 10px 10px",
           borderRadius: 6
         }}>
           <img src={claim.avatarUrl} alt={claim.name} style={{ width: 28, borderRadius: "50%", border: "2px solid #E4EAFA" }} />

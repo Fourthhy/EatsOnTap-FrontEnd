@@ -2,7 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoutes";
 import Login from "../Login";
 import AdminDashboard from "../pages/admin/AdminDashboard"
-import AdminAssistantDashboard from "../pages/adminAssitant/AdminAssistantDashboard";
+import AdminAssistantLanding from "../pages/adminAssitant/AdminAssistantLanding";
+import AdminAssistantDashboard from "../pages/adminAssitant/AdminAssistantDashboard"
 import FoodItemClaim from "../pages/canteenStaff/FoodItemClaim";
 import ChancellorDashboard from "../pages/chancellor/ChancellorDashboard";
 import SubmitMealList from "../pages/classAdviser/SubmitMealList";
@@ -12,6 +13,17 @@ import SuperAdminDashboard from "../pages/superAdmin/SuperAdminDashboard";
 import SidebarLayout from "../components/custom/SidebarLayout";
 import ClassAdviserLanding from "@/pages/classAdviser/ClassAdviserLanding";
 import AdminLanding from "@/pages/admin/AdminLanding";
+
+import MealRecipientOrder from "../pages/admin/MealRecipientOrder";
+import Records from "../pages/admin/Records";
+import ScheduleStudentEligibility from "../pages/admin/ScheduleStudentEligibility";
+import VoucherManagement from "../pages/admin/VoucherManagement";
+
+import BSISMealClaim from "../pages/foodServer/BSISMealClaim";
+import BSAMealClaim from "../pages/foodServer/BSAMealClaim";
+import BSAISMealClaim from "../pages/foodServer/BSAISMealClaim";
+import BSSWMealClaim from "../pages/foodServer/BSSWMealClaim";
+import BABMealClaim from "../pages/foodServer/BABMealClaim";
 
 export default function Routers() {
     return (
@@ -28,13 +40,21 @@ export default function Routers() {
                             <AdminLanding />
                         </ProtectedRoute>
                     }>
-                        <Route path="landing" element={<AdminDashboard />} />
+                        <Route index element={<AdminDashboard />} />
+                        <Route path="dashboard" element={<AdminDashboard />} />
+                        <Route path="voucher" element={<VoucherManagement />} /> 
+                        <Route path="schedule" element={<ScheduleStudentEligibility />} /> 
+                        <Route path="order" element={<MealRecipientOrder />} /> 
+                        <Route path="record" element={<Records />} /> 
+
                     </Route>
                     <Route path="/adminAssistant" element={
                         <ProtectedRoute>
-                            <AdminAssistantDashboard />
+                            <AdminAssistantLanding />
                         </ProtectedRoute>
-                    } />
+                    }>
+                        <Route index element={<AdminAssistantDashboard />} />
+                    </Route>
                     <Route path="/canteenStaff" element={
                         <ProtectedRoute>
                             <FoodItemClaim />
@@ -61,6 +81,31 @@ export default function Routers() {
                         <ProtectedRoute>
                             <SuperAdminDashboard />
                         </ProtectedRoute>
+                    } />
+                    <Route path="/bsisMealClaim" element={
+                        <>
+                            <BSISMealClaim />
+                        </>
+                    } />
+                    <Route path="/bsaMealClaim" element={
+                        <>
+                            <BSAMealClaim />
+                        </>
+                    } />
+                    <Route path="/bsaisMealClaim" element={
+                        <>
+                            <BSAISMealClaim />
+                        </>
+                    } />
+                    <Route path="/bsswMealClaim" element={
+                        <>
+                            <BSSWMealClaim />
+                        </>
+                    } />
+                    <Route path="/babMealClaim" element={
+                        <>
+                            <BABMealClaim />
+                        </>
                     } />
                 </Routes>
             </Router>

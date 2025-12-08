@@ -2,6 +2,7 @@ import React from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 function CustomTooltip({ active, payload, label }) {
+
   if (active && payload && payload.length) {
     return (
       <div
@@ -47,18 +48,17 @@ function CustomTooltip({ active, payload, label }) {
   return null;
 }
 
-
 function CustomLegend({ payload }) {
   return (
-    <div style={{ display: "flex", gap: 20, alignItems: "center", justifyContent: "center" }}>
+    <div style={{ display: "flex", gap: 20, alignItems: "center", justifyContent: "end", marginTop: 10, paddingBottom: 10 }}>
       {payload.map((entry) => (
-        <div key={entry.value} style={{ width: "full", display: "flex", alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 6 }}>
+        <div key={entry.value} style={{ display: "flex", alignItems: "center", flexDirection: "row", gap: 6 }}>
           {/* Colored square/box */}
           <div style={{
             width: 12,
             height: 12,
             background: entry.color,
-            borderRadius: 2,   // use full 0 for hard square
+            borderRadius: 2,
             marginRight: 4
           }} />
           <span style={{
@@ -75,42 +75,44 @@ function CustomLegend({ payload }) {
   );
 }
 
-
 function LineChartBox({ data }) {
+  const geistTickStyle = { fontFamily: 'geist', fontSize: 12, fill: '#666' };
+
+
   return (
-    <div style={{ background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px #eee", padding: 20 }}>
-      <div
-        style={{ padding: "5px 0px 5px 10px" }}
-        className="w-full h-auto">
-        <h3 style={{ fontFamily: "geist", color: "#4C4B4B", fontSize: 15, fontWeight: '500' }}>Student Meal Claim Trends</h3>
-        <p style={{ fontFamily: "geist", fontSize: 12, fontWeight: '400', color: "#475569" }}>January 2025 - June 2025</p>
-      </div>
-      <ResponsiveContainer width="100%" height={230}>
+    <div style={{ width: "100%", height: 230, marginRight: 10 }}>
+      {/* FIX: Changed width="full" to width="100%" */}
+      <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
+          <CartesianGrid stroke="#e6e6e6" vertical={false} />
           <XAxis
             dataKey="dataSpan"
-            tick={{
-              fontFamily: "geist",      // Your custom font
-              fontSize: 13,             // Increase or decrease for readability
-              fontWeight: 500,          // Bold or medium
-              color: "#6C778B"
-            }}
-            tickLine={false}            // Hide tick lines for cleaner look
+            tick={geistTickStyle}
+            tickLine={false}
+            axisLine={false}
+            dy={10} // Adds padding between chart and labels
           />
+          <YAxis
+            hide={false} // Ensure YAxis is visible, or set to true to hide lines but keep scale
+            tickLine={false}
+            axisLine={false}
+            tick={geistTickStyle}
+          />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#eaebec', strokeWidth: 2 }} />
 
-          <YAxis />
-          <Tooltip content={<CustomTooltip />} />
-          <CartesianGrid stroke="#e6e6e6" />
-          <Line type="linear" dataKey="Pre-packed Food" stroke="#1C6E81" strokeWidth={2} />
-          <Line type="linear" dataKey="Customized Order" stroke="#6C43A7" strokeWidth={2} />
-          <Line type="linear" dataKey="Unused vouchers" stroke="#D13B3B" strokeWidth={2} />
-          <Legend content={<CustomLegend />} alignItems={"center"} />
+          <Line type="linear" dataKey="Pre-packed Food" stroke="#21198cff" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+          <Line type="linear" dataKey="Customized Order" stroke="#3836b2ff" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+          <Line type="linear" dataKey="Unused vouchers" stroke="#D13B3B" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+
+          <Legend
+            content={<CustomLegend />} 
+            verticalAlign="top"
+            align="end"
+            />
         </LineChart>
       </ResponsiveContainer>
     </div>
   );
 }
 
-export {
-  LineChartBox
-}
+export { LineChartBox };

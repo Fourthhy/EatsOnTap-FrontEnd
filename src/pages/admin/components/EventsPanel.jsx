@@ -33,7 +33,7 @@ function EventsPanel({ events }) {
             style={{
               padding: "10px 10px 10px 20px",
               margin: "0px 10px 0px 10px",
-              background: "rgba(199, 234, 242, 0.5)"
+              background: "#c7eaf280"
             }}
             className="rounded-lg flex justify-between items-center">
             <div

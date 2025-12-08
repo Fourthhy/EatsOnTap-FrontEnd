@@ -1,6 +1,6 @@
-import { logout } from "../../functions/logoutAuth"
-import { Button } from "../../components/ui/button"
-import { useNavigate } from "react-router-dom"
+import { logout } from "../../functions/logoutAuth";
+import { Button } from "../../components/ui/button";
+import { useNavigate } from "react-router-dom";
 import logo from "/lv-logo.svg";
 
 
@@ -9,29 +9,37 @@ export default function FreeMealClaim() {
 
     const handleLogout = () => {
         logout();
-        navigate('/'); // redirect to login/home
+        navigate("/");
     };
-    return (
-        <>
-            <div className="bg-gradient-to-b from-[#153FA3] to-[#142345] h-screen w-full overflow-auto font-[geist]">
-                <div className="text-white">
-                <div className="flex flex-col w-1/2 h-full items-center justify-center">
-                {/* Left Side */}
-                
-                    <div className="flex flex-col items-center">
-                        <img src={logo} alt="" className="h-[155px] " style={{marginBottom: '50px'}}/>
-                        <p className="text-[28px] font-tolkien text-white">LA VERDAD CHRISTIAN COLLEGE, INC.</p>
-                        <p className="italic">MacArthur Highway, Sampaloc, Apalit, Pampanga 2016</p>
-                    </div>
-                    <div className="" style={{marginLeft: '30px'
-                        , marginTop: '30px'
-                    }}>
-                        <p className="text-[16px]">Hi, Good Morning!</p>
-                        <p className="text-[30px]">La Verdarians</p>
-                    </div>
 
-                    {/* Card */}
-                    <div className=" border border-white/40 rounded-tl-[32px] rounded-br-[32px] w-[550px] bg-white/15 shadow-xl/20 "
+    return (
+        <div className="flex object-fit h-screen w-full font-[geist] bg-[url(/MealClaim/BGDefaultClaim.svg)] bg-no-repeat bg-cover overflow-hidden">
+            {/* LEFT SIDE */}
+            <div className="w-1/2 h-full  text-white flex flex-col items-center justify-center px-4">
+
+                {/* SCHOOL LOGO + TEXT */}
+                <div className="flex flex-col items-center mt-[-40px]"
+                style={{marginTop: '100px',
+                }}>
+                    <img src={logo} className="h-[155px] mb-6" />
+
+                    <p className="text-[26px] font-tolkien">LA VERDAD CHRISTIAN COLLEGE, INC.</p>
+                    <p className="italic text-sm opacity-80">
+                        MacArthur Highway, Sampaloc, Apalit, Pampanga 2016
+                    </p>
+                {/* GREETING */}
+                <div className="w-full"
+                style={{marginLeft: '10px',
+                    marginTop: '40px',
+                }}>
+                    <p className="text-[16px]">Hi, Good Morning!</p>
+                    <p className="text-[32px] font-semibold">La Verdarians!</p>
+                </div>
+                </div>
+
+
+                {/* Card */}
+                    <div className=" border border-white/40 ounded-tl-[32px] rounded-br-[32px] w-[550px] bg-white/15 shadow-xl/20 "
                     style={{padding: '8px',
                         marginTop: '30px',
                     }}>
@@ -67,16 +75,19 @@ export default function FreeMealClaim() {
                         <p className="text-[10px] mt-6 opacity-70">Powered by: </p>
                         <p className="text-[13px]">BSIS4 Batch 2025</p>
                     </div>
-                </div>
-                </div>
-
-
-
-            This is free meal claim for food server
-            <Button onClick={handleLogout}>
-                Log out
-            </Button>
             </div>
-        </>
-    )
+
+            {/* RIGHT SIDE */}
+            <div className="w-1/2  h-full rounded-tl-lg  flex flex-col items-center justify-center relative">
+
+                {/* FREE LUNCH LABEL */}
+                <div className=" top-10 right-14 flex items-center gap-2">
+                    
+                </div>
+
+                {/* FOOD IMAGE */}
+                
+            </div>
+        </div>
+    );
 }

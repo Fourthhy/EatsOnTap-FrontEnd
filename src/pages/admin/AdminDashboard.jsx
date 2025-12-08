@@ -1,59 +1,229 @@
-    import { logout } from "../../functions/logoutAuth"
-    import { Button } from "../../components/ui/button"
-    import { useNavigate } from "react-router-dom"
-    import { StatsCard } from "./components/StatsCard";
-    import { StatsCardGroup } from "./components/StatsCardGroup"
-    import { PieChartBox } from "./components/PieChartBox";
-    import { BarChartBox } from "./components/BarChartBox";
-    import { LineChartBox } from "./components/LineChartBox";
-    import { QuickActions } from "./components/QuickActions";
-    import { EventsPanel } from "./components/EventsPanel";
-    import { ClaimsPanel } from "./components/ClaimsPanel";
-    import { GreetingCard } from "./components/GreetingCard";
-    import { useOutletContext } from 'react-router-dom';
-    import { Menu } from "lucide-react"
-    import { RiNotification2Fill } from "react-icons/ri";
-
-    // Example logo API usage
-    const SCHOOL_LOGO = "https://logo.clearbit.com/up.edu.ph";
-    const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
-
-    export default function AdminDashboard({ data }) {
+import { useState } from "react"
+import { useDate } from "./components/DatePicker"
+import { BandedChartTADMC } from "./components/charts/BandedChartTADMC"
+import { BandedChartCUR } from "./components/charts/BandedChartCUR"
+import { BandedChartOCF } from "./components/charts/BandedChartOCF"
+import { CustomStatsCard } from "./components/CustomStatsCard"
+import { StatsCardGroup } from "./components/StatsCardGroup"
+import { BarChartBox } from "./components/charts/BarChartBox";
+import { LineChartBox } from "./components/charts/LineChartBox";
+import { QuickActions } from "./components/QuickActions";
+import { EventsPanel } from "./components/EventsPanel";
+import { AnalyticTabs } from "./components/AnalyticTabs";
+import { MealAllowanceCard } from "./components/MealAllowanceCard";
+import { DatePicker } from "./components/DatePicker"
+import { useOutletContext } from 'react-router-dom';
+import { Menu } from "lucide-react"
+import { RiNotification2Fill } from "react-icons/ri";
 
 
-        const navigate = useNavigate();
+// Example logo API usage
+const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
 
-        const context = useOutletContext() || {};
-        const handleToggleSidebar = context.handleToggleSidebar || (() => { });
+export default function AdminDashboard() {
+    const [selectedTab, setSelectedTab] = useState(1);
+    const { selectedDate } = useDate();
 
-        const handleLogout = () => {
-            logout();
-            navigate('/'); // redirect to login/home
-        };
-
-        const pieChartData = [
-            { property: "Claimed", value: 575 },
-            { property: "Unclaimed", value: 788 },
-            { property: "Waived", value: 92 }
+    const extractedMealRequestData = {
+        acceptedRequests: [
+            { title: "Accepted Request Rate", value: 100, subtitle: "Overall", acceptanceRate: 95, expectingPositiveResult: true, isPercentage: true },
+            { title: "Accepted Request Count", value: 34, subtitle: "Today" },
+            { title: "Total Eligible Students", value: 1500, subtitle: "Today" }
+        ],
+        rejectedRequests: [
+            { title: "Rejected Request Rate", value: 0, subtitle: "Overall", acceptanceRate: 5, expectingPositiveResult: false, isPercentage: true },
+            { title: "Rejected Request Count", value: 0, subtitle: "Today" },
+            { title: "Total Waived Students", value: 0, subtitle: "Today" }
         ]
+    }   
 
-        const barChartData = [
-            { dayOfWeek: "Monday", dish1: "Miswa", dish2: "Monggo", Claimed: 210, Unclaimed: 2100 },
-            { dayOfWeek: "Tuesday", dish1: "Burger Steak", dish2: "", Claimed: 420, Unclaimed: 1503 },
-            { dayOfWeek: "Wednesday", dish1: "Menudo", dish2: "Adobo", Claimed: 100, Unclaimed: 2175 },
-            { dayOfWeek: "Thursday", dish1: "Fried Chicken", dish2: "Ampalaya", Claimed: 200, Unclaimed: 1863 },
-            { dayOfWeek: "Friday", dish1: "Tortang Talong", dish2: "Ampalaya", Claimed: 632, Unclaimed: 1698 },
-            { dayOfWeek: "Saturday", dish1: "Hotdog", dish2: "Egg", Claimed: 0, Unclaimed: 423 },
-        ]
+    const extractedData = {
+        today: [
+            {
+                barChartData: [
+                    { dayOfWeek: "Tuesday", dish1: "Burger Steak", dish2: "", Claimed: 420, Unclaimed: 1503 },
+                    { dayOfWeek: "Wednesday", dish1: "Menudo", dish2: "Adobo", Claimed: 100, Unclaimed: 2175 },
+                    { dayOfWeek: "Thursday", dish1: "Fried Chicken", dish2: "Ampalaya", Claimed: 200, Unclaimed: 1863 },
+                    { dayOfWeek: "Friday", dish1: "Tortang Talong", dish2: "Ampalaya", Claimed: 632, Unclaimed: 1698 },
+                    { dayOfWeek: "Saturday", dish1: "Hotdog", dish2: "Egg", Claimed: 0, Unclaimed: 423 },
+                ]
+            },
+            {
+                trendsData: [
+                    { dataSpan: "Jan", "Pre-packed Food": 200, "Customized Order": 200, "Unused vouchers": 300 },
+                    { dataSpan: "Feb", "Pre-packed Food": 1300, "Customized Order": 300, "Unused vouchers": 100 },
+                    { dataSpan: "Mar", "Pre-packed Food": 1200, "Customized Order": 100, "Unused vouchers": 500 },
+                    { dataSpan: "Apr", "Pre-packed Food": 900, "Customized Order": 50, "Unused vouchers": 50 },
+                ]
+            },
+            {
+                TADMCdata: [
+                    { Day: 'Mon 1', AcceptableRange: [58, 62], TADMC: 60.50 },
+                    { Day: 'Tue 2', AcceptableRange: [58, 62], TADMC: 61.25 },
+                    { Day: 'Wed 3', AcceptableRange: [58, 62], TADMC: 59.80 },
+                    { Day: 'Thu 4', AcceptableRange: [58, 62], TADMC: 57.90 },
+                    { Day: 'Fri 5', AcceptableRange: [58, 62], TADMC: 63.50 },
+                    { Day: 'Sat 6', AcceptableRange: [58, 62], TADMC: 61.90 },
+                    { Day: 'Mon 8', AcceptableRange: [58, 62], TADMC: 61.00 },
+                ]
+            },
+            {
+                CURdata: [
+                    { Day: 'Mon 1', AcceptableRange: [90, 100], TADMC: 92.50 },
+                    { Day: 'Tue 2', AcceptableRange: [90, 100], TADMC: 98.25 },
+                    { Day: 'Wed 3', AcceptableRange: [90, 100], TADMC: 94.80 },
+                    { Day: 'Thu 4', AcceptableRange: [90, 100], TADMC: 89.90 },
+                    { Day: 'Fri 5', AcceptableRange: [90, 100], TADMC: 101.50 },
+                    { Day: 'Sat 6', AcceptableRange: [90, 100], TADMC: 96.90 },
+                    { Day: 'Mon 8', AcceptableRange: [90, 100], TADMC: 95.00 },
+                ]
+            },
+            {
+                OCFdata: [
+                    { Day: 'Mon 1', AcceptableRange: [0, 15], TADMC: 5.50 },
+                    { Day: 'Tue 2', AcceptableRange: [0, 15], TADMC: 12.25 },
+                    { Day: 'Wed 3', AcceptableRange: [0, 15], TADMC: 8.80 },
+                    { Day: 'Thu 4', AcceptableRange: [0, 15], TADMC: 1.90 },
+                    { Day: 'Fri 5', AcceptableRange: [0, 15], TADMC: 16.50 },
+                    { Day: 'Sat 6', AcceptableRange: [0, 15], TADMC: 10.90 },
+                    { Day: 'Mon 8', AcceptableRange: [0, 15], TADMC: 7.00 },
+                ]
+            }
+        ],
+        weekly: [
+            {
+                barChartData: [
+                    { dayOfWeek: "Week 1", dish1: "Burger Steak", dish2: "Adobo", Claimed: 2000, Unclaimed: 500 },
+                    { dayOfWeek: "Week 2", dish1: "Menudo", dish2: "Fried Chicken", Claimed: 1500, Unclaimed: 700 },
+                    { dayOfWeek: "Week 3", dish1: "Pork Sinigang", dish2: "Caldereta", Claimed: 2200, Unclaimed: 300 },
+                    { dayOfWeek: "Week 4", dish1: "Tilapia", dish2: "Pinakbet", Claimed: 1800, Unclaimed: 600 },
+                ]
+            },
+            {
+                trendsData: [
+                    { dataSpan: "Week 1", "Pre-packed Food": 500, "Customized Order": 100, "Unused vouchers": 50 },
+                    { dataSpan: "Week 2", "Pre-packed Food": 700, "Customized Order": 150, "Unused vouchers": 70 },
+                    { dataSpan: "Week 3", "Pre-packed Food": 600, "Customized Order": 120, "Unused vouchers": 60 },
+                    { dataSpan: "Week 4", "Pre-packed Food": 800, "Customized Order": 180, "Unused vouchers": 80 },
+                ]
+            },
+            {
+                TADMCdata: [
+                    { Day: 'Week 1', AcceptableRange: [58, 62], TADMC: 59.00 },
+                    { Day: 'Week 2', AcceptableRange: [58, 62], TADMC: 60.00 },
+                    { Day: 'Week 3', AcceptableRange: [58, 62], TADMC: 61.50 },
+                    { Day: 'Week 4', AcceptableRange: [58, 62], TADMC: 58.50 },
+                ]
+            },
+            {
+                CURdata: [
+                    { Day: 'Week 1', AcceptableRange: [90, 100], TADMC: 95.00 },
+                    { Day: 'Week 2', AcceptableRange: [90, 100], TADMC: 97.00 },
+                    { Day: 'Week 3', AcceptableRange: [90, 100], TADMC: 93.00 },
+                    { Day: 'Week 4', AcceptableRange: [90, 100], TADMC: 98.00 },
+                ]
+            },
+            {
+                OCFdata: [
+                    { Day: 'Week 1', AcceptableRange: [0, 15], TADMC: 10.00 },
+                    { Day: 'Week 2', AcceptableRange: [0, 15], TADMC: 8.00 },
+                    { Day: 'Week 3', AcceptableRange: [0, 15], TADMC: 12.00 },
+                    { Day: 'Week 4', AcceptableRange: [0, 15], TADMC: 6.00 },
+                ]
+            }
+        ],
+        monthly: [
+            {
+                barChartData: [
+                    { dayOfWeek: "Month 1", dish1: "Chicken Curry", dish2: "Bistek", Claimed: 8000, Unclaimed: 2000 },
+                    { dayOfWeek: "Month 2", dish1: "Sinigang na Hipon", dish2: "Kare-Kare", Claimed: 7500, Unclaimed: 2500 },
+                    { dayOfWeek: "Month 3", dish1: "Lechon Kawali", dish2: "Dinuguan", Claimed: 9000, Unclaimed: 1000 },
+                    { dayOfWeek: "Month 4", dish1: "Pancit Canton", dish2: "Lumpia", Claimed: 8200, Unclaimed: 1800 },
+                ]
+            },
+            {
+                trendsData: [
+                    { dataSpan: "Month 1", "Pre-packed Food": 2000, "Customized Order": 500, "Unused vouchers": 200 },
+                    { dataSpan: "Month 2", "Pre-packed Food": 2200, "Customized Order": 600, "Unused vouchers": 150 },
+                    { dataSpan: "Month 3", "Pre-packed Food": 2500, "Customized Order": 700, "Unused vouchers": 100 },
+                    { dataSpan: "Month 4", "Pre-packed Food": 2300, "Customized Order": 650, "Unused vouchers": 180 },
+                ]
+            },
+            {
+                TADMCdata: [
+                    { Day: 'Month 1', AcceptableRange: [58, 62], TADMC: 60.00 },
+                    { Day: 'Month 2', AcceptableRange: [58, 62], TADMC: 59.50 },
+                    { Day: 'Month 3', AcceptableRange: [58, 62], TADMC: 61.00 },
+                    { Day: 'Month 4', AcceptableRange: [58, 62], TADMC: 60.20 },
+                ]
+            },
+            {
+                CURdata: [
+                    { Day: 'Month 1', AcceptableRange: [90, 100], TADMC: 96.00 },
+                    { Day: 'Month 2', AcceptableRange: [90, 100], TADMC: 95.50 },
+                    { Day: 'Month 3', AcceptableRange: [90, 100], TADMC: 97.00 },
+                    { Day: 'Month 4', AcceptableRange: [90, 100], TADMC: 96.50 },
+                ]
+            },
+            {
+                OCFdata: [
+                    { Day: 'Month 1', AcceptableRange: [0, 15], TADMC: 9.00 },
+                    { Day: 'Month 2', AcceptableRange: [0, 15], TADMC: 11.00 },
+                    { Day: 'Month 3', AcceptableRange: [0, 15], TADMC: 8.00 },
+                    { Day: 'Month 4', AcceptableRange: [0, 15], TADMC: 10.00 },
+                ]
+            }
+        ],
+    }
 
-        const trendsData = [
-            { dataSpan: "Jan", "Pre-packed Food": 200, "Customized Order": 200, "Unused vouchers": 300 },
-            { dataSpan: "Feb", "Pre-packed Food": 1300, "Customized Order": 300, "Unused vouchers": 100 },
-            { dataSpan: "Mar", "Pre-packed Food": 1200, "Customized Order": 100, "Unused vouchers": 500 },
-            { dataSpan: "Apr", "Pre-packed Food": 900, "Customized Order": 50, "Unused vouchers": 50 },
-            { dataSpan: "May", "Pre-packed Food": 1000, "Customized Order": 300, "Unused vouchers": 300 },
-            { dataSpan: "Jun", "Pre-packed Food": 500, "Customized Order": 500, "Unused vouchers": 200 },
+    const extractedOverallData = {
+        mostMealClaims: [
+            { title: "Third Most Meal Combination", value: "Hatdog / Longganisa", subtitle: "28.31% of total | 2,123 claims" },
+            { title: "Second Most Meal Combination", value: "Adobo / Menudo", subtitle: "31.01% of total | 2,325 claims" },
+            { title: "Most Claimed Combination", value: "Chicken Curry / Burger Steak", subtitle: "33.72% of total | 2,529 claims" },
+        ],
+        leastMealClaims: [
+            { title: "Third Least Claimed Combination", value: "Miswa / Sotanghon", subtitle: "3.30% of total | 247 claims" },
+            { title: "Second Least Claimed Combination", value: "Monggo / Fried Fish", subtitle: "2.90% of total | 217 claims" },
+            { title: "Least Claimed Combination", value: "Ampalaya / Itlog", subtitle: "2.47% of total | 185 claims" },
+        ],
+        claimsCount: [
+            { title: "Overall Unclaimed Count", value: 10, inPercentage: true, subtitle: "1000 claims" },
+            { title: "Overall Food Item Claim Count", value: 40, inPercentage: true, subtitle: "6000 claims" },
+            { title: "Overall Free Meal Claim Count", value: 50, inPercentage: true, subtitle: "7500 claims" },
+            { title: "Overall Claim Count", value: 15000, subtitle: "Free Meal + Food Item Claim" },
+        ],
+        KPIreports: [
+            { title: "Average OCF", value: 10.00, isPercentage: true, subtitle: "Overall" },
+            { title: "Average CUR", value: 95.00, isPercentage: true, subtitle: "Overall" },
+            { title: "Average TADMC", value: 60.00, subtitle: "Overall" },
+        ],
+        consumedCredits: [
+            { title: "Total Unused Credits", value: "₱2,340", subtitle: "The actual unused credits" },
+            { title: "Total Consumed Credits", value: "₱150,000", subtitle: "The actual consumed credits" },
         ]
+    }
+
+    const extractedCustomDateData = {
+        dishForDay: [
+            { title: "Dish for the day", value: "Chicken Curry / Adobo", subtitle: "53.32% of total | 2,529 claims" }
+        ],
+        claimsCount: [
+            { title: "Unclaimed Count", value: 10, inPercentage: true, subtitle: "1000 claims" },
+            { title: "Food Item Claim Count", value: 40, inPercentage: true, subtitle: "6000 claims" },
+            { title: "Free Meal Claim Count", value: 50, inPercentage: true, subtitle: "7500 claims" },
+            { title: "Claim Count", value: 15000, subtitle: "Free Meal + Food Item Claim" },
+        ],
+        KPIreports: [
+            { title: "Average OCF", value: 10.00, isPercentage: true, subtitle: "Overall" },
+            { title: "Average CUR", value: 95.00, isPercentage: true, subtitle: "Overall" },
+            { title: "Average TADMC", value: 60.00, subtitle: "Overall" },
+        ],
+        consumedCredits: [
+            { title: "Total Unused Credits", value: "₱2,340", subtitle: "The actual unused credits" },
+            { title: "Total Consumed Credits", value: "₱150,000", subtitle: "The actual consumed credits" },
+        ]
+    }
 
         const upcomingEvents = [
             { link: "#", title: "Teachers' Day", date: "Oct 5, 2025" },
@@ -61,54 +231,33 @@
             { link: "#", title: "College Intramurals", date: "Dec 15, 2025" }
         ]
 
-        const recentClaims = [
-            { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
-            { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
-            { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
-            { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
-            { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
-            { id: 1, name: "Santos, Mark Joseph", avatarUrl: "https://randomuser.me/api/portraits/lego/3.jpg", cohort: "BSIS-4" },
-        ]
 
-        const programStatus = [
-            {
-                program: "Preschool",
-                claimed: 12,
-                unclaimed: 11,
-                waived: 0
-            },
-            {
-                program: "Primary Education",
-                claimed: 34,
-                unclaimed: 104,
-                waived: 4
-            },
-            {
-                program: "Intermediate",
-                claimed: 52,
-                unclaimed: 113,
-                waived: 12
-            },
-            {
-                program: "Junior High School",
-                claimed: 112,
-                unclaimed: 161,
-                waived: 23
-            },
-            {
-                program: "Senior High School",
-                claimed: 124,
-                unclaimed: 247,
-                waived: 37
-            },
-            {
-                program: "Higher Education",
-                claimed: 241,
-                unclaimed: 152,
-                waived: 16
-            }
-        ];
+    const getTimeframeKey = (id) => {
+        switch (id) {
+            case 1: return 'today';
+            case 2: return 'weekly';
+            case 3: return 'monthly';
+            case 4: return 'overall';
+            default: return 'today';
+        }
+    };
 
+    const getChartData = (dataKey) => {
+        const timeKey = getTimeframeKey(selectedTab); // e.g., "today"
+        const timeDataArray = extractedData[timeKey]; // The array of objects
+
+        if (!timeDataArray) return []; // Safety check
+
+        // Find the object in the array that contains the key we want (e.g. "TADMCdata")
+        const foundItem = timeDataArray.find(item => item[dataKey]);
+
+        return foundItem ? foundItem[dataKey] : [];
+    };
+
+
+
+    const context = useOutletContext() || {};
+    const handleToggleSidebar = context.handleToggleSidebar || (() => { });
 
         return (
             <>
@@ -187,223 +336,220 @@
 
                     </div>
 
-                    {/* CONTENT */}
-                    <div className="h-full w-full">
-                        <div
-                            style={{
-                                borderRadius: '10px',
-                                marginTop: '20px',
-                                marginLeft: '40px',
-                                marginRight: '40px',
-                                backgroundColor: "#F7F9F9"
-                            }}
-                            className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
-                            <div className="w-full h-auto flex flex-col gap-4">
+                {/* CONTENT */}
+                <div className="h-full w-full">
 
 
-
-                                <div className="grid grid-cols-5 gap-4">
-
-                                    <div className="col-span-3">
-                                        <StatsCardGroup
-                                            title1={"Accepted Request Rate"}
-                                            title2={"Accepted Request Count"}
-                                            subtitle1={"Overall"}
-                                            subtitle2={"Today"}
-                                            value1={100}
-                                            value2={34}
-                                            acceptanceRate1={95}
-                                            expectingPostiveResult1={true}
-                                            isPercentage={true}
-
-                                            title3={"Rejected Request Rate"}
-                                            title4={"Rejected Request Count"}
-                                            subtitle3={"Overall"}
-                                            subtitle4={"Today"}
-                                            value3={0}
-                                            value4={0}
-                                            acceptanceRate2={5}
-                                            expectingPostiveResult2={false}
-                                        />
-                                    </div>
-
-                                    <div className="col-span-2">
-                                        <QuickActions />
-                                    </div>
-
-                                    {/* <div className="col-span-1 h-full">
-                                        <GreetingCard subtitle={"Here’s everything you need to know!"} />
-                                    </div> */}
-
+                    <div
+                        style={{
+                            borderRadius: '10px',
+                            marginTop: '20px',
+                            marginLeft: '40px',
+                            marginRight: '40px',
+                            backgroundColor: "#F7F9F9"
+                        }}
+                        className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
+                        <div className="w-full h-auto flex flex-col gap-4">
+                            <div className="grid grid-cols-6 gap-4">
+                                <div className="h-full col-span-2">
+                                    <CustomStatsCard title={"Daily Virtual Credit Used"} value={"P60,000"} subtitle={"vs P65,000 allotted"} />
                                 </div>
 
-                                <div className="w-full h-[50vh] mx-auto mt-8 bg-white shadow rounded-lg flex">
-                                    <div
-                                        style={{
-                                            marginRight: 6,
-                                            marginLeft: 10,
-                                        }}
-                                        className="w-[60%] min-h-full flex flex-col justify-center">
-                                        <div
-                                            style={{ padding: "15px 4px 10px 10px " }}>
-                                            <h2
-                                                style={{
-                                                    color: '#4C4B4B',
-                                                    fontWeight: '500',
-                                                    fontSize: 13
-                                                }}>
-                                                Program Status Claim (Today)
-                                            </h2>
-                                        </div>
-                                        <table
-                                            style={{ marginBottom: "10px" }}
-                                            className="min-w-full min-h-auto border-gray-200 border-[1px]">
-                                            <thead className="border-gray-200 border-[1px] bg-[#FCFCFD]">
-                                                <tr className="bg-gray-50 text-gray-700">
-                                                    <th
-                                                        style={{
-                                                            padding: "10px 2px 10px 10px",
-                                                            fontSize: 14,
-                                                            color: "#667085"
-                                                        }}
-                                                        className="text-left font-medium">
-                                                        All
-                                                    </th>
-                                                    <th
-                                                        style={{
-                                                            padding: "10px 2px 10px 2px",
-                                                            fontSize: 14,
-                                                            color: "#076560"
-                                                        }}
-                                                        className="text-left font-medium">
-                                                        Claimed
-                                                    </th>
-                                                    <th
-                                                        style={{
-                                                            padding: "10px 2px 10px 2px",
-                                                            fontSize: 14,
-                                                            color: "#CF7171"
-                                                        }}
-                                                        className="text-left font-medium">
-                                                        Unclaimed
-                                                    </th>
-                                                    <th
-                                                        style={{
-                                                            padding: "10px 2px 10px 2px",
-                                                            fontSize: 14,
-                                                            color: "#9291A5"
-                                                        }}
-                                                        className="text-left font-medium">
-                                                        Waived
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {programStatus.map((item, idx) => (
-                                                    <tr key={item.category} className="border-b last:border-none">
-                                                        <td
-                                                            style={{
-                                                                padding: "10px 2px 10px 10px",
-                                                                fontSize: 13
-                                                            }}
-                                                            className="font-geist">
-                                                            {item.program}
-                                                        </td>
-                                                        <td
-                                                            style={{
-                                                                padding: "10px 2px 10px 2px",
-                                                                fontSize: 14,
-                                                                fontWeight: '500',
-                                                                color: "#076560"
-                                                            }}
-                                                            className="font-geist">
-                                                            {item.claimed}
-                                                        </td>
-                                                        <td
-                                                            style={{
-                                                                padding: "10px 2px 10px 2px",
-                                                                fontSize: 14,
-                                                                fontWeight: '500',
-                                                                color: "#CF7171"
-                                                            }}
-                                                            className="font-geist">
-                                                            {item.unclaimed}
-                                                        </td>
-                                                        <td
-                                                            style={{
-                                                                padding: "10px 2px 10px 2px",
-                                                                fontSize: 14,
-                                                                fontWeight: '500',
-                                                                color: "#9291A5"
-                                                            }}
-                                                            className="font-geist">
-                                                            {item.waived}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div className="w-[40%] h-[100%]">
-                                        <PieChartBox data={pieChartData} />
-                                    </div>
+                                <div className="col-span-4">
+                                    <StatsCardGroup
+                                        cardGroupTitle={"Meal Eligibilty List Count"}
+                                        urgentNotification={1}
+                                        isDualPager={true}
+                                        dualPageTitles={["View Accepted Claims", "View Rejected Claims"]}
+                                        notificationTitle={"Pending Meal Requests"}
+                                        successMessage="Great job! The acceptance rate is above the target."
+                                        failureMessage="Warning: Acceptance rate is critically low."
+                                        primaryData={extractedMealRequestData.acceptedRequests}
+                                        secondaryData={extractedMealRequestData.rejectedRequests}
+                                    />
                                 </div>
 
-                                <div className="w-full h-[45vh] mx-auto bg-white shadow rounded-lg flex">
-                                    <div className="h-auto w-full">
-                                        <BarChartBox data={barChartData} />
-                                    </div>
-                                </div>
-                                <div className="w-full h-[45vh] mx-auto bg-white shadow rounded-lg flex">
-                                    <div className="h-auto w-full">
-                                        <LineChartBox data={trendsData} />
-                                    </div>
-                                </div>
                             </div>
 
+                            <AnalyticTabs selectedTab={selectedTab} onTabChange={setSelectedTab}>
+                                <div className="w-[100%] flex flex-col items-center h-[100%] bg-[#FFFFFF]">
 
-                            <div className="h-auto flex flex-col gap-4">
-                                <div>
-                                    <EventsPanel events={upcomingEvents} />
+                                    {selectedTab === 4
+                                        ? <>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                <StatsCardGroup
+                                                    cardGroupTitle={"Dish Combination Claims Status"}
+                                                    isDualPager={true}
+                                                    dualPageTitles={["View Most Claims", "View Least Claims"]}
+
+                                                    primaryData={extractedOverallData.mostMealClaims}
+                                                    secondaryData={extractedOverallData.leastMealClaims}
+
+                                                    displayDate={false}
+                                                    urgentNotification={0}
+                                                />
+                                            </div>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                <StatsCardGroup
+                                                    cardGroupTitle={"Claims Count"}
+                                                    isDualPager={false}
+
+                                                    primaryData={extractedOverallData.claimsCount}
+
+                                                    displayDate={false}
+                                                    urgentNotification={0}
+                                                />
+                                            </div>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                <StatsCardGroup
+                                                    cardGroupTitle={"KPI Metrics"}
+                                                    isDualPager={false}
+
+                                                    primaryData={extractedOverallData.KPIreports}
+
+                                                    displayDate={false}
+                                                    urgentNotification={0}
+                                                />
+                                            </div>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                <StatsCardGroup
+                                                    cardGroupTitle={"Consumed Credits"}
+                                                    isDualPager={false}
+
+                                                    primaryData={extractedOverallData.consumedCredits}
+
+                                                    displayDate={false}
+                                                    urgentNotification={0}
+                                                />
+                                            </div>
+                                        </>
+                                        : ""}
+                                    {selectedTab === 5
+                                        ? <>
+                                            <div clasName="w-full">
+                                                <DatePicker />
+                                                {selectedDate
+                                                    ? <>
+                                                        <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                            <StatsCardGroup
+                                                                cardGroupTitle={"Dish Combination Claims Status"}
+                                                                isDualPager={false}
+
+                                                                primaryData={extractedCustomDateData.dishForDay}
+
+                                                                displayDate={false}
+                                                                urgentNotification={0}
+                                                            />
+                                                        </div>
+                                                        <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                            <StatsCardGroup
+                                                                cardGroupTitle={"Claims Count"}
+                                                                isDualPager={false}
+
+                                                                primaryData={extractedCustomDateData.claimsCount}
+
+                                                                displayDate={false}
+                                                                urgentNotification={0}
+                                                            />
+                                                        </div>
+                                                        <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                            <StatsCardGroup
+                                                                cardGroupTitle={"KPI Metrics"}
+                                                                isDualPager={false}
+
+                                                                primaryData={extractedCustomDateData.KPIreports}
+
+                                                                displayDate={false}
+                                                                urgentNotification={0}
+                                                            />
+                                                        </div>
+                                                        <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                            <StatsCardGroup
+                                                                cardGroupTitle={"Consumed Credits"}
+                                                                isDualPager={false}
+
+                                                                primaryData={extractedCustomDateData.consumedCredits}
+
+                                                                displayDate={false}
+                                                                urgentNotification={0}
+                                                            />
+                                                        </div>
+                                                    </>
+                                                    : ""}
+                                            </div>
+                                        </> : ""
+                                    }
+                                    {selectedTab !== 4 && selectedTab !== 5
+                                        ?
+                                        <>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
+                                                    <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} hoverText="The count of how many claims are made for this day" />
+                                                </div>
+                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                    <BarChartBox data={getChartData('barChartData')} />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex h-[270px] w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
+                                                    <CustomStatsCard title={"Unclaim Count"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} hoverText="The count of how many claims are not claimed for this day" />
+                                                </div>
+                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                    <LineChartBox data={getChartData('trendsData')} />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
+                                                    <CustomStatsCard
+                                                        title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} hoverText="Measures how much money is actually spent on a meal when a student makes a claim." hoverValueText={"The ideal target range should be close to the currently assigned credit value (₱60)"} />
+                                                </div>
+                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                    <BandedChartTADMC data={getChartData('TADMCdata')} />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
+                                                    <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} hoverText={"The percentage of the total allocated credit budget that is actually consumed by the students before the unused amount is automatically removed."} hoverValueText={"A rate below 90% implies significant budget waste"} />
+                                                </div>
+                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                    <BandedChartCUR data={getChartData('CURdata')} />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
+                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
+                                                    <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} hoverText={"The frequency at which students’ total food item cost exceed the assigned credit value"} hoverValueText={"An OCF above 15% means too many students are frequently forced to pay out-of-pocket, which diminishes the value and intent of the scholarship/subsidy"} />
+                                                </div>
+                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                    <BandedChartOCF data={getChartData('OCFdata')} />
+                                                </div>
+                                            </div>
+                                        </>
+                                        : ""
+                                    }
                                 </div>
-                                <div>
-                                    <ClaimsPanel claims={recentClaims} />
-                                </div>
-                                <div>
-                                    <div
-                                        style={{
-                                            background: "#fff",
-                                            borderRadius: 8,
-                                            padding: 16
-                                        }}
-                                        className="w-full h-auto flex flex-col items-center"
-                                    >
-                                        <span
-                                            style={{
-                                                fontWeight: "bold",
-                                                fontSize: 13,
-                                                fontFamily: 'geist',
-                                                paddingBottom: "20px"
-                                            }}
-                                            className="w-full h-auto flex items-center"
-                                        >
-                                            Default Meal Allowance
-                                        </span>
-                                        <div
-                                            style={{
-                                                background: "#E6FBF9",
-                                                padding: 10
-                                            }}
-                                            className="w-full h-auto flex justify-center rounded-lg"
-                                        >
-                                            <span style={{ color: "#000", fontSize: 20, fontFamily: "geist" }}>PHP {60}</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            </AnalyticTabs>
+                        </div>
+
+
+                        <div className="h-auto flex flex-col gap-4">
+                            <div className="">
+                                <QuickActions />
+                            </div>
+
+                            <div>
+                                <EventsPanel events={upcomingEvents} />
+                            </div>
+                            <div>
+                                <MealAllowanceCard />
                             </div>
                         </div>
                     </div>
                 </div>
-            </>
-        )
-    }
+            </div>
+        </>
+    )
+}
