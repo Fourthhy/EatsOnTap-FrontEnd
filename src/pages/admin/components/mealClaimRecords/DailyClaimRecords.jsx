@@ -1,8 +1,14 @@
+import { useState } from "react";
 import { HeaderBar } from "../HeaderBar"
 import { MealClaimRecordsTable } from "./MealClaimRecordsTable";
+import { OverallClaims } from "./OverallClaims";
 
 function DailyClaimRecords() {
     const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
+    const [view, setView] = useState("daily");
+    const switchView = () => {
+        setView(view === "daily" ? "overall" : "daily");
+    }
     return (
         <>
             <div
@@ -14,7 +20,11 @@ function DailyClaimRecords() {
                 <HeaderBar headerTitle="Records" userAvatar={USER_AVATAR} />
                 <div className="w-full flex justify-center">
                     <div className="w-[95%]">
-                        <MealClaimRecordsTable />
+                        {view === "daily" ?
+                            <MealClaimRecordsTable switchView={switchView} />
+                            :
+                            <OverallClaims switchView={switchView} />
+                        }
                     </div>
                 </div>
             </div>

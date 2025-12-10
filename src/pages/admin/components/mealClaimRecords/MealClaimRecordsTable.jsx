@@ -51,12 +51,7 @@ const Avatar = () => (
 );
 
 
-const MealClaimRecordsTable = () => {
-
-    // --- STATE ---
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
-    const [studentToLink, setStudentToLink] = useState(null);
+const MealClaimRecordsTable = ({ switchView }) => {
 
     const [activeTab, setActiveTab] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
@@ -217,6 +212,7 @@ const MealClaimRecordsTable = () => {
                         display: 'flex', alignItems: 'center', gap: '8px',
                         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                     }}
+                    onClick={switchView}
                 >
                     <IoGrid size={16} />
                     View Weekly Claims
