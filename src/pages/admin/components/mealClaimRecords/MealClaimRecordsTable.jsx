@@ -215,7 +215,7 @@ const MealClaimRecordsTable = ({ switchView }) => {
                     onClick={switchView}
                 >
                     <IoGrid size={16} />
-                    View Weekly Claims
+                    View Overall Claims
                 </button>
             </div>
 

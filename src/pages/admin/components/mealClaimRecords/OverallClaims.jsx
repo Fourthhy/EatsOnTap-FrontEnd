@@ -11,12 +11,10 @@ const ITEM_HEIGHT_ESTIMATE_PX = 40; // Reduced height estimate for matrix rows
 // --- Helper Functions (Mock Data and UI) ---
 
 // Assume generateData() is available globally to fetch base student list
-// The function below simulates generating the claim history for a fixed period (15 days)
 const generateClaimHistory = (students) => {
     return students.map(student => {
         const history = [];
         for (let i = 0; i < 15; i++) {
-            // Generate a random claim status: 70% chance claimed (Check), 20% missed (Cross), 10% not applicable (Dash)
             const random = Math.random();
             let status = 'check';
             if (random < 0.2) {
@@ -37,34 +35,70 @@ const CheckIcon = () => <Check size={18} style={{ color: '#047857' }} />; // Gre
 const CrossIcon = () => <X size={18} style={{ color: '#b91c1c' }} />; // Red cross
 
 // Component to generate 15 column headers
-const renderDayHeaders = () => {
-    const days = [];
-    for (let i = 1; i <= 15; i++) {
-        days.push(
-            <th key={i} style={{ 
-                padding: '12px 0px', 
-                textAlign: 'center', 
-                width: '40px', // Fixed width for small columns
-                fontWeight: 500, 
-                color: '#6b7280', 
-                fontSize: '0.75rem', 
-                borderBottom: '1px solid #e5e7eb' 
-            }}>
-                {i.toString().padStart(2, '0')}
-            </th>
-        );
-    }
-    return days;
+const renderDayHeaders = (matrixData) => {
+    // This is no longer needed since the matrixData contains the full nested structure
+    return null;
 };
 
 
 const OverallClaims = () => {
+    // --- SETUP: Dynamic Date Calculation ---
+    const CURRENT_DATE_FOR_MATRIX = new Date(); // Use current real date
+    const getDynamicMonthMatrix = (currentDate) => {
+        const today = new Date(currentDate);
+        const year = today.getFullYear();
+        const month = today.getMonth();
+
+        const firstDayOfMonth = new Date(year, month, 1);
+        const dayOfWeek = firstDayOfMonth.getDay() === 0 ? 7 : firstDayOfMonth.getDay();
+        const offsetToMonday = (dayOfWeek === 1) ? 0 : (dayOfWeek - 1);
+
+        const startMatrixDate = new Date(firstDayOfMonth);
+        startMatrixDate.setDate(firstDayOfMonth.getDate() - offsetToMonday);
+
+        const monthLabel = firstDayOfMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+        const matrix = { monthLabel, weeks: [] };
+        let currentWeekDays = [];
+        let currentDateIterator = new Date(startMatrixDate);
+        let weekNumber = 1;
+
+        // Loop runs for 5 weeks (30 days total) + extra buffer to ensure all days of the month are included
+        while (matrix.weeks.length < 5 || (currentDateIterator.getMonth() === month && currentDateIterator.getDay() !== 1)) {
+
+            // If the iterator rolls over to the next month, we break after finishing the current week display
+            if (matrix.weeks.length >= 5 && currentDateIterator.getDay() === 1 && currentDateIterator.getMonth() !== month) break;
+
+            currentWeekDays.push({
+                date: currentDateIterator.getDate(),
+                isCurrentMonth: currentDateIterator.getMonth() === month,
+            });
+
+            // Sunday is 0, but we use Monday=1 start. Day 6 of our week is Saturday
+            if (currentWeekDays.length === 6) {
+                matrix.weeks.push({
+                    label: `Week ${weekNumber}`,
+                    days: currentWeekDays,
+                });
+                currentWeekDays = [];
+                weekNumber++;
+            }
+
+            currentDateIterator.setDate(currentDateIterator.getDate() + 1);
+        }
+
+        return matrix;
+    };
+
+    const matrixData = useMemo(() => getDynamicMonthMatrix(CURRENT_DATE_FOR_MATRIX), []);
+    const totalDayColumns = matrixData.weeks.reduce((sum, week) => sum + week.days.length, 0);
+
+
     // --- STATE ---
     const [activeTab, setActiveTab] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [itemsPerPage, setItemsPerPage] = useState(MAX_ITEMS);
-    
+
     // --- REFS ---
     const tableWrapperRef = useRef(null);
     const tableHeaderRef = useRef(null);
@@ -72,9 +106,12 @@ const OverallClaims = () => {
 
     // --- DATA ---
     const baseStudents = useMemo(() => generateData(), []);
+    // Note: Claim history is generated for 15 days, which won't exactly match the dynamic matrix width. 
+    // We will truncate the history to match `totalDayColumns` in the render step.
     const studentsWithHistory = useMemo(() => generateClaimHistory(baseStudents), [baseStudents]);
 
-    // --- HEIGHT CALCULATION LOGIC (Adjusted for Matrix View) ---
+
+    // --- HEIGHT CALCULATION LOGIC ---
     useEffect(() => {
         const wrapper = tableWrapperRef.current;
         const header = tableHeaderRef.current;
@@ -84,15 +121,13 @@ const OverallClaims = () => {
         const observer = new ResizeObserver(entries => {
             const entry = entries[0];
             const totalCardHeight = entry.contentRect.height;
-            
-            // Measure fixed heights
-            const controlsHeight = 100; // Estimated height of controls section (Search, Calendar)
-            const headerHeight = header.offsetHeight; // Measured height of complex header
-            const footerHeight = footer.offsetHeight; // Measured height of footer
-            
-            // Available space for rows
-            const availableSpace = totalCardHeight - controlsHeight - headerHeight - footerHeight - 50; // Extra buffer
-            
+
+            const controlsHeight = 100;
+            const headerHeight = header.offsetHeight;
+            const footerHeight = footer.offsetHeight;
+
+            const availableSpace = totalCardHeight - controlsHeight - headerHeight - footerHeight - 50;
+
             const calculatedItems = Math.floor(availableSpace / ITEM_HEIGHT_ESTIMATE_PX);
             const newItemsPerPage = Math.max(MIN_ITEMS, Math.min(MAX_ITEMS, calculatedItems));
 
@@ -107,10 +142,10 @@ const OverallClaims = () => {
 
         observer.observe(wrapper);
         return () => observer.disconnect();
-    }, []);
+    }, [totalDayColumns]);
 
     // --- PAGINATION AND FILTERING ---
-    const filteredStudents = studentsWithHistory.filter(student => 
+    const filteredStudents = studentsWithHistory.filter(student =>
         student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.program.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -125,7 +160,7 @@ const OverallClaims = () => {
         }
     };
 
-    const tabs = [ 'All', 'Preschool', 'Primary Education', 'Intermediate', 'Junior High School', 'Senior High School', 'Higher Education' ];
+    const tabs = ['All', 'Preschool', 'Primary Education', 'Intermediate', 'Junior High School', 'Senior High School', 'Higher Education'];
 
     return (
         <div style={{
@@ -133,7 +168,7 @@ const OverallClaims = () => {
             height: 'calc(100vh - 90px)',
             display: 'flex',
             flexDirection: 'column',
-            padding: '1.5rem',
+            padding: 10,
             fontFamily: "'Geist', sans-serif",
             color: '#1f2937',
             overflow: 'hidden',
@@ -155,12 +190,14 @@ const OverallClaims = () => {
             </div>
 
             {/* Main Card (Flex Grow to fill space) */}
-            <div ref={tableWrapperRef} 
-                 style={{ 
-                    backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', 
-                    border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', 
-                    flex: '1 1 0%', minHeight: 0, overflowX: 'auto', overflowY: 'hidden', fontFamily: 'geist' 
-                 }}>
+            <div
+                ref={tableWrapperRef}
+                style={{
+                    backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                    border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column',
+                    flex: '1 1 0%', minHeight: 0, overflow: 'hidden', fontFamily: 'geist'
+                }}
+            >
 
                 {/* Header Section (Fixed Height - Contains Title and Search/Filters) */}
                 <div style={{ padding: '1.5rem', borderBottom: '1px solid #f3f4f6', flexShrink: 0 }}>
@@ -169,104 +206,94 @@ const OverallClaims = () => {
                             <h1 style={{ fontWeight: 500, fontSize: 16, color: '#1f2937' }}>All Students' History</h1>
                             <p style={{ color: '#667085', fontSize: 12 }}>This table is where you can see the students' history of meal claiming.</p>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <Search size={18} style={{ color: '#4C4B4B' }} />
+                        <div className="relative flex-1 max-w-sm flex-row" style={{ marginLeft: 10 }}>
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4C4B4B]" size={16} />
                             <input
                                 type="text"
                                 placeholder="Search"
+                                className="w-full text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                                 style={{
-                                    fontFamily: "geist", fontSize: 12, fontWeight: 400, padding: '5px 10px', 
-                                    backgroundColor: "#F0F1F6", border: 'none', borderRadius: 50, width: 200
+                                    width: '100%', paddingLeft: '40px', paddingRight: '16px', paddingTop: '4px',
+                                    paddingBottom: '4px', backgroundColor: '#F0F1F6', border: 'none', borderRadius: '8px',
+                                    fontSize: 13, fontFamily: "geist", color: "#4C4B4B"
                                 }}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
-                            <button
-                                className="hover:cursor-pointer hover:bg-gray-100 text-sm font-medium text-gray-600 transition-colors"
-                                style={{ padding: '8px 12px', borderRadius: '8px', fontSize: 12, display: 'flex', alignItems: 'center', gap: '2' }}
-                            >
-                                <Filter size={12} /> Filter by Section
-                            </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Table Body (Scrollable Horizontally, Constrained Vertically) */}
+                {/* FIX: Ensure the inner div handles horizontal overflow */}
                 <div style={{ flex: '1 1 0%', overflowY: 'hidden', overflowX: 'auto' }}>
-                    <table style={{ width: '100%', minWidth: '1000px', textAlign: 'left', borderCollapse: 'collapse' }}>
-                        
+                    <table style={{ width: '100%', minWidth: '1500px', textAlign: 'left', borderCollapse: 'collapse' }}> {/* Increased minWidth to guarantee scrolling */}
+
                         {/* Nested Headers Structure */}
                         <thead ref={tableHeaderRef} style={{ backgroundColor: '#f9fafb', position: 'sticky', top: 0, zIndex: 10 }}>
                             {/* Row 1: Month/Week Headers */}
                             <tr style={{ height: '40px' }}>
-                                <th rowSpan="2" style={{ width: '100px', padding: '12px 24px', fontWeight: 500, color: '#1f2937', fontSize: '0.875rem', borderBottom: '1px solid #e5e7eb' }}>
-                                    August 2025
+                                <th rowSpan="2" style={{ width: '250px', padding: '12px 24px', fontWeight: 500, color: '#1f2937', fontSize: '0.875rem', borderBottom: '1px solid #e5e7eb' }}>
+                                    {matrixData.monthLabel}
                                 </th>
-                                <th colSpan="7" style={{ padding: '8px 0', textAlign: 'center', fontWeight: 700, color: '#1f2937', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>
-                                    Week 1
-                                </th>
-                                <th colSpan="8" style={{ padding: '8px 0', textAlign: 'center', fontWeight: 700, color: '#1f2937', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>
-                                    Week 2
-                                </th>
+                                {/* Dynamically rendered week headers */}
+                                {matrixData.weeks.map((week, index) => (
+                                    <th key={`week-${index}`} colSpan={week.days.length} style={{ padding: '8px 0', textAlign: 'center', fontWeight: 700, color: '#1f2937', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb', borderLeft: index > 0 ? '1px solid #e5e7eb' : 'none' }}>
+                                        {week.label}
+                                    </th>
+                                ))}
                             </tr>
-                            {/* Row 2: Day Headers (1 to 15) */}
+                            {/* Row 2: Day Headers */}
                             <tr>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>01</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>02</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>03</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>04</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>05</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>06</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>07</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>08</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>09</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>10</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>11</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>12</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>13</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>14</th>
-                                <th style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: '#6b7280', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>15</th>
+                                {/* Dynamically rendered day headers */}
+                                {matrixData.weeks.map(week => (
+                                    week.days.map((day, dayIndex) => (
+                                        <th key={`${week.label}-${dayIndex}`} style={{ padding: '12px 0px', textAlign: 'center', width: '40px', fontWeight: 500, color: day.isCurrentMonth ? '#1f2937' : '#9ca3af', fontSize: '0.75rem', borderBottom: '1px solid #e5e7eb' }}>
+                                            {day.date.toString().padStart(2, '0')}
+                                        </th>
+                                    ))
+                                ))}
                             </tr>
                         </thead>
 
                         <tbody style={{ borderSpacing: 0, borderTop: '1px solid #f3f4f6' }}>
                             {currentData.map((student, rowIndex) => (
                                 <tr key={student.id} className="hover:bg-gray-50 transition-colors" style={{ height: ITEM_HEIGHT_ESTIMATE_PX, borderBottom: '1px solid #f3f4f6' }}>
-                                    
-                                    {/* Student Info Column (Spans 2 rows logically in image, but merged here for data rows) */}
-                                    <td style={{ 
-                                        padding: '1rem 1.5rem', 
-                                        fontSize: '0.875rem', 
-                                        fontWeight: 500, 
+
+                                    {/* Student Info Column */}
+                                    <td style={{
+                                        padding: '1rem 1.5rem',
+                                        fontSize: '0.875rem',
+                                        fontWeight: 500,
                                         color: '#1f2937',
-                                        width: '250px', 
-                                        verticalAlign: 'top', 
+                                        width: '250px',
+                                        verticalAlign: 'top',
                                         borderRight: '1px solid #e5e7eb'
                                     }}>
                                         <div style={{ marginBottom: '0.25rem' }}>{student.name}</div>
                                         <div style={{ fontSize: '0.75rem', fontWeight: 400, color: '#4b5563' }}>{student.program}</div>
                                     </td>
-                                    
-                                    {/* Claim History Columns */}
-                                    {student.claimHistory.map((status, dayIndex) => (
-                                        <td key={dayIndex} style={{ 
-                                            padding: '0.5rem 0', 
-                                            textAlign: 'center', 
-                                            fontSize: '0.875rem', 
-                                            width: '40px' 
+
+                                    {/* Claim History Columns (Must match totalDayColumns length) */}
+                                    {student.claimHistory.slice(0, totalDayColumns).map((status, dayIndex) => (
+                                        <td key={dayIndex} style={{
+                                            padding: '0.5rem 0',
+                                            textAlign: 'center',
+                                            fontSize: '0.875rem',
+                                            width: '40px'
                                         }}>
-                                            {status === 'check' ? <CheckIcon /> : 
-                                             status === 'cross' ? <CrossIcon /> : 
-                                             <span style={{ color: '#9ca3af' }}>-</span>}
+                                            {status === 'check' ? <CheckIcon /> :
+                                                status === 'cross' ? <CrossIcon /> :
+                                                    <span style={{ color: '#9ca3af' }}>-</span>}
                                         </td>
                                     ))}
                                 </tr>
                             ))}
-                            
+
                             {/* Padding Rows */}
                             {currentData.length < itemsPerPage && Array(itemsPerPage - currentData.length).fill(0).map((_, i) => (
                                 <tr key={`pad-${i}`} style={{ height: ITEM_HEIGHT_ESTIMATE_PX, borderBottom: '1px solid #f3f4f6' }}>
-                                    <td colSpan="16"></td> {/* 1 (Info) + 15 (Days) */}
+                                    <td colSpan={totalDayColumns + 1}></td>
                                 </tr>
                             ))}
                         </tbody>
@@ -274,10 +301,10 @@ const OverallClaims = () => {
                 </div>
 
                 {/* Footer Section */}
-                <div ref={paginationFooterRef} style={{ 
-                    padding: '1.5rem', borderTop: '1px solid #f3f4f6', display: 'flex', 
-                    flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', 
-                    gap: '1rem', flexShrink: 0, backgroundColor: 'white' 
+                <div ref={paginationFooterRef} style={{
+                    padding: '1.5rem', borderTop: '1px solid #f3f4f6', display: 'flex',
+                    flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between',
+                    gap: '1rem', flexShrink: 0, backgroundColor: 'white'
                 }}>
                     <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.875rem', fontWeight: 500 }}>
                         <span style={{ color: '#4b5563' }}>Total Students: <span style={{ color: '#1f2937', fontWeight: 700 }}>{filteredStudents.length}</span></span>
@@ -315,6 +342,7 @@ const OverallClaims = () => {
                         >
                             Next <ChevronRight size={16} />
                         </button>
+
                     </div>
                 </div>
             </div>
