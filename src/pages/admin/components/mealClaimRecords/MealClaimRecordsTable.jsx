@@ -1,23 +1,67 @@
 // StudentList.jsx
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, Calendar, Filter, ChevronLeft, ChevronRight, Plus, User } from 'lucide-react';
+import { Search, Calendar, Filter, ChevronLeft, ChevronRight, Check, X, User } from 'lucide-react';
+import { IoGrid } from "react-icons/io5";
 import { generateData } from './mockData';
-// import { AddStudentModal, LinkIDModal } from './AddStudentModal';
+// import { AddStudentModal, LinkIDModal } from './AddStudentModal'; // Commented out modals for clean build
 
 // --- CONFIGURATION ---
 const MIN_ITEMS = 4;
 const MAX_ITEMS = 13;
-// Estimated row height (based on py-4 + font size + border) ~65px
-const ITEM_HEIGHT_ESTIMATE_PX = 45; 
+const ITEM_HEIGHT_ESTIMATE_PX = 45;
+
+// --- REUSABLE SUB-COMPONENTS ---
+
+// 1. Repurposed Status Badge for Claim Status
+const ClaimStatusBadge = ({ isClaimed }) => {
+    // Reuses the styles from Linked/Unlinked (Eligible/Ineligible)
+    const status = isClaimed ? 'Claimed' : 'Unclaimed';
+
+    const styles = {
+        Claimed: { backgroundColor: '#d1fae5', color: '#047857', dotColor: '#10b981', text: 'Claimed' }, // Green/Linked style
+        Unclaimed: { backgroundColor: '#fee2e2', color: '#b91c1c', dotColor: '#ef4444', text: 'Unclaimed' } // Red/Unlinked style
+    };
+
+    const currentStyle = styles[status];
+
+    return (
+        <span
+            // Removed onClick and hover class names as per instruction
+            className="text-xs font-medium"
+            style={{
+                padding: '4px 12px', borderRadius: 12, display: 'flex', alignItems: 'center',
+                gap: '6px', backgroundColor: currentStyle.backgroundColor, color: currentStyle.color,
+                width: 'fit-content'
+            }}
+        >
+            <span style={{ width: '6px', height: '6px', borderRadius: 12, backgroundColor: currentStyle.dotColor }}></span>
+            <span>{currentStyle.text}</span>
+        </span>
+    );
+};
+
+// 2. Generic Avatar
+const Avatar = () => (
+    <div style={{
+        width: 32, height: 32, borderRadius: 9999, // rounded-full
+        backgroundColor: '#e5e7eb', // bg-gray-200
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        overflow: 'hidden', color: '#6b7280', // text-gray-500
+        marginRight: 12 // gap-3 converted to marginRight for inline cell
+    }}>
+        <User size={16} />
+    </div>
+);
+
 
 const MealClaimRecordsTable = () => {
-    
+
     // --- STATE ---
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
     const [studentToLink, setStudentToLink] = useState(null);
-    
+
     const [activeTab, setActiveTab] = useState('All');
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
@@ -40,18 +84,18 @@ const MealClaimRecordsTable = () => {
             const containerHeight = entry.contentRect.height;
 
             // Subtract Table Header Height (approx 45px)
-            const availableSpace = containerHeight - 45; 
+            const availableSpace = containerHeight - 45;
 
             // Calculate items that fit
             const calculatedItems = Math.floor(availableSpace / ITEM_HEIGHT_ESTIMATE_PX);
 
-            // Apply constraints (Min 5, Max 13)
+            // Apply constraints (Min 4, Max 13)
             const newItemsPerPage = Math.max(MIN_ITEMS, Math.min(MAX_ITEMS, calculatedItems));
 
             setItemsPerPage(prev => {
                 if (prev !== newItemsPerPage) {
                     // Reset to page 1 to avoid out-of-bounds errors on resize
-                    setCurrentPage(1); 
+                    setCurrentPage(1);
                     return newItemsPerPage;
                 }
                 return prev;
@@ -66,7 +110,7 @@ const MealClaimRecordsTable = () => {
     // Derive unique program sections for the dropdown
     const programSections = useMemo(() => {
         const programs = new Set(allStudents.map(s => s.program));
-        return [...programs].sort(); 
+        return [...programs].sort();
     }, [allStudents]);
 
     const tabs = [
@@ -104,7 +148,7 @@ const MealClaimRecordsTable = () => {
     const isHigherEducation = (program) => {
         return program.startsWith('BS') || program.startsWith('BAB') || program.startsWith('AB');
     };
-    
+
     const filteredStudents = allStudents.filter(student => {
         let matchesTab = true;
         const program = student.program;
@@ -144,75 +188,14 @@ const MealClaimRecordsTable = () => {
         }
     };
 
-    // --- SUB-COMPONENTS ---
-    const StatusBadge = ({ status }) => {
-        const styles = {
-            Eligible: { backgroundColor: '#d1fae5', color: '#047857', dotColor: '#10b981' },
-            Ineligible: { backgroundColor: '#fee2e2', color: '#b91c1c', dotColor: '#ef4444' },
-            Waived: { backgroundColor: '#f3f4f6', color: '#4b5563', dotColor: '#6b7280' }
-        };
-
-        const currentStyle = styles[status] || styles.Waived;
-        const currentDotColor = currentStyle.dotColor;
-
-        return (
-            <span
-                className="text-xs font-medium flex items-center w-fit"
-                style={{
-                    padding: '4px 12px', borderRadius: 12, display: 'flex', alignItems: 'center',
-                    gap: '6px', backgroundColor: currentStyle.backgroundColor, color: currentStyle.color,
-                }}
-            >
-                <span style={{ width: '6px', height: '6px', borderRadius: 12, backgroundColor: currentDotColor }}></span>
-                {status}
-            </span>
-        );
-    };
-
-    const LinkStatusBadge = ({ isLinked, student }) => {
-        const status = isLinked ? 'Linked' : 'Unlinked';
-        
-        const styles = {
-            Linked: { backgroundColor: '#d1fae5', color: '#047857', dotColor: '#10b981', text: 'Linked' },
-            Unlinked: { backgroundColor: '#fee2e2', color: '#b91c1c', dotColor: '#ef4444', text: 'Unlinked' }
-        };
-
-        const currentStyle = styles[status];
-
-        return (
-            <span
-                onClick={() => !isLinked && handleOpenLinkModal(student)}
-                className={`text-xs font-medium flex items-center w-fit transition-all ${!isLinked ? 'cursor-pointer hover:bg-red-200 hover:text-red-800' : ''}`}
-                style={{
-                    padding: '4px 12px', borderRadius: 12, display: 'flex', alignItems: 'center',
-                    gap: '6px', backgroundColor: currentStyle.backgroundColor, color: currentStyle.color,
-                }}
-            >
-                <span style={{ width: '6px', height: '6px', borderRadius: 12, backgroundColor: currentStyle.dotColor }}></span>
-                <span className={`${!isLinked ? 'group-hover:hidden inline' : ''}`}>{currentStyle.text}</span>
-                <span className={`hidden ${!isLinked ? 'group-hover:inline' : ''}`} style={{ fontWeight: 600 }}>Link ID now</span>
-            </span>
-        );
-    };
-
     // --- RENDER ---
     return (
         // Changed from min-h-screen to h-screen flex flex-col to bound the height
         <div className="w-full h-[calc(100vh-90px)] flex flex-col p-6 font-['Geist',sans-serif] text-gray-900 overflow-hidden">
 
-            {/* --- MODALS --- */}
-            {/* <AddStudentModal
-                isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
-                programSections={programSections}
-            /> */}
-             {/* {studentToLink && (
-                <LinkIDModal
-                    isOpen={isLinkModalOpen}
-                    onClose={handleCloseLinkModal}
-                    student={studentToLink}
-                />
-            )} */}
+            {/* --- MODALS --- (Kept structure commented out) */}
+            {/* <AddStudentModal ... /> */}
+            {/* {studentToLink && ( <LinkIDModal ... /> )} */}
 
             {/* Top Navigation Tabs (Fixed Height) */}
             <div className="flex flex-wrap gap-2 mb-6 shrink-0" style={{ marginTop: 15, marginBottom: 15 }}>
@@ -238,19 +221,19 @@ const MealClaimRecordsTable = () => {
                     ))}
 
                 </div>
-        
+
                 <button
                     onClick={() => setIsAddModalOpen(true)}
                     className="ml-auto hover:bg-blue-700 text-sm font-medium flex items-center shadow-sm"
                     style={{
-                        marginLeft: 'auto', backgroundColor: '#2563eb', color: 'white',
+                        marginLeft: 'auto', backgroundImage: 'linear-gradient(to right, #4268BD, #3F6AC9)', color: 'white',
                         padding: '10px 20px', borderRadius: 12, fontSize: '0.875rem',
                         display: 'flex', alignItems: 'center', gap: '8px',
                         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                     }}
                 >
-                    <Plus size={16} />
-                    Add Student
+                    <IoGrid size={16} />
+                    View Weekly Claims
                 </button>
             </div>
 
@@ -259,14 +242,24 @@ const MealClaimRecordsTable = () => {
 
                 {/* Header Section (Fixed Height) */}
                 <div className="p-6 border-b border-gray-100 shrink-0">
-                    <div className="flex justify-between items-start" style={{ marginBottom: 12, marginTop: 12, }}>
+                    <div className="flex justify-between items-center" style={{ marginBottom: 12, marginTop: 12, }}>
                         <div style={{ paddingLeft: 20 }}>
-                            <h1 className="font-geist font-semibold text-gray-900" style={{ fontSize: 16 }}>All Students List</h1>
-                            <p className="font-geist text-gray-500" style={{ fontSize: 13 }}>Manage students' eligibility</p>
+                            <h1 className="font-geist font-semibold text-gray-900" style={{ fontSize: 16 }}>All Meal Claim Records</h1>
+                            <p className="font-geist text-gray-500" style={{ fontSize: 13 }}>This table is about students' history of meal claiming.</p>
                         </div>
-                        <div className="text-right" style={{ paddingRight: 20 }}>
-                            <span className="font-geist font-semibold" style={{ fontSize: 14 }}>Total Students: </span>
-                            <span className="font-geist font-bold text-gray-900" style={{ fontSize: 18 }}>{filteredStudents.length}</span>
+                        <div className="w-auto flex flex-row items-center h-full">
+                            <div className="text-right" style={{ paddingRight: 30 }}>
+                                <span className="font-geist font-semibold text-[#037847]" style={{ fontSize: 14 }}>Eligible: </span>
+                                <span className="font-geist font-bold text-[#037847]" style={{ fontSize: 16 }}>{filteredStudents.length}</span>
+                            </div>
+                            <div className="text-right" style={{ paddingRight: 30 }}>
+                                <span className="font-geist font-semibold text-[#8B0000]" style={{ fontSize: 14 }}>Ineligible: </span>
+                                <span className="font-geist font-bold text-[#8B0000]" style={{ fontSize: 16 }}>{filteredStudents.length}</span>
+                            </div>
+                            <div className="text-right" style={{ paddingRight: 20 }}>
+                                <span className="font-geist font-semibold" style={{ fontSize: 14 }}>Total Claims: </span>
+                                <span className="font-geist font-bold text-gray-900" style={{ fontSize: 16 }}>{filteredStudents.length}</span>
+                            </div>
                         </div>
                     </div>
                     <hr className="w-full" />
@@ -313,54 +306,75 @@ const MealClaimRecordsTable = () => {
                 </div>
 
                 {/* Table Section (Flexible Height) */}
-                <div 
-                    ref={tableWrapperRef} 
+                <div
+                    ref={tableWrapperRef}
                     className="flex-1 overflow-y-hidden w-full"
                 >
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-gray-50/50 sticky top-0 z-10" style={{ height: '45px' }}>
+                            {/* HYDRATION FIX: Remove whitespace/line breaks inside <thead> */}
                             <tr>
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500 w-16"></th>
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Student Name</th>
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-3 font-medium text-gray-500">Student ID</th>
-                                <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500 w-30">RFID Link</th>
-                                <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">{getProgramHeaderLabel()}</th>
-                                <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Regular/Irregular</th>
+                                <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Program/Section</th>
+                                {/* NEW COLUMNS START */}
+                                <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Claim Time</th>
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Status</th>
+                                <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Meal Type Claim</th>
+                                <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Value Claimed</th>
+                                {/* NEW COLUMNS END */}
                             </tr>
                         </thead>
 
                         <tbody className="divide-y divide-gray-100">
-                            {currentData.map((student, index) => (
-                                <tr key={student.id} className="hover:bg-gray-50/80 transition-colors group" style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>
-                                    <td className="font-geist text-black flex items-center justify-center" style={{ paddingTop: '10px', paddingBottom: '10px', fontSize: 13, height: '100%' }}>
-                                        {startIndex + index + 1}
-                                    </td>
-                                    <td className="py-4 px-6">
-                                        <div className="flex items-center gap-3" style={{ paddingLeft: 5 }}>
-                                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-gray-500">
-                                                <User size={16} />
+                            {currentData.map((student, index) => {
+                                // MOCK NEW DATA FIELDS
+                                const isClaimed = index % 3 === 0;
+                                const claimTime = (index % 4) === 0 ? '11:00 AM' : '12:30 PM';
+                                const mealType = (index % 2) === 0 ? 'Customized Order' : 'Pre-Packed Food';
+
+                                return (
+                                    <tr key={student.id} className="hover:bg-gray-50/80 transition-colors group" style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>
+                                        {/* 1. INDEX */}
+                                        <td className="font-geist text-black flex items-center justify-center" style={{ paddingTop: '10px', paddingBottom: '10px', fontSize: 13, height: '100%' }}>
+                                            {startIndex + index + 1}
+                                        </td>
+
+                                        {/* 2. STUDENT NAME */}
+                                        <td className="py-4 px-6">
+                                            <div style={{ paddingLeft: 5, display: 'flex', alignItems: 'center', gap: 12 }}> {/* 12px gap for avatar/text */}
+                                                <Avatar />
+                                                <span style={{ fontSize: 12, fontWeight: 450, fontFamily: "geist", color: "black" }}>{student.name}</span>
                                             </div>
-                                            <span style={{ fontSize: 12, fontWeight: 450 }} className="font-geist text-black">{student.name}</span>
-                                        </div>
-                                    </td>
-                                    <td style={{ fontSize: 12 }} className="font-geist py-4 px-3 text-black">{student.studentId}</td>
-                                    
-                                    <td style={{ fontSize: 12 }} className="font-geist py-4 px-6">
-                                        <LinkStatusBadge isLinked={student.isLinked} student={student} />
-                                    </td>
-                                    
-                                    <td style={{ fontSize: 12 }} className="font-geist py-4 px-6 text-black">{student.program}</td>
-                                    <td style={{ fontSize: 12 }} className="font-geist py-4 px-6 text-black text-left">{student.type}</td>
-                                    <td style={{ fontSize: 12 }} className="font-geist py-4 px-6">
-                                        <StatusBadge status={student.status} />
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+
+                                        {/* 3. STUDENT ID */}
+                                        <td style={{ fontSize: 12, fontFamily: "geist", color: "black" }}>{student.studentId}</td>
+
+                                        {/* 4. PROGRAM/SECTION */}
+                                        <td style={{ fontSize: 12, fontFamily: "geist", color: "black" }}>{student.program}</td>
+
+                                        {/* 5. CLAIM TIME (NEW) */}
+                                        <td style={{ fontSize: 12, fontFamily: "geist", color: "black" }}>{claimTime}</td>
+
+                                        {/* 6. STATUS (NEW - Claimed/Unclaimed) */}
+                                        <td style={{ fontSize: 12 }} className="font-geist py-4 px-6">
+                                            <ClaimStatusBadge isClaimed={isClaimed} />
+                                        </td>
+
+                                        {/* 7. MEAL TYPE CLAIM (NEW) */}
+                                        <td style={{ fontSize: 12, fontFamily: "geist", color: "black" }}>{mealType}</td>
+
+                                        {/* 8. VALUE CLAIMED (NEW) */}
+                                        <td style={{ fontSize: 12, fontFamily: "geist", color: "black" }}>P60</td>
+                                    </tr>
+                                );
+                            })}
                             {/* Padding Rows to keep layout stable */}
                             {currentData.length < itemsPerPage && Array(itemsPerPage - currentData.length).fill(0).map((_, i) => (
                                 <tr key={`pad-${i}`} style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>
-                                    <td colSpan="7"></td>
+                                    <td colSpan="8"></td>
                                 </tr>
                             ))}
                         </tbody>
