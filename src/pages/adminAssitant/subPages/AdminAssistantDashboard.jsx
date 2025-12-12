@@ -1,12 +1,13 @@
 import { useOutletContext } from 'react-router-dom';
 import { Menu } from "lucide-react"
 import { RiNotification2Fill } from "react-icons/ri"
-import { GreetingCard } from '../admin/components/GreetingCard';
-import { StatsCardGroup } from '../admin/components/StatsCardGroup';
-import { QuickActions } from './componenets/QuickActions';
-import { ScheduleTabs } from './componenets/ScheduleTabs';
-import { ProgramsList } from './componenets/ProgramsList';
-import { EventsPanel } from '../admin/components/EventsPanel';
+import { StatsCardGroup } from '../../admin/components/StatsCardGroup';
+import { EventsPanel } from '../../admin/components/EventsPanel';
+import { RecentEvents } from '../components/RecentEvents';
+import { ProgramsList } from '../components/ProgramsList';
+import { QuickActions } from '../components/QuickActions';
+import { ScheduleTabs } from '../components/ScheduleTabs';
+
 
 import { useState } from 'react';
 
@@ -26,6 +27,11 @@ export default function AdminAssistantDashboard() {
     ]
 
     const upcomingEvents = [
+        { link: "#", title: "President' Day", date: "Nov 25, 2025" },
+        { link: "#", title: "College Intramurals", date: "Dec 15, 2025" }
+    ]
+
+    const recentEvents = [
         { link: "#", title: "President' Day", date: "Nov 25, 2025" },
         { link: "#", title: "College Intramurals", date: "Dec 15, 2025" }
     ]
@@ -147,6 +153,9 @@ export default function AdminAssistantDashboard() {
                             </div>
                             <div>
                                 <EventsPanel events={upcomingEvents} />
+                            </div>
+                            <div>
+                                <RecentEvents events={recentEvents} />
                             </div>
                         </div>
                     </div>

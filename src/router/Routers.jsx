@@ -1,9 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoutes";
 import Login from "../Login";
+
 import AdminDashboard from "../pages/admin/AdminDashboard"
+
+import StudentManagement from "../pages/adminAssitant/subPages/StudentManagement"
+import MealEligibilityManagement from "../pages/adminAssitant/subPages/MealEligibilityManagement"
+import AdminAssistantDashboard from "../pages/adminAssitant/subPages/AdminAssistantDashboard"
 import AdminAssistantLanding from "../pages/adminAssitant/AdminAssistantLanding";
-import AdminAssistantDashboard from "../pages/adminAssitant/AdminAssistantDashboard"
+
 import FoodItemClaim from "../pages/canteenStaff/FoodItemClaim";
 
 import ChancellorDashboard from "../pages/chancellor/ChancellorDashboard";
@@ -52,6 +57,8 @@ export default function Routers() {
                     }>
                         <Route index element={<AdminAssistantDashboard />} />
                         <Route path="dashboard" element={<AdminAssistantDashboard />} />
+                        <Route path="student" element={<StudentManagement />} />
+                        <Route path="meal" element={<MealEligibilityManagement />} />
                     </Route>
                     <Route path="/canteenStaff" element={
                         <ProtectedRoute>

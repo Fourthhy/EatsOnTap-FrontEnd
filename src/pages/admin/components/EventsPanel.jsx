@@ -33,7 +33,7 @@ function EventsPanel({ events, isHyerlink = true, canViewAll = true }) {
             style={{
               padding: "10px 10px 10px 20px",
               margin: "0px 10px 0px 10px",
-              background: "#c7eaf280"
+              background: "#c7eaf290"
             }}
             className="rounded-lg flex justify-between items-center">
             <div
