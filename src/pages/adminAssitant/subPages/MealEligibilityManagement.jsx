@@ -12,8 +12,8 @@ export default function MealEligibilityManagement() {
                 }}
                 className="w-full h-auto flex flex-col justify-start">
                 <HeaderBar userAvatar={USER_AVATAR} headerTitle={"Voucher Management"} />
-                <div className="w-full flex justify-center">
-                    <div className="w-[95%]">
+                <div className="w-full h-full flex justify-center overflow-y-hidden" style={{ paddingTop: 30 }}>
+                    <div className="w-[95%] h-[calc(100vh-120px)] flex items-center">
                         <EligibilityScheduler />
                     </div>
                 </div>

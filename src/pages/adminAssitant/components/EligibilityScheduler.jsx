@@ -5,7 +5,15 @@ import { Input } from "@/components/ui/input"
 
 
 function EligibilityScheduler() {
-    const [selectedValue, setSelectedValue] = useState('');
+    //general selection of submission type
+    const [selectedSubmissionType, setSelectedSubmissionType] = useState('');
+
+    //state for selecting day of week
+    const [selectedDayOfWeek, setSelectedDayOfWeek] = useState('');
+
+    //state for event entries
+    const [eventName, setEventName] = useState('')
+    const [eventDate, setEventDate] = useState('')
 
     function SubmissionTypeDropdown() {
 
@@ -15,13 +23,9 @@ function EligibilityScheduler() {
             { label: 'Event Meal Request', value: 'eventMeal' },
         ];
 
-
-
         // Find the selected option's label for display in the button
-        const selectedOption = options.find(option => option.value === selectedValue);
+        const selectedOption = options.find(option => option.value === selectedSubmissionType);
         const buttonText = selectedOption ? selectedOption.label : 'Select a Request Type';
-
-
 
         return (
             <>
@@ -30,16 +34,16 @@ function EligibilityScheduler() {
                     height: 'full',
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'center',
+                    alignItems: 'start',
                     justifyContent: 'center',
                 }}>
                     {/* HEADER */}
-                    <h1 style={{ fontFamily: 'geist', fontSize: '1rem', fontWeight: 450 }}>Submission Type</h1>
+                    <h1 style={{ fontFamily: 'geist', fontSize: '0.90rem', fontWeight: 400, padding: 10 }}>Submission Type</h1>
 
-                    <div className="font-geist">
+                    <div className="font-geist" style={{ paddingLeft: 20 }}>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="w-full">
+                                <Button variant="outline" className="w-full font-geist" style={{ padding: "10px 20px", fontFamily: "geist", fontSize: "0.75", fontWeight: 450 }}>
                                     {/* Display the human-readable label */}
                                     {buttonText}
                                 </Button>
@@ -47,11 +51,11 @@ function EligibilityScheduler() {
                             <DropdownMenuContent className="w-[200px]">
                                 {options.map((option) => (
                                     <DropdownMenuItem
-                                        style={{ padding: "10px 20px" }}
+                                        style={{ padding: "10px 20px", fontFamily: "geist", fontSize: "0.75", fontWeight: 450 }}
                                         key={option.value}
                                         // FIX: Use an arrow function to set the state 
                                         // with the correct value when the item is selected.
-                                        onSelect={() => setSelectedValue(option.value)}
+                                        onSelect={() => setSelectedSubmissionType(option.value)}
                                         // Prevents the menu from closing when selecting the placeholder/empty option
                                         // This is often helpful for initial states.
                                         {...(option.value === '' && { onSelect: (e) => e.preventDefault() })}
@@ -74,8 +78,14 @@ function EligibilityScheduler() {
         return (
             <>
                 <div className="w-full flex flex-col gap-2">
-                    <Input placeholder="Event Name" type="text" />
-                    <Input placeholder="Event Date" type="Date" />
+                    <h1 style={{ fontFamily: 'geist', fontSize: '0.85rem', fontWeight: 400 }}>Enter Event Name</h1>
+                    <div style={{ paddingLeft: "10px" }}>
+                        <Input style={{ paddingLeft: "10px" }} placeholder="Event Name" type="text" value={eventName} onChange={(e) => setEventName(e.target.value)} />
+                    </div>
+                    <h1 style={{ fontFamily: 'geist', fontSize: '0.85rem', fontWeight: 400 }}>Enter Event Date</h1>
+                    <div style={{ paddingLeft: "10px" }}>
+                        <Input style={{ paddingLeft: "10px" }} placeholder="Event Date" type="Date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
+                    </div>
                 </div>
             </>
         )
@@ -91,37 +101,40 @@ function EligibilityScheduler() {
             { label: 'Saturday', value: 'saturday' },
         ];
 
-        const selectedDay = daysOfWeek.find(option => option.value === selectedValue);
+        const selectedDay = daysOfWeek.find(option => option.value === selectedDayOfWeek);
         const dayButtonText = selectedDay ? selectedDay.label : 'Select a Day';
         return (
-            <div className="font-geist">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="w-full">
-                            {/* Display the human-readable label */}
-                            {dayButtonText}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-[200px]">
-                        {daysOfWeek.map((option) => (
-                            <DropdownMenuItem
-                                style={{ padding: "10px 20px" }}
-                                key={option.value}
-                                // FIX: Use an arrow function to set the state 
-                                // with the correct value when the item is selected.
-                                onSelect={() => setSelectedValue(option.value)}
-                                // Prevents the menu from closing when selecting the placeholder/empty option
-                                // This is often helpful for initial states.
-                                {...(option.value === '' && { onSelect: (e) => e.preventDefault() })}
-                            >
-                                <span>
-                                    {option.label}
-                                </span>
-                            </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
+            <>
+                <h1 style={{ fontFamily: 'geist', fontSize: '0.90rem', fontWeight: 400 }}>Select day of week</h1>
+                <div className="font-geist" style={{ paddingLeft: "10px" }}>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="w-full font-geist" style={{ padding: "10px 20px", fontFamily: "geist", fontSize: "0.75", fontWeight: 450 }}>
+                                {/* Display the human-readable label */}
+                                {dayButtonText}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-[200px]">
+                            {daysOfWeek.map((option) => (
+                                <DropdownMenuItem
+                                    style={{ padding: "10px 20px", fontFamily: "geist", fontSize: "0.75", fontWeight: 450 }}
+                                    key={option.value}
+                                    // FIX: Use an arrow function to set the state 
+                                    // with the correct value when the item is selected.
+                                    onSelect={() => setSelectedDayOfWeek(option.value)}
+                                    // Prevents the menu from closing when selecting the placeholder/empty option
+                                    // This is often helpful for initial states.
+                                    {...(option.value === '' && { onSelect: (e) => e.preventDefault() })}
+                                >
+                                    <span>
+                                        {option.label}
+                                    </span>
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            </>
         )
     }
 
@@ -143,8 +156,8 @@ function EligibilityScheduler() {
 
         const globalStyle = {
             fontFamily: "geist",
-            fontSize: "0.80rem",
-            fontWeight: 500
+            fontSize: "0.75rem",
+            fontWeight: 450
         };
 
         // Handle single checkbox toggle
@@ -219,21 +232,13 @@ function EligibilityScheduler() {
                     padding: "20px",
                     borderRadius: "8px",
                     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                    maxWidth: "fit-content",
+                    width: "full",
+                    height: "full",
+                    marginBottom: "20px"
                 }}
             >
-                <h3
-                    style={{
-                        ...globalStyle,
-                        color: "#232323",
-                        marginBottom: "15px",
-                        fontWeight: "normal",
-                        fontSize: "1rem",
-                        fontFamily: "geist",
-                    }}
-                >
-                    Eligible Programs
-                </h3>
+
+                <h1 style={{ color: "#232323", marginBottom: "15px", fontFamily: 'geist', fontSize: '0.90rem', fontWeight: 400 }}>Eligibile Programs</h1>
 
                 {/* 🔥 SELECT ALL CHECKBOX */}
                 <div style={{ marginBottom: "1rem", display: "flex", alignItems: "center" }}>
@@ -269,9 +274,28 @@ function EligibilityScheduler() {
 
     return (
         <>
-            <div className="w-full h-[calc(100vh-90px)] flex items-center p-6 font-geist text-gray-900 overflow-hidden">
-                <div className="bg-white rounded-md shadow-sm border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
-                    
+            {/* PARENT */}
+            <div className="w-full h-full flex items-center justify-center font-geist overflow-hidden">
+                {/* CHILD */}
+                <div className="w-full h-full bg-white rounded-md shadow-sm border border-gray-200 flex-1 overflow-hidden">
+                    {/* GRIDDER */}
+                    <div className="w-full h-full flex flex-col" style={{ padding: 10 }}>
+                        <div className="w-full h-auto grid grid-cols-4 row-span-1 gap-4">
+                            <div className="col-span-1">
+                                <SubmissionTypeDropdown />
+                                <div style={{ padding: "10px 10px 10px 10px" }}>
+                                    {selectedSubmissionType === 'mealEligibility' && <MealRequestForm />}
+                                    {selectedSubmissionType === 'eventMeal' && <EventForm />}
+                                </div>
+                            </div>
+                            <div className="col-span-3">
+                                <EligibleProgramsForm />
+                            </div>
+                        </div>
+                        <div className="w-full h-full border-black border-[1px]">
+                            bottom Content
+                        </div>
+                    </div>
                 </div>
             </div>
         </>
