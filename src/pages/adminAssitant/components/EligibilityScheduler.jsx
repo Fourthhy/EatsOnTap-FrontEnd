@@ -17,17 +17,15 @@ const ALL_PROGRAM_CODES = [
 ];
 const generateStudentData = (programCode) => {
     const students = [];
-    const baseNames = ["A. Doe", "B. Reyes", "C. Dicdican", "D. Santos", "E. Chambers", "F. Nixon", "G. Baird", "H. Hartley", "I. Stevenson", "J. Arvin"];
+    const baseNames = [ "A. Doe", "B. Reyes", "C. Dicdican", "D. Santos", "E. Chambers", "F. Nixon", "G. Baird", "H. Hartley", "I. Stevenson", "J. Arvin" ];
     for (let i = 0; i < Math.min(10, baseNames.length); i++) {
         const studentId = `25-${Math.floor(Math.random() * 90000) + 10000}`;
-        // Base status is irrelevant now, as it will be derived from the checkbox state
         const status = 'Eligible';
         students.push({
             id: `${programCode}-${i}`,
             name: `${baseNames[i]} (${programCode})`,
             studentId: studentId,
             program: programCode,
-            // We use a derived status property for display later
             baseStatus: status,
         });
     }
@@ -37,12 +35,30 @@ const allStudentsData = ALL_PROGRAM_CODES.flatMap(program => generateStudentData
 
 
 // --- Student List Table Component (ProgramSelectionAndList) ---
-const ProgramSelectionAndList = ({ filteredStudents }) => {
+const ProgramSelectionAndList = ({ filteredStudents: programFilteredStudents }) => {
     const ITEM_HEIGHT_ESTIMATE_PX = 45;
     const ITEMS_PER_PAGE = 9;
-    const PAGES_PER_VIEW = 5;
-
+    const PAGES_PER_VIEW = 5; 
+    
     const [currentPage, setCurrentPage] = useState(1);
+    const [searchQuery, setSearchQuery] = useState(''); // New state for search input
+    
+    // --- Combined Filtering Logic ---
+    const combinedFilteredStudents = useMemo(() => {
+        if (!searchQuery) {
+            return programFilteredStudents;
+        }
+        const lowerCaseQuery = searchQuery.toLowerCase();
+        
+        return programFilteredStudents.filter(student => {
+            const nameMatch = student.name.toLowerCase().includes(lowerCaseQuery);
+            const idMatch = student.studentId.toLowerCase().includes(lowerCaseQuery);
+            const programMatch = student.program.toLowerCase().includes(lowerCaseQuery);
+            
+            return nameMatch || idMatch || programMatch;
+        });
+    }, [programFilteredStudents, searchQuery]); // Rerun when program filter or search query changes
+
 
     // --- Row Checkbox State (Initializes all to checked/Eligible) ---
     const [rowCheckedState, setRowCheckedState] = useState({});
@@ -50,26 +66,25 @@ const ProgramSelectionAndList = ({ filteredStudents }) => {
     // EFFECT: Set all filtered students to CHECKED (Eligible) upon mount or filter change
     useEffect(() => {
         const initialCheckedState = {};
-        filteredStudents.forEach(student => {
-            // Default them to true (Eligible)
-            initialCheckedState[student.id] = true;
+        combinedFilteredStudents.forEach(student => {
+            initialCheckedState[student.id] = true; 
         });
         setRowCheckedState(initialCheckedState);
         setCurrentPage(1); // Reset pagination on filter change
-    }, [filteredStudents]);
-
+    }, [combinedFilteredStudents]); // Dependency is the result of both program and text filter
+    
     // Handler for toggling the selection checkbox
     const handleRowCheckChange = (studentId) => {
-        setRowCheckedState(prev => ({
-            ...prev,
-            [studentId]: !prev[studentId] // Toggle the state
-        }));
+         setRowCheckedState(prev => ({
+             ...prev,
+             [studentId]: !prev[studentId] 
+         }));
     };
-
+    
     // --- Pagination Logic ---
-    const totalPages = Math.ceil(filteredStudents.length / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(combinedFilteredStudents.length / ITEMS_PER_PAGE);
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const currentData = filteredStudents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    const currentData = combinedFilteredStudents.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -88,7 +103,6 @@ const ProgramSelectionAndList = ({ filteredStudents }) => {
         let start = Math.max(1, currentPage - Math.floor(PAGES_PER_VIEW / 2));
         let end = Math.min(totalPages, start + PAGES_PER_VIEW - 1);
 
-        // Adjust start if we hit the end bound
         if (end - start + 1 < PAGES_PER_VIEW) {
             start = Math.max(1, end - PAGES_PER_VIEW + 1);
         }
@@ -100,21 +114,20 @@ const ProgramSelectionAndList = ({ filteredStudents }) => {
         return pages;
     };
     const displayedPages = getDisplayedPages();
-
+    
     // --- Status Badge Sub-component ---
     const StatusBadge = ({ isChecked }) => {
-        // Determine status based on checkbox state
         const status = isChecked ? 'Eligible' : 'Ineligible';
-
+        
         const styles = {
             Eligible: { backgroundColor: '#d1fae5', color: '#047857', dotColor: '#10b981', text: 'Eligible' },
             Ineligible: { backgroundColor: '#fee2e2', color: '#b91c1c', dotColor: '#ef4444', text: 'Ineligible' }
         };
         const currentStyle = styles[status] || styles.Eligible;
-
+        
         return (
             <span
-                className="text-xs font-medium"
+                className="text-xs font-medium" 
                 style={{
                     padding: '4px 12px', borderRadius: 12, display: 'flex', alignItems: 'center',
                     gap: '6px', backgroundColor: currentStyle.backgroundColor, color: currentStyle.color,
@@ -129,35 +142,35 @@ const ProgramSelectionAndList = ({ filteredStudents }) => {
 
     // --- Avatar Sub-component ---
     const Avatar = () => (
-        <div style={{
-            width: 32, height: 32, borderRadius: 9999,
-            backgroundColor: '#e5e7eb',
-            color: '#6b7280',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            marginRight: 12
+        <div style={{ 
+            width: 32, height: 32, borderRadius: 9999, 
+            backgroundColor: '#e5e7eb', 
+            color: '#6b7280', 
+            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+            marginRight: 12 
         }}>
             <User size={16} />
         </div>
     );
-
+    
 
     return (
-        <div
-            style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
+        <div 
+            style={{ 
+                width: '100%', 
+                height: '100%', 
+                display: 'flex', 
                 flexDirection: 'column',
                 backgroundColor: 'white',
                 fontFamily: 'sans-serif'
             }}
         >
             {/* Top Search and Filter Bar */}
-            <div style={{
-                padding: '12px 10px',
-                borderBottom: '1px solid #f3f4f6',
-                display: 'flex',
-                justifyContent: 'space-between',
+            <div style={{ 
+                padding: '12px 10px', 
+                borderBottom: '1px solid #f3f4f6', 
+                display: 'flex', 
+                justifyContent: 'space-between', 
                 alignItems: 'center',
                 gap: '8px'
             }}>
@@ -165,15 +178,17 @@ const ProgramSelectionAndList = ({ filteredStudents }) => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" size={14} />
                     <input
                         type="text"
-                        placeholder="Search"
+                        placeholder="Search student, ID, or program"
                         className="w-full text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                         style={{
                             width: '100%', paddingLeft: '40px', paddingRight: '16px', paddingTop: '4px',
                             paddingBottom: '4px', backgroundColor: '#F0F1F6', border: 'none', borderRadius: '8px',
                             fontSize: 14, fontFamily: "geist"
                         }}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                </div>F
+                </div>
             </div>
 
             {/* Table Container */}
@@ -192,33 +207,33 @@ const ProgramSelectionAndList = ({ filteredStudents }) => {
                     <tbody style={{ borderSpacing: 0, borderTop: '1px solid #f3f4f6' }}>
                         {currentData.length > 0 ? (
                             currentData.map((student, index) => {
-                                const isSelected = rowCheckedState[student.id] !== false; // Checkbox defaults to true if undefined
+                                const isSelected = rowCheckedState[student.id] !== false; 
                                 return (
                                     <tr key={student.id} className="hover:bg-gray-50 transition-colors" style={{ height: ITEM_HEIGHT_ESTIMATE_PX, borderBottom: '1px solid #f3f4f6' }}>
-
+                                        
                                         {/* # */}
                                         <td style={{ padding: '8px 24px', fontSize: 13, color: '#1f2937' }}>{startIndex + index + 1}</td>
-
+                                        
                                         {/* Student Name */}
                                         <td style={{ padding: '8px 24px', display: 'flex', alignItems: 'center', gap: 8 }}>
                                             <Avatar />
                                             <span style={{ fontSize: 12, fontWeight: 450, color: '#1f2937' }}>{student.name.split('(')[0].trim()}</span>
                                         </td>
-
+                                        
                                         {/* Student ID */}
                                         <td style={{ padding: '8px 12px', fontSize: 12, color: '#1f2937' }}>{student.studentId}</td>
-
+                                        
                                         {/* Program */}
                                         <td style={{ padding: '8px 24px', fontSize: 12, color: '#1f2937' }}>{student.program}</td>
-
+                                        
                                         {/* Status (DYNAMIC) */}
                                         <td style={{ padding: '8px 24px', fontSize: 12 }}>
                                             <StatusBadge isChecked={isSelected} />
                                         </td>
-
+                                        
                                         {/* Select Checkbox */}
                                         <td style={{ padding: '8px 24px', textAlign: 'center' }}>
-                                            <input
+                                            <input 
                                                 type="checkbox"
                                                 checked={isSelected}
                                                 onChange={() => handleRowCheckChange(student.id)}
@@ -231,7 +246,9 @@ const ProgramSelectionAndList = ({ filteredStudents }) => {
                         ) : (
                             <tr>
                                 <td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#6b7280' }}>
-                                    No students selected. Please check program boxes above.
+                                    {programFilteredStudents.length > 0 && searchQuery ? 
+                                     "No results found matching your search criteria." : 
+                                     "No students selected. Please check program boxes above."}
                                 </td>
                             </tr>
                         )}
@@ -285,7 +302,7 @@ const ProgramSelectionAndList = ({ filteredStudents }) => {
                 <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={isNextDisabled}
-                    className="text-sm flex items-center gap-2font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-sm flex items-center gap-2 font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ padding: '8px 12px', borderRadius: '6px' }}
                 >
                     Next <ChevronRight size={16} />
@@ -396,7 +413,7 @@ const EligibleProgramsForm = ({ checkedPrograms, handleCheckboxChange, toggleSel
 function EligibilityScheduler() {
     // Shared State for Program Selection (LIFTED)
     const [checkedPrograms, setCheckedPrograms] = useState({});
-
+    
     // general selection of submission type
     const [selectedSubmissionType, setSelectedSubmissionType] = useState('mealEligibility');
 
@@ -430,16 +447,16 @@ function EligibilityScheduler() {
             setCheckedPrograms(allChecked);
         }
     };
-
+    
     // Filter students based on selected programs
     const filteredStudents = useMemo(() => {
         const selectedCodes = Object.keys(checkedPrograms).filter(key => checkedPrograms[key]);
         if (selectedCodes.length === 0) return [];
-
+        
         return allStudentsData.filter(student => selectedCodes.includes(student.program));
     }, [checkedPrograms]);
-
-
+    
+    
     function SubmissionTypeDropdown() {
         const options = [
             { label: 'Meal Eligibility Request', value: 'mealEligibility' },
@@ -547,10 +564,10 @@ function EligibilityScheduler() {
                                 </div>
                             </div>
                             <div className="col-span-3">
-                                <EligibleProgramsForm
-                                    checkedPrograms={checkedPrograms}
-                                    handleCheckboxChange={handleCheckboxChange}
-                                    toggleSelectAll={toggleSelectAll}
+                                <EligibleProgramsForm 
+                                    checkedPrograms={checkedPrograms} 
+                                    handleCheckboxChange={handleCheckboxChange} 
+                                    toggleSelectAll={toggleSelectAll} 
                                     isAllSelected={isAllSelected}
                                 />
                             </div>
