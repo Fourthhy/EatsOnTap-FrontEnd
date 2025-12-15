@@ -292,7 +292,7 @@ export default function AdminDashboard() {
                                 <div className="col-span-4">
                                     <StatsCardGroup
                                         cardGroupTitle={"Meal Eligibilty List Count"}
-                                        urgentNotification={0}
+                                        urgentNotification={1}
                                         isDualPager={true}
                                         dualPageTitles={["View Accepted Requests", "View Rejected Requests"]}
                                         notificationTitle={"Pending Meal Requests"}
