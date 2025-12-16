@@ -106,7 +106,7 @@ function Sidebar({ menuItems }) {
             <div style={{
                 width: sidebarWidth, // Transitioning width
                 height: "100vh",
-                background: "linear-gradient(to bottom, #263C70, #142345)",
+                background: "linear-gradient(to bottom, #153FA3, #142345)",
                 color: "white",
                 display: "flex",
                 flexDirection: "column",
