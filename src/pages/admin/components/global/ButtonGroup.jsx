@@ -1,16 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-// BUTTON ITEM DOCUMENTATION (Unchanged)
+// BUTTON ITEM DOCUMENTATION (Icon removed from ButtonItem definition)
 /**
  * @typedef {object} ButtonItem
- * @property {string | React.ReactNode} icon - The icon component or element.
  * @property {string} label - The text label for the button.
  * @property {string | number} id - A unique identifier for the button.
  */
 
 /**
  * @typedef {object} ButtonGroupItemProps
- * @property {ButtonItem} buttonData - The data object for the button (icon, label, id).
+ * @property {ButtonItem} buttonData - The data object for the button (label, id).
  * @property {string | number} activeId - The ID of the currently active button.
  * @property {(id: string | number) => void} onClick - Handler for button clicks.
  * @property {string} [activeTextColor='white'] - The text color for the active state.
@@ -18,8 +17,7 @@ import React, { useState, useRef, useEffect } from 'react';
  */
 
 /**
- * A standardized component for an individual button within the ButtonGroup.
- * **Note:** The background is now always transparent, as the sliding indicator handles the color.
+ * A standardized component for an individual button within the ButtonGroup (now without an icon).
  * @param {ButtonGroupItemProps} props
  */
 const ButtonGroupItem = ({
@@ -40,7 +38,7 @@ const ButtonGroupItem = ({
     whiteSpace: 'nowrap', // whitespace-nowrap
     display: 'flex', // flex
     alignItems: 'center', // items-center
-    gap: '0.5rem', // gap-2
+    gap: '0rem', // gap: 0rem (no icon, so no gap needed)
     // Crucial: Set position relative so the button is layered above the absolute indicator
     position: 'relative',
     zIndex: 2, // Layered above the indicator (zIndex 1)
@@ -50,7 +48,7 @@ const ButtonGroupItem = ({
     transitionDuration: '150ms',
   };
 
-  // Dynamic inline styles based on active state (only controls text/icon color)
+  // Dynamic inline styles based on active state (only controls text color)
   const dynamicStyle = {
     color: isActive ? activeTextColor : '#4b5563', // gray-600 equivalent when inactive
   };
@@ -60,21 +58,8 @@ const ButtonGroupItem = ({
 
   // Merge base and dynamic inline styles
   const mergedStyle = { ...baseStyle, ...dynamicStyle };
-
-  // Determine the color for the icon element
-  const iconColor = isActive ? 'white' : '#4b5563'; // White when active, gray when inactive
-  const iconSize = 16;
-
-  // Logic to render the icon:
-  let iconElement = null;
-  if (buttonData.icon && React.isValidElement(buttonData.icon)) {
-    // If the icon is a valid React element (like a Lucide icon), clone it
-    // to inject the dynamic color and size props.
-    iconElement = React.cloneElement(buttonData.icon, {
-      size: iconSize,
-      color: iconColor
-    });
-  }
+  
+  // Icon related logic has been completely removed.
 
   return (
     <button
@@ -83,8 +68,7 @@ const ButtonGroupItem = ({
       className={tailwindClasses}
       style={mergedStyle}
     >
-      {/* Icon Rendering (Directly rendered, no wrapper dot) */}
-      {iconElement}
+      {/* Icon rendering has been removed */}
 
       {/* Label */}
       <span className={isActive ? "" : "hover:text-[#231F20] cursor-pointer"}>
@@ -94,14 +78,14 @@ const ButtonGroupItem = ({
   );
 };
 
-// BUTTON GROUP DOCUMENTATION (Unchanged)
+// BUTTON GROUP DOCUMENTATION (Icon removed from ButtonGroupProps definition)
 
 /**
  * @typedef {object} ButtonGroupProps
- * @property {Array<{ icon: React.ReactNode, label: string, id: string | number }>} buttonListGroup - The array of button configuration objects.
+ * @property {Array<{ label: string, id: string | number }>} buttonListGroup - The array of button configuration objects.
  * @property {string | number} [initialActiveId] - The ID of the button that should be active initially. Defaults to the first item's ID.
  * @property {(id: string | number) => void} [onSetActiveId] - Optional callback when a button is clicked, providing the new active ID.
- * @property {string} [activeColor='#4268BD'] - The background color for the active button.
+ * @property {string} [activeColor='#1F3460'] - The background color for the active button.
  */
 
 /**
@@ -137,7 +121,6 @@ const ButtonGroup = ({
     if (!containerEl) return;
 
     // 2. Get the currently active button element. 
-    //    We need to access the `.current` property of the ref object.
     const activeButtonRefObject = buttonRefs.current[activeId];
     // Check if the ref object exists and has the DOM element attached to its .current property
     const activeButtonEl = activeButtonRefObject?.current;
@@ -146,7 +129,6 @@ const ButtonGroup = ({
 
     // 3. Get the bounding rectangles
     const containerRect = containerEl.getBoundingClientRect();
-    // NOW IT WORKS: call getBoundingClientRect on the DOM element (activeButtonEl)
     const activeRect = activeButtonEl.getBoundingClientRect();
 
     // 4. Calculate the relative position (offset from container's left edge)
@@ -198,6 +180,7 @@ const ButtonGroup = ({
     transform: `translateX(${indicatorStyle.left}px)`,
     width: `${indicatorStyle.width}px`,
     opacity: indicatorStyle.opacity,
+    left: 1
   };
 
 
@@ -210,7 +193,6 @@ const ButtonGroup = ({
       {buttonListGroup.map((button) => {
         // Create a ref for each button and store it in the buttonRefs map
         if (!buttonRefs.current[button.id]) {
-          // This line creates the ref object: { current: null }
           buttonRefs.current[button.id] = React.createRef();
         }
 

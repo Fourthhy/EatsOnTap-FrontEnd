@@ -7,7 +7,7 @@ import { ButtonGroup } from "../admin/components/global/ButtonGroup";
 import { PlaneTakeoff } from "lucide-react"
 
 export default function SuperAdminDashboard() {
-    const [currentOrderType, setCurrentOrderType] = useState('Pending');
+    const [currentOrderType, setCurrentOrderType] = useState('all');
     const CheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
     const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
     const buttonListGroup = [
@@ -27,6 +27,44 @@ export default function SuperAdminDashboard() {
             icon: <PlaneTakeoff />,
         },
     ];
+
+    const buttonListGroup2 = [
+        {
+            id: 'all',
+            label: 'All',
+            icon: null
+        },
+        {
+            id: 'preschool',
+            label: 'Preschool',
+            icon: null
+        },
+        {
+            id: 'primaryEducation',
+            label: 'Primary Education',
+            icon: null
+        },
+        {
+            id: 'intermediate',
+            label: 'Intermediate',
+            icon: null
+        },
+        {
+            id: 'juniorHighSchool',
+            label: 'Junior High School',
+            icon: null
+        },
+        {
+            id: 'seniorHighSchool',
+            label: 'Senior High School',
+            icon: null
+        },
+        {
+            id: 'higherEducation',
+            label: 'Higher Education',
+            icon: null
+        },
+    ]
     const handleTypeChange = (newTypeId) => {
         console.log(`Order type changed to: ${newTypeId}`);
         setCurrentOrderType(newTypeId);
@@ -45,7 +83,7 @@ export default function SuperAdminDashboard() {
             <div className="p-8 border-black">
                 <h2 className="text-xl font-bold mb-4">Order Status Selector</h2>
                 <ButtonGroup
-                    buttonListGroup={buttonListGroup}
+                    buttonListGroup={buttonListGroup2}
                     initialActiveId={currentOrderType} // Control the active state from the parent
                     onSetActiveId={handleTypeChange} // Get the callback on click
                 // Optional: change the active color if needed
