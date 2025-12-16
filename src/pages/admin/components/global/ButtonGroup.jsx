@@ -30,7 +30,7 @@ const ButtonGroupItem = ({
   buttonRef
 }) => {
   const isActive = buttonData.id === activeId;
-  
+
   // Base style for the button, fully converted to inline style
   const baseStyle = {
     padding: '0.5rem 1rem', // px-4 py-2
@@ -47,14 +47,14 @@ const ButtonGroupItem = ({
     backgroundColor: 'transparent', // Always transparent, indicator provides the color
     // Only the color of the text/icon changes here
     transitionProperty: 'color', // transition-colors (only for color now)
-    transitionDuration: '150ms', 
+    transitionDuration: '150ms',
   };
-    
+
   // Dynamic inline styles based on active state (only controls text/icon color)
   const dynamicStyle = {
     color: isActive ? activeTextColor : '#4b5563', // gray-600 equivalent when inactive
   };
-    
+
   // We keep Tailwind classes ONLY for hover state
   const tailwindClasses = `transition-colors ${isActive ? '' : 'hover:bg-gray-200 text-gray-600'}`;
 
@@ -64,16 +64,16 @@ const ButtonGroupItem = ({
   // Determine the color for the icon element
   const iconColor = isActive ? 'white' : '#4b5563'; // White when active, gray when inactive
   const iconSize = 16;
-  
+
   // Logic to render the icon:
   let iconElement = null;
   if (buttonData.icon && React.isValidElement(buttonData.icon)) {
-      // If the icon is a valid React element (like a Lucide icon), clone it
-      // to inject the dynamic color and size props.
-      iconElement = React.cloneElement(buttonData.icon, { 
-          size: iconSize, 
-          color: iconColor 
-      });
+    // If the icon is a valid React element (like a Lucide icon), clone it
+    // to inject the dynamic color and size props.
+    iconElement = React.cloneElement(buttonData.icon, {
+      size: iconSize,
+      color: iconColor
+    });
   }
 
   return (
@@ -85,9 +85,11 @@ const ButtonGroupItem = ({
     >
       {/* Icon Rendering (Directly rendered, no wrapper dot) */}
       {iconElement}
-      
+
       {/* Label */}
-      {buttonData.label}
+      <span className={isActive ? "" : "hover:text-[#231F20] cursor-pointer"}>
+        {buttonData.label}
+      </span>
     </button>
   );
 };
@@ -111,21 +113,21 @@ const ButtonGroup = ({
   buttonListGroup,
   initialActiveId,
   onSetActiveId,
-  activeColor = '#4268BD', // Blue from your example
+  activeColor = '#1F3460', // Blue from your example
 }) => {
   const defaultInitialId = buttonListGroup.length > 0 ? buttonListGroup[0].id : null;
   const [activeId, setActiveId] = useState(initialActiveId ?? defaultInitialId);
-  
+
   // Ref for the entire button group container
   const containerRef = useRef(null);
   // Ref to store the mapping of button IDs to their respective element refs
   const buttonRefs = useRef({});
 
   // State to track the position and size of the sliding indicator
-  const [indicatorStyle, setIndicatorStyle] = useState({ 
-    left: 0, 
-    width: 0, 
-    opacity: 0 
+  const [indicatorStyle, setIndicatorStyle] = useState({
+    left: 0,
+    width: 0,
+    opacity: 0
   });
 
   // Effect to calculate and update the indicator position when activeId changes
@@ -145,7 +147,7 @@ const ButtonGroup = ({
     // 3. Get the bounding rectangles
     const containerRect = containerEl.getBoundingClientRect();
     // NOW IT WORKS: call getBoundingClientRect on the DOM element (activeButtonEl)
-    const activeRect = activeButtonEl.getBoundingClientRect(); 
+    const activeRect = activeButtonEl.getBoundingClientRect();
 
     // 4. Calculate the relative position (offset from container's left edge)
     const newLeft = activeRect.left - containerRect.left;
@@ -160,7 +162,7 @@ const ButtonGroup = ({
 
   }, [activeId, buttonListGroup.length]); // Recalculate on ID change or button list change
 
-  
+
   const handleButtonClick = (id) => {
     setActiveId(id);
     if (onSetActiveId) {
