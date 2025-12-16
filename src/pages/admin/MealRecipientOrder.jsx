@@ -11,7 +11,6 @@ export default function MealRecipientOrder() {
                 <HeaderBar headerTitle="Meal Recipient Orders" userAvatar={USER_AVATAR} />
                 <div className="w-full h-[calc(100vh - 60px)] flex flex-col justify-start overflow-hidden">
                     <MealOrdersTable />
-
                 </div>
             </div>
 

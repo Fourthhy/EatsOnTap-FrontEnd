@@ -7,7 +7,7 @@ import { AddStudentModal, LinkIDModal } from './AddStudentModal';
 
 // --- CONFIGURATION ---
 const MIN_ITEMS = 4;
-const MAX_ITEMS = 13;
+const MAX_ITEMS = 15;
 // Estimated row height (based on py-4 + font size + border) ~65px
 const ITEM_HEIGHT_ESTIMATE_PX = 40; 
 
