@@ -24,7 +24,7 @@ export default function SuperAdminDashboard() {
         {
             id: 'Shipped',
             label: 'Shipped Orders',
-            icon: <PlaneTakeoff />, // An example without an icon
+            icon: <PlaneTakeoff />,
         },
     ];
     const handleTypeChange = (newTypeId) => {
