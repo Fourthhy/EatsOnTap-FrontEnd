@@ -12,9 +12,9 @@ export default function AdminLanding() {
     const menuItems = [
         // Make sure these paths match the Route paths defined above
         { icon: <LayoutDashboard size={20} />, text: "Dashboard", path: "/admin/dashboard" },
-        { icon: <Ticket size={20} />, text: "Voucher Management", path: "/admin/voucher" },
-        { icon: <CalendarDays size={20} />, text: "Schedule of Student Eligibility", path: "/admin/schedule" },
-        { icon: <ShoppingBag size={20} />, text: "Meal Recipient Orders", path: "/admin/order" },
+        { icon: <Ticket size={20} />, text: "Student", path: "/admin/voucher" },
+        { icon: <CalendarDays size={20} />, text: "Event", path: "/admin/schedule" },
+        { icon: <ShoppingBag size={20} />, text: "Meal Orders", path: "/admin/order" },
         { icon: <BookOpen size={20} />, text: "Records", path: "/admin/record" },
     ]
 
