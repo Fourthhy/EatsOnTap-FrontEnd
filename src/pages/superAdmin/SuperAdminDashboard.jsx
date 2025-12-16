@@ -3,7 +3,7 @@ import { logout } from "../../functions/logoutAuth"
 import { Button } from "../../components/ui/button"
 import { useNavigate } from "react-router-dom"
 
-import { ButtonGroup } from "../admin/components/global/ButtonGroup";
+import { ButtonGroup } from "../../components/global/ButtonGroup";
 import { PlaneTakeoff } from "lucide-react"
 
 export default function SuperAdminDashboard() {
