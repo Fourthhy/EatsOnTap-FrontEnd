@@ -9,15 +9,15 @@ import { AddStudentModal, LinkIDModal } from './AddStudentModal';
 const MIN_ITEMS = 4;
 const MAX_ITEMS = 15;
 // Estimated row height (based on py-4 + font size + border) ~65px
-const ITEM_HEIGHT_ESTIMATE_PX = 40; 
+const ITEM_HEIGHT_ESTIMATE_PX = 40;
 
 const StudentList = () => {
-    
+
     // --- CUSTOM STATE ---
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
     const [studentToLink, setStudentToLink] = useState(null);
-    
+
     // --- TOP TABULATION
     const [activeTab, setActiveTab] = useState('All');
 
@@ -45,7 +45,7 @@ const StudentList = () => {
             const containerHeight = entry.contentRect.height;
 
             // Subtract Table Header Height (approx 45px)
-            const availableSpace = containerHeight - 45; 
+            const availableSpace = containerHeight - 45;
 
             // Calculate items that fit
             const calculatedItems = Math.floor(availableSpace / ITEM_HEIGHT_ESTIMATE_PX);
@@ -56,7 +56,7 @@ const StudentList = () => {
             setItemsPerPage(prev => {
                 if (prev !== newItemsPerPage) {
                     // Reset to page 1 to avoid out-of-bounds errors on resize
-                    setCurrentPage(1); 
+                    setCurrentPage(1);
                     return newItemsPerPage;
                 }
                 return prev;
@@ -71,7 +71,7 @@ const StudentList = () => {
     // Derive unique program sections for the dropdown
     const programSections = useMemo(() => {
         const programs = new Set(allStudents.map(s => s.program));
-        return [...programs].sort(); 
+        return [...programs].sort();
     }, [allStudents]);
 
     const tabs = [
@@ -109,7 +109,7 @@ const StudentList = () => {
     const isHigherEducation = (program) => {
         return program.startsWith('BS') || program.startsWith('BAB') || program.startsWith('AB');
     };
-    
+
     // --- FILTERING --- 
     const filteredStudents = allStudents.filter(student => {
         let matchesTab = true;
@@ -180,7 +180,7 @@ const StudentList = () => {
 
     const LinkStatusBadge = ({ isLinked, student }) => {
         const status = isLinked ? 'Linked' : 'Unlinked';
-        
+
         const styles = {
             Linked: { backgroundColor: '#d1fae5', color: '#047857', dotColor: '#10b981', text: 'Linked' },
             Unlinked: { backgroundColor: '#fee2e2', color: '#b91c1c', dotColor: '#ef4444', text: 'Unlinked' }
@@ -215,7 +215,7 @@ const StudentList = () => {
                 onClose={() => setIsAddModalOpen(false)}
                 programSections={programSections}
             />
-             {studentToLink && (
+            {studentToLink && (
                 <LinkIDModal
                     isOpen={isLinkModalOpen}
                     onClose={handleCloseLinkModal}
@@ -247,7 +247,7 @@ const StudentList = () => {
                     ))}
 
                 </div>
-        
+
                 <button
                     onClick={() => setIsAddModalOpen(true)}
                     className="ml-auto hover:bg-blue-700 text-sm font-medium flex items-center shadow-sm"
@@ -322,8 +322,8 @@ const StudentList = () => {
                 </div>
 
                 {/* Table Section (Flexible Height) */}
-                <div 
-                    ref={tableWrapperRef} 
+                <div
+                    ref={tableWrapperRef}
                     className="flex-1 overflow-y-hidden w-full"
                 >
                     <table className="w-full text-left border-collapse">
@@ -333,9 +333,8 @@ const StudentList = () => {
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Student Name</th>
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-3 font-medium text-gray-500">Student ID</th>
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500 w-30">RFID Link</th>
-                                <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">{getProgramHeaderLabel()}</th>
                                 <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Regular/Irregular</th>
-                                <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">Status</th>
+                                <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">{getProgramHeaderLabel()}</th>
                             </tr>
                         </thead>
 
@@ -360,15 +359,13 @@ const StudentList = () => {
                                         </div>
                                     </td>
                                     <td style={{ fontSize: 12 }} className="font-geist py-4 px-3 text-black">{student.studentId}</td>
-                                    
-                                    <td style={{ fontSize: 12 }} className="font-geist py-4 px-6">
-                                        <LinkStatusBadge isLinked={student.isLinked} student={student} />
-                                    </td>
-                                    
+
+
+
                                     <td style={{ fontSize: 12 }} className="font-geist py-4 px-6 text-black">{student.program}</td>
                                     <td style={{ fontSize: 12 }} className="font-geist py-4 px-6 text-black text-left">{student.type}</td>
                                     <td style={{ fontSize: 12 }} className="font-geist py-4 px-6">
-                                        <StatusBadge status={student.status} />
+                                        <LinkStatusBadge isLinked={student.isLinked} student={student} />
                                     </td>
 
                                 </tr>
