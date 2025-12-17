@@ -5,7 +5,7 @@ import { Search, Calendar, Filter, ChevronLeft, ChevronRight, Plus, User } from 
 import { generateData } from './mockData';
 import { AddStudentModal, LinkIDModal } from './AddStudentModal';
 
-// --- CONFIGURATION ---
+// --- TABLE ITEM HEIGHT CONFIGURATION ---
 const MIN_ITEMS = 4;
 const MAX_ITEMS = 15;
 // Estimated row height (based on py-4 + font size + border) ~65px
@@ -13,22 +13,27 @@ const ITEM_HEIGHT_ESTIMATE_PX = 40;
 
 const StudentList = () => {
     
-    // --- STATE ---
+    // --- CUSTOM STATE ---
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
     const [studentToLink, setStudentToLink] = useState(null);
     
+    // --- TOP TABULATION
     const [activeTab, setActiveTab] = useState('All');
+
+    // --- PAGINATION --- 
     const [currentPage, setCurrentPage] = useState(1);
+
+    // --- SEARCH ---
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Dynamic Pagination State
-    const [itemsPerPage, setItemsPerPage] = useState(MAX_ITEMS);
+    // --- DATA ---
+    const allStudents = useMemo(() => generateData(), []);
 
+    // --- PAGINATION --- 
+    const [itemsPerPage, setItemsPerPage] = useState(MAX_ITEMS);
     // Refs for height calculation
     const tableWrapperRef = useRef(null);
-
-    const allStudents = useMemo(() => generateData(), []);
 
     // --- HEIGHT CALCULATION LOGIC ---
     useEffect(() => {
@@ -105,6 +110,7 @@ const StudentList = () => {
         return program.startsWith('BS') || program.startsWith('BAB') || program.startsWith('AB');
     };
     
+    // --- FILTERING --- 
     const filteredStudents = allStudents.filter(student => {
         let matchesTab = true;
         const program = student.program;
@@ -127,6 +133,7 @@ const StudentList = () => {
         return matchesTab && matchesSearch;
     });
 
+    // --- PAGINATION COMPUTATION AND DISPLAY --- 
     const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const currentData = filteredStudents.slice(startIndex, startIndex + itemsPerPage);
