@@ -1,14 +1,15 @@
+// STATE
 import { useState } from "react";
-import { logout } from "../../functions/logoutAuth"
-import { Button } from "../../components/ui/button"
+// NAVIGATION
 import { useNavigate } from "react-router-dom"
-
+// LOG OUT FUNCTION
+import { logout } from "../../functions/logoutAuth"
+// COMPONENTS
+import { Button } from "../../components/ui/button"
 import { ButtonGroup } from "../../components/global/ButtonGroup";
 import { TableHeader } from "../../components/global/table/TableHeader";
 import { TableItem } from "../../components/global/table/TableItem"
-
-import { PlaneTakeoff } from "lucide-react"
-import { generateData } from "./data/data"
+// DATA
 import { buttonList } from "./data/buttonList.js"
 
 
