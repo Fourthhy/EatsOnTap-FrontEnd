@@ -130,12 +130,14 @@ const StudentList = () => {
         const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             student.studentId.toLowerCase().includes(searchTerm.toLowerCase());
 
+        console.log(matchesTab, matchesSearch)
         return matchesTab && matchesSearch;
     });
 
     // --- PAGINATION COMPUTATION AND DISPLAY --- 
     const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
+
     const currentData = filteredStudents.slice(startIndex, startIndex + itemsPerPage);
 
     // Safety check for pagination index
@@ -338,16 +340,22 @@ const StudentList = () => {
                         </thead>
 
                         <tbody className="divide-y divide-gray-100">
+
                             {currentData.map((student, index) => (
+                                //static parent 
                                 <tr key={student.id} className="hover:bg-gray-50/80 transition-colors group" style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>
+
                                     <td className="font-geist text-black flex items-center justify-center" style={{ paddingTop: '10px', paddingBottom: '10px', fontSize: 13, height: '100%' }}>
                                         {startIndex + index + 1}
                                     </td>
+
                                     <td className="py-4 px-6">
                                         <div className="flex items-center gap-3" style={{ paddingLeft: 5 }}>
+
                                             <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-gray-500">
                                                 <User size={16} />
                                             </div>
+
                                             <span style={{ fontSize: 12, fontWeight: 450 }} className="font-geist text-black">{student.name}</span>
                                         </div>
                                     </td>
@@ -362,8 +370,10 @@ const StudentList = () => {
                                     <td style={{ fontSize: 12 }} className="font-geist py-4 px-6">
                                         <StatusBadge status={student.status} />
                                     </td>
+
                                 </tr>
                             ))}
+
                             {/* Padding Rows to keep layout stable */}
                             {currentData.length < itemsPerPage && Array(itemsPerPage - currentData.length).fill(0).map((_, i) => (
                                 <tr key={`pad-${i}`} style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>

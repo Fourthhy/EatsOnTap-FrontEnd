@@ -16,21 +16,10 @@ const dateToday = () => {
     return `${month} ${day}, ${year}`;
 }
 
-const tableInformation = {
-    title: 'All Students List',
-    subtitle: 'Manage Students\' Eligibility',
-    generalInformation: [
-        { label: 'Total Students', value: '100', color: '#f3f4f6' },
-        { label: 'Eligible Students', value: '50', color: '#d1fae5' },
-        { label: 'Ineligible Students', value: '50', color: '#fee2e2' },
-    ],
-    tableHeaders: ["", "Student Name", "Student ID", "RFID Link", ["Program/Section", "Section", "Program"], "Regular/Irregular", "Status"],
-    conditionalDisplay: 0,
 
-}
 
 // DONT FORGE TO REVERT THE DECLARATION OF FUNTION INTO THIS STATE --> function Table({ tableInformation }) { 
-function Table() {
+function TableHeader({ children, tableHeaderInformation, onAutoPassItemHeightEstimate }) {
     // --- TABLE ITEM HEIGHT CONFIGURATION ---
     const MIN_ITEMS = 4;
     const MAX_ITEMS = 15;
@@ -41,11 +30,15 @@ function Table() {
     const [itemsPerPage, setItemsPerPage] = useState(MAX_ITEMS);
     const [currentPage, setCurrentPage] = useState(1);
 
+
     // Refs for height calculation
     const tableWrapperRef = useRef(null);
 
     // --- HEIGHT CALCULATION LOGIC   
     useEffect(() => {
+        //pass the Item Height to Parent Component
+        onAutoPassItemHeightEstimate(ITEM_HEIGHT_ESTIMATE_PX);
+
         const wrapper = tableWrapperRef.current;
         if (!wrapper) return;
 
@@ -87,8 +80,8 @@ function Table() {
                     {/* TITLE and GENERAL INFO */}
                     <div className="flex justify-between items-start" style={{ marginBottom: 12, marginTop: 12, }}>
                         <div style={{ paddingLeft: 20 }}>
-                            <h1 className="font-geist font-semibold text-gray-900" style={{ fontSize: 16 }}>{tableInformation.title}</h1>
-                            <p className="font-geist text-gray-500" style={{ fontSize: 13 }}>{tableInformation.subtitle}</p>
+                            <h1 className="font-geist font-semibold text-gray-900" style={{ fontSize: 16 }}>{tableHeaderInformation.title}</h1>
+                            <p className="font-geist text-gray-500" style={{ fontSize: 13 }}>{tableHeaderInformation.subtitle}</p>
                         </div>
                         <div className="text-right" style={{ paddingRight: 20 }}>
                             <span className="font-geist font-semibold" style={{ fontSize: 14 }}>Total Students: </span>
@@ -113,7 +106,6 @@ function Table() {
                             />
                         </div>
                         <div className="flex gap-2 ml-auto">
-                            Table Item Controls
                             <button
                                 className="text-sm font-medium text-gray-600 flex items-center hover:bg-gray-200"
                                 style={{
@@ -143,14 +135,15 @@ function Table() {
                     className="flex-1 overflow-y-hidden w-full"
                 >
                     <table className="w-full text-left border-collapse">
+                        {/* TABLE HEADERS */}
                         <thead className="bg-gray-50/50 sticky top-0 z-10" style={{ height: '45px' }}>
                             <tr>
-                                {tableInformation.tableHeaders.map((header, index) => {
+                                {tableHeaderInformation.tableHeaders.map((header, index) => {
                                     const isEmpty = header === "";
                                     const baseClass = `${tableHeaderStyle}${isEmpty ? " w-16" : ""}`;
 
                                     const label = Array.isArray(header)
-                                        ? header[tableInformation.conditionalDisplay] // pick which text to show
+                                        ? header[tableHeaderInformation.conditionalDisplay] // pick which text to show
                                         : header;
 
                                     return (
@@ -165,6 +158,12 @@ function Table() {
                                 })}
                             </tr>
                         </thead>
+
+                        {/* TABLE ITEMS*/}
+                        <tbody className="divide-y divide-gray-100">
+                            {children}
+                        </tbody>
+
                     </table>
                 </div>
             </div>
@@ -172,4 +171,4 @@ function Table() {
     )
 }
 
-export { Table };
+export { TableHeader };
