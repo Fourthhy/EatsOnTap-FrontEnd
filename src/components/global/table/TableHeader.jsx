@@ -16,8 +16,6 @@ const dateToday = () => {
     return `${month} ${day}, ${year}`;
 }
 
-
-
 // DONT FORGE TO REVERT THE DECLARATION OF FUNTION INTO THIS STATE --> function Table({ tableInformation }) { 
 function TableHeader({ children, tableHeaderInformation, onAutoPassItemHeightEstimate }) {
     // --- TABLE ITEM HEIGHT CONFIGURATION ---
