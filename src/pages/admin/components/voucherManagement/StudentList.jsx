@@ -90,7 +90,7 @@ const StudentList = () => {
         setStudentToLink(null);
     };
 
-    // --- FILTERS & DATA ---
+    // --- FOR CONDITIONAL RENDERING ---
     const getProgramHeaderLabel = () => {
         if (activeTab === 'All') return 'Program / Section';
         if (activeTab === 'Higher Education') return 'Programs';
