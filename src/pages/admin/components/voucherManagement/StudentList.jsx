@@ -137,7 +137,6 @@ const StudentList = () => {
     // --- PAGINATION COMPUTATION AND DISPLAY --- 
     const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-
     const currentData = filteredStudents.slice(startIndex, startIndex + itemsPerPage);
 
     // Safety check for pagination index
