@@ -4,7 +4,7 @@ import { RiNotification2Fill } from "react-icons/ri";
 import { useOutletContext } from "react-router-dom";
 
 
-function HeaderBar({ userAvatar, headerTitle }) {
+function HeaderBar({ userAvatar, headerTitle, userName = "Sample Name", userRole = "Sample Role" }) {
     const context = useOutletContext() || {};
     const handleToggleSidebar = context.handleToggleSidebar || (() => { });
 
@@ -24,7 +24,7 @@ function HeaderBar({ userAvatar, headerTitle }) {
                     }}
                     className="flex-1 flex items-center gap-4 justify-between"
                 >
-                    <div className="w-auto h-auto flex gap-4">
+                    <div className="w-auto h-auto flex gap-2">
                         <div className="w-auto h-auto">
                             <Menu size={20} onClick={handleToggleSidebar} className="hover:cursor-pointer" />
                         </div>
@@ -38,17 +38,29 @@ function HeaderBar({ userAvatar, headerTitle }) {
                         style={{
                             marginRight: "20px"
                         }}
-                        className="w-auto h-auto flex flex-row gap-5 items-center">
+                        className="w-auto h-auto flex flex-row gap-2 items-center">
                         <div
                             style={{
                                 padding: 5,
                                 borderRadius: 14
                             }}
                             className="w-auto h-full flex items-center">
-                            <RiNotification2Fill size={20} />
+                            <RiNotification2Fill size={18} />
                         </div>
-                        <div>
-                            <div className="w-[100%] h-[100%] flex flex-col items-center">
+
+                        {/* <div style={{ width: 1, height: 40, background: '#b9bdc5ff', borderRadius: 1 }} className="mx-2" /> */}
+
+                        <div className="w-[150px] flex flex-row gap-1">
+                            <div className="w-auto h-auto flex items-center justify-center">
+                                <img
+                                    style={{ borderRadius: 15, width: 35, height: 30, objectFit: 'cover' }}
+                                    // src={userAvatar}
+                                    src="https://xsgames.co/randomusers/avatar.php?g=male"
+                                    alt="User Avatar"
+                                />
+                            </div>
+
+                            <div className="w-[100%] h-[100%] flex flex-col items-start justify-start">
                                 <span
                                     style={{
                                         fontFamily: "geist",
@@ -57,7 +69,7 @@ function HeaderBar({ userAvatar, headerTitle }) {
                                         fontSize: 14,
                                     }}
                                 >
-                                    Name Surname
+                                    {userName}
                                 </span>
                                 <p
                                     style={{
@@ -66,13 +78,13 @@ function HeaderBar({ userAvatar, headerTitle }) {
                                         fontWeight: "500",
                                         fontSize: 11,
                                     }}
-                                    className="w-[100%] flex justify-end"
-                                >Role</p>
+                                    className="w-[100%] flex justify-start"
+                                >
+                                    {userRole}
+                                </p>
                             </div>
                         </div>
-                        <div className="w-auto h-auto">
-                            <img style={{ height: 33, width: 35, borderRadius: 15 }} src={userAvatar} alt="User Avatar" />
-                        </div>
+
                     </div>
                 </div>
 

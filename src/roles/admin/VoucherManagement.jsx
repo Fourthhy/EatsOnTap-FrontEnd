@@ -3,6 +3,7 @@ import { StudentList } from "./components/voucherManagement/StudentList";
 
 export default function VoucherManagement() {
     const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
+    
     return (
         <>
             <div
