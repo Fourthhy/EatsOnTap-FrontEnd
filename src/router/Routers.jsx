@@ -2,33 +2,33 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoutes";
 import Login from "../Login";
 
-import AdminDashboard from "../pages/admin/AdminDashboard"
+import AdminDashboard from "../roles/admin/AdminDashboard"
 
-import StudentManagement from "../pages/adminAssitant/subPages/StudentManagement"
-import MealEligibilityManagement from "../pages/adminAssitant/subPages/MealEligibilityManagement"
-import AdminAssistantDashboard from "../pages/adminAssitant/subPages/AdminAssistantDashboard"
-import AdminAssistantLanding from "../pages/adminAssitant/AdminAssistantLanding";
+import StudentManagement from "../roles/adminAssitant/subPages/StudentManagement"
+import MealEligibilityManagement from "../roles/adminAssitant/subPages/MealEligibilityManagement"
+import AdminAssistantDashboard from "../roles/adminAssitant/subPages/AdminAssistantDashboard"
+import AdminAssistantLanding from "../roles/adminAssitant/AdminAssistantLanding";
 
-import FoodItemClaim from "../pages/canteenStaff/FoodItemClaim";
+import FoodItemClaim from "../roles/canteenStaff/FoodItemClaim";
 
-import ChancellorDashboard from "../pages/chancellor/ChancellorDashboard";
-import ChancellorLanding from "../pages/chancellor/ChancellorLanding";
+import ChancellorDashboard from "../roles/chancellor/ChancellorDashboard";
+import ChancellorLanding from "../roles/chancellor/ChancellorLanding";
 
-import SubmitMealList from "../pages/classAdviser/SubmitMealList";
-import FreeMealClaim from "../pages/foodServer/FreeMealClaim";
+import SubmitMealList from "../roles/classAdviser/SubmitMealList";
+import FreeMealClaim from "../roles/foodServer/FreeMealClaim";
 
-import SuperAdminLayout from "../pages/superAdmin/SuperAdminLayout";
-import UserManagement from "../pages/superAdmin/pages/UserManagement";
-import SystemLogs from "../pages/superAdmin/pages/SystemLogs";
+import SuperAdminLayout from "../roles/superAdmin/SuperAdminLayout";
+import UserManagement from "../roles/superAdmin/pages/UserManagement";
+import SystemLogs from "../roles/superAdmin/pages/SystemLogs";
 
 import SidebarLayout from "../components/custom/SidebarLayout";
-import ClassAdviserLanding from "@/pages/classAdviser/ClassAdviserLanding";
-import AdminLanding from "@/pages/admin/AdminLanding";
+import ClassAdviserLanding from "@/roles/classAdviser/ClassAdviserLanding";
+import AdminLanding from "@/roles/admin/AdminLanding";
 
-import MealRecipientOrder from "../pages/admin/MealRecipientOrder";
-import Records from "../pages/admin/Records";
-import ScheduleStudentEligibility from "../pages/admin/ScheduleStudentEligibility";
-import VoucherManagement from "../pages/admin/VoucherManagement";
+import MealRecipientOrder from "../roles/admin/MealRecipientOrder";
+import Records from "../roles/admin/Records";
+import ScheduleStudentEligibility from "../roles/admin/ScheduleStudentEligibility";
+import VoucherManagement from "../roles/admin/VoucherManagement";
 
 import Playground from "../Playground";
 

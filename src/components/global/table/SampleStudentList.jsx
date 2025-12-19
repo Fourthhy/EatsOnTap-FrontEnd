@@ -3,7 +3,7 @@ import { GenericTable } from './GenericTable';
 import { User, Plus } from 'lucide-react';
 import { generateData } from './mockdata.js';
 import { LinkStatusBadge } from "./LinkStatusBadge"
-import { AddStudentModal } from '@/pages/admin/components/voucherManagement/AddStudentModal';
+import { AddStudentModal } from '@/roles/admin/components/voucherManagement/AddStudentModal';
 
 // ... import your Modal components
 
