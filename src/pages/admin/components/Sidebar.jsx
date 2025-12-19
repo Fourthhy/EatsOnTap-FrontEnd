@@ -5,6 +5,7 @@ import { LogOut } from "lucide-react";
 import { useBreakpoint } from "use-breakpoint";
 import logo from "/lv-logo.svg";
 import { SidebarItem } from "../../../components/custom/SidebarItem"; // Assuming the fixed version is here
+import { Tooltip } from "flowbite-react";
 
 function Sidebar({ menuItems }) {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -146,15 +147,17 @@ function Sidebar({ menuItems }) {
                         <Indicator />
 
                         {menuItems.map((item, i) => (
-                            <SidebarItem
-                                key={i}
-                                index={i}
-                                icon={item.icon}
-                                text={item.text}
-                                expanded={isExpanded}
-                                active={activeIndex === i}
-                                onClick={handleItemClick}
-                            />
+                            <Tooltip content={<p className="font-geist w-[120px]" style={{ padding: "10px 15px" }}>{item.text}</p>} placement="right" trigger="hover" style="light" animation="duration-200">
+                                <SidebarItem
+                                    key={i}
+                                    index={i}
+                                    icon={item.icon}
+                                    text={item.text}
+                                    expanded={isExpanded}
+                                    active={activeIndex === i}
+                                    onClick={handleItemClick}
+                                />
+                            </Tooltip>
                         ))}
                     </nav>
                 </div>

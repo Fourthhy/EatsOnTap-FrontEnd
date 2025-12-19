@@ -1,7 +1,7 @@
 import { Sidebar } from "../admin/components/Sidebar";
 import { User, Logs } from "lucide-react"
 
-export default function SuperAdminLanding() {
+export default function SuperAdminLayout() {
 
     const menuItems = [
         { icon: <User size={20} />, text: "User Management", path: "/superAdmin/userManagement" },

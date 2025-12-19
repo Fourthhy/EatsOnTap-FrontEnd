@@ -17,8 +17,7 @@ import ChancellorLanding from "../pages/chancellor/ChancellorLanding";
 import SubmitMealList from "../pages/classAdviser/SubmitMealList";
 import FreeMealClaim from "../pages/foodServer/FreeMealClaim";
 
-import SuperAdminLanding from "../pages/superAdmin/SuperAdminLanding";
-import SuperAdminDashboard from "../pages/superAdmin/SuperAdminDashboard";
+import SuperAdminLayout from "../pages/superAdmin/SuperAdminLayout";
 import UserManagement from "../pages/superAdmin/pages/UserManagement";
 import SystemLogs from "../pages/superAdmin/pages/SystemLogs";
 
@@ -98,7 +97,7 @@ export default function Routers() {
                     } />
                     <Route path="/superAdmin" element={
                         <ProtectedRoute>
-                            <SuperAdminLanding />
+                            <SuperAdminLayout />
                         </ProtectedRoute>
                     }>
                         <Route index element={<UserManagement />}  />
