@@ -46,7 +46,10 @@ export default function SuperAdminDashboard() {
     const [conditionalDisplayIndex, setConditionalDisplayIndex] = useState(0);
 
     const [tableItemHeight, setTableItemHeight] = useState(null);
-
+    const [minItems, setMinItems] = useState(null)
+    const [maxItems, setMaxItems] = useState(null)
+    const [itemsPerPage, setItemsPerPage] = useState(null)
+    const [currentPage, setCurrentPage] = useState(null)
 
     const handleTypeChange = (newTypeId) => {
         //for conditional display
@@ -178,7 +181,14 @@ export default function SuperAdminDashboard() {
             </div>
 
             {/* THE DATA INSIDE THE TABLE MUST BE CALLED HERE, NOT IN THE TABLE */}
-            <TableHeader tableHeaderInformation={tableHeaderInformation} onAutoPassItemHeightEstimate={setTableItemHeight}>
+            <TableHeader
+                tableHeaderInformation={tableHeaderInformation}
+                onAutoPassItemHeightEstimate={setTableItemHeight}
+                onAutoPassMinItems={setMinItems}
+                onAutoPassMaxItems={setMaxItems}
+                onAutoPassItemsPerPage={setItemsPerPage}
+                onAutoPassCurrentPage={setCurrentPage}
+            >
                 {filteredStudents.map((item, index) => (
                     //table row is still necessary
                     <tr key={index} className="hover:bg-gray-200/100 transition-colors group" style={{ height: tableItemHeight }}>
@@ -188,6 +198,11 @@ export default function SuperAdminDashboard() {
                         <TableItem tableItemtype={"defaultInformation"} value={item.program || item.section} />
                         <TableItem tableItemtype={"defaultInformation"} value={item.type} />
                         <TableItem tableItemtype={"defaultInformation"} value={<LinkStatusBadge isLinked={item.isLinked} />} />
+                    </tr>
+                ))}
+                {filteredStudents.length < itemsPerPage && Array(itemsPerPage - filteredStudents.length).fill(0).map((_, i) => (
+                    <tr key={`pad-${i}`} style={{ height: tableItemHeight }}>
+                        <td colSpan="7"></td>
                     </tr>
                 ))}
             </TableHeader>

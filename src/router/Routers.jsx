@@ -16,7 +16,11 @@ import ChancellorLanding from "../pages/chancellor/ChancellorLanding";
 
 import SubmitMealList from "../pages/classAdviser/SubmitMealList";
 import FreeMealClaim from "../pages/foodServer/FreeMealClaim";
+
+import SuperAdminLanding from "../pages/superAdmin/SuperAdminLanding";
 import SuperAdminDashboard from "../pages/superAdmin/SuperAdminDashboard";
+import UserManagement from "../pages/superAdmin/pages/UserManagement";
+import SystemLogs from "../pages/superAdmin/pages/SystemLogs";
 
 import SidebarLayout from "../components/custom/SidebarLayout";
 import ClassAdviserLanding from "@/pages/classAdviser/ClassAdviserLanding";
@@ -27,6 +31,10 @@ import Records from "../pages/admin/Records";
 import ScheduleStudentEligibility from "../pages/admin/ScheduleStudentEligibility";
 import VoucherManagement from "../pages/admin/VoucherManagement";
 
+import Playground from "../Playground";
+
+
+
 export default function Routers() {
     return (
         <>
@@ -36,6 +44,8 @@ export default function Routers() {
                     <Route path="/" element={<Login />} />
 
                     <Route path="/sample" element={<SidebarLayout />} />
+
+                    <Route path="/playground" element={<Playground />} />
 
                     <Route path="/admin" element={
                         <ProtectedRoute>
@@ -88,9 +98,13 @@ export default function Routers() {
                     } />
                     <Route path="/superAdmin" element={
                         <ProtectedRoute>
-                            <SuperAdminDashboard />
+                            <SuperAdminLanding />
                         </ProtectedRoute>
-                    } />
+                    }>
+                        <Route index element={<UserManagement />}  />
+                        <Route path="userManagement" element={<UserManagement />} />
+                        <Route path="systemLogs" element={<SystemLogs />} />
+                    </Route>
                 </Routes>
             </Router>
         </>

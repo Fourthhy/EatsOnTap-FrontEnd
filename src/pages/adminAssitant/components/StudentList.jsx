@@ -290,7 +290,7 @@ const StudentList = () => {
                     </table>
                 </div>
 
-                {/* Pagination Footer (Fixed Height) */}
+                {/* ion Footer (Fixed Height) */}
                 <div
                     className="p-4 border-t border-gray-100 flex items-center justify-center gap-2 shrink-0 bg-white"
                     style={{

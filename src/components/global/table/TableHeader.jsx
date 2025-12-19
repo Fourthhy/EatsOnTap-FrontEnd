@@ -17,7 +17,20 @@ const dateToday = () => {
 }
 
 // DONT FORGE TO REVERT THE DECLARATION OF FUNTION INTO THIS STATE --> function Table({ tableInformation }) { 
-function TableHeader({ children, tableHeaderInformation, onAutoPassItemHeightEstimate }) {
+function TableHeader({
+    children,
+    tableHeaderInformation,
+    onAutoPassItemHeightEstimate,
+    onAutoPassMaxItems,
+    onAutoPassMinItems,
+    onAutoPassItemsPerPage,
+    onAutoPassCurrentPage,
+    forCurrentDisplayData,
+    filterId,
+    customContentComponent
+}) {
+
+
     // --- TABLE ITEM HEIGHT CONFIGURATION ---
     const MIN_ITEMS = 4;
     const MAX_ITEMS = 15;
@@ -28,7 +41,6 @@ function TableHeader({ children, tableHeaderInformation, onAutoPassItemHeightEst
     const [itemsPerPage, setItemsPerPage] = useState(MAX_ITEMS);
     const [currentPage, setCurrentPage] = useState(1);
 
-
     // Refs for height calculation
     const tableWrapperRef = useRef(null);
 
@@ -36,6 +48,10 @@ function TableHeader({ children, tableHeaderInformation, onAutoPassItemHeightEst
     useEffect(() => {
         //pass the Item Height to Parent Component
         onAutoPassItemHeightEstimate(ITEM_HEIGHT_ESTIMATE_PX);
+        onAutoPassMaxItems(MAX_ITEMS);
+        onAutoPassMinItems(MIN_ITEMS);
+        onAutoPassItemsPerPage(itemsPerPage);
+        onAutoPassCurrentPage(currentPage);
 
         const wrapper = tableWrapperRef.current;
         if (!wrapper) return;
@@ -158,9 +174,7 @@ function TableHeader({ children, tableHeaderInformation, onAutoPassItemHeightEst
                         </thead>
 
                         {/* TABLE ITEMS*/}
-                        <tbody className="divide-y divide-gray-100">
-                            {children}
-                        </tbody>
+                        {children}
 
                     </table>
                 </div>
