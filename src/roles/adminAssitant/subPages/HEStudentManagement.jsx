@@ -1,9 +1,8 @@
-import { HeaderBar } from "./components/HeaderBar";
-import { StudentList } from "./components/voucherManagement/StudentList";
+import { HeaderBar } from "../../../components/global/HeaderBar";
+import { StudentList } from "../components/StudentList";
 
-export default function VoucherManagement() {
+export default function HEStudentManagement() {
     const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
-    
     return (
         <>
             <div

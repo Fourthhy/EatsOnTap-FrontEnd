@@ -1,10 +1,10 @@
-import { logout } from "../../../functions/logoutAuth";
+import { logout } from "../../functions/logoutAuth";
 import { useState, useRef, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { useBreakpoint } from "use-breakpoint";
 import logo from "/lv-logo.svg";
-import { SidebarItem } from "../../../components/custom/SidebarItem";
+import { SidebarItem } from "../custom/SidebarItem";
 import { Tooltip } from "flowbite-react";
 
 function Sidebar({ menuItems }) {

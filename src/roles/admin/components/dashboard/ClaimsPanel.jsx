@@ -1,5 +1,6 @@
 import React from "react";
 
+// This compoenent displays a list of recent claims
 function ClaimsPanel({ claims }) {
   return (
     <div style={{

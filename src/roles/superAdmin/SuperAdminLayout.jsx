@@ -1,4 +1,4 @@
-import { Sidebar } from "../admin/components/Sidebar";
+import { Sidebar } from "../../components/global/Sidebar";
 import { User, Logs } from "lucide-react"
 
 export default function SuperAdminLayout() {

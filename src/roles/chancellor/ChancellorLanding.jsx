@@ -1,6 +1,6 @@
-import { Sidebar } from "../admin/components/Sidebar"
+import { Sidebar } from "../../components/global/Sidebar"
 import { LayoutDashboard } from "lucide-react"
-import { DateProvider } from "../admin/components/DatePicker";
+import { DateProvider } from "../admin/components/dashboard/DatePicker";
 
 export default function ChancellorLanding() {
     const menuItems = [

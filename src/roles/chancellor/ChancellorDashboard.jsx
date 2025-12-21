@@ -1,17 +1,17 @@
 import { RiNotification2Fill } from "react-icons/ri"
-import { CustomStatsCard } from "../admin/components/CustomStatsCard";
-import { StatsCardGroup } from "../admin/components/StatsCardGroup";
-import { EventsPanel } from "../admin/components/EventsPanel";
-import { MealAllowanceCard } from "../admin/components/MealAllowanceCard";
-import { AnalyticTabs } from "../admin/components/AnalyticTabs";
+import { CustomStatsCard } from "../admin/components/dashboard/CustomStatsCard";
+import { StatsCardGroup } from "../admin/components/dashboard/StatsCardGroup";
+import { EventsPanel } from "../admin/components/dashboard/EventsPanel";
+import { MealAllowanceCard } from "../admin/components/dashboard/MealAllowanceCard";
+import { AnalyticTabs } from "../admin/components/dashboard/AnalyticTabs";
 import { BandedChartTADMC } from "../admin/components/charts/BandedChartTADMC"
 import { BandedChartCUR } from "../admin/components/charts/BandedChartCUR"
 import { BandedChartOCF } from "../admin/components/charts/BandedChartOCF"
 import { BarChartBox } from "../admin/components/charts/BarChartBox";
 import { LineChartBox } from "../admin/components/charts/LineChartBox"
-import { DatePicker } from "../admin/components/DatePicker"
+import { DatePicker } from "../admin/components/dashboard/DatePicker"
 
-import { useDate } from "../admin/components/DatePicker";
+import { useDate } from "../admin/components/dashboard/DatePicker";
 import { useState } from "react";
 
 export default function ChancellorDashboard() {

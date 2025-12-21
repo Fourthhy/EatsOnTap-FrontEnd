@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HeaderBar } from "../HeaderBar"
+import { HeaderBar } from "../../../../components/global/HeaderBar"
 import { MealClaimRecordsTable } from "./MealClaimRecordsTable";
 import { OverallClaims } from "./OverallClaims";
 

@@ -1,4 +1,4 @@
-import { Sidebar } from "./components/Sidebar";
+import { Sidebar } from "../../components/global/Sidebar";
 import {    
     LayoutDashboard,
     Ticket,
@@ -6,14 +6,14 @@ import {
     ShoppingBag,
     BookOpen
 } from "lucide-react"
-import { DateProvider } from "./components/DatePicker";
+import { DateProvider } from "./components/dashboard/DatePicker";
 
-export default function AdminLanding() {
+export default function AdminLayout() {
     const menuItems = [
         // Make sure these paths match the Route paths defined above
         { icon: <LayoutDashboard size={20} />, text: "Dashboard", path: "/admin/dashboard" },
-        { icon: <Ticket size={20} />, text: "Student", path: "/admin/voucher" },
-        { icon: <CalendarDays size={20} />, text: "Event", path: "/admin/schedule" },
+        { icon: <Ticket size={20} />, text: "Students", path: "/admin/voucher" },
+        { icon: <CalendarDays size={20} />, text: "Events", path: "/admin/schedule" },
         { icon: <ShoppingBag size={20} />, text: "Meal Orders", path: "/admin/order" },
         { icon: <BookOpen size={20} />, text: "Records", path: "/admin/record" },
     ]

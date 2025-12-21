@@ -2,9 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoutes";
 import Login from "../Login";
 
-import AdminDashboard from "../roles/admin/AdminDashboard"
+import AdminDashboard from "../roles/admin/components/pages/AdminDashboard"
 
-import StudentManagement from "../roles/adminAssitant/subPages/StudentManagement"
+import HEStudentManagement from "../roles/adminAssitant/subPages/HEStudentManagement"
 import MealEligibilityManagement from "../roles/adminAssitant/subPages/MealEligibilityManagement"
 import AdminAssistantDashboard from "../roles/adminAssitant/subPages/AdminAssistantDashboard"
 import AdminAssistantLanding from "../roles/adminAssitant/AdminAssistantLanding";
@@ -23,12 +23,12 @@ import SystemLogs from "../roles/superAdmin/pages/SystemLogs";
 
 import SidebarLayout from "../components/custom/SidebarLayout";
 import ClassAdviserLanding from "@/roles/classAdviser/ClassAdviserLanding";
-import AdminLanding from "@/roles/admin/AdminLanding";
+import AdminLayout from "@/roles/admin/AdminLayout";
 
 import MealRecipientOrder from "../roles/admin/MealRecipientOrder";
-import Records from "../roles/admin/Records";
-import ScheduleStudentEligibility from "../roles/admin/ScheduleStudentEligibility";
-import VoucherManagement from "../roles/admin/VoucherManagement";
+import StudentRecords from "../roles/admin/components/pages/StudentRecords";
+import EventManagement from "../roles/admin/components/pages/EventManagement";
+import StudentManagement from "../roles/admin/components/pages/StudentManagement";
 
 import Playground from "../Playground";
 
@@ -48,15 +48,15 @@ export default function Routers() {
 
                     <Route path="/admin" element={
                         <ProtectedRoute>
-                            <AdminLanding />
+                            <AdminLayout />
                         </ProtectedRoute>
                     }>
                         <Route index element={<AdminDashboard />} />
                         <Route path="dashboard" element={<AdminDashboard />} />
-                        <Route path="voucher" element={<VoucherManagement />} /> 
-                        <Route path="schedule" element={<ScheduleStudentEligibility />} /> 
+                        <Route path="voucher" element={<StudentManagement />} /> 
+                        <Route path="schedule" element={<EventManagement />} /> 
                         <Route path="order" element={<MealRecipientOrder />} /> 
-                        <Route path="record" element={<Records />} /> 
+                        <Route path="record" element={<StudentRecords />} /> 
 
                     </Route>
                     <Route path="/adminAssistant" element={
@@ -66,7 +66,7 @@ export default function Routers() {
                     }>
                         <Route index element={<AdminAssistantDashboard />} />
                         <Route path="dashboard" element={<AdminAssistantDashboard />} />
-                        <Route path="student" element={<StudentManagement />} />
+                        <Route path="student" element={<HEStudentManagement />} />
                         <Route path="meal" element={<MealEligibilityManagement />} />
                     </Route>
                     <Route path="/canteenStaff" element={

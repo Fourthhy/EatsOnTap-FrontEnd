@@ -1,4 +1,4 @@
-import { HeaderBar } from "../../admin/components/HeaderBar";
+import { HeaderBar } from "../../../components/global/HeaderBar";
 import { EligibilityScheduler } from "../components/EligibilityScheduler";
 
 export default function MealEligibilityManagement() {

@@ -1,4 +1,4 @@
-import { Sidebar } from "../admin/components/Sidebar"
+import { Sidebar } from "../../components/global/Sidebar"
 import {
     LayoutDashboard,
     BookMarked,

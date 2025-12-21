@@ -1,8 +1,9 @@
 import { useOutletContext } from 'react-router-dom';
 import { Menu } from "lucide-react"
 import { RiNotification2Fill } from "react-icons/ri"
-import { StatsCardGroup } from '../../admin/components/StatsCardGroup';
-import { EventsPanel } from '../../admin/components/EventsPanel';
+import { StatsCardGroup } from '../../admin/components/dashboard/StatsCardGroup';
+//src\roles\admin\components\dashboard\StatsCardGroup.jsx
+import { EventsPanel } from '../../admin/components/dashboard/EventsPanel';
 import { RecentEvents } from '../components/RecentEvents';
 import { ProgramsList } from '../components/ProgramsList';
 import { QuickActions } from '../components/QuickActions';

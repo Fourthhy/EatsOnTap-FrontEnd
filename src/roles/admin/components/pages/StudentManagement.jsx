@@ -1,8 +1,9 @@
-import { HeaderBar } from "../../admin/components/HeaderBar";
-import { StudentList } from "../components/StudentList";
+import { HeaderBar } from "../../../../components/global/HeaderBar";
+import { StudentList } from "../voucherManagement/StudentList";
 
 export default function StudentManagement() {
     const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
+    
     return (
         <>
             <div
@@ -11,7 +12,7 @@ export default function StudentManagement() {
                     marginBottom: "30px",
                 }}
                 className="w-full h-auto flex flex-col justify-start">
-                <HeaderBar userAvatar={USER_AVATAR} headerTitle={"Voucher Management"} />
+                <HeaderBar userAvatar={USER_AVATAR} headerTitle={"Student Management"} />
                 <div className="w-full flex justify-center">
                     <div className="w-[95%]">
                         <StudentList />
