@@ -48,12 +48,10 @@ function HeaderBar({ userAvatar, headerTitle, userName = "Sample Name", userRole
                             <RiNotification2Fill size={18} />
                         </div>
 
-                        {/* <div style={{ width: 1, height: 40, background: '#b9bdc5ff', borderRadius: 1 }} className="mx-2" /> */}
-
-                        <div className="w-[150px] flex flex-row gap-1">
+                        <div className="w-[150px] flex flex-row gap-3">
                             <div className="w-auto h-auto flex items-center justify-center">
                                 <img
-                                    style={{ borderRadius: 15, width: 35, height: 30, objectFit: 'cover' }}
+                                    style={{ borderRadius: 15, width: 46, height: 35, objectFit: 'cover' }}
                                     // src={userAvatar}
                                     src="https://xsgames.co/randomusers/avatar.php?g=male"
                                     alt="User Avatar"

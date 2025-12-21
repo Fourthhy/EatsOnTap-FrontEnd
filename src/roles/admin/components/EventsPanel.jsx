@@ -1,41 +1,46 @@
 function EventsPanel({ events, isHyerlink = true, canViewAll = true }) {
   return (
     <div
-      className="h-auto bg-white rounded-xl shadow p-5 w-full">
+      style={{
+        padding: 20,
+        borderRadius: 12,
+        boxShadow: "0 2px 6px #e5eaf0",
+        background: "white"
+      }}
+      className="h-auto w-full">
       <div
-        style={{ padding: "15px 0px 20px 15px", }}
-        className="flex justify-between items-center mb-4">
+        style={{ paddingBottom: 10 }}
+        className="flex justify-between items-center">
         <h2
-          style={{ paddingLeft: "10px", fontFamily: "geist", fontWeight: "500", fontSize: 13, color: "#000" }}>
+          style={{ fontFamily: "geist", fontWeight: "500", fontSize: 12, color: "#000" }}>
           Upcoming Events
         </h2>
 
-        {canViewAll && <a
-          href="#"
-          style={{
-            fontSize: 10,
-            color: "#254280",
-            fontFamily: "geist",
-            fontWeight: 500,
-            paddingRight: "25px"
-          }}
-          className="hover:underline">View All</a>}
+        {canViewAll &&
+          <a
+            href="#"
+            style={{
+              fontSize: 12,
+              color: "#254280",
+              fontFamily: "geist",
+              fontWeight: 500,
+              paddingRight: 5
+            }}
+            className="hover:underline">
+            View All
+          </a>
+        }
       </div>
-      <div
-        style={{
-          paddingBottom: "20px",
-          margin: "0px 10px 0px 10px",
-        }}
-        className="flex flex-col gap-4">
+      <div className="flex flex-col">
         {events.map((event, idx) => (
           <div
             key={event.title}
             style={{
-              padding: "10px 10px 10px 20px",
-              margin: "0px 10px 0px 10px",
-              background: "#c7eaf290"
+              padding: "5px 15px",
+              marginBottom: 8
+              // background: "#c7eaf290"
             }}
-            className="rounded-lg flex justify-between items-center">
+            className="rounded-lg flex justify-between items-center bg-blue-50">
             <div
               style={{ padding: "5px 0px 5px 0px" }}>
               <h3
@@ -60,14 +65,14 @@ function EventsPanel({ events, isHyerlink = true, canViewAll = true }) {
                 <a
                   href={event.link}
                   style={{
-                    fontSize: 10,
+                    fontSize: 11,
                     color: "#254280",
                     fontFamily: "geist",
                     fontWeight: 500,
                     paddingRight: "20px"
                   }}
                   className="hover:underline transition text-center">
-                  View <br />Details
+                  View Details
                 </a>
               </>
               : ""}

@@ -55,7 +55,7 @@ export function CustomStatsCard({
                 {/* --- HOVER ICON (Top Right) --- */}
                 {hoverText && (
                     <div 
-                        style={{ position: 'absolute', top: 12, right: 12, cursor: 'help' }}
+                        style={{ position: 'absolute', top: 20, right: 12, cursor: 'help' }}
                         onMouseEnter={() => setIsHovered(true)}
                         onMouseLeave={() => setIsHovered(false)}
                     >
@@ -82,12 +82,11 @@ export function CustomStatsCard({
                     <span
                         style={{
                             fontWeight: "500",
-                            fontSize: 12,
+                            fontSize: 13,
                             color: "#000000",
                             fontFamily: "geist",
                             width: "fit-content",
                             height: "fit-content",
-                            paddingTop: 5
                         }}
                         className="text-center"
                     >

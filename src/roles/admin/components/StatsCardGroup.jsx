@@ -5,7 +5,7 @@ export function StatsCardGroup({
     cardGroupTitle, //what is the title of the card group 
     isDualPager, //does it handle primary and secondary pages (enable switching)
     dualPageTitles, //array, what is the title for viewing primary and secondary pages
-    
+
     primaryData = [], //for displaying first page data
     secondaryData = [], //for displaying first page data
 
@@ -51,6 +51,24 @@ export function StatsCardGroup({
                 ? val1 <= rate1
                 : false;
 
+    const globalButtonStyle = {
+        marginBottom: 8,
+        borderRadius: 6,
+        padding: "20px 12px",
+        fontFamily: "geist",
+        fontSize: 13,
+        fontWeight: 400,
+        width: "100%",
+        boxShadow: "0 2px 6px #e5eaf0ac",
+        border: "1px solid #ddddddaa",
+        color: "#231F20",
+        // color: "#EBEBED",
+        cursor: "pointer"
+    }
+
+    const globalButtonBgColor = "cursor-pointer bg-[#2CA4DD3f] hover:bg-[#2CA4DD5f] transition-colors duration-100";
+
+
     return (
         <div
             style={{
@@ -63,8 +81,8 @@ export function StatsCardGroup({
         >
             {/* ... Header and Buttons (Unchanged) ... */}
             <div style={{ paddingBottom: 5 }} className="w-full h-auto flex justify-between">
-                <div style={{ display: "flex", flexDirection: "column", paddingLeft: 6 }}>
-                    <span style={{ fontWeight: "500", fontSize: 14, color: "#000000", fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
+                <div style={{ display: "flex", flexDirection: "column", paddingLeft: 6, width: "100%" }}>
+                    <span style={{ fontWeight: 500, fontSize: 12, color: "#000000", fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
                         {cardGroupTitle}
                     </span>
                     {displayDate
@@ -75,12 +93,21 @@ export function StatsCardGroup({
                         </>
                         : ""}
                 </div>
-                <div className="h-full flex items-center">
+                <div className="h-full w-full flex items-center justify-end">
                     {isDualPager
                         ? <>
                             <button
-                                style={{ marginBottom: 2, marginRight: 5, borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontFamily: "geist", fontSize: 12, boxShadow: "0 2px 6px #e5eaf0" }}
-                                className="hover:cursor-pointer bg-[#FFFFFF] hover:bg-[#E2E2E2]"
+                                style={{
+                                    marginBottom: 2,
+                                    marginRight: 5,
+                                    borderRadius: 6,
+                                    padding: "10px 12px",
+                                    fontFamily: "geist",
+                                    fontSize: 12,
+                                    boxShadow: "0 2px 6px #e5eaf0ac",
+                                    border: "1px solid #ddddddaf",
+                                }}
+                                className={globalButtonBgColor}
                                 onClick={() => { setViewFirstPage(!viewFirstPage) }}
                             >
                                 {viewFirstPage ? dualPageTitles[0] : dualPageTitles[1]}

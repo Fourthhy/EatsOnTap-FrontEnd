@@ -10,7 +10,6 @@ import { LineChartBox } from "./components/charts/LineChartBox";
 import { QuickActions } from "./components/QuickActions";
 import { EventsPanel } from "./components/EventsPanel";
 import { AnalyticTabs } from "./components/AnalyticTabs";
-import { MealAllowanceCard } from "./components/MealAllowanceCard";
 import { DatePicker } from "./components/DatePicker"
 import { HeaderBar } from "./components/HeaderBar"
 
@@ -230,7 +229,8 @@ export default function AdminDashboard() {
     const upcomingEvents = [
         { link: "#", title: "Teachers' Day", date: "Oct 5, 2025" },
         { link: "#", title: "President' Day", date: "Nov 25, 2025" },
-        { link: "#", title: "College Intramurals", date: "Dec 15, 2025" }
+        { link: "#", title: "College Intramurals", date: "Dec 15, 2025" },
+        { link: "#", title: "ICT Week", date: "Jan 19, 2026" }
     ]
 
 
@@ -270,19 +270,21 @@ export default function AdminDashboard() {
                 }}
                 className="w-full h-auto flex flex-col justify-start">
                 {/*HEADER*/}
-                    <HeaderBar userAvatar={USER_AVATAR} headerTitle={"Dashboard"}/>
+                <HeaderBar userAvatar={USER_AVATAR} headerTitle={"Dashboard"} />
 
                 {/* CONTENT */}
-                <div className="h-full w-full">
+
+                <div className="w-full">
                     <div
                         style={{
                             borderRadius: '10px',
                             marginTop: '20px',
-                            marginLeft: '40px',
-                            marginRight: '40px',
+                            marginLeft: '20px',
+                            marginRight: '20px',
                             backgroundColor: "#F7F9F9"
                         }}
-                        className="w-auto bg-white grid grid-cols-[70%_30%] gap-4">
+                        className="w-auto bg-white grid grid-cols-[70%_30%] gap-4 items-start">
+
                         <div className="w-full h-auto flex flex-col gap-4">
                             <div className="grid grid-cols-6 gap-4">
                                 <div className="h-full col-span-2">
@@ -292,10 +294,9 @@ export default function AdminDashboard() {
                                 <div className="col-span-4">
                                     <StatsCardGroup
                                         cardGroupTitle={"Meal Eligibilty List Count"}
-                                        urgentNotification={1}
+                                        urgentNotification={0}
                                         isDualPager={true}
                                         dualPageTitles={["View Accepted Requests", "View Rejected Requests"]}
-                                        notificationTitle={"Pending Meal Requests"}
                                         successMessage="Great job! The acceptance rate is above the target."
                                         failureMessage="Warning: Acceptance rate is critically low."
                                         primaryData={extractedMealRequestData.acceptedRequests}
@@ -309,51 +310,53 @@ export default function AdminDashboard() {
 
                                     {selectedTab === 4
                                         ? <>
-                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                                <StatsCardGroup
-                                                    cardGroupTitle={"Dish Combination Claims Status"}
-                                                    isDualPager={true}
-                                                    dualPageTitles={["View Most Claims", "View Least Claims"]}
+                                            <div className="flex flex-col items-center gap-4 w-full" style={{ padding: 10 }}>
+                                                <div className="flex h-full w-[98%] border-gray-100 border-[1px] rounded-xl">
+                                                    <StatsCardGroup
+                                                        cardGroupTitle={"Dish Combination Claims Status"}
+                                                        isDualPager={true}
+                                                        dualPageTitles={["View Most Claims", "View Least Claims"]}
 
-                                                    primaryData={extractedOverallData.mostMealClaims}
-                                                    secondaryData={extractedOverallData.leastMealClaims}
+                                                        primaryData={extractedOverallData.mostMealClaims}
+                                                        secondaryData={extractedOverallData.leastMealClaims}
 
-                                                    displayDate={false}
-                                                    urgentNotification={0}
-                                                />
-                                            </div>
-                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                                <StatsCardGroup
-                                                    cardGroupTitle={"Claims Count"}
-                                                    isDualPager={false}
+                                                        displayDate={false}
+                                                        urgentNotification={0}
+                                                    />
+                                                </div>
+                                                <div className="flex h-full w-[98%] border-gray-100 border-[1px] rounded-xl">
+                                                    <StatsCardGroup
+                                                        cardGroupTitle={"Claims Count"}
+                                                        isDualPager={false}
 
-                                                    primaryData={extractedOverallData.claimsCount}
+                                                        primaryData={extractedOverallData.claimsCount}
 
-                                                    displayDate={false}
-                                                    urgentNotification={0}
-                                                />
-                                            </div>
-                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                                <StatsCardGroup
-                                                    cardGroupTitle={"KPI Metrics"}
-                                                    isDualPager={false}
+                                                        displayDate={false}
+                                                        urgentNotification={0}
+                                                    />
+                                                </div>
+                                                <div className="flex h-full w-[98%] border-gray-100 border-[1px] rounded-xl">
+                                                    <StatsCardGroup
+                                                        cardGroupTitle={"KPI Metrics"}
+                                                        isDualPager={false}
 
-                                                    primaryData={extractedOverallData.KPIreports}
+                                                        primaryData={extractedOverallData.KPIreports}
 
-                                                    displayDate={false}
-                                                    urgentNotification={0}
-                                                />
-                                            </div>
-                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                                <StatsCardGroup
-                                                    cardGroupTitle={"Consumed Credits"}
-                                                    isDualPager={false}
+                                                        displayDate={false}
+                                                        urgentNotification={0}
+                                                    />
+                                                </div>
+                                                <div className="flex h-full w-[98%] border-gray-100 border-[1px] rounded-xl">
+                                                    <StatsCardGroup
+                                                        cardGroupTitle={"Consumed Credits"}
+                                                        isDualPager={false}
 
-                                                    primaryData={extractedOverallData.consumedCredits}
+                                                        primaryData={extractedOverallData.consumedCredits}
 
-                                                    displayDate={false}
-                                                    urgentNotification={0}
-                                                />
+                                                        displayDate={false}
+                                                        urgentNotification={0}
+                                                    />
+                                                </div>
                                             </div>
                                         </>
                                         : ""}
@@ -467,17 +470,21 @@ export default function AdminDashboard() {
                             </AnalyticTabs>
                         </div>
 
+                        <div
+                            style={{
+                                position: 'sticky',
+                                top: '20px', // This is the gap from the top of the screen
+                                height: 'fit-content', // Crucial: prevents the div from stretching to match the 70% column
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: "10px"
 
-                        <div className="h-auto flex flex-col gap-4">
+                            }}>
                             <div className="">
                                 <QuickActions />
                             </div>
-
                             <div>
                                 <EventsPanel events={upcomingEvents} />
-                            </div>
-                            <div>
-                                <MealAllowanceCard />
                             </div>
                         </div>
                     </div>

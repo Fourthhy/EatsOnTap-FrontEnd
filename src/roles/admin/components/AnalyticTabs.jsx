@@ -18,7 +18,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                 </div>
 
                 <div className="flex">
-                    <div className="w-3 bg-[#9da7e380]">
+                    <div className="w-3 bg-[#2CA4DD3f]">
                         <div
                             className=" h-full w-full bg-[#F7F9F9]"
                             style={{ borderBottomRightRadius: selectedTab === 1 ? 10 : 0 }}
@@ -34,14 +34,14 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontFamily: "geist",
                             fontSize: 12,
                             fontWeight: 500,
-                            boxShadow: "2px 0 5px #e5eaf0",
-                            backgroundColor: selectedTab === 1 ? "#9da7e380" : "#FFFFFF"
+                            
+                            backgroundColor: selectedTab === 1 ? "#2CA4DD3f" : "#FFFFFF"
                         }}
                         onClick={() => onTabChange(1)}
                     >
                         Daily
                     </button>
-                    <div className="w-3 bg-[#9da7e380]">
+                    <div className="w-3 bg-[#2CA4DD3f]">
                         <div
                             className=" h-full w-full bg-[#F7F9F9]"
                             style={{
@@ -60,14 +60,14 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontFamily: "geist",
                             fontSize: 12,
                             fontWeight: 500,
-                            boxShadow: "2px 0 5px #e5eaf0",
-                            backgroundColor: selectedTab === 2 ? "#9da7e380" : "#FFFFFF"
+                            
+                            backgroundColor: selectedTab === 2 ? "#2CA4DD3f" : "#FFFFFF"
                         }}
                         onClick={() => onTabChange(2)}
                     >
                         Weekly
                     </button>
-                    <div className="w-3 bg-[#9da7e380]">
+                    <div className="w-3 bg-[#2CA4DD3f]">
                         <div
                             className=" h-full w-full bg-[#F7F9F9]"
                             style={{
@@ -86,14 +86,14 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontFamily: "geist",
                             fontSize: 12,
                             fontWeight: 500,
-                            boxShadow: "2px 0 5px #e5eaf0",
-                            backgroundColor: selectedTab === 3 ? "#9da7e380" : "#FFFFFF"
+                            
+                            backgroundColor: selectedTab === 3 ? "#2CA4DD3f" : "#FFFFFF"
                         }}
                         onClick={() => onTabChange(3)}
                     >
                         Monthly
                     </button>
-                    <div className="w-3 bg-[#9da7e380]">
+                    <div className="w-3 bg-[#2CA4DD3f]">
                         <div
                             className=" h-full w-full bg-[#F7F9F9]"
                             style={{
@@ -112,14 +112,14 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontFamily: "geist",
                             fontSize: 12,
                             fontWeight: 500,
-                            boxShadow: "2px 0 5px #e5eaf0",
-                            backgroundColor: selectedTab === 4 ? "#9da7e380" : "#FFFFFF"
+                            
+                            backgroundColor: selectedTab === 4 ? "#2CA4DD3f" : "#FFFFFF"
                         }}
                         onClick={() => onTabChange(4)}
                     >
                         Overall
                     </button>
-                    <div className="w-3 bg-[#9da7e380]">
+                    <div className="w-3 bg-[#2CA4DD3f]">
                         <div
                             className=" h-full w-full bg-[#F7F9F9]"
                             style={{
@@ -138,16 +138,16 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontFamily: "geist",
                             fontSize: 12,
                             fontWeight: 500,
-                            boxShadow: "2px 0 5px #e5eaf0",
-                            backgroundColor: selectedTab === 5 ? "#9da7e380" : "#FFFFFF"
+                            
+                            backgroundColor: selectedTab === 5 ? "#2CA4DD3f" : "#FFFFFF"
                         }}
                         onClick={() => onTabChange(5)}
                     >
                         Specific Date
                     </button>
-                    <div className="w-3 bg-[#9da7e380]">
+                    <div className="w-3 bg-[#2CA4DD3f]">
                         <div
-                            className=" h-full w-full bg-[#F7F9F9]"
+                            className=" h-full w-full bg-[#F7F9F9] border-none"
                             style={{
                                 borderBottomRightRadius: selectedTab === 5 ? 0 : selectedTab === 5 ? 10 : 0,
                                 borderBottomLeftRadius: selectedTab === 5 ? 10 : 0,
@@ -160,7 +160,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                     style={{
                         width: "full",
                         height: 10,
-                        background: 'linear-gradient(to bottom, #9da7e380, #FFFFFF)',
+                        background: 'linear-gradient(to bottom, #2CA4DD3f, #FFFFFF)',
                         borderTopLeftRadius: 3,
                         borderTopRightRadius: 3,
                     }}

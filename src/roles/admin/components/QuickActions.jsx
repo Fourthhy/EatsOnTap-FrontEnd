@@ -5,10 +5,15 @@ import {
     UserPlus,
     CalendarDays,
     Plus,
-    X
-} from "lucide-react";
+    X,
+    ClipboardList
+} from "lucide-react"
+    ;
 // BUTTON FROM SHADCN
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
+
+// BUTTON FROM FLOWBITE
+import { Button } from "flowbite-react"
 
 function QuickActions() {
     const [addedTodaysDish, setAddedTodaysDish] = useState(false);
@@ -47,6 +52,8 @@ function QuickActions() {
                 break;
             case "registerStudent":
                 break;
+            case "viewMealRequest":
+                break
         }
     };
 
@@ -81,13 +88,13 @@ function QuickActions() {
         fontSize: 13,
         fontWeight: 400,
         width: "100%",
-        boxShadow: "0 2px 6px #e5eaf0cc",
-        border: "1px solid #e5eaf0",
+        boxShadow: "0 2px 6px #e5eaf0ac",
+        border: "1px solid #ddddddaf",
         color: "#231F20",
         cursor: "pointer"
     }
 
-    const globalButtonBgColor = "bg-[#EEFCFF] hover:bg-[#c7eaf280]"
+    const globalButtonBgColor = "bg-[#2CA4DD3f] hover:bg-[#2CA4DD5f] transition-colors duration-100";
 
     return (
         <>
@@ -96,7 +103,7 @@ function QuickActions() {
                     background: "#fff",
                     borderRadius: 12,
                     boxShadow: "0 2px 6px #e5eaf0",
-                    padding: 18,
+                    padding: 20,
                     display: "flex",
                     flexDirection: "column",
                     width: "auto",
@@ -106,7 +113,7 @@ function QuickActions() {
             >
                 <h4
                     style={{
-                        fontWeight: "500",
+                        fontWeight: 500,
                         fontSize: 12,
                         color: "#000000",
                         fontFamily: "geist",
@@ -129,10 +136,8 @@ function QuickActions() {
                             {addedTodaysDish ? "View Dish for Today" : "Add Dish for Today"}
                         </span>
                     </Button>
-
                 </div>
                 <div className="w-full">
-
                     <Button style={globalButtonStyle} className={globalButtonBgColor}
                         onClick={() => {
                             handelClickAction("ScheduleEvent");
@@ -153,6 +158,18 @@ function QuickActions() {
                         <span className="w-[100%] gap-2 flex justify-start">
                             <UserPlus size={20} />
                             Register Student
+                        </span>
+                    </Button>
+                </div>
+                <div className="w-full">
+                    <Button style={globalButtonStyle} className={globalButtonBgColor}
+                        onClick={() => {
+                            handelClickAction("viewMealRequest");
+                        }}
+                    >
+                        <span className="w-[100%] gap-2 flex justify-start">
+                            <ClipboardList size={20} />
+                            View Meal Request
                         </span>
                     </Button>
                 </div>
