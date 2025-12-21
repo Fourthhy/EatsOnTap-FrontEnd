@@ -1,5 +1,5 @@
-import { HeaderBar } from "../../../components/global/HeaderBar";
-import { StudentList } from "../components/StudentList";
+import { HeaderBar } from "../../../../components/global/HeaderBar";
+import { StudentList } from "../StudentList";
 
 export default function HEStudentManagement() {
     const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";

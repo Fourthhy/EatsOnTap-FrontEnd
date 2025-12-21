@@ -1,5 +1,5 @@
-import { HeaderBar } from "../../../components/global/HeaderBar";
-import { EligibilityScheduler } from "../components/EligibilityScheduler";
+import { HeaderBar } from "../../../../components/global/HeaderBar";
+import { EligibilityScheduler } from "../EligibilityScheduler";
 
 export default function MealEligibilityManagement() {
     const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";

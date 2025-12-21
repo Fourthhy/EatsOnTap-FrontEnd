@@ -1,5 +1,5 @@
-import { HeaderBar } from "../../components/global/HeaderBar";
-import { MealOrdersTable } from "./components/mealOrders/MealOrdersTable"
+import { HeaderBar } from "../../../../components/global/HeaderBar";
+import { MealOrdersTable } from "../../components/mealOrders/MealOrdersTable"
 
 export default function MealRecipientOrder() {
     const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";

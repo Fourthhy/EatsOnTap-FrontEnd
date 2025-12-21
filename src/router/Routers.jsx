@@ -4,10 +4,10 @@ import Login from "../Login";
 
 import AdminDashboard from "../roles/admin/components/pages/AdminDashboard"
 
-import HEStudentManagement from "../roles/adminAssitant/subPages/HEStudentManagement"
-import MealEligibilityManagement from "../roles/adminAssitant/subPages/MealEligibilityManagement"
-import AdminAssistantDashboard from "../roles/adminAssitant/subPages/AdminAssistantDashboard"
-import AdminAssistantLanding from "../roles/adminAssitant/AdminAssistantLanding";
+import HEStudentManagement from "../roles/adminAssitant/components/pages/HEStudentManagement"
+import MealEligibilityManagement from "../roles/adminAssitant/components/pages/MealEligibilityManagement"
+import AdminAssistantDashboard from "../roles/adminAssitant/components/pages/AdminAssistantDashboard"
+import AdminAssistantLayout from "../roles/adminAssitant/AdminAssistantLayout";
 
 import FoodItemClaim from "../roles/canteenStaff/FoodItemClaim";
 
@@ -25,7 +25,7 @@ import SidebarLayout from "../components/custom/SidebarLayout";
 import ClassAdviserLanding from "@/roles/classAdviser/ClassAdviserLanding";
 import AdminLayout from "@/roles/admin/AdminLayout";
 
-import MealRecipientOrder from "../roles/admin/MealRecipientOrder";
+import MealRecipientOrder from "../roles/admin/components/pages/MealRecipientOrder";
 import StudentRecords from "../roles/admin/components/pages/StudentRecords";
 import EventManagement from "../roles/admin/components/pages/EventManagement";
 import StudentManagement from "../roles/admin/components/pages/StudentManagement";
@@ -61,7 +61,7 @@ export default function Routers() {
                     </Route>
                     <Route path="/adminAssistant" element={
                         <ProtectedRoute>
-                            <AdminAssistantLanding />
+                            <AdminAssistantLayout />
                         </ProtectedRoute>
                     }>
                         <Route index element={<AdminAssistantDashboard />} />

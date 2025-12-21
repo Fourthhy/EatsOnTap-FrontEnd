@@ -6,7 +6,7 @@ import {
 } from "lucide-react"
 
 
-export default function AdminAssistantLanding() {
+export default function AdminAssistantLayout() {
 
     const menuItems = [
         { icon: <LayoutDashboard size={20} />, text: "Dashboard", path: "/adminAssistant/dashboard" },
