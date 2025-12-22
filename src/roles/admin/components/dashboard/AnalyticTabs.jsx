@@ -34,9 +34,8 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontFamily: "geist",
                             fontSize: 12,
                             fontWeight: 500,
-                            
-                            backgroundColor: selectedTab === 1 ? "#2CA4DD3f" : "#FFFFFF"
                         }}
+                        className={selectedTab === 1 ? "bg-[#2CA4DD3f]" : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
                         onClick={() => onTabChange(1)}
                     >
                         Daily
@@ -60,9 +59,8 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontFamily: "geist",
                             fontSize: 12,
                             fontWeight: 500,
-                            
-                            backgroundColor: selectedTab === 2 ? "#2CA4DD3f" : "#FFFFFF"
                         }}
+                        className={selectedTab === 2 ? "bg-[#2CA4DD3f]" : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
                         onClick={() => onTabChange(2)}
                     >
                         Weekly
@@ -86,9 +84,8 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontFamily: "geist",
                             fontSize: 12,
                             fontWeight: 500,
-                            
-                            backgroundColor: selectedTab === 3 ? "#2CA4DD3f" : "#FFFFFF"
                         }}
+                        className={selectedTab === 3 ? "bg-[#2CA4DD3f]" : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
                         onClick={() => onTabChange(3)}
                     >
                         Monthly
@@ -112,9 +109,8 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontFamily: "geist",
                             fontSize: 12,
                             fontWeight: 500,
-                            
-                            backgroundColor: selectedTab === 4 ? "#2CA4DD3f" : "#FFFFFF"
                         }}
+                        className={selectedTab === 4 ? "bg-[#2CA4DD3f]" : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
                         onClick={() => onTabChange(4)}
                     >
                         Overall
@@ -138,9 +134,8 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontFamily: "geist",
                             fontSize: 12,
                             fontWeight: 500,
-                            
-                            backgroundColor: selectedTab === 5 ? "#2CA4DD3f" : "#FFFFFF"
                         }}
+                        className={selectedTab === 5 ? "bg-[#2CA4DD3f]" : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
                         onClick={() => onTabChange(5)}
                     >
                         Specific Date

@@ -94,7 +94,7 @@ function QuickActions() {
         cursor: "pointer"
     }
 
-    const globalButtonBgColor = "bg-[#2CA4DD3f] hover:bg-[#2CA4DD5f] transition-colors duration-100";
+    const globalButtonBgColor = "bg-[#2CA4DD3f] hover:bg-[#2CA4DD5f] transition-colors duration-300";
 
     return (
         <>

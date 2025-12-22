@@ -66,7 +66,7 @@ export function StatsCardGroup({
         cursor: "pointer"
     }
 
-    const globalButtonBgColor = "cursor-pointer bg-[#2CA4DD3f] hover:bg-[#2CA4DD5f] transition-colors duration-100";
+    const globalButtonBgColor = "cursor-pointer bg-[#2CA4DD3f] hover:bg-[#2CA4DD5f] transition-colors duration-300";
 
 
     return (
