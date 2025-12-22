@@ -110,7 +110,7 @@ const Sidebar = () => {
                 display: "flex", // Place sidebar and content side by side
                 width: "100%",
                 height: "100vh",
-                overflow: "hidden",
+                
             }}
         >
             {/* Sidebar */}

@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoutes";
 import Login from "../Login";
 
-import AdminDashboard from "../roles/admin/components/pages/AdminDashboard"
 
 import HEStudentManagement from "../roles/adminAssitant/components/pages/HEStudentManagement"
 import MealEligibilityManagement from "../roles/adminAssitant/components/pages/MealEligibilityManagement"
@@ -23,8 +22,9 @@ import SystemLogs from "../roles/superAdmin/pages/SystemLogs";
 
 import SidebarLayout from "../components/custom/SidebarLayout";
 import ClassAdviserLanding from "@/roles/classAdviser/ClassAdviserLanding";
-import AdminLayout from "@/roles/admin/AdminLayout";
 
+import AdminLayout from "@/roles/admin/AdminLayout";
+import AdminDashboard from "../roles/admin/components/pages/AdminDashboard"
 import MealRecipientOrder from "../roles/admin/components/pages/MealRecipientOrder";
 import StudentRecords from "../roles/admin/components/pages/StudentRecords";
 import EventManagement from "../roles/admin/components/pages/EventManagement";

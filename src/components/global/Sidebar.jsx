@@ -180,7 +180,6 @@ function Sidebar({ menuItems }) {
                     width: `calc(100% - ${sidebarWidth})`,
                     backgroundColor: "#f9fafb",
                     minHeight: "100vh",
-                    overflowY: "auto",
                 }}
             >
                 <Outlet context={{ handleToggleSidebar }} />

@@ -281,11 +281,16 @@ export default function AdminDashboard() {
                             marginTop: '20px',
                             marginLeft: '20px',
                             marginRight: '20px',
-                            backgroundColor: "#F7F9F9"
-                        }}
-                        className="w-auto bg-white grid grid-cols-[70%_30%] gap-4 items-start">
+                            backgroundColor: "#F7F9F9",
+                            width: "auto",
+                            display: 'grid',
+                            gridTemplateColumns: '70% 30%',
+                            gap: "18px",
+                            alignItems: 'start',
+                        }}>
 
-                        <div className="w-full h-auto flex flex-col gap-4">
+                        {/* LEFT SIDE COMPONENTS */}
+                        <div className="w-full h-full flex flex-col gap-4">
                             <div className="grid grid-cols-6 gap-4">
                                 <div className="h-full col-span-2">
                                     <CustomStatsCard title={"Daily Virtual Credit Used"} value={"P60,000"} subtitle={"vs P65,000 allotted"} />
@@ -470,14 +475,16 @@ export default function AdminDashboard() {
                             </AnalyticTabs>
                         </div>
 
+                        {/* RIGHT SIDE COMPONENTS */}   
                         <div
                             style={{
                                 position: 'sticky',
-                                top: '20px', // This is the gap from the top of the screen
-                                height: 'fit-content', // Crucial: prevents the div from stretching to match the 70% column
+                                top: '35px', // This is the gap from the top of the screen
+                                height: 'fit-content',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: "10px"
+                                gap: "18px",
+                                alignSelf: 'start',
 
                             }}>
                             <div className="">

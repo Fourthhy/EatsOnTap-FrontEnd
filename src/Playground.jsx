@@ -34,7 +34,7 @@ const StickyLayout = () => {
 function Playground() {
     return (
         <>
-            <StudentList />
+            <StickyLayout />
         </>
     );
 }
