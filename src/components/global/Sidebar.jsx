@@ -128,7 +128,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel }
 
                         {quickActionsLabel && isExpanded && (
                             <div style={{ margin: "10px 0", paddingLeft: "1rem" }}>
-                                <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{menutItemsLabel}</span>
+                                <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{quickActionsLabel}</span>
                             </div>
                         )}
 
