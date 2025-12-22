@@ -83,15 +83,15 @@ const GenericTable = ({
                     buttonListGroup={tabs}
                     initialActiveId={activeTab}
                     onSetActiveId={(id) => { onTabChange(id); setCurrentPage(1); }}
-                    activeColor="#1F3463"
+                    activeColor="#2CA4DD3f"
                 />
                 {primaryActionLabel && primaryActionIcon ? (
                     <button
                         onClick={onPrimaryAction}
-                        className="ml-auto bg-[#1F3463] hover:bg-[#153FA3] cursor-pointer text-sm font-medium flex items-center shadow-sm transition-colors duration-300"
+                        className="ml-auto bg-[#2CA4DD3f] hover:bg-[#2CA4DD5f] color-[#231F20] cursor-pointer text-sm font-medium flex items-center shadow-sm transition-colors duration-200"
                         style={{
-                            marginLeft: 'auto', color: 'white',
-                            padding: '10px 20px', borderRadius: 12, fontSize: '0.875rem',
+                            marginLeft: 'auto',
+                            padding: '10px 20px', borderRadius: 12, fontSize: 12, fontFamily: 'geist',
                             display: 'flex', alignItems: 'center', gap: '8px',
                             boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                         }}

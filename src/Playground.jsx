@@ -1,5 +1,6 @@
 import { StudentList } from "../src/components/global/table/SampleStudentList";
 
+
 import React from 'react';
 
 const StickyLayout = () => {
@@ -34,7 +35,7 @@ const StickyLayout = () => {
 function Playground() {
     return (
         <>
-            <StickyLayout />
+            <StudentList />
         </>
     );
 }

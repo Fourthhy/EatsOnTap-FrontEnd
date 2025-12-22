@@ -33,8 +33,9 @@ const ButtonGroupItem = ({
   const baseStyle = {
     padding: '0.5rem 1rem', // px-4 py-2
     borderRadius: '0.375rem', // rounded-md
-    fontSize: '0.875rem', // text-sm
-    fontWeight: 500, // font-medium
+    fontSize: 12, // text-sm
+    fontWeight: 400, // font-medium
+    fontFamily: 'geist',
     whiteSpace: 'nowrap', // whitespace-nowrap
     display: 'flex', // flex
     alignItems: 'center', // items-center
@@ -50,11 +51,11 @@ const ButtonGroupItem = ({
 
   // Dynamic inline styles based on active state (only controls text color)
   const dynamicStyle = {
-    color: isActive ? activeTextColor : '#4b5563', // gray-600 equivalent when inactive
+    color: isActive ? activeTextColor : '#727c89ff', // gray-600 equivalent when inactive
   };
 
   // We keep Tailwind classes ONLY for hover state
-  const tailwindClasses = `transition-colors ${isActive ? '' : 'hover:bg-gray-200 text-gray-600'}`;
+  const tailwindClasses = `transition-colors ${isActive ? '' : 'hover:bg-gray-200 color-[#231F20]'}`;
 
   // Merge base and dynamic inline styles
   const mergedStyle = { ...baseStyle, ...dynamicStyle };
@@ -68,8 +69,6 @@ const ButtonGroupItem = ({
       className={tailwindClasses}
       style={mergedStyle}
     >
-      {/* Icon rendering has been removed */}
-
       {/* Label */}
       <span className={isActive ? "" : "hover:text-[#231F20] cursor-pointer"}>
         {buttonData.label}
@@ -97,7 +96,7 @@ const ButtonGroup = ({
   buttonListGroup,
   initialActiveId,
   onSetActiveId,
-  activeColor = '#1F3460', // Blue from your example
+  activeColor = '#2CA4DD3f', // Blue from your example
 }) => {
   const defaultInitialId = buttonListGroup.length > 0 ? buttonListGroup[0].id : null;
   const [activeId, setActiveId] = useState(initialActiveId ?? defaultInitialId);
@@ -203,7 +202,7 @@ const ButtonGroup = ({
             buttonData={button}
             activeId={activeId}
             onClick={handleButtonClick}
-            activeTextColor="white" // Explicitly set the active text color
+            activeTextColor="#231F20" // Explicitly set the active text color
           />
         );
       })}
