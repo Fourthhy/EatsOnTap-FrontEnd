@@ -31,7 +31,7 @@ const SidebarItem = ({ icon, text, expanded, active, onClick, index }) => {
             }}
             onMouseEnter={(e) => {
                 if (!active) {
-                    e.currentTarget.style.backgroundColor = "#52728F";
+                    e.currentTarget.style.backgroundColor = "#f3f4f63f";
                     e.currentTarget.style.color = "white";
                 }
             }}

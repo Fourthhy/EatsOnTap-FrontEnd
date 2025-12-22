@@ -79,7 +79,7 @@ function Sidebar({ menuItems }) {
             <div style={{
                 width: sidebarWidth,
                 height: "100vh",
-                background: "linear-gradient(to bottom, #153FA3, #142345)",
+                background: "linear-gradient(to bottom, #2CA4DD, #143463)",
                 color: "white",
                 display: "flex",
                 flexDirection: "column",
