@@ -51,22 +51,7 @@ export function StatsCardGroup({
                 ? val1 <= rate1
                 : false;
 
-    const globalButtonStyle = {
-        marginBottom: 8,
-        borderRadius: 6,
-        padding: "20px 12px",
-        fontFamily: "geist",
-        fontSize: 13,
-        fontWeight: 400,
-        width: "100%",
-        boxShadow: "0 2px 6px #e5eaf0ac",
-        border: "1px solid #ddddddaa",
-        color: "#231F20",
-        // color: "#EBEBED",
-        cursor: "pointer"
-    }
-
-    const globalButtonBgColor = "cursor-pointer bg-[#2CA4DD3f] hover:bg-[#2CA4DD5f] transition-colors duration-300";
+    const globalButtonBgColor = "cursor-pointer bg-[#4268BD] hover:bg-[#33549F] transition-colors duration-300";
 
 
     return (
@@ -104,6 +89,7 @@ export function StatsCardGroup({
                                     padding: "10px 12px",
                                     fontFamily: "geist",
                                     fontSize: 12,
+                                    color: "#eeeeee",
                                     boxShadow: "0 2px 6px #e5eaf0ac",
                                     border: "1px solid #ddddddaf",
                                 }}

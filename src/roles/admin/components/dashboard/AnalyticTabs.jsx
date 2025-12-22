@@ -18,7 +18,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                 </div>
 
                 <div className="flex">
-                    <div className="w-3 bg-[#2CA4DD3f]">
+                    <div className="w-3 bg-[#4268BD]">
                         <div
                             className=" h-full w-full bg-[#F7F9F9]"
                             style={{ borderBottomRightRadius: selectedTab === 1 ? 10 : 0 }}
@@ -35,12 +35,12 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontSize: 12,
                             fontWeight: 500,
                         }}
-                        className={selectedTab === 1 ? "bg-[#2CA4DD3f]" : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
+                        className={selectedTab === 1 ? "bg-[#4268BD] text-[#EEEEEE]" : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
                         onClick={() => onTabChange(1)}
                     >
                         Daily
                     </button>
-                    <div className="w-3 bg-[#2CA4DD3f]">
+                    <div className="w-3 bg-[#4268BD]">
                         <div
                             className=" h-full w-full bg-[#F7F9F9]"
                             style={{
@@ -60,12 +60,12 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontSize: 12,
                             fontWeight: 500,
                         }}
-                        className={selectedTab === 2 ? "bg-[#2CA4DD3f]" : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
+                        className={selectedTab === 2 ? "bg-[#4268BD] text-[#EEEEEE] " : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
                         onClick={() => onTabChange(2)}
                     >
                         Weekly
                     </button>
-                    <div className="w-3 bg-[#2CA4DD3f]">
+                    <div className="w-3 bg-[#4268BD]">
                         <div
                             className=" h-full w-full bg-[#F7F9F9]"
                             style={{
@@ -85,12 +85,12 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontSize: 12,
                             fontWeight: 500,
                         }}
-                        className={selectedTab === 3 ? "bg-[#2CA4DD3f]" : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
+                        className={selectedTab === 3 ? "bg-[#4268BD] text-[#EEEEEE] " : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
                         onClick={() => onTabChange(3)}
                     >
                         Monthly
                     </button>
-                    <div className="w-3 bg-[#2CA4DD3f]">
+                    <div className="w-3 bg-[#4268BD]">
                         <div
                             className=" h-full w-full bg-[#F7F9F9]"
                             style={{
@@ -110,12 +110,12 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontSize: 12,
                             fontWeight: 500,
                         }}
-                        className={selectedTab === 4 ? "bg-[#2CA4DD3f]" : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
+                        className={selectedTab === 4 ? "bg-[#4268BD] text-[#EEEEEE] " : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
                         onClick={() => onTabChange(4)}
                     >
                         Overall
                     </button>
-                    <div className="w-3 bg-[#2CA4DD3f]">
+                    <div className="w-3 bg-[#4268BD]">
                         <div
                             className=" h-full w-full bg-[#F7F9F9]"
                             style={{
@@ -135,12 +135,12 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                             fontSize: 12,
                             fontWeight: 500,
                         }}
-                        className={selectedTab === 5 ? "bg-[#2CA4DD3f]" : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
+                        className={selectedTab === 5 ? "bg-[#4268BD] text-[#EEEEEE] " : "bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"}
                         onClick={() => onTabChange(5)}
                     >
                         Specific Date
                     </button>
-                    <div className="w-3 bg-[#2CA4DD3f]">
+                    <div className="w-3 bg-[#4268BD]">
                         <div
                             className=" h-full w-full bg-[#F7F9F9] border-none"
                             style={{
@@ -155,7 +155,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                     style={{
                         width: "full",
                         height: 10,
-                        background: 'linear-gradient(to bottom, #2CA4DD3f, #FFFFFF)',
+                        background: 'linear-gradient(to bottom, #4268BD, #FFFFFF)',
                         borderTopLeftRadius: 3,
                         borderTopRightRadius: 3,
                     }}

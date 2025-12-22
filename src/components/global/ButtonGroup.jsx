@@ -32,7 +32,7 @@ const ButtonGroupItem = ({
   // Base style for the button, fully converted to inline style
   const baseStyle = {
     padding: '0.5rem 1rem', // px-4 py-2
-    borderRadius: '0.375rem', // rounded-md
+    borderRadius: 6, // rounded-md
     fontSize: 12, // text-sm
     fontWeight: 400, // font-medium
     fontFamily: 'geist',
@@ -52,29 +52,33 @@ const ButtonGroupItem = ({
   // Dynamic inline styles based on active state (only controls text color)
   const dynamicStyle = {
     color: isActive ? activeTextColor : '#727c89ff', // gray-600 equivalent when inactive
-  };
+    boxShadow: isActive? "0 2px 6px #e5eaf0ac" : "", 
+    border: isActive ? "1px solid #ddddddaf" : ""
+};
 
-  // We keep Tailwind classes ONLY for hover state
-  const tailwindClasses = `transition-colors ${isActive ? '' : 'hover:bg-gray-200 color-[#231F20]'}`;
+// We keep Tailwind classes ONLY for hover state
+const tailwindClasses = `transition-colors ${isActive ? '' : 'hover:bg-gray-200 color-[#231F20]'}`;
 
-  // Merge base and dynamic inline styles
-  const mergedStyle = { ...baseStyle, ...dynamicStyle };
-  
-  // Icon related logic has been completely removed.
+// Merge base and dynamic inline styles
+const mergedStyle = {
+  ...baseStyle, ...dynamicStyle
+};
 
-  return (
-    <button
-      ref={buttonRef} // Attach the ref here
-      onClick={() => onClick(buttonData.id)}
-      className={tailwindClasses}
-      style={mergedStyle}
-    >
-      {/* Label */}
-      <span className={isActive ? "" : "hover:text-[#231F20] cursor-pointer"}>
-        {buttonData.label}
-      </span>
-    </button>
-  );
+// Icon related logic has been completely removed.
+
+return (
+  <button
+    ref={buttonRef} // Attach the ref here
+    onClick={() => onClick(buttonData.id)}
+    className={tailwindClasses}
+    style={mergedStyle}
+  >
+    {/* Label */}
+    <span className={isActive ? "" : "hover:text-[#231F20] cursor-pointer"}>
+      {buttonData.label}
+    </span>
+  </button>
+);
 };
 
 // BUTTON GROUP DOCUMENTATION (Icon removed from ButtonGroupProps definition)

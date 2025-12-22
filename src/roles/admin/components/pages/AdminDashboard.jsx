@@ -487,9 +487,6 @@ export default function AdminDashboard() {
                                 alignSelf: 'start',
 
                             }}>
-                            <div className="">
-                                <QuickActions />
-                            </div>
                             <div>
                                 <EventsPanel events={upcomingEvents} />
                             </div>

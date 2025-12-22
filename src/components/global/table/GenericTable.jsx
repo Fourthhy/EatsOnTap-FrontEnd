@@ -78,7 +78,7 @@ const GenericTable = ({
         <div className="w-full h-[calc(100vh-90px)] flex flex-col p-6 font-['Geist',sans-serif] text-gray-900 overflow-hidden">
 
             {/* Top Navigation using your ButtonGroup */}
-            <div className="flex flex-wrap gap-2 mb-6 shrink-0" style={{ marginTop: 15, marginBottom: 15 }}>
+            <div className="flex flex-wrap gap-2 mb-6 shrink-0" style={{ marginTop: 15, marginBottom: 15, marginLeft: 10 }}>
                 <ButtonGroup
                     buttonListGroup={tabs}
                     initialActiveId={activeTab}
@@ -90,10 +90,11 @@ const GenericTable = ({
                         onClick={onPrimaryAction}
                         className="ml-auto bg-[#2CA4DD3f] hover:bg-[#2CA4DD5f] color-[#231F20] cursor-pointer text-sm font-medium flex items-center shadow-sm transition-colors duration-200"
                         style={{
-                            marginLeft: 'auto',
-                            padding: '10px 20px', borderRadius: 12, fontSize: 12, fontFamily: 'geist',
+                            marginLeft: 'auto', marginRight: 10,
+                            padding: '10px 20px', borderRadius: 6, fontSize: 12, fontFamily: 'geist',
                             display: 'flex', alignItems: 'center', gap: '8px',
-                            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                            boxShadow: "0 2px 6px #e5eaf0ac",
+                            border: "1px solid #ddddddaf",
                         }}
                     >
                         {primaryActionIcon} {primaryActionLabel}
@@ -132,12 +133,9 @@ const GenericTable = ({
                                 onChange={(e) => onSearchChange(e.target.value)}
                             />
                         </div>
-                        <div className="flex gap-2 ml-auto">
+                        <div className="flex gap-2 ml-auto" style={{ marginRight: 10 }}>
                             <button className="text-sm font-medium text-gray-600 flex items-center hover:bg-gray-200" style={{ padding: '8px 12px', backgroundColor: '#f3f4f6', borderRadius: '8px', fontSize: 12, display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 July 21, 2025 <Calendar size={12} />
-                            </button>
-                            <button className="hover:cursor-pointer hover:bg-gray-100 text-sm font-medium text-gray-600 flex items-center gap-2" style={{ padding: '8px 12px', borderRadius: '8px', fontSize: 12, display: 'flex', alignItems: 'center', gap: '2' }}>
-                                <Filter size={12} /> Filter by Status
                             </button>
                         </div>
                     </div>
@@ -183,8 +181,8 @@ const GenericTable = ({
                         <button
                             key={page}
                             onClick={() => handlePageChange(page)}
-                            className={`w-8 h-8 rounded-md text-sm font-medium flex items-center justify-center ${currentPage === page ? 'bg-[#1F3463] text-white' : 'text-gray-500 hover:bg-gray-300 hover:text-gray-700 transition-colors duration-300 cursor-pointer'}`}
-                            style={{ width: '32px', height: '32px', borderRadius: '6px' }}
+                            className={`w-8 h-8 rounded-md text-sm font-medium flex items-center justify-center ${currentPage === page ? 'bg-[#2CA4DD3f] color-[#231F20]' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors duration-200 cursor-pointer'}`}
+                            style={{ width: '32px', height: '32px', borderRadius: '6px', boxShadow: "0 2px 6px #e5eaf0ac", border: "1px solid #ddddddaf", }}
                         >
                             {page}
                         </button>

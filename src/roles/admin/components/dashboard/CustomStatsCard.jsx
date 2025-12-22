@@ -145,23 +145,3 @@ export function CustomStatsCard({
         </>
     )
 }
-
-// Main App Component to render the Preview
-export default function App() {
-    return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100 p-10">
-            <div className="w-64 h-48">
-                <CustomStatsCard 
-                    title="Total Revenue" 
-                    value={5240} 
-                    subtitle="Vs last month" 
-                    isPeso={true}
-                    isHasAcceptableRange={true}
-                    acceptableRate={[5000, 10000]}
-                    hoverText="Total accumulated revenue before tax deductions."
-                    hoverValueText="Raw Data: 5240.00"
-                />
-            </div>
-        </div>
-    );
-}

@@ -7,8 +7,8 @@ import logo from "/lv-logo.svg";
 import { SidebarItem } from "../custom/SidebarItem";
 import { Tooltip } from "flowbite-react";
 
-function Sidebar({ menuItems }) {
-    const [isExpanded, setIsExpanded] = useState(false);
+function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel }) {
+    const [isExpanded, setIsExpanded] = useState(true);
     const [activeIndex, setActiveIndex] = useState(0);
     const [indicatorStyle, setIndicatorStyle] = useState({ top: '0px', height: '0px', opacity: 0 });
 
@@ -34,6 +34,9 @@ function Sidebar({ menuItems }) {
         if (activeItemIndex !== -1 && activeItemIndex !== activeIndex) {
             setActiveIndex(activeItemIndex);
         }
+        setTimeout(() => {
+            setIsExpanded(false);
+        }, 2000);
     }, [location.pathname, menuItems, activeIndex]);
 
     // Handle Click to Navigate
@@ -69,7 +72,7 @@ function Sidebar({ menuItems }) {
     const { breakpoint } = useBreakpoint(BREAKPOINTS, 'mobile-md');
 
     const sidebarWidth = isExpanded ? "280px" : "72px";
-    const transitionDuration = "300ms";
+    const transitionDuration = "500ms";
     const indicatorMargin = isExpanded ? '0.75rem' : '0.25rem';
 
     return (
@@ -79,7 +82,7 @@ function Sidebar({ menuItems }) {
             <div style={{
                 width: sidebarWidth,
                 height: "100vh",
-                background: "linear-gradient(to bottom, #2CA4DD, #143463)",
+                background: "linear-gradient(to bottom, #153FA3, #142345)",
                 color: "white",
                 display: "flex",
                 flexDirection: "column",
@@ -123,6 +126,46 @@ function Sidebar({ menuItems }) {
                             ...indicatorStyle,
                         }} />
 
+                        {quickActionsLabel && isExpanded && (
+                            <div style={{ margin: "10px 0", paddingLeft: "1rem" }}>
+                                <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{menutItemsLabel}</span>
+                            </div>
+                        )}
+
+                        {quickActions && quickActions.map((item, i) => (
+                            <Tooltip
+                                key={i}
+                                content={<p className="font-geist w-[120px]" style={{ padding: "10px 15px" }}>{item.text}</p>}
+                                placement="right"
+                                // Some libraries don't support "none". 
+                                // If "none" doesn't work, use disabled={isExpanded}
+                                trigger={isExpanded ? "none" : "hover"}
+                                style="light"
+                                animation="duration-300"
+                            >
+                                {/* Wrapper div with ref to capture exact position */}
+                                <div ref={el => itemRefs.current[i] = el}>
+                                    <SidebarItem
+                                        index={i}
+                                        icon={item.icon}
+                                        text={item.text}
+                                        expanded={isExpanded}
+                                        onClick={handleItemClick}
+                                    />
+                                </div>
+                            </Tooltip>
+                        ))}
+
+                        <div style={{ margin: "10px 0", width: "100%", display: "flex", justifyContent: "center" }}>
+                            <hr style={{ width: "90%" }}/>
+                        </div>
+
+                        {menutItemsLabel && isExpanded && (
+                            <div style={{ margin: "10px 0", paddingLeft: "1rem" }}>
+                                <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{menutItemsLabel}</span>
+                            </div>
+                        )}
+
                         {menuItems.map((item, i) => (
                             <Tooltip
                                 key={i}
@@ -145,6 +188,7 @@ function Sidebar({ menuItems }) {
                                 </div>
                             </Tooltip>
                         ))}
+
                     </nav>
                 </div>
 
