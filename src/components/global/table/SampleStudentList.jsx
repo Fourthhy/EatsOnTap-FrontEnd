@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { GenericTable } from './GenericTable';
 import { User, Plus } from 'lucide-react';
 import { generateData } from './mockdata.js';
-import { LinkStatusBadge } from "./LinkStatusBadge"
+import { LinkStatusBadge } from "../../../roles/admin/components/voucherManagement/LinkStatusBadge"
 import { AddStudentModal } from '@/roles/admin/components/voucherManagement/AddStudentModal';
 
 // ... import your Modal components
@@ -101,11 +101,9 @@ const StudentList = () => {
         return matchesTab;
     });
 
-    // ... (Keep your existing isGradeLevel, isHigherEducation, and filteredStudents logic here)
-
     return (
         <>
-            {/* <AddStudentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} /> */}
+            <AddStudentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
 
             <GenericTable
                 title="All Students List"

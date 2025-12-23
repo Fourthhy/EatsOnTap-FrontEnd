@@ -1,25 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-// BUTTON ITEM DOCUMENTATION (Icon removed from ButtonItem definition)
-/**
- * @typedef {object} ButtonItem
- * @property {string} label - The text label for the button.
- * @property {string | number} id - A unique identifier for the button.
- */
-
-/**
- * @typedef {object} ButtonGroupItemProps
- * @property {ButtonItem} buttonData - The data object for the button (label, id).
- * @property {string | number} activeId - The ID of the currently active button.
- * @property {(id: string | number) => void} onClick - Handler for button clicks.
- * @property {string} [activeTextColor='white'] - The text color for the active state.
- * @property {React.RefObject<HTMLButtonElement>} buttonRef - A ref to attach to the button element.
- */
-
-/**
- * A standardized component for an individual button within the ButtonGroup (now without an icon).
- * @param {ButtonGroupItemProps} props
- */
 const ButtonGroupItem = ({
   buttonData,
   activeId,
@@ -29,187 +9,138 @@ const ButtonGroupItem = ({
 }) => {
   const isActive = buttonData.id === activeId;
 
-  // Base style for the button, fully converted to inline style
   const baseStyle = {
-    padding: '0.5rem 1rem', // px-4 py-2
-    borderRadius: 6, // rounded-md
-    fontSize: 12, // text-sm
-    fontWeight: 400, // font-medium
+    padding: '0.5rem 1rem',
+    borderRadius: 6,
+    fontSize: 12,
+    fontWeight: 400,
     fontFamily: 'geist',
-    whiteSpace: 'nowrap', // whitespace-nowrap
-    display: 'flex', // flex
-    alignItems: 'center', // items-center
-    gap: '0rem', // gap: 0rem (no icon, so no gap needed)
-    // Crucial: Set position relative so the button is layered above the absolute indicator
+    whiteSpace: 'nowrap',
+    display: 'flex',
+    alignItems: 'center',
     position: 'relative',
-    zIndex: 2, // Layered above the indicator (zIndex 1)
-    backgroundColor: 'transparent', // Always transparent, indicator provides the color
-    // Only the color of the text/icon changes here
-    transitionProperty: 'color', // transition-colors (only for color now)
-    transitionDuration: '150ms',
+    zIndex: 2, 
+    backgroundColor: 'transparent',
+    transition: 'all 200ms ease',
+    cursor: 'pointer',
+    outline: 'none',
+    border: 'none'
   };
 
-  // Dynamic inline styles based on active state (only controls text color)
   const dynamicStyle = {
-    color: isActive ? activeTextColor : '#727c89ff', // gray-600 equivalent when inactive
-    boxShadow: isActive? "0 2px 6px #e5eaf0ac" : "", 
-    border: isActive ? "1px solid #ddddddaf" : ""
+    color: isActive ? activeTextColor : '#727c89ff',
+    // We add a subtle border only to the active button to match your design
+    boxShadow: isActive ? "0 2px 6px #e5eaf0ac" : "none",
+    border: isActive ? "1px solid #ddddddaf" : "1px solid transparent",
+  };
+
+  const tailwindClasses = `transition-all duration-200 ${
+    isActive ? '' : 'hover:bg-gray-200 hover:text-[#231F20]'
+  }`;
+
+  return (
+    <button
+      ref={buttonRef}
+      // Logic Fix: Pass the ID directly
+      onClick={() => onClick(buttonData.id)}
+      className={tailwindClasses}
+      style={{ ...baseStyle, ...dynamicStyle }}
+    >
+      <span style={{ pointerEvents: 'none' }}>
+        {buttonData.label}
+      </span>
+    </button>
+  );
 };
-
-// We keep Tailwind classes ONLY for hover state
-const tailwindClasses = `transition-colors ${isActive ? '' : 'hover:bg-gray-200 color-[#231F20]'}`;
-
-// Merge base and dynamic inline styles
-const mergedStyle = {
-  ...baseStyle, ...dynamicStyle
-};
-
-// Icon related logic has been completely removed.
-
-return (
-  <button
-    ref={buttonRef} // Attach the ref here
-    onClick={() => onClick(buttonData.id)}
-    className={tailwindClasses}
-    style={mergedStyle}
-  >
-    {/* Label */}
-    <span className={isActive ? "" : "hover:text-[#231F20] cursor-pointer"}>
-      {buttonData.label}
-    </span>
-  </button>
-);
-};
-
-// BUTTON GROUP DOCUMENTATION (Icon removed from ButtonGroupProps definition)
-
-/**
- * @typedef {object} ButtonGroupProps
- * @property {Array<{ label: string, id: string | number }>} buttonListGroup - The array of button configuration objects.
- * @property {string | number} [initialActiveId] - The ID of the button that should be active initially. Defaults to the first item's ID.
- * @property {(id: string | number) => void} [onSetActiveId] - Optional callback when a button is clicked, providing the new active ID.
- * @property {string} [activeColor='#1F3460'] - The background color for the active button.
- */
-
-/**
- * A dynamic button group component that manages the active state internally.
- * @param {ButtonGroupProps} props
- */
 
 const ButtonGroup = ({
   buttonListGroup,
   initialActiveId,
   onSetActiveId,
-  activeColor = '#2CA4DD3f', // Blue from your example
+  activeColor = '#4268BD',
 }) => {
-  const defaultInitialId = buttonListGroup.length > 0 ? buttonListGroup[0].id : null;
-  const [activeId, setActiveId] = useState(initialActiveId ?? defaultInitialId);
-
-  // Ref for the entire button group container
+  // Use a ref to track if it's the first render
+  const isFirstRender = useRef(true);
+  const [activeId, setActiveId] = useState(initialActiveId || buttonListGroup[0]?.id);
   const containerRef = useRef(null);
-  // Ref to store the mapping of button IDs to their respective element refs
   const buttonRefs = useRef({});
 
-  // State to track the position and size of the sliding indicator
   const [indicatorStyle, setIndicatorStyle] = useState({
     left: 0,
     width: 0,
     opacity: 0
   });
 
-  // Effect to calculate and update the indicator position when activeId changes
+  // Sync internal state with external prop
   useEffect(() => {
-    // 1. Get the container element for relative positioning calculations
-    const containerEl = containerRef.current;
-    if (!containerEl) return;
+    if (initialActiveId !== undefined) {
+      setActiveId(initialActiveId);
+    }
+  }, [initialActiveId]);
 
-    // 2. Get the currently active button element. 
-    const activeButtonRefObject = buttonRefs.current[activeId];
-    // Check if the ref object exists and has the DOM element attached to its .current property
-    const activeButtonEl = activeButtonRefObject?.current;
+  // Measurement Logic
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeButtonEl = buttonRefs.current[activeId];
+      if (activeButtonEl) {
+        setIndicatorStyle({
+          left: activeButtonEl.offsetLeft,
+          width: activeButtonEl.offsetWidth,
+          opacity: 1,
+        });
+      }
+    };
 
-    if (!activeButtonEl) return;
-
-    // 3. Get the bounding rectangles
-    const containerRect = containerEl.getBoundingClientRect();
-    const activeRect = activeButtonEl.getBoundingClientRect();
-
-    // 4. Calculate the relative position (offset from container's left edge)
-    const newLeft = activeRect.left - containerRect.left;
-    const newWidth = activeRect.width;
-
-    // 5. Update the indicator style
-    setIndicatorStyle({
-      left: newLeft,
-      width: newWidth,
-      opacity: 1, // Make it visible once calculated
-    });
-
-  }, [activeId, buttonListGroup.length]); // Recalculate on ID change or button list change
-
+    // Use a tiny timeout to ensure the browser has calculated widths
+    const timer = setTimeout(updateIndicator, 0);
+    return () => clearTimeout(timer);
+  }, [activeId, buttonListGroup]);
 
   const handleButtonClick = (id) => {
     setActiveId(id);
+    // Logic Fix: Always notify parent, even if it's already active
     if (onSetActiveId) {
       onSetActiveId(id);
     }
   };
 
-  if (!buttonListGroup || buttonListGroup.length === 0) {
-    return null;
-  }
-
-  // The main container style, converted to inline style
   const containerStyle = {
-    display: 'flex', // flex
-    backgroundColor: '#f3f4f6', // bg-gray-100
-    borderRadius: '0.5rem', // rounded-lg
-    padding: '0.25rem', // p-1
-    gap: '0.25rem', // replacing space-x-1
-    position: 'relative', // **Crucial for absolute positioning of the indicator**
+    display: 'flex',
+    backgroundColor: '#f3f4f6',
+    borderRadius: '0.5rem',
+    padding: '0.25rem',
+    gap: '0.25rem',
+    position: 'relative',
+    width: 'fit-content',
   };
 
-  // Style for the sliding indicator element
   const indicatorBaseStyle = {
     position: 'absolute',
-    top: '0.25rem', // Matches the container's p-1 (0.25rem)
-    height: 'calc(100% - 0.5rem)', // 100% minus top and bottom padding (2 * 0.25rem = 0.5rem)
+    top: '0.25rem',
+    height: 'calc(100% - 0.5rem)',
     backgroundColor: activeColor,
-    borderRadius: '0.375rem', // rounded-md, matches button
-    zIndex: 1, // Positioned below the buttons (zIndex 2)
-    transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)', // Smooth slide animation (ease-in-out)
-    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', // shadow-sm, matches original active button style
-    // Apply dynamic position/size via transform for better performance
+    borderRadius: '0.375rem',
+    zIndex: 1,
+    transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
     transform: `translateX(${indicatorStyle.left}px)`,
     width: `${indicatorStyle.width}px`,
     opacity: indicatorStyle.opacity,
-    left: 0
+    left: 0,
   };
-
 
   return (
     <div ref={containerRef} style={containerStyle}>
-      {/* 1. The Sliding Indicator (Renders first so it sits under the buttons) */}
       <div style={indicatorBaseStyle} />
-
-      {/* 2. The Buttons (Renders next so they sit on top of the indicator) */}
-      {buttonListGroup.map((button) => {
-        // Create a ref for each button and store it in the buttonRefs map
-        if (!buttonRefs.current[button.id]) {
-          buttonRefs.current[button.id] = React.createRef();
-        }
-
-        return (
-          <ButtonGroupItem
-            key={button.id}
-            buttonRef={buttonRefs.current[button.id]} // Pass the ref object to the item
-            buttonData={button}
-            activeId={activeId}
-            onClick={handleButtonClick}
-            activeTextColor="#EEEEEE" // Explicitly set the active text color
-          />
-        );
-      })}
+      {buttonListGroup.map((button) => (
+        <ButtonGroupItem
+          key={button.id}
+          buttonRef={(el) => (buttonRefs.current[button.id] = el)}
+          buttonData={button}
+          activeId={activeId}
+          onClick={handleButtonClick}
+          activeTextColor="#EEEEEE"
+        />
+      ))}
     </div>
   );
 };
