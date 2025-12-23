@@ -92,7 +92,14 @@ const GenericTable = ({
         <div className="w-full h-[calc(100vh-90px)] flex flex-col p-6 font-['Geist',sans-serif] text-gray-900 overflow-hidden">
 
             {/* Top Navigation using your ButtonGroup */}
-            <div className="flex flex-wrap gap-2 mb-6 shrink-0" style={{ marginTop: 15, marginBottom: 15, marginLeft: 10 }}>
+            <div
+                className="w-full flex justify-between items-center px-4 py-2 mb-4 bg-white rounded-md shadow-md border border-gray-200"
+                style={{
+                    padding: 5,
+                    marginTop: 15,
+                    marginBottom: 15,
+                }}
+            >
                 <ButtonGroup
                     buttonListGroup={tabs}
                     activeId={activeTab}

@@ -1,10 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { AddEventForm } from './AddEventForm';
-import { UpcomingEvents, RecentEvents } from './EventCards'; // Assuming you keep these components in EventCards.jsx or similar
 import { ViewUpcomingEvent } from './ViewUpcomingEvent';
 import { ViewRecentEvent } from './ViewRecentEvent';
+import { ButtonGroup } from '../../../../components/global/ButtonGroup';
 
-// --- MAIN LAYOUT ---
+// IMPORT THE NEW DISPLAYER
+import { EventDisplayer } from './EventDisplayer';
+
+// --- MOCK DATA (Replace with your actual API/Data source) ---
+const MOCK_ALL_EVENTS = [
+    // 1. UPCOMING EVENT (Future Date)
+    {
+        id: 1,
+        eventName: "Christmas Party 2025",
+        eventDate: "2025-12-25",
+        selectedColor: "#dbeafe", // Blue
+        selectedDepartments: ["Preschool", "Primary Education"],
+        selectedPrograms: ["Kindergarten", "Grade 1", "Grade 2"]
+    },
+
+    // 2. RECENT EVENT (Past Date)
+    {
+        id: 2,
+        eventName: "Annual Intramurals",
+        eventDate: "2023-10-01",
+        selectedColor: "#fee2e2", // Red
+        selectedDepartments: ["Junior High School", "Senior High School"],
+        selectedPrograms: ["Grade 7", "Grade 11", "Grade 12"]
+    },
+
+    // 3. ONGOING EVENT
+    {
+        id: 3,
+        eventName: "Foundation Day Celebration",
+        // This gives you YYYY-MM-DD in your Local Timezone, guaranteed
+        eventDate: new Date().toLocaleDateString('en-CA'),
+        selectedColor: "#dcfce7",
+        selectedDepartments: ["Higher Education", "Senior High School"],
+        selectedPrograms: ["BSIT", "BSBA", "AB Psychology"]
+    },
+
+    // 4. ANOTHER UPCOMING (To help you test the Grid layout)
+    {
+        id: 4,
+        eventName: "Parents Orientation",
+        eventDate: "2025-08-15",
+        selectedColor: "#fef9c3", // Yellow
+        selectedDepartments: ["All"],
+        selectedPrograms: ["All Levels"]
+    }
+];
 
 const VIEWS = {
     DASHBOARD: 'DASHBOARD',
@@ -12,20 +57,59 @@ const VIEWS = {
     VIEW_RECENT_EVENT: 'VIEW_RECENT_EVENT',
 };
 
-export function EventDashboard() {
-    // State to manage the currently displayed view and the selected event's ID
-    const [currentView, setCurrentView] = useState(VIEWS.DASHBOARD);
-    const [selectedEventId, setSelectedEventId] = useState(null); // To pass data to the detail screen
+const buttonListGroup = [
+    { id: "ongoing", label: "Ongoing Events" },
+    { id: "upcoming", label: "Upcoming Events" },
+    { id: "recent", label: "Recent Events" },
+];
 
-    // Function passed down to UpcomingEvents to trigger the view change
-    const handleViewDetails = (eventId, eventType) => {
+export function EventDashboard() {
+    // State
+    const [currentView, setCurrentView] = useState(VIEWS.DASHBOARD);
+    const [selectedEventId, setSelectedEventId] = useState(null);
+    const [activeTab, setActiveTab] = useState("ongoing");
+
+    // --- 1. FILTERING LOGIC (The "Brain") ---
+    const filteredEvents = useMemo(() => {
+        // 1. Get "Today" at midnight in LOCAL time
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        return MOCK_ALL_EVENTS.filter(event => {
+            // 2. PARSING FIX: 
+            // Instead of new Date(string), which defaults to UTC, 
+            // we split the string to manually construct a LOCAL date.
+            const [year, month, day] = event.eventDate.split('-').map(Number);
+
+            // Note: Month is 0-indexed in JS (0 = Jan, 11 = Dec)
+            const eventDate = new Date(year, month - 1, day);
+            eventDate.setHours(0, 0, 0, 0);
+
+            switch (activeTab) {
+                case 'ongoing':
+                    return eventDate.getTime() === today.getTime();
+                case 'upcoming':
+                    return eventDate.getTime() > today.getTime();
+                case 'recent':
+                    return eventDate.getTime() < today.getTime();
+                default:
+                    return true;
+            }
+        });
+    }, [activeTab]);
+
+    // --- HANDLERS ---
+    const handleViewDetails = (eventId) => {
         setSelectedEventId(eventId);
-        if (eventType === "upcoming") {setCurrentView(VIEWS.VIEW_UPCOMING_EVENT);}
-        if (eventType === "recent") {setCurrentView(VIEWS.VIEW_RECENT_EVENT);}
-        
+        // Determine view based on active tab
+        if (activeTab === "upcoming") { setCurrentView(VIEWS.VIEW_UPCOMING_EVENT); }
+        else if (activeTab === "recent") { setCurrentView(VIEWS.VIEW_RECENT_EVENT); }
+        else {
+            // Handle ongoing view details if needed, or default to upcoming view
+            setCurrentView(VIEWS.VIEW_UPCOMING_EVENT);
+        }
     };
 
-    // Function to go back to the dashboard view (can be passed to ViewUpcomingEvent)
     const handleBackToDashboard = () => {
         setCurrentView(VIEWS.DASHBOARD);
         setSelectedEventId(null);
@@ -34,69 +118,53 @@ export function EventDashboard() {
     // --- STYLES ---
     const dashboardStyle = {
         backgroundColor: '#F7F9F9',
-        padding: 10,
+        padding: 15,
         boxSizing: 'border-box',
         fontFamily: 'sans-serif',
         display: 'flex',
-        gap: '2rem',
+        flexDirection: 'column', // Changed to column to stack header and grid
+        gap: '1rem',
+        height: '100%',
         overflow: 'hidden',
     };
 
-    const columnStyle = {
-        flex: '1 1 500px',
-        minWidth: '500px',
-        height: '100%',
-    };
-
-    const rightColumnStyle = {
-        ...columnStyle,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2rem',
-        overflowY: 'auto',
-    };
-
-
-    // Default RENDER: Dashboard View
-    let content = (
-        <>
-            {/* View Event */}
-            {currentView === VIEWS.VIEW_UPCOMING_EVENT ? (
-                <div className="h-full w-full">
-                    <ViewUpcomingEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
-                </div>
-            ) 
-            : currentView === VIEWS.VIEW_RECENT_EVENT ? (
-                <div className="h-full w-full">
-                    <ViewRecentEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
-                </div>
-            ) : (
-                <>
-                    <div className="h-full w-full grid grid-cols-2 gap-4">
-
-                        {/* Right Column (Cards) */}
-                        <div className="h-[90%] flex flex-col gap-2">
-                            <div className="h-auto">
-                                <UpcomingEvents onViewDetails={handleViewDetails} />
-                            </div>
-                            <div className="h-auto">
-                                <RecentEvents onViewDetails={handleViewDetails}/>
-                            </div>
-                        </div>
-
-                        <div className="h-[98%]">
-                            <AddEventForm />
-                        </div>
-                    </div>
-                </>
-            )}
-
-        </>
-    );
-
+    // --- RENDER ---
     return (
-        <div style={dashboardStyle}>
-            {content}
+        <div className="w-full h-full">
+
+            {/* 1. TOP BAR (Navigation & Add Button) */}
+            <div style={dashboardStyle}>
+                <div
+                    className="w-full flex justify-between items-center px-4 py-2 bg-white rounded-md shadow-md"
+                    style={{ padding: 5 }}
+                >
+                    <ButtonGroup
+                        buttonListGroup={buttonListGroup}
+                        activeId={activeTab}
+                        onSetActiveId={setActiveTab} // Simple state setter
+                        activeColor="#4268BD"
+                    />
+                    <AddEventForm />
+                </div>
+
+                {/* 2. MAIN CONTENT AREA */}
+                <div className="flex-1 overflow-y-auto">
+                    {currentView === VIEWS.VIEW_UPCOMING_EVENT ? (
+                        <ViewUpcomingEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
+                    ) : currentView === VIEWS.VIEW_RECENT_EVENT ? (
+                        <ViewRecentEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
+                    ) : (
+                        /* DASHBOARD VIEW
+                           Here is the clean implementation. No more if/else blocks for content.
+                           We just pass the filtered list to the displayer.
+                        */
+                        <EventDisplayer
+                            events={filteredEvents}
+                            onEventClick={handleViewDetails}
+                        />
+                    )}
+                </div>
+            </div>
         </div>
     );
 }
