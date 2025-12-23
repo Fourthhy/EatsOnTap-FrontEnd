@@ -37,7 +37,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
         // Adding a tiny delay (150ms) makes the UI feel much smoother
         collapseTimeout.current = setTimeout(() => {
             setIsExpanded(false);
-        }, 150);
+        }, 100);
     };  
 
     // Sync activeIndex with the URL
@@ -86,15 +86,13 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
     const { breakpoint } = useBreakpoint(BREAKPOINTS, 'mobile-md');
 
     const sidebarWidth = isExpanded ? "280px" : "72px";
-    const transitionDuration = "500ms";
+    const transitionDuration = "300ms";
     const indicatorMargin = isExpanded ? '0.75rem' : '0.25rem';
 
     return (
         <div style={{ width: "100%", minHeight: "100vh", backgroundColor: "#F4FDFF" }}>
             {/* 1. Sidebar */}
             <div
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
                 style={{
                     width: sidebarWidth,
                     height: "100vh",
@@ -103,7 +101,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
-                    transition: `width ${transitionDuration} ease`,
+                    transition: `width ${transitionDuration} cubic-bezier(0.4, 0, 0.2, 1)`, // Smoother curve
                     position: "fixed",
                     top: 0,
                     left: 0,
