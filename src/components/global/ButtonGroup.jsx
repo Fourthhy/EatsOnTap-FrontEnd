@@ -183,7 +183,7 @@ const ButtonGroup = ({
     transform: `translateX(${indicatorStyle.left}px)`,
     width: `${indicatorStyle.width}px`,
     opacity: indicatorStyle.opacity,
-    left: 1
+    left: 0
   };
 
 
@@ -206,7 +206,7 @@ const ButtonGroup = ({
             buttonData={button}
             activeId={activeId}
             onClick={handleButtonClick}
-            activeTextColor="#231F20" // Explicitly set the active text color
+            activeTextColor="#EEEEEE" // Explicitly set the active text color
           />
         );
       })}

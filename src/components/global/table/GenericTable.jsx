@@ -83,12 +83,12 @@ const GenericTable = ({
                     buttonListGroup={tabs}
                     initialActiveId={activeTab}
                     onSetActiveId={(id) => { onTabChange(id); setCurrentPage(1); }}
-                    activeColor="#2CA4DD3f"
+                    activeColor="#4268BD"
                 />
                 {primaryActionLabel && primaryActionIcon ? (
                     <button
                         onClick={onPrimaryAction}
-                        className="ml-auto bg-[#2CA4DD3f] hover:bg-[#2CA4DD5f] color-[#231F20] cursor-pointer text-sm font-medium flex items-center shadow-sm transition-colors duration-200"
+                        className="ml-auto bg-[#4268BD] hover:bg-[#33549F] text-[#EEEEEE] cursor-pointer text-sm font-medium flex items-center shadow-sm transition-colors duration-200"
                         style={{
                             marginLeft: 'auto', marginRight: 10,
                             padding: '10px 20px', borderRadius: 6, fontSize: 12, fontFamily: 'geist',
@@ -181,7 +181,7 @@ const GenericTable = ({
                         <button
                             key={page}
                             onClick={() => handlePageChange(page)}
-                            className={`w-8 h-8 rounded-md text-sm font-medium flex items-center justify-center ${currentPage === page ? 'bg-[#2CA4DD3f] color-[#231F20]' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors duration-200 cursor-pointer'}`}
+                            className={`w-8 h-8 rounded-md text-sm font-medium flex items-center justify-center ${currentPage === page ? 'bg-[#4268BD] text-[#EEEEEE]' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors duration-200 cursor-pointer'}`}
                             style={{ width: '32px', height: '32px', borderRadius: '6px', boxShadow: "0 2px 6px #e5eaf0ac", border: "1px solid #ddddddaf", }}
                         >
                             {page}

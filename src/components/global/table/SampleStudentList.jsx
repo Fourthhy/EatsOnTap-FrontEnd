@@ -17,7 +17,7 @@ const StudentList = () => {
 
     // Configuration for interchanging headers
     const getProgramHeaderLabel = () => {
-        if (activeTab === 'All') return 'Program / Section';
+        if (activeTab === 'all') return 'Program / Section';
         if (activeTab === 'Higher Education') return 'Programs';
         return 'Section';
     };
