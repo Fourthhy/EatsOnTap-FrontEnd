@@ -197,8 +197,8 @@ const AddStudentModal = ({ isOpen, onClose, programSections }) => {
 
     return (
         <div
-            className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity ${isClosing ? 'opacity-0' : 'opacity-100'} backdrop-blur-sm bg-black/50`}
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+            className={`fixed inset-0 flex items-center justify-center transition-opacity ${isClosing ? 'opacity-0' : 'opacity-100'} backdrop-blur-sm bg-black/50`}
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', zIndex: 2000 }}
             onClick={handleClose}
         >
             {/* Modal Container */}
@@ -317,7 +317,7 @@ const LinkIDModal = ({ isOpen, onClose, student }) => {
 
     return (
         <div
-            className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity ${isClosing ? 'opacity-0' : 'opacity-100'} backdrop-blur-sm bg-black/50`}
+            className={`fixed inset-0 flex items-center justify-center transition-opacity ${isClosing ? 'opacity-0' : 'opacity-100'} backdrop-blur-sm bg-black/50`}
             style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.3)',
                 position: 'fixed',
@@ -325,7 +325,7 @@ const LinkIDModal = ({ isOpen, onClose, student }) => {
                 left: 0,
                 right: 0,
                 bottom: 0,
-                zIndex: 50,
+                zIndex: 2000,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

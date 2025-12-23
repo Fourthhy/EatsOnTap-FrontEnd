@@ -27,7 +27,7 @@ const ButtonGroupItem = ({
     cursor: 'pointer',
     outline: 'none',
     border: '2px solid red',
-    zIndex: 49, // Layered above the indicator
+    zIndex: 1000, // Layered above the indicator
   };
 
   const dynamicStyle = {

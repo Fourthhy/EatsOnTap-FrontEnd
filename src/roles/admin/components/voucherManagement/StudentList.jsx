@@ -5,7 +5,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 
 import { Search, Calendar, Filter, ChevronLeft, ChevronRight, Plus, User } from 'lucide-react';
 import { generateData } from './mockData';
-import { AddStudentModal, LinkIDModal } from './AddStudentModal';
+import { AddStudentModal } from './AddStudentModal';
 import { LinkStatusBadge } from './LinkStatusBadge';
 import { GenericTable } from '../../../../components/global/table/GenericTable';
 
