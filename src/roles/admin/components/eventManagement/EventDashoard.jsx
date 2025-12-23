@@ -1,13 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { AddEventForm } from './AddEventForm';
-import { ViewUpcomingEvent } from './ViewUpcomingEvent';
-import { ViewRecentEvent } from './ViewRecentEvent';
 import { ButtonGroup } from '../../../../components/global/ButtonGroup';
-
-// IMPORT THE NEW DISPLAYER
 import { EventDisplayer } from './EventDisplayer';
+import { EventDetailModal } from './EventDetailModal'; // IMPORT THE NEW MODAL
 
-// --- MOCK DATA (Replace with your actual API/Data source) ---
+// --- MOCK DATA (Ensure this is defined or imported) ---
 const MOCK_ALL_EVENTS = [
     // 1. UPCOMING EVENT (Future Date)
     {
@@ -51,12 +48,6 @@ const MOCK_ALL_EVENTS = [
     }
 ];
 
-const VIEWS = {
-    DASHBOARD: 'DASHBOARD',
-    VIEW_UPCOMING_EVENT: 'VIEW_UPCOMING_EVENT',
-    VIEW_RECENT_EVENT: 'VIEW_RECENT_EVENT',
-};
-
 const buttonListGroup = [
     { id: "ongoing", label: "Ongoing Events" },
     { id: "upcoming", label: "Upcoming Events" },
@@ -64,101 +55,83 @@ const buttonListGroup = [
 ];
 
 export function EventDashboard() {
-    // State
-    const [currentView, setCurrentView] = useState(VIEWS.DASHBOARD);
-    const [selectedEventId, setSelectedEventId] = useState(null);
     const [activeTab, setActiveTab] = useState("ongoing");
 
-    // --- 1. FILTERING LOGIC (The "Brain") ---
+    // --- MODAL STATE ---
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedEventId, setSelectedEventId] = useState(null);
+
+    // --- FILTERING LOGIC ---
     const filteredEvents = useMemo(() => {
-        // 1. Get "Today" at midnight in LOCAL time
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
         return MOCK_ALL_EVENTS.filter(event => {
-            // 2. PARSING FIX: 
-            // Instead of new Date(string), which defaults to UTC, 
-            // we split the string to manually construct a LOCAL date.
-            const [year, month, day] = event.eventDate.split('-').map(Number);
-
-            // Note: Month is 0-indexed in JS (0 = Jan, 11 = Dec)
-            const eventDate = new Date(year, month - 1, day);
+            // FIX: Parse manual YYYY-MM-DD string to Local Date
+            const [y, m, d] = event.eventDate.split('-').map(Number);
+            const eventDate = new Date(y, m - 1, d);
             eventDate.setHours(0, 0, 0, 0);
 
             switch (activeTab) {
-                case 'ongoing':
-                    return eventDate.getTime() === today.getTime();
-                case 'upcoming':
-                    return eventDate.getTime() > today.getTime();
-                case 'recent':
-                    return eventDate.getTime() < today.getTime();
-                default:
-                    return true;
+                case 'ongoing': return eventDate.getTime() === today.getTime();
+                case 'upcoming': return eventDate.getTime() > today.getTime();
+                case 'recent': return eventDate.getTime() < today.getTime();
+                default: return true;
             }
         });
     }, [activeTab]);
 
     // --- HANDLERS ---
-    const handleViewDetails = (eventId) => {
+    const handleCardClick = (eventId) => {
         setSelectedEventId(eventId);
-        // Determine view based on active tab
-        if (activeTab === "upcoming") { setCurrentView(VIEWS.VIEW_UPCOMING_EVENT); }
-        else if (activeTab === "recent") { setCurrentView(VIEWS.VIEW_RECENT_EVENT); }
-        else {
-            // Handle ongoing view details if needed, or default to upcoming view
-            setCurrentView(VIEWS.VIEW_UPCOMING_EVENT);
-        }
+        setIsModalOpen(true); // Just open the modal
     };
 
-    const handleBackToDashboard = () => {
-        setCurrentView(VIEWS.DASHBOARD);
-        setSelectedEventId(null);
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setTimeout(() => setSelectedEventId(null), 300); // clear after animation
     };
 
     // --- STYLES ---
     const dashboardStyle = {
         backgroundColor: '#F7F9F9',
         padding: 15,
-        boxSizing: 'border-box',
         fontFamily: 'sans-serif',
         display: 'flex',
-        flexDirection: 'column', // Changed to column to stack header and grid
+        flexDirection: 'column',
         gap: '1rem',
         height: '100%',
         overflow: 'hidden',
     };
 
-    // --- RENDER ---
     return (
-        <div className="w-full h-full">
+        <div className="w-full h-full relative">
 
-            {/* 1. TOP BAR (Navigation & Add Button) */}
+            {/* THE MODAL */}
+            <EventDetailModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                events={filteredEvents} // Pass the FULL LIST for Next/Prev logic
+                initialEventId={selectedEventId}
+            />
+
+            {/* DASHBOARD CONTENT */}
             <div style={dashboardStyle}>
-                <div
-                    className="w-full flex justify-between items-center px-4 py-2 bg-white rounded-md shadow-md"
-                    style={{ padding: 5 }}
-                >
+                <div className="w-full flex justify-between items-center px-4 py-2 bg-white rounded-md shadow-md">
                     <ButtonGroup
                         buttonListGroup={buttonListGroup}
                         activeId={activeTab}
-                        onSetActiveId={setActiveTab} // Simple state setter
+                        onSetActiveId={setActiveTab}
                         activeColor="#4268BD"
                     />
                     <AddEventForm />
                 </div>
 
-                {/* 2. MAIN CONTENT AREA */}
                 <div className="flex-1 overflow-y-auto">
-                    {currentView === VIEWS.VIEW_UPCOMING_EVENT ? (
-                        <ViewUpcomingEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
-                    ) : currentView === VIEWS.VIEW_RECENT_EVENT ? (
-                        <ViewRecentEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
-                    ) : (
-                        <EventDisplayer
-                            events={filteredEvents}
-                            onEventClick={handleViewDetails}
-                        />
-                    )}
+                    <EventDisplayer
+                        events={filteredEvents}
+                        onEventClick={handleCardClick} // Triggers the modal
+                    />
                 </div>
             </div>
         </div>

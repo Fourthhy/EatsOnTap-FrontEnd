@@ -128,7 +128,7 @@ const GenericTable = ({
 
             </div>
 
-            <div className="bg-white rounded-md border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="bg-white rounded-md shadow-lg border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
                 {/* Header Section */}
                 <div className="p-6 border-b border-gray-100 shrink-0">
                     <div className="flex justify-between items-center" style={{ marginBottom: 12, marginTop: 12 }}>
