@@ -16,6 +16,7 @@ const GenericTable = ({
     searchTerm,
     onSearchChange,
     totalRecords,
+    metrics, //label, value, and color (black by default)
     columns = [], // Array of strings or { label, width }
     data = [],
     renderRow, // Function: (item, index, startIndex) => ReactNode
@@ -26,6 +27,19 @@ const GenericTable = ({
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(maxItems);
     const tableWrapperRef = useRef(null);
+
+    // --- GET DATE --- 
+    function getFormattedDate() {
+        const today = new Date();
+
+        const options = {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        };
+
+        return today.toLocaleDateString('en-US', options);
+    }
 
     // --- EXACT ORIGINAL HEIGHT CALCULATION LOGIC ---
     useEffect(() => {
@@ -81,10 +95,14 @@ const GenericTable = ({
             <div className="flex flex-wrap gap-2 mb-6 shrink-0" style={{ marginTop: 15, marginBottom: 15, marginLeft: 10 }}>
                 <ButtonGroup
                     buttonListGroup={tabs}
-                    initialActiveId={activeTab}
-                    onSetActiveId={(id) => { onTabChange(id); setCurrentPage(1); }}
+                    activeId={activeTab}
+                    onSetActiveId={(id) => {
+                        onTabChange(id);
+                        setCurrentPage(1);
+                    }}
                     activeColor="#4268BD"
                 />
+
                 {primaryActionLabel && primaryActionIcon ? (
                     <button
                         onClick={onPrimaryAction}
@@ -106,15 +124,20 @@ const GenericTable = ({
             <div className="bg-white rounded-md shadow-sm border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
                 {/* Header Section */}
                 <div className="p-6 border-b border-gray-100 shrink-0">
-                    <div className="flex justify-between items-start" style={{ marginBottom: 12, marginTop: 12 }}>
+                    <div className="flex justify-between items-center" style={{ marginBottom: 12, marginTop: 12 }}>
                         <div style={{ paddingLeft: 20 }}>
                             <h1 className="font-geist font-semibold text-gray-900" style={{ fontSize: 16 }}>{title}</h1>
                             <p className="font-geist text-gray-500" style={{ fontSize: 13 }}>{subtitle}</p>
                         </div>
-                        <div className="text-right" style={{ paddingRight: 20 }}>
-                            <span className="font-geist font-semibold" style={{ fontSize: 14 }}>Total: </span>
-                            <span className="font-geist font-bold text-gray-900" style={{ fontSize: 18 }}>{totalRecords}</span>
-                        </div>
+
+                        {metrics && metrics.map((metric, index) => (
+                            <div className="text-right" style={{ paddingRight: 20 }}>
+                                <span className="font-geist font-semibold" style={{ fontSize: 14 }}>{metric.label}: </span>
+                                <span className="font-geist font-bold" style={{ fontSize: 18, color: metric.color || '#000000' }}>{metric.value}</span>
+                            </div>
+                        ))}
+
+
                     </div>
                     <hr className="w-full" />
                     <div className="flex gap-4 items-center justify-between" style={{ marginTop: 4, marginBottom: 4 }}>
@@ -135,7 +158,7 @@ const GenericTable = ({
                         </div>
                         <div className="flex gap-2 ml-auto" style={{ marginRight: 10 }}>
                             <button className="text-sm font-medium text-gray-600 flex items-center hover:bg-gray-200" style={{ padding: '8px 12px', backgroundColor: '#f3f4f6', borderRadius: '8px', fontSize: 12, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                July 21, 2025 <Calendar size={12} />
+                                {getFormattedDate()} <Calendar size={12} />
                             </button>
                         </div>
                     </div>

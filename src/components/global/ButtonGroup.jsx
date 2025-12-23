@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+/**
+ * Standardized component for an individual button within the ButtonGroup.
+ */
 const ButtonGroupItem = ({
   buttonData,
   activeId,
@@ -19,33 +22,32 @@ const ButtonGroupItem = ({
     display: 'flex',
     alignItems: 'center',
     position: 'relative',
-    zIndex: 2, 
     backgroundColor: 'transparent',
     transition: 'all 200ms ease',
     cursor: 'pointer',
     outline: 'none',
-    border: 'none'
+    border: '2px solid red',
+    zIndex: 9999, // Layered above the indicator
   };
 
   const dynamicStyle = {
     color: isActive ? activeTextColor : '#727c89ff',
-    // We add a subtle border only to the active button to match your design
     boxShadow: isActive ? "0 2px 6px #e5eaf0ac" : "none",
-    border: isActive ? "1px solid #ddddddaf" : "1px solid transparent",
+    border: `1px solid ${isActive ? '#ddddddaf' : 'transparent'}`,
   };
 
-  const tailwindClasses = `transition-all duration-200 ${
-    isActive ? '' : 'hover:bg-gray-200 hover:text-[#231F20]'
-  }`;
+  const tailwindClasses = `transition-all duration-200 ${isActive ? '' : 'hover:bg-gray-200 hover:text-[#231F20]'
+    }`;
 
   return (
     <button
       ref={buttonRef}
-      // Logic Fix: Pass the ID directly
+      // Trigger click even if already active to ensure parent logic resets
       onClick={() => onClick(buttonData.id)}
       className={tailwindClasses}
       style={{ ...baseStyle, ...dynamicStyle }}
     >
+      {/* pointer-events-none ensures the button, not the text, captures the click */}
       <span style={{ pointerEvents: 'none' }}>
         {buttonData.label}
       </span>
@@ -53,15 +55,15 @@ const ButtonGroupItem = ({
   );
 };
 
+/**
+ * A dynamic button group component with a sliding indicator.
+ */
 const ButtonGroup = ({
   buttonListGroup,
-  initialActiveId,
+  activeId,
   onSetActiveId,
   activeColor = '#4268BD',
 }) => {
-  // Use a ref to track if it's the first render
-  const isFirstRender = useRef(true);
-  const [activeId, setActiveId] = useState(initialActiveId || buttonListGroup[0]?.id);
   const containerRef = useRef(null);
   const buttonRefs = useRef({});
 
@@ -71,18 +73,13 @@ const ButtonGroup = ({
     opacity: 0
   });
 
-  // Sync internal state with external prop
-  useEffect(() => {
-    if (initialActiveId !== undefined) {
-      setActiveId(initialActiveId);
-    }
-  }, [initialActiveId]);
-
-  // Measurement Logic
+  // Handle measurement of the active button
   useEffect(() => {
     const updateIndicator = () => {
+      const containerEl = containerRef.current;
       const activeButtonEl = buttonRefs.current[activeId];
-      if (activeButtonEl) {
+
+      if (containerEl && activeButtonEl) {
         setIndicatorStyle({
           left: activeButtonEl.offsetLeft,
           width: activeButtonEl.offsetWidth,
@@ -91,17 +88,13 @@ const ButtonGroup = ({
       }
     };
 
-    // Use a tiny timeout to ensure the browser has calculated widths
+    // Use a zero-delay timeout to ensure DOM layout is complete before measuring
     const timer = setTimeout(updateIndicator, 0);
     return () => clearTimeout(timer);
   }, [activeId, buttonListGroup]);
 
   const handleButtonClick = (id) => {
-    setActiveId(id);
-    // Logic Fix: Always notify parent, even if it's already active
-    if (onSetActiveId) {
-      onSetActiveId(id);
-    }
+    onSetActiveId?.(id);
   };
 
   const containerStyle = {
@@ -120,20 +113,26 @@ const ButtonGroup = ({
     height: 'calc(100% - 0.5rem)',
     backgroundColor: activeColor,
     borderRadius: '0.375rem',
-    zIndex: 1,
-    transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-    transform: `translateX(${indicatorStyle.left}px)`,
-    width: `${indicatorStyle.width}px`,
+    pointerEvents: 'none',
+    transition: 'left 300ms cubic-bezier(0.4, 0, 0.2, 1), width 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+    left: indicatorStyle.left,
+    width: indicatorStyle.width,
     opacity: indicatorStyle.opacity,
-    left: 0,
+    zIndex: 0,
   };
+
+
+
+  if (!buttonListGroup || buttonListGroup.length === 0) return null;
 
   return (
     <div ref={containerRef} style={containerStyle}>
       <div style={indicatorBaseStyle} />
+
       {buttonListGroup.map((button) => (
         <ButtonGroupItem
           key={button.id}
+          // Callback ref captures the DOM element for precise measurement
           buttonRef={(el) => (buttonRefs.current[button.id] = el)}
           buttonData={button}
           activeId={activeId}

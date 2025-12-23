@@ -30,8 +30,12 @@ const StudentList = () => {
         { label: 'Intermediate', id: 'intermediate' },
         { label: 'Junior High School', id: 'juniorHighSchool' },
         { label: 'Senior High School', id: 'seniorHighSchool' },
-        { label: 'Higher Education', id: 'higherEducation' }
+        { label: 'Higher Education', id: 'higherEducation' },
     ];
+
+    const metrics = [
+        {label: "Total", value: 50}
+    ]
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -117,7 +121,10 @@ const StudentList = () => {
                 onTabChange={handleTabChange}
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
+
                 totalRecords={filteredStudents.length}
+                metrics={metrics}
+
                 onPrimaryAction={() => setIsAddModalOpen(true)}
                 primaryActionLabel="Add Student"
                 primaryActionIcon={<Plus size={16} />}
