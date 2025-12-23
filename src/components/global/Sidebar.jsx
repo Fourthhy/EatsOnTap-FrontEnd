@@ -4,13 +4,15 @@ import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { useBreakpoint } from "use-breakpoint";
 import logo from "/lv-logo.svg";
-import { SidebarItem } from "../custom/SidebarItem";
+import { SidebarItem } from "./SidebarItem";
 import { Tooltip } from "flowbite-react";
 
-function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel }) {
-    const [isExpanded, setIsExpanded] = useState(true);
+function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, onClickAction }) {
+    const [isExpanded, setIsExpanded] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const [indicatorStyle, setIndicatorStyle] = useState({ top: '0px', height: '0px', opacity: 0 });
+
+    const collapseTimeout = useRef(null);
 
     const containerRef = useRef(null);
     const itemRefs = useRef([]); // To store references to each menu item
@@ -25,6 +27,18 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel }
     const handleToggleSidebar = () => {
         setIsExpanded(!isExpanded);
     };
+
+    const handleMouseEnter = () => {
+        if (collapseTimeout.current) clearTimeout(collapseTimeout.current);
+        setIsExpanded(true);
+    };
+
+    const handleMouseLeave = () => {
+        // Adding a tiny delay (150ms) makes the UI feel much smoother
+        collapseTimeout.current = setTimeout(() => {
+            setIsExpanded(false);
+        }, 150);
+    };  
 
     // Sync activeIndex with the URL
     useEffect(() => {
@@ -77,22 +91,24 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel }
 
     return (
         <div style={{ width: "100%", minHeight: "100vh", backgroundColor: "#F4FDFF" }}>
-
             {/* 1. Sidebar */}
-            <div style={{
-                width: sidebarWidth,
-                height: "100vh",
-                background: "linear-gradient(to bottom, #153FA3, #142345)",
-                color: "white",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                transition: `width ${transitionDuration} ease`,
-                position: "fixed",
-                top: 0,
-                left: 0,
-                zIndex: 1000,
-            }}>
+            <div
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                style={{
+                    width: sidebarWidth,
+                    height: "100vh",
+                    background: "linear-gradient(to bottom, #153FA3, #142345)",
+                    color: "white",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    transition: `width ${transitionDuration} ease`,
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    zIndex: 1000,
+                }}>
                 <div>
                     {/* Header/Logo Area */}
                     <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem", marginBottom: "1.5rem" }}>
@@ -114,8 +130,9 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel }
                         }}
                         ref={containerRef}
                     >
+
                         {/* Inline Indicator for smoother transitions */}
-                        <div style={{
+                        {/* <div style={{
                             position: "absolute",
                             left: indicatorMargin,
                             width: `calc(100% - (${indicatorMargin} * 2))`,
@@ -124,7 +141,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel }
                             zIndex: 0,
                             transition: "top 0.3s ease, height 0.3s ease, left 0.3s ease, width 0.3s ease",
                             ...indicatorStyle,
-                        }} />
+                        }} /> */}
 
                         {quickActionsLabel && isExpanded && (
                             <div style={{ margin: "10px 0", paddingLeft: "1rem" }}>
@@ -142,22 +159,23 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel }
                                 trigger={isExpanded ? "none" : "hover"}
                                 style="light"
                                 animation="duration-300"
+                                arrow={false}
                             >
                                 {/* Wrapper div with ref to capture exact position */}
                                 <div ref={el => itemRefs.current[i] = el}>
                                     <SidebarItem
-                                        index={i}
                                         icon={item.icon}
                                         text={item.text}
                                         expanded={isExpanded}
-                                        onClick={handleItemClick}
+                                        active={false}
+                                        onClick={item.onClickAction}
                                     />
                                 </div>
                             </Tooltip>
                         ))}
 
                         <div style={{ margin: "10px 0", width: "100%", display: "flex", justifyContent: "center" }}>
-                            <hr style={{ width: "90%" }}/>
+                            <hr style={{ width: "90%" }} />
                         </div>
 
                         {menutItemsLabel && isExpanded && (
@@ -183,12 +201,11 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel }
                                         text={item.text}
                                         expanded={isExpanded}
                                         active={activeIndex === i}
-                                        onClick={handleItemClick}
+                                        onClick={() => handleItemClick(i)}
                                     />
                                 </div>
                             </Tooltip>
                         ))}
-
                     </nav>
                 </div>
 

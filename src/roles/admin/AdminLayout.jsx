@@ -1,19 +1,37 @@
+import React, { useState } from "react";
+import { AddDishModal } from "./components/dashboard/AddDishModal";
 import { Sidebar } from "../../components/global/Sidebar";
-import {    
-    LayoutDashboard,
-    Ticket,
-    CalendarDays,
-    ShoppingBag,
-    BookOpen,
-    Utensils,
-    ClipboardMinus
-
-} from "lucide-react"
+import { LayoutDashboard, Ticket, CalendarDays, ShoppingBag, BookOpen, Utensils } from "lucide-react";
 import { DateProvider } from "./components/dashboard/DatePicker";
 
 export default function AdminLayout() {
+    // --- MODAL & MEAL STATE LOGIC ---
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [addedTodaysDish, setAddedTodaysDish] = useState(false);
+    const [meals, setMeals] = useState(["", ""]);
+    const [todaysMenu, setTodaysMenu] = useState([]);
+
+    // Change Detection Logic
+    const hasChanges = JSON.stringify(meals) !== JSON.stringify(todaysMenu);
+    const isSaveDisabled = addedTodaysDish && !hasChanges;
+
+    // Handlers passed to the Modal
+    const handleMealChange = (index, value) => {
+        const newMeals = [...meals];
+        newMeals[index] = value;
+        setMeals(newMeals);
+    };
+
+    const addMealField = () => setMeals([...meals, ""]);
+
+    const handleSubmitMeals = () => {
+        setTodaysMenu(meals);
+        setAddedTodaysDish(true);
+        setIsModalOpen(false);
+        console.log("Saved Menu:", meals);
+    };
+
     const menuItems = [
-        // Make sure these paths match the Route paths defined above
         { icon: <LayoutDashboard size={20} />, text: "Dashboard", path: "/admin/dashboard" },
         { icon: <Ticket size={20} />, text: "Students", path: "/admin/voucher" },
         { icon: <CalendarDays size={20} />, text: "Events", path: "/admin/schedule" },
@@ -22,13 +40,37 @@ export default function AdminLayout() {
     ];
 
     const quickActions = [
-        { icon: <Utensils size={20} />, text: "Add Dish", onClicAction: "add-dish"},
-        { icon: <ClipboardMinus size={20} />, text: "Export Report", onClicAction: "export-report" },
-    ]
+        { 
+            icon: <Utensils size={20} />, 
+            text: "Add Dish", 
+            // Logic: Ensure current saved menu is loaded when opening
+            onClickAction: () => {
+                if (todaysMenu.length > 0) setMeals([...todaysMenu]);
+                setIsModalOpen(true);
+            } 
+        },
+    ];
 
     return (
         <DateProvider>
-            <Sidebar menuItems={menuItems} menutItemsLabel={"Pages"} quickActions={quickActions} quickActionsLabel={"Quick Actions"}/>
+            <Sidebar
+                menuItems={menuItems}
+                menutItemsLabel={"Pages"}
+                quickActions={quickActions}
+                quickActionsLabel={"Quick Actions"}
+            />
+
+            {/* Render Modal with all required logic props */}
+            <AddDishModal 
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                meals={meals}
+                onMealChange={handleMealChange}
+                onAddMealField={addMealField}
+                onSubmit={handleSubmitMeals}
+                isSaveDisabled={isSaveDisabled}
+                addedTodaysDish={addedTodaysDish}
+            />
         </DateProvider>
-    )
+    );
 }

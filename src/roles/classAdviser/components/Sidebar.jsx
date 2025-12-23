@@ -6,7 +6,7 @@ import { StudentsIcon } from "hugeicons-react";
 import { useBreakpoint } from "use-breakpoint"
 import logo from "/lv-logo.svg";
 
-import { SidebarItem } from "../../../components/custom/SidebarItem";
+import { SidebarItem } from "../../../components/global/SidebarItem";
 
 function Sidebar() {
     const [isExpanded, setIsExpanded] = useState(false);

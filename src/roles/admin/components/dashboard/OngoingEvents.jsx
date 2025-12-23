@@ -1,4 +1,4 @@
-function EventsPanel({ events, isHyerlink = true, canViewAll = true }) {
+function OngoingEvents({ events, isHyerlink = true }) {
   return (
     <div
       style={{
@@ -13,23 +13,8 @@ function EventsPanel({ events, isHyerlink = true, canViewAll = true }) {
         className="flex justify-between items-center">
         <h2
           style={{ fontFamily: "geist", fontWeight: "500", fontSize: 12, color: "#000" }}>
-          Upcoming Events
+          {events.length > 1 ? "Ongoing Events" : "Ongoing Event"} 
         </h2>
-
-        {canViewAll &&
-          <a
-            href="#"
-            style={{
-              fontSize: 12,
-              color: "#254280",
-              fontFamily: "geist",
-              fontWeight: 500,
-              paddingRight: 5
-            }}
-            className="hover:underline">
-            View All
-          </a>
-        }
       </div>
       <div className="flex flex-col">
         {events.map((event, idx) => (
@@ -84,5 +69,5 @@ function EventsPanel({ events, isHyerlink = true, canViewAll = true }) {
 }
 
 export {
-  EventsPanel
+  OngoingEvents
 }

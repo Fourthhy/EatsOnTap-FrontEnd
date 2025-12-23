@@ -8,6 +8,7 @@ import { StatsCardGroup } from "../dashboard/StatsCardGroup"
 import { BarChartBox } from "../charts/BarChartBox";
 import { LineChartBox } from "../charts/LineChartBox";
 import { QuickActions } from "../dashboard/QuickActions";
+import { OngoingEvents } from "../dashboard/OngoingEvents"
 import { EventsPanel } from "../dashboard/EventsPanel";
 import { AnalyticTabs } from "../dashboard/AnalyticTabs";
 import { DatePicker } from "../dashboard/DatePicker"
@@ -231,6 +232,10 @@ export default function AdminDashboard() {
         { link: "#", title: "President' Day", date: "Nov 25, 2025" },
         { link: "#", title: "College Intramurals", date: "Dec 15, 2025" },
         { link: "#", title: "ICT Week", date: "Jan 19, 2026" }
+    ]
+
+    const ongoingEvents = [
+        { link: "#", title: "Vacation!!!", date: "December 23, 2025" },
     ]
 
 
@@ -475,7 +480,7 @@ export default function AdminDashboard() {
                             </AnalyticTabs>
                         </div>
 
-                        {/* RIGHT SIDE COMPONENTS */}   
+                        {/* RIGHT SIDE COMPONENTS */}
                         <div
                             style={{
                                 position: 'sticky',
@@ -487,6 +492,9 @@ export default function AdminDashboard() {
                                 alignSelf: 'start',
 
                             }}>
+                            <div>
+                                <OngoingEvents events={ongoingEvents} />
+                            </div>
                             <div>
                                 <EventsPanel events={upcomingEvents} />
                             </div>
