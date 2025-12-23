@@ -27,7 +27,7 @@ const ButtonGroupItem = ({
     cursor: 'pointer',
     outline: 'none',
     border: '2px solid red',
-    zIndex: 9999, // Layered above the indicator
+    zIndex: 49, // Layered above the indicator
   };
 
   const dynamicStyle = {
@@ -36,7 +36,7 @@ const ButtonGroupItem = ({
     border: `1px solid ${isActive ? '#ddddddaf' : 'transparent'}`,
   };
 
-  const tailwindClasses = `transition-all duration-200 ${isActive ? '' : 'hover:bg-gray-200 hover:text-[#231F20]'
+  const tailwindClasses = `transition-all duration-200 ${isActive ? '' : 'hover:bg-gray-200 hover:text-[#000000cc]'
     }`;
 
   return (
