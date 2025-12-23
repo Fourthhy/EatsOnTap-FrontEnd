@@ -154,10 +154,6 @@ export function EventDashboard() {
                     ) : currentView === VIEWS.VIEW_RECENT_EVENT ? (
                         <ViewRecentEvent eventId={selectedEventId} onBackToDashboard={handleBackToDashboard} />
                     ) : (
-                        /* DASHBOARD VIEW
-                           Here is the clean implementation. No more if/else blocks for content.
-                           We just pass the filtered list to the displayer.
-                        */
                         <EventDisplayer
                             events={filteredEvents}
                             onEventClick={handleViewDetails}
