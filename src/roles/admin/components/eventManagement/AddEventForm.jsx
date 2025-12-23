@@ -5,9 +5,9 @@ import { Calendar, Search, ChevronLeft, ChevronRight, Check, X, Tag } from 'luci
 
 // --- CONSTANTS ---
 const EVENT_COLORS = [
-    { name: 'Blue',   value: '#dbeafe', text: '#1e40af' }, 
-    { name: 'Red',    value: '#fee2e2', text: '#991b1b' },
-    { name: 'Green',  value: '#dcfce7', text: '#166534' },
+    { name: 'Blue', value: '#dbeafe', text: '#1e40af' },
+    { name: 'Red', value: '#fee2e2', text: '#991b1b' },
+    { name: 'Green', value: '#dcfce7', text: '#166534' },
     { name: 'Yellow', value: '#fef9c3', text: '#854d0e' },
     { name: 'Orange', value: '#ffedd5', text: '#9a3412' },
     { name: 'Violet', value: '#f3e8ff', text: '#6b21a8' },
@@ -33,7 +33,7 @@ export const AddEventForm = () => {
     // --- FORM STATE ---
     const [eventName, setEventName] = useState('');
     const [eventDate, setEventDate] = useState('');
-    const [selectedColor, setSelectedColor] = useState(EVENT_COLORS[0].value); 
+    const [selectedColor, setSelectedColor] = useState(EVENT_COLORS[0].value);
     const [selectedDepartments, setSelectedDepartments] = useState([]);
     const [selectedPrograms, setSelectedPrograms] = useState([]);
     const [validationError, setValidationError] = useState({});
@@ -44,7 +44,7 @@ export const AddEventForm = () => {
 
     // --- DYNAMIC DATA ---
     const allProgramsToDisplay = useMemo(() => {
-        if (!isOpen) return []; 
+        if (!isOpen) return [];
         setCurrentPage(1);
         return getProgramsForDepartments(selectedDepartments);
     }, [selectedDepartments, isOpen]);
@@ -74,7 +74,7 @@ export const AddEventForm = () => {
         setTimeout(() => {
             setIsOpen(false);
             setIsClosing(false);
-        }, 300); 
+        }, 300);
     };
 
     const handleEventNameChange = (e) => {
@@ -104,7 +104,7 @@ export const AddEventForm = () => {
             }
             const allNonAllSelected = departments.filter(d => d !== 'All').every(d => newDepts.includes(d));
             if (allNonAllSelected && newDepts.length > 0) newDepts = ['All', ...departments.filter(d => d !== 'All')];
-            
+
             if (validationError.departments && newDepts.length > 0) setValidationError(prev => ({ ...prev, departments: false }));
             if (validationError.programs) setValidationError(prev => ({ ...prev, programs: false }));
             if (newDepts.length === 0) return [];
@@ -140,8 +140,8 @@ export const AddEventForm = () => {
         if (Object.keys(errors).length === 0) {
             console.log('✅ Form Submitted Successfully!', { eventName, eventDate, selectedColor, selectedDepartments, selectedPrograms });
             alert(`Event Created Successfully!`);
-            handleCloseModal(); 
-            resetForm(); 
+            handleCloseModal();
+            resetForm();
         }
     };
 
@@ -171,7 +171,7 @@ export const AddEventForm = () => {
     const modalOverlayStyle = {
         position: 'fixed',
         top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -187,17 +187,17 @@ export const AddEventForm = () => {
         borderRadius: '0.75rem',
         boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
         width: '90%',
-        maxWidth: '900px', 
+        maxWidth: '900px',
         maxHeight: '90vh',
         display: 'flex',
-        flexDirection: 'row', 
+        flexDirection: 'row',
         position: 'relative', // Necessary for absolute positioning of close button
-        overflow: 'hidden' 
+        overflow: 'hidden'
     };
 
     // Style for the Left Side (Form)
     const leftPanelStyle = {
-        flex: 1.4, 
+        flex: 1.4,
         padding: '1.5rem',
         display: 'flex',
         flexDirection: 'column',
@@ -207,7 +207,7 @@ export const AddEventForm = () => {
 
     // Style for the Right Side (Preview)
     const rightPanelStyle = {
-        flex: 1, 
+        flex: 1,
         backgroundColor: '#f9fafb',
         borderLeft: '1px solid #e5e7eb',
         padding: '1.5rem',
@@ -257,7 +257,7 @@ export const AddEventForm = () => {
 
     // --- PREVIEW CARD LOGIC ---
     const currentColorObj = EVENT_COLORS.find(c => c.value === selectedColor) || EVENT_COLORS[0];
-    
+
     return (
         <>
             {/* TRIGGER */}
@@ -267,20 +267,20 @@ export const AddEventForm = () => {
                 onMouseEnter={() => setIsTriggerHovered(true)}
                 onMouseLeave={() => setIsTriggerHovered(false)}
             >
-                Open Modal
+                Add Event
             </button>
 
             {/* MODAL */}
             {isOpen && (
                 <div style={modalOverlayStyle} onClick={handleCloseModal}>
-                    <form 
-                        style={modalContentStyle} 
+                    <form
+                        style={modalContentStyle}
                         onSubmit={handleCreateEvent}
                         className={animationClass}
-                        onClick={(e) => e.stopPropagation()} 
+                        onClick={(e) => e.stopPropagation()}
                     >
                         {/* --- NEW GLOBAL CLOSE BUTTON --- */}
-                        <button 
+                        <button
                             type="button"
                             onClick={handleCloseModal}
                             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
@@ -304,7 +304,28 @@ export const AddEventForm = () => {
                                             {eventDate ? new Date(eventDate).toLocaleDateString('en-US') : 'Pick a date'}
                                         </span>
                                         <Calendar size={12} style={{ color: validationError.eventDate ? 'red' : '#4b5563' }} />
-                                        <input type="date" value={eventDate} onChange={handleEventDateChange} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} />
+                                        <input
+                                            type="date"
+                                            value={eventDate}
+                                            onChange={handleEventDateChange}
+                                            onClick={(e) => {
+                                                // Force the calendar to open immediately on click
+                                                try {
+                                                    if (e.target.showPicker) e.target.showPicker();
+                                                } catch (error) {
+                                                    // Fail silently if browser is outdated
+                                                }
+                                            }}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                opacity: 0,
+                                                cursor: 'pointer'
+                                            }}
+                                        />
                                     </label>
                                 </div>
                                 <button type="submit" disabled={isButtonDisabled} style={submitButtonStyle(isButtonDisabled)} className="transition-colors hover:bg-blue-700 shadow-md">
@@ -381,11 +402,11 @@ export const AddEventForm = () => {
                                             </div>
                                             {allProgramsToDisplay.length > ITEMS_PER_PAGE && (
                                                 <div style={{ paddingTop: '10px', borderTop: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} className="flex-shrink-0">
-                                                    <button type="button" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} style={{ cursor: currentPage === 1 ? 'not-allowed' : 'pointer', border:'none', background:'transparent' }} className="text-gray-500 hover:text-gray-700"><ChevronLeft size={16} /></button>
+                                                    <button type="button" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} style={{ cursor: currentPage === 1 ? 'not-allowed' : 'pointer', border: 'none', background: 'transparent' }} className="text-gray-500 hover:text-gray-700"><ChevronLeft size={16} /></button>
                                                     {[...Array(totalPages)].slice(0, 3).map((_, i) => (
                                                         <button key={i} type="button" onClick={() => handlePageChange(i + 1)} className={`${currentPage === i + 1 ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-200'}`} style={{ width: '24px', height: '24px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', fontFamily: "geist", fontSize: 11 }}>{i + 1}</button>
                                                     ))}
-                                                    <button type="button" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} style={{ cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', border:'none', background:'transparent' }} className="text-gray-500 hover:text-gray-700"><ChevronRight size={16} /></button>
+                                                    <button type="button" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} style={{ cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', border: 'none', background: 'transparent' }} className="text-gray-500 hover:text-gray-700"><ChevronRight size={16} /></button>
                                                 </div>
                                             )}
                                         </div>
@@ -397,7 +418,7 @@ export const AddEventForm = () => {
                         {/* --- RIGHT COLUMN: THE LIVE PREVIEW --- */}
                         <div style={rightPanelStyle}>
                             <h3 style={{ fontFamily: 'geist', fontSize: 12, color: '#6b7280', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Preview Card</h3>
-                            
+
                             {/* THE CARD ITSELF */}
                             <div style={{
                                 width: '280px', // Fixed width for preview
@@ -414,10 +435,10 @@ export const AddEventForm = () => {
                                 {/* NOTE: Internal X removed here */}
 
                                 {/* Date Badge Preview */}
-                                <div style={{ 
-                                    backgroundColor: 'rgba(255,255,255,0.6)', 
-                                    padding: '4px 10px', 
-                                    borderRadius: '8px', 
+                                <div style={{
+                                    backgroundColor: 'rgba(255,255,255,0.6)',
+                                    padding: '4px 10px',
+                                    borderRadius: '8px',
                                     alignSelf: 'flex-start',
                                     marginBottom: '20px',
                                     fontSize: 12,
@@ -434,20 +455,20 @@ export const AddEventForm = () => {
 
                                 {/* Event Title */}
                                 <div style={{ flex: 1 }}>
-                                    <h3 style={{ 
-                                        fontFamily: 'geist', 
-                                        fontSize: 24, 
-                                        fontWeight: 600, 
+                                    <h3 style={{
+                                        fontFamily: 'geist',
+                                        fontSize: 24,
+                                        fontWeight: 600,
                                         color: currentColorObj.text, // Darker version of bg color
                                         lineHeight: 1.2,
                                         wordBreak: 'break-word'
                                     }}>
                                         {eventName || "Event Title Goes Here"}
                                     </h3>
-                                    
+
                                     {/* Program Count Subtitle */}
                                     <div style={{ marginTop: 8, fontSize: 13, color: currentColorObj.text, opacity: 0.8, fontFamily: 'geist' }}>
-                                        {selectedPrograms.length > 0 
+                                        {selectedPrograms.length > 0
                                             ? `${selectedPrograms.length} section${selectedPrograms.length !== 1 ? 's' : ''} selected`
                                             : "No sections selected"}
                                     </div>
@@ -457,11 +478,11 @@ export const AddEventForm = () => {
                                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 'auto' }}>
                                     {selectedDepartments.length > 0 ? (
                                         selectedDepartments.slice(0, 3).map((dept, i) => (
-                                            <span key={i} style={{ 
-                                                fontSize: 10, 
-                                                backgroundColor: 'white', 
-                                                padding: '4px 8px', 
-                                                borderRadius: 20, 
+                                            <span key={i} style={{
+                                                fontSize: 10,
+                                                backgroundColor: 'white',
+                                                padding: '4px 8px',
+                                                borderRadius: 20,
                                                 fontFamily: 'geist',
                                                 color: currentColorObj.text,
                                                 fontWeight: 500
@@ -482,7 +503,7 @@ export const AddEventForm = () => {
 
                             </div>
                             {/* End Card */}
-                            
+
                             {/* NOTE: Bottom "Close Modal" link removed here */}
                         </div>
                     </form>
