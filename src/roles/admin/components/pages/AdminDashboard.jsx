@@ -18,6 +18,9 @@ import { useOutletContext } from 'react-router-dom';
 import { Menu } from "lucide-react"
 import { RiNotification2Fill } from "react-icons/ri";
 
+// 1. IMPORT FRAMER MOTION
+import { motion } from "framer-motion";
+
 
 // Example logo API usage
 const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
@@ -297,11 +300,18 @@ export default function AdminDashboard() {
                         {/* LEFT SIDE COMPONENTS */}
                         <div className="w-full h-full flex flex-col gap-4">
                             <div className="grid grid-cols-6 gap-4">
-                                <div className="h-full col-span-2">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ type: "spring", delay: 0 }}
+                                    className="h-full col-span-2">
                                     <CustomStatsCard title={"Daily Virtual Credit Used"} value={"P60,000"} subtitle={"vs P65,000 allotted"} />
-                                </div>
+                                </motion.div>
 
-                                <div className="col-span-4">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ type: "spring", delay: 0.1 }} className="col-span-4">
                                     <StatsCardGroup
                                         cardGroupTitle={"Meal Eligibilty List Count"}
                                         urgentNotification={0}
@@ -312,172 +322,225 @@ export default function AdminDashboard() {
                                         primaryData={extractedMealRequestData.acceptedRequests}
                                         secondaryData={extractedMealRequestData.rejectedRequests}
                                     />
-                                </div>
+                                </motion.div>
                             </div>
 
-                            <AnalyticTabs selectedTab={selectedTab} onTabChange={setSelectedTab}>
-                                <div className="w-[100%] flex flex-col items-center h-[100%] bg-[#FFFFFF]">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ type: "spring", delay: 0.3 }}>
+                                <AnalyticTabs selectedTab={selectedTab} onTabChange={setSelectedTab}>
+                                    <div className="w-[100%] flex flex-col items-center h-[100%] bg-[#FFFFFF]">
 
-                                    {selectedTab === 4
-                                        ? <>
-                                            <div className="flex flex-col items-center gap-4 w-full" style={{ padding: 10 }}>
-                                                <div className="flex h-full w-[98%] border-gray-100 border-[1px] rounded-xl">
-                                                    <StatsCardGroup
-                                                        cardGroupTitle={"Dish Combination Claims Status"}
-                                                        isDualPager={true}
-                                                        dualPageTitles={["View Most Claims", "View Least Claims"]}
+                                        {selectedTab === 4
+                                            ? <>
+                                                <div className="flex flex-col items-center gap-4 w-full" style={{ padding: 10 }}>
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ type: "spring", delay: 0 }}
+                                                        className="flex h-full w-[98%] border-gray-100 border-[1px] rounded-xl">
+                                                        <StatsCardGroup
+                                                            cardGroupTitle={"Dish Combination Claims Status"}
+                                                            isDualPager={true}
+                                                            dualPageTitles={["View Most Claims", "View Least Claims"]}
 
-                                                        primaryData={extractedOverallData.mostMealClaims}
-                                                        secondaryData={extractedOverallData.leastMealClaims}
+                                                            primaryData={extractedOverallData.mostMealClaims}
+                                                            secondaryData={extractedOverallData.leastMealClaims}
 
-                                                        displayDate={false}
-                                                        urgentNotification={0}
-                                                    />
+                                                            displayDate={false}
+                                                            urgentNotification={0}
+                                                        />
+                                                    </motion.div>
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ type: "spring", delay: 0 }}
+                                                        className="flex h-full w-[98%] border-gray-100 border-[1px] rounded-xl">
+                                                        <StatsCardGroup
+                                                            cardGroupTitle={"Claims Count"}
+                                                            isDualPager={false}
+
+                                                            primaryData={extractedOverallData.claimsCount}
+
+                                                            displayDate={false}
+                                                            urgentNotification={0}
+                                                        />
+                                                    </motion.div>
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ type: "spring", delay: 0 }}
+                                                        className="flex h-full w-[98%] border-gray-100 border-[1px] rounded-xl">
+                                                        <StatsCardGroup
+                                                            cardGroupTitle={"KPI Metrics"}
+                                                            isDualPager={false}
+
+                                                            primaryData={extractedOverallData.KPIreports}
+
+                                                            displayDate={false}
+                                                            urgentNotification={0}
+                                                        />
+                                                    </motion.div>
+                                                    <motion.div
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ type: "spring", delay: 0 }}
+                                                        className="flex h-full w-[98%] border-gray-100 border-[1px] rounded-xl">
+                                                        <StatsCardGroup
+                                                            cardGroupTitle={"Consumed Credits"}
+                                                            isDualPager={false}
+
+                                                            primaryData={extractedOverallData.consumedCredits}
+
+                                                            displayDate={false}
+                                                            urgentNotification={0}
+                                                        />
+                                                    </motion.div>
                                                 </div>
-                                                <div className="flex h-full w-[98%] border-gray-100 border-[1px] rounded-xl">
-                                                    <StatsCardGroup
-                                                        cardGroupTitle={"Claims Count"}
-                                                        isDualPager={false}
+                                            </>
+                                            : ""}
+                                        {selectedTab === 5
+                                            ? <>
+                                                <div clasName="w-full">
+                                                    <DatePicker />
+                                                    {selectedDate
+                                                        ? <>
+                                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                                <StatsCardGroup
+                                                                    cardGroupTitle={"Dish Combination Claims Status"}
+                                                                    isDualPager={false}
 
-                                                        primaryData={extractedOverallData.claimsCount}
+                                                                    primaryData={extractedCustomDateData.dishForDay}
 
-                                                        displayDate={false}
-                                                        urgentNotification={0}
-                                                    />
+                                                                    displayDate={false}
+                                                                    urgentNotification={0}
+                                                                />
+                                                            </div>
+                                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                                <StatsCardGroup
+                                                                    cardGroupTitle={"Claims Count"}
+                                                                    isDualPager={false}
+
+                                                                    primaryData={extractedCustomDateData.claimsCount}
+
+                                                                    displayDate={false}
+                                                                    urgentNotification={0}
+                                                                />
+                                                            </div>
+                                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                                <StatsCardGroup
+                                                                    cardGroupTitle={"KPI Metrics"}
+                                                                    isDualPager={false}
+
+                                                                    primaryData={extractedCustomDateData.KPIreports}
+
+                                                                    displayDate={false}
+                                                                    urgentNotification={0}
+                                                                />
+                                                            </div>
+                                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                                                <StatsCardGroup
+                                                                    cardGroupTitle={"Consumed Credits"}
+                                                                    isDualPager={false}
+
+                                                                    primaryData={extractedCustomDateData.consumedCredits}
+
+                                                                    displayDate={false}
+                                                                    urgentNotification={0}
+                                                                />
+                                                            </div>
+                                                        </>
+                                                        : ""}
                                                 </div>
-                                                <div className="flex h-full w-[98%] border-gray-100 border-[1px] rounded-xl">
-                                                    <StatsCardGroup
-                                                        cardGroupTitle={"KPI Metrics"}
-                                                        isDualPager={false}
+                                            </> : ""
+                                        }
 
-                                                        primaryData={extractedOverallData.KPIreports}
+                                        {/* 2. APPLIED MOTION.DIV TO PARENTS HERE */}
+                                        {selectedTab !== 4 && selectedTab !== 5
+                                            ?
+                                            <>
+                                                {/* BAR CHART SECTION */}
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ type: "spring", delay: 0 }}
+                                                    className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}
+                                                >
+                                                    <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
+                                                        <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} hoverText="The count of how many claims are made for this day" />
+                                                    </div>
+                                                    <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                        <BarChartBox data={getChartData('barChartData')} />
+                                                    </div>
+                                                </motion.div>
 
-                                                        displayDate={false}
-                                                        urgentNotification={0}
-                                                    />
-                                                </div>
-                                                <div className="flex h-full w-[98%] border-gray-100 border-[1px] rounded-xl">
-                                                    <StatsCardGroup
-                                                        cardGroupTitle={"Consumed Credits"}
-                                                        isDualPager={false}
+                                                {/* TRENDS (LINE) CHART SECTION */}
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ type: "spring", delay: 0.1 }}
+                                                    className="flex h-[270px] w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}
+                                                >
+                                                    <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
+                                                        <CustomStatsCard title={"Unclaim Count"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} hoverText="The count of how many claims are not claimed for this day" />
+                                                    </div>
+                                                    <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                        <LineChartBox data={getChartData('trendsData')} />
+                                                    </div>
+                                                </motion.div>
 
-                                                        primaryData={extractedOverallData.consumedCredits}
+                                                {/* TADMC CHART SECTION */}
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ type: "spring", delay: 0.2 }}
+                                                    className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}
+                                                >
+                                                    <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
+                                                        <CustomStatsCard
+                                                            title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} hoverText="Measures how much money is actually spent on a meal when a student makes a claim." hoverValueText={"The ideal target range should be close to the currently assigned credit value (₱60)"} />
+                                                    </div>
+                                                    <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                        <BandedChartTADMC data={getChartData('TADMCdata')} />
+                                                    </div>
+                                                </motion.div>
 
-                                                        displayDate={false}
-                                                        urgentNotification={0}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </>
-                                        : ""}
-                                    {selectedTab === 5
-                                        ? <>
-                                            <div clasName="w-full">
-                                                <DatePicker />
-                                                {selectedDate
-                                                    ? <>
-                                                        <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                                            <StatsCardGroup
-                                                                cardGroupTitle={"Dish Combination Claims Status"}
-                                                                isDualPager={false}
+                                                {/* CUR CHART SECTION */}
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ type: "spring", delay: 0.3 }}
+                                                    className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}
+                                                >
+                                                    <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
+                                                        <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} hoverText={"The percentage of the total allocated credit budget that is actually consumed by the students before the unused amount is automatically removed."} hoverValueText={"A rate below 90% implies significant budget waste"} />
+                                                    </div>
+                                                    <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                        <BandedChartCUR data={getChartData('CURdata')} />
+                                                    </div>
+                                                </motion.div>
 
-                                                                primaryData={extractedCustomDateData.dishForDay}
-
-                                                                displayDate={false}
-                                                                urgentNotification={0}
-                                                            />
-                                                        </div>
-                                                        <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                                            <StatsCardGroup
-                                                                cardGroupTitle={"Claims Count"}
-                                                                isDualPager={false}
-
-                                                                primaryData={extractedCustomDateData.claimsCount}
-
-                                                                displayDate={false}
-                                                                urgentNotification={0}
-                                                            />
-                                                        </div>
-                                                        <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                                            <StatsCardGroup
-                                                                cardGroupTitle={"KPI Metrics"}
-                                                                isDualPager={false}
-
-                                                                primaryData={extractedCustomDateData.KPIreports}
-
-                                                                displayDate={false}
-                                                                urgentNotification={0}
-                                                            />
-                                                        </div>
-                                                        <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                                            <StatsCardGroup
-                                                                cardGroupTitle={"Consumed Credits"}
-                                                                isDualPager={false}
-
-                                                                primaryData={extractedCustomDateData.consumedCredits}
-
-                                                                displayDate={false}
-                                                                urgentNotification={0}
-                                                            />
-                                                        </div>
-                                                    </>
-                                                    : ""}
-                                            </div>
-                                        </> : ""
-                                    }
-                                    {selectedTab !== 4 && selectedTab !== 5
-                                        ?
-                                        <>
-                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
-                                                    <CustomStatsCard title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} hoverText="The count of how many claims are made for this day" />
-                                                </div>
-                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                                    <BarChartBox data={getChartData('barChartData')} />
-                                                </div>
-                                            </div>
-
-                                            <div className="flex h-[270px] w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
-                                                    <CustomStatsCard title={"Unclaim Count"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} hoverText="The count of how many claims are not claimed for this day" />
-                                                </div>
-                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                                    <LineChartBox data={getChartData('trendsData')} />
-                                                </div>
-                                            </div>
-
-                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
-                                                    <CustomStatsCard
-                                                        title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} hoverText="Measures how much money is actually spent on a meal when a student makes a claim." hoverValueText={"The ideal target range should be close to the currently assigned credit value (₱60)"} />
-                                                </div>
-                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                                    <BandedChartTADMC data={getChartData('TADMCdata')} />
-                                                </div>
-                                            </div>
-
-                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
-                                                    <CustomStatsCard title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]} hoverText={"The percentage of the total allocated credit budget that is actually consumed by the students before the unused amount is automatically removed."} hoverValueText={"A rate below 90% implies significant budget waste"} />
-                                                </div>
-                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                                    <BandedChartCUR data={getChartData('CURdata')} />
-                                                </div>
-                                            </div>
-
-                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
-                                                <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
-                                                    <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} hoverText={"The frequency at which students’ total food item cost exceed the assigned credit value"} hoverValueText={"An OCF above 15% means too many students are frequently forced to pay out-of-pocket, which diminishes the value and intent of the scholarship/subsidy"} />
-                                                </div>
-                                                <div className="h-[100%] w-[75%] flex justify-end items-center">
-                                                    <BandedChartOCF data={getChartData('OCFdata')} />
-                                                </div>
-                                            </div>
-                                        </>
-                                        : ""
-                                    }
-                                </div>
-                            </AnalyticTabs>
+                                                {/* OCF CHART SECTION */}
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ type: "spring", delay: 0.4 }}
+                                                    className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}
+                                                >
+                                                    <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
+                                                        <CustomStatsCard title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPeso={false} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]} hoverText={"The frequency at which students’ total food item cost exceed the assigned credit value"} hoverValueText={"An OCF above 15% means too many students are frequently forced to pay out-of-pocket, which diminishes the value and intent of the scholarship/subsidy"} />
+                                                    </div>
+                                                    <div className="h-[100%] w-[75%] flex justify-end items-center">
+                                                        <BandedChartOCF data={getChartData('OCFdata')} />
+                                                    </div>
+                                                </motion.div>
+                                            </>
+                                            : ""
+                                        }
+                                    </div>
+                                </AnalyticTabs>
+                            </motion.div>
                         </div>
 
                         {/* RIGHT SIDE COMPONENTS */}
@@ -492,16 +555,22 @@ export default function AdminDashboard() {
                                 alignSelf: 'start',
 
                             }}>
-                            <div>
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0.5 }}
+                                transition={{ type: "spring", delay: 0 }}>
                                 <OngoingEvents events={ongoingEvents} />
-                            </div>
-                            <div>
+                            </motion.div>
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0.6 }}
+                                transition={{ type: "spring", delay: 0 }}>
                                 <EventsPanel events={upcomingEvents} />
-                            </div>
+                            </motion.div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </div >
+            </div >
         </>
     )
 }
