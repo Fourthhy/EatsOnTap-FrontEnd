@@ -1,9 +1,14 @@
+import React, { useState } from 'react'; // Added useState
 import { GoKebabHorizontal } from "react-icons/go";
 import { PiExport } from "react-icons/pi";
 import { ClipboardMinus } from "lucide-react";
 import { Tooltip } from "flowbite-react";
+import { ExportReportModal } from './ExportReportModal'; // Import the new modal
 
 function AnalyticTabs({ children, selectedTab, onTabChange }) {
+    // --- STATE FOR MODAL ---
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
     return (
         <div>
             <div className="w-full bg-[#F7F9F9]">
@@ -22,7 +27,6 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                     </span>
                 </div>
 
-                {/* Added w-full to the parent container */}
                 <div className="flex w-full">
                     <div className="w-3 bg-[#4268BD]">
                         <div
@@ -31,12 +35,11 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                         ></div>
                     </div>
 
-                    {/* Added flex-1 to each tab button. Removed horizontal padding (50px) to allow flex to control width */}
                     <button
                         style={{
                             borderTopLeftRadius: 6,
                             borderTopRightRadius: 6,
-                            padding: "10px 0", // Changed from 10px 50px to allow flex-1 to work
+                            padding: "10px 0",
                             cursor: "pointer",
                             fontFamily: "geist",
                             fontSize: 12,
@@ -162,7 +165,6 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                         ></div>
                     </div>
 
-                    {/* The Export button keeps its fixed width (padding: 10px 20px) so it doesn't stretch like the tabs */}
                     <Tooltip
                         content={<p className="font-geist w-[120px] text-center" style={{ padding: "10px" }}>Export Reports</p>}
                         placement="top"
@@ -181,7 +183,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                                 fontWeight: 500,
                             }}
                             className="bg-[#FFFFFF] hover:bg-slate-200 transition-colors duration-200"
-                            onClick={() => { alert("export report") }}
+                            onClick={() => setIsExportModalOpen(true)} // UPDATED TRIGGER
                         >
                             <PiExport size={20} />
                         </button>
@@ -199,6 +201,12 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                 </div>
 
                 {children}
+
+                {/* --- RENDER MODAL CONDITIONALLY --- */}
+                <ExportReportModal 
+                    isOpen={isExportModalOpen} 
+                    onClose={() => setIsExportModalOpen(false)} 
+                />
             </div>
         </div>
     )
