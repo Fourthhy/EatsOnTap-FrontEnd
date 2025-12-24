@@ -6,11 +6,13 @@ export default function MealRecipientOrder() {
     return (
         <>
             <div
-                style={{ backgroundColor: "#F7F9F9" }}w
+                style={{ backgroundColor: "#F7F9F9" }} w
                 className="w-full h-[100vh] flex flex-col">
                 <HeaderBar headerTitle="Meal Recipient Orders" userAvatar={USER_AVATAR} />
-                <div className="w-full h-[calc(100vh - 60px)] flex flex-col justify-start overflow-hidden">
-                    <MealOrdersTable />
+                <div className="w-full flex justify-center">
+                    <div className="w-[98%]">
+                        <MealOrdersTable />
+                    </div>
                 </div>
             </div>
 
