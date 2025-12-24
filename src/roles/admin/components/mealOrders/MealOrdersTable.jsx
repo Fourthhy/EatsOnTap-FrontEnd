@@ -1,49 +1,70 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Check, X, Trash2, Clock, CalendarDays } from 'lucide-react'; 
+import { Check, X, Trash2, Clock, CalendarDays } from 'lucide-react';
 import { GenericTable } from '../../../../components/global/table/GenericTable';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- MOCK DATA ---
 const generateMockRequests = () => {
     const senders = ["Ms. Maria Santos", "Mr. Rudy Iba", "Ms. Sophie Sarcia", "Mr. Lorence Tagailog", "Event Organizer A", "Event Organizer B"];
-    const sections = ["1-Luke", "1-John", "2-Peter", "3-Paul", "5-Jonas", "Sports Fest", "Seminary Night"];
+
+    // Split sections to categorize them easily
+    const basicEdSections = ["Kinder-Love", "Grade 1-Faith", "Grade 4-Hope", "Grade 7-Rizal", "Grade 10-Bonifacio", "Grade 11-STEM", "Grade 12-ABM"];
+    const higherEdSections = ["BSIT 1-A", "BSCS 2-B", "AB Broadcasting 3-A", "BSSW 4-C", "Associate CT 1-A"];
+    const eventSections = ["Sports Fest", "Seminary Night", "Teachers Conference", "Foundation Day"];
 
     return Array.from({ length: 50 }).map((_, index) => {
-        const isEvent = Math.random() > 0.7;
+        const isEvent = Math.random() > 0.8; // 20% chance of being an event
+
+        let section = "";
+        let category = "";
+
+        if (isEvent) {
+            section = eventSections[Math.floor(Math.random() * eventSections.length)];
+            category = "Event"; // Events usually don't fall strictly into basic/higher unless specified, treated as separate or neutral
+        } else {
+            // Randomly assign Basic vs Higher Ed (60% Basic, 40% Higher)
+            const isBasic = Math.random() > 0.4;
+            if (isBasic) {
+                section = basicEdSections[Math.floor(Math.random() * basicEdSections.length)];
+                category = "Basic Education";
+            } else {
+                section = higherEdSections[Math.floor(Math.random() * higherEdSections.length)];
+                category = "Higher Education";
+            }
+        }
+
         return {
             id: index + 1,
-            sectionProgram: isEvent ? sections[Math.floor(Math.random() * 2) + 5] : sections[index % 5],
+            sectionProgram: section,
             sender: senders[index % senders.length],
             recipientCount: Math.floor(Math.random() * 40) + 30,
             waivedCount: Math.floor(Math.random() * 5),
             timeSent: "7:10 AM",
             type: isEvent ? 'Event' : 'Regular',
+            category: category, // Added for filtering tabs
             status: index % 4 === 0 ? "Approved" : (index % 7 === 0 ? "Rejected" : "Pending"),
         };
     });
 };
 
 const MealOrdersTable = () => {
+    // --- UPDATED TABS ---
     const [activeTab, setActiveTab] = useState('All');
+
     const [orderType, setOrderType] = useState('Pending Meal Orders');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedIds, setSelectedIds] = useState([]);
     const [allRequests, setAllRequests] = useState([]);
-    
-    // --- NEW: State to delay the unmounting of the Action Bar ---
     const [showActionBar, setShowActionBar] = useState(false);
 
     useEffect(() => {
         setAllRequests(generateMockRequests());
     }, []);
 
-    // --- NEW: Handle Action Bar Visibility with Delay ---
     useEffect(() => {
         if (selectedIds.length > 0) {
             setShowActionBar(true);
         } else {
-            // Wait for exit animation (300ms) before removing the element entirely
-            // This ensures the Default Header comes back only after the blue bar leaves
             const timer = setTimeout(() => setShowActionBar(false), 300);
             return () => clearTimeout(timer);
         }
@@ -54,6 +75,7 @@ const MealOrdersTable = () => {
     const filteredData = useMemo(() => {
         let data = allRequests;
 
+        // 1. Filter by Order Type (View)
         if (orderType === 'Confirmed Meal Orders') {
             data = data.filter(r => r.status === 'Approved' || r.status === 'Rejected');
         } else if (orderType === 'Event Meal Request') {
@@ -62,10 +84,14 @@ const MealOrdersTable = () => {
             data = data.filter(r => r.status === 'Pending' && r.type === 'Regular');
         }
 
-        if (activeTab !== 'All') {
-             // Add logic here if needed
+        // 2. Filter by Tabs (Basic vs Higher Ed)
+        if (activeTab === 'Basic Education') {
+            data = data.filter(r => r.category === 'Basic Education');
+        } else if (activeTab === 'Higher Education') {
+            data = data.filter(r => r.category === 'Higher Education');
         }
 
+        // 3. Search
         if (searchTerm) {
             const lowerTerm = searchTerm.toLowerCase();
             data = data.filter(r =>
@@ -100,12 +126,11 @@ const MealOrdersTable = () => {
         setSelectedIds([]);
     }
 
+    // --- UPDATED TABS CONFIG ---
     const tabs = [
         { id: 'All', label: 'All' },
-        { id: 'Preschool', label: 'Preschool' },
-        { id: 'Primary', label: 'Primary' },
-        { id: 'High School', label: 'High School' },
-        { id: 'College', label: 'College' }
+        { id: 'Basic Education', label: 'Basic Education' },
+        { id: 'Higher Education', label: 'Higher Education' }
     ];
 
     const viewSwitcher = (
@@ -132,13 +157,9 @@ const MealOrdersTable = () => {
         </div>
     );
 
-    // --- ACTION BAR (Using showActionBar state) ---
-    // We render this if showActionBar is true.
-    // Inside, we toggle `animate` props based on `selectedIds.length` to trigger the slide up/down.
     const actionBar = showActionBar ? (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
-            // If we have selections, stay visible (y:0). If 0, animate out (y:20).
             animate={selectedIds.length > 0 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             style={{
@@ -182,7 +203,6 @@ const MealOrdersTable = () => {
         </motion.div>
     ) : null;
 
-    // --- RENDER ROW ---
     const renderRow = (item, index, startIndex, selection) => {
         const cellStyle = {
             fontFamily: 'geist, sans-serif', fontSize: '12px', color: '#4b5563',
@@ -220,16 +240,18 @@ const MealOrdersTable = () => {
             >
                 <td style={{ padding: '12px 24px', width: '48px', borderBottom: '1px solid #f3f4f6' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <input
-                            type={showCheckbox ? 'checkbox' : 'hidden'}
-                            checked={isSelected}
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={() => selection?.toggleSelection()}
-                            style={{
-                                width: '16px', height: '16px', borderRadius: '4px', cursor: 'pointer',
-                                accentColor: '#4268BD', zIndex: 1000
-                            }}
-                        />
+                        {showCheckbox ? (
+                            <input
+                                type={'checkbox'}
+                                checked={isSelected}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={() => selection?.toggleSelection()}
+                                style={{
+                                    width: '16px', height: '16px', borderRadius: '4px', cursor: 'pointer',
+                                    accentColor: '#4268BD', zIndex: 1000
+                                }}
+                            />
+                        ): <div style={{width: '16px', height: '16px'}} />}
                     </div>
                 </td>
                 <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
