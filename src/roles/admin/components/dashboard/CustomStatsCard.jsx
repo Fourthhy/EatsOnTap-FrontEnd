@@ -16,14 +16,14 @@ export function CustomStatsCard({
     const [isValueHovered, setIsValueHovered] = useState(false); // State for Value hover
 
     const acceptableIndicator = isHasAcceptableRange 
-        ? (value >= acceptableRate[0] && value <= acceptableRate[1] ? "#0e7973ff" : "#CF7171") 
+        ? (value >= acceptableRate[0] && value <= acceptableRate[1] ? "#10B981" : "#EF4444") 
         : "#4C4B4B";
 
     // Reusing your styling for consistency
     const tooltipStyle = {
         position: 'absolute',
         backgroundColor: '#eeeeeeff',
-        color: '#000000',
+        color: '#111827',
         padding: '5px 12px',
         borderRadius: '6px',
         fontSize: '11px',
@@ -55,7 +55,7 @@ export function CustomStatsCard({
                 {/* --- HOVER ICON (Top Right) --- */}
                 {hoverText && (
                     <div 
-                        style={{ position: 'absolute', top: 20, right: 12, cursor: 'help' }}
+                        style={{ position: 'absolute', top: 8, right: 8, cursor: 'help' }}
                         onMouseEnter={() => setIsHovered(true)}
                         onMouseLeave={() => setIsHovered(false)}
                     >
@@ -83,7 +83,7 @@ export function CustomStatsCard({
                         style={{
                             fontWeight: "500",
                             fontSize: 13,
-                            color: "#000000",
+                            color: "#111827",
                             fontFamily: "geist",
                             width: "fit-content",
                             height: "fit-content",
@@ -105,7 +105,7 @@ export function CustomStatsCard({
                                 fontSize: 25,
                                 fontWeight: "500",
                                 margin: "8px 0",
-                                color: isHasAcceptableRange ? acceptableIndicator : "#4C4B4B",
+                                color: isHasAcceptableRange ? acceptableIndicator : "#111827",
                                 fontFamily: "geist",
                                 cursor: hoverValueText ? "help" : "default" // Change cursor if prop exists
                             }}
