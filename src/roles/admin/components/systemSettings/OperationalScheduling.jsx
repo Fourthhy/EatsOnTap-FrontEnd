@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Clock, Calendar } from 'lucide-react';
-import { PasswordConfirmationModal } from './PasswordConfirmationModal'; // Import the modal
+import { PasswordConfirmationModal } from './PasswordConfirmationModal';
+import { ButtonGroup } from '../../../../components/global/ButtonGroup'; // Import your custom ButtonGroup
 
 // --- SHARED THEME FOR THIS COMPONENT ---
 const theme = {
@@ -130,21 +131,13 @@ const ScheduleConfigForm = ({ type, data }) => {
 const OperationalScheduling = () => {
     const [activeScheduleTab, setActiveScheduleTab] = useState('claim'); 
 
+    // Mapped correctly for ButtonGroup usage (id and label)
     const scheduleTabs = [
         { id: 'claim', label: 'Student Claim' },
         { id: 'meal', label: 'Submit Meal Request' },
         { id: 'assign', label: 'Assign Credits' },
         { id: 'remove', label: 'Remove Credits' },
     ];
-
-    const getTabStyle = (isActive) => ({
-        padding: '8px 16px', borderRadius: '99px', fontSize: '12px', fontWeight: '500',
-        fontFamily: theme.fonts.main, whiteSpace: 'nowrap', border: 'none', cursor: 'pointer',
-        transition: 'all 0.2s',
-        backgroundColor: isActive ? '#111827' : '#F3F4F6',
-        color: isActive ? 'white' : '#4B5563',
-        boxShadow: isActive ? theme.shadows.md : 'none',
-    });
 
     const cardStyle = {
         backgroundColor: theme.colors.white, borderRadius: theme.radius.lg,
@@ -159,19 +152,21 @@ const OperationalScheduling = () => {
                 <p style={{ fontSize: '14px', color: theme.colors.textSec }}>Configure time windows and effective dates for specific system operations.</p>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '32px', overflowX: 'auto', paddingBottom: '4px' }}>
-                {scheduleTabs.map(tab => (
-                    <button key={tab.id} onClick={() => setActiveScheduleTab(tab.id)} style={getTabStyle(activeScheduleTab === tab.id)}>
-                        {tab.label}
-                    </button>
-                ))}
+            <div style={{ marginBottom: '32px' }}>
+                {/* IMPLEMENTATION OF BUTTON GROUP */}
+                <ButtonGroup 
+                    buttonListGroup={scheduleTabs}
+                    activeId={activeScheduleTab}
+                    onSetActiveId={setActiveScheduleTab}
+                    activeColor={theme.colors.primary}
+                />
             </div>
 
             <div style={{ minHeight: '300px' }}>
                 {/* We pass the key prop here so React re-mounts the form (and its local state) when the tab changes */}
                 <ScheduleConfigForm 
                     key={activeScheduleTab} 
-                    type={scheduleTabs.find(t => t.id === activeScheduleTab).label} 
+                    type={scheduleTabs.find(t => t.id === activeScheduleTab)?.label} 
                     data={{ enabled: true }} 
                 />
             </div>

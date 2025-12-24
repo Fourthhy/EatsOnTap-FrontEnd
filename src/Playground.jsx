@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, RotateCcw } from 'lucide-react';
 import { Save, AlertTriangle, Power, Clock, Calendar, ShieldAlert, CheckCircle2 } from 'lucide-react';
-import { SystemSettings } from "../src/roles/admin/components/pages/SystemSettings";
+import SystemSettings from "../src/roles/admin/components/pages/SystemSettings";
 
 
 const StickyLayout = () => {

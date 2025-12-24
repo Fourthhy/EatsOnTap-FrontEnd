@@ -29,6 +29,7 @@ import MealRecipientOrder from "../roles/admin/components/pages/MealRecipientOrd
 import StudentRecords from "../roles/admin/components/pages/StudentRecords";
 import EventManagement from "../roles/admin/components/pages/EventManagement";
 import StudentManagement from "../roles/admin/components/pages/StudentManagement";
+import SystemSettings from "../roles/admin/components/pages/SystemSettings";
 
 import Playground from "../Playground";
 
@@ -57,6 +58,7 @@ export default function Routers() {
                         <Route path="schedule" element={<EventManagement />} /> 
                         <Route path="order" element={<MealRecipientOrder />} /> 
                         <Route path="record" element={<StudentRecords />} /> 
+                        <Route path="settings" element={<SystemSettings />} />
 
                     </Route>
                     <Route path="/adminAssistant" element={

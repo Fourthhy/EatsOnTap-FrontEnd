@@ -43,6 +43,11 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
         navigate(menuItems[index].path);
     };
 
+    //handle click of settings
+    const handleSettingsClick = () => {
+        navigate('/admin/settings');
+    }
+
     const BREAKPOINTS = {
         'mobile-md': 375, 'mobile-lg': 425, 'tablet': 768,
         'laptop-md': 1024, 'laptop-lg': 1440,
@@ -90,7 +95,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                             marginTop: "0.5rem",
                             position: "relative",
                             overflow: "visible",
-                            padding: "0px 3px"
+                            padding: "0px 4px"
                         }}
                         ref={containerRef}
                     >
@@ -178,7 +183,10 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                                     icon={setting.icon}
                                     text={setting.text}
                                     expanded={isExpanded}
-                                    active={false} />
+                                    active={false}
+                                    onClick={handleSettingsClick} 
+                                />
+
                             </Tooltip>
                         ))}
                     </div>
