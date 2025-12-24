@@ -34,7 +34,7 @@ const StudentList = () => {
     ];
 
     const metrics = [
-        {label: "Total", value: 50}
+        { label: "Total", value: 50 }
     ]
 
     const handleTabChange = (tab) => {
@@ -109,6 +109,53 @@ const StudentList = () => {
         return matchesTab;
     });
 
+    const cellStyle = {
+        fontFamily: 'geist, sans-serif',
+        fontSize: '12px',
+        color: '#4b5563',
+        padding: '6px 0px',
+        borderBottom: '1px solid #f3f4f6'
+    };
+
+    const renderRow = (student, index, startIndex) => (
+        <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+            {/* Index Column */}
+            <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }}>
+                {startIndex + index + 1}
+            </td>
+
+            {/* Name Column (Darker Text, Medium Weight) */}
+            <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-gray-500">
+                        <User size={16} />
+                    </div>
+                    <span>{student.name}</span>
+                </div>
+            </td>
+
+            {/* Student ID */}
+            <td style={cellStyle}>
+                {student.studentId}
+            </td>
+
+            {/* Type */}
+            <td style={cellStyle}>
+                {student.type}
+            </td>
+
+            {/* Program */}
+            <td style={cellStyle}>
+                {student.program}
+            </td>
+
+            {/* Link Status Badge */}
+            <td style={cellStyle}>
+                <LinkStatusBadge isLinked={student.isLinked} student={student} />
+            </td>
+        </tr>
+    )
+
     return (
         <>
             <AddStudentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
@@ -131,27 +178,7 @@ const StudentList = () => {
                 columns={['Student Name', 'Student ID', 'Regular/Irregular', 'DYNAMIC', 'RFID Link']}
                 dynamicHeaderLabel={getProgramHeaderLabel()}
                 data={filteredStudents}
-                renderRow={(student, index, startIndex) => (
-                    <tr key={student.id} className="hover:bg-gray-50/80 transition-colors group" style={{ height: 40 }}>
-                        <td className="font-geist text-black flex items-center justify-center" style={{ paddingTop: '10px', paddingBottom: '10px', fontSize: 13, height: '100%' }}>
-                            {startIndex + index + 1}
-                        </td>
-                        <td className="py-4 px-6">
-                            <div className="flex items-center gap-3" style={{ paddingLeft: 5 }}>
-                                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-gray-500">
-                                    <User size={16} />
-                                </div>
-                                <span style={{ fontSize: 12, fontWeight: 450 }} className="font-geist text-black">{student.name}</span>
-                            </div>
-                        </td>
-                        <td style={{ fontSize: 12 }} className="font-geist py-4 px-3 text-black">{student.studentId}</td>
-                        <td style={{ fontSize: 12 }} className="font-geist py-4 px-6 text-black text-left">{student.type}</td>
-                        <td style={{ fontSize: 12 }} className="font-geist py-4 px-6 text-black">{student.program}</td>
-                        <td style={{ fontSize: 12 }} className="font-geist py-4 px-6">
-                            <LinkStatusBadge isLinked={student.isLinked} student={student} />
-                        </td>
-                    </tr>
-                )}
+                renderRow={renderRow}
             />
         </>
     );

@@ -140,7 +140,7 @@ const MealOrdersTable = () => {
                     </button>
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <span style={{ fontWeight: 600, fontSize: '18px' }}>{selectedIds.length} Selected</span>
+                        <span style={{ fontWeight: 500, fontSize: 14 }}>{selectedIds.length} Selected</span>
 
                         {/* THE NEW SELECT ALL TRIGGER */}
                         {selectedIds.length < filteredData.length ? (
