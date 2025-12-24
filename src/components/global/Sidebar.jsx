@@ -10,9 +10,6 @@ import { Tooltip } from "flowbite-react";
 function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, onClickAction }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
-    const [indicatorStyle, setIndicatorStyle] = useState({ top: '0px', height: '0px', opacity: 0 });
-
-    const collapseTimeout = useRef(null);
 
     const containerRef = useRef(null);
     const itemRefs = useRef([]); // To store references to each menu item
@@ -28,18 +25,6 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
         setIsExpanded(!isExpanded);
     };
 
-    const handleMouseEnter = () => {
-        if (collapseTimeout.current) clearTimeout(collapseTimeout.current);
-        setIsExpanded(true);
-    };
-
-    const handleMouseLeave = () => {
-        // Adding a tiny delay (150ms) makes the UI feel much smoother
-        collapseTimeout.current = setTimeout(() => {
-            setIsExpanded(false);
-        }, 100);
-    };  
-
     // Sync activeIndex with the URL
     useEffect(() => {
         const currentPath = location.pathname;
@@ -48,9 +33,6 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
         if (activeItemIndex !== -1 && activeItemIndex !== activeIndex) {
             setActiveIndex(activeItemIndex);
         }
-        setTimeout(() => {
-            setIsExpanded(false);
-        }, 2000);
     }, [location.pathname, menuItems, activeIndex]);
 
     // Handle Click to Navigate
@@ -58,25 +40,6 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
         setActiveIndex(index);
         navigate(menuItems[index].path);
     };
-
-    // --- INDICATOR POSITIONING LOGIC ---
-    useEffect(() => {
-        const container = containerRef.current;
-        const activeItem = itemRefs.current[activeIndex];
-
-        if (container && activeItem) {
-            const containerRect = container.getBoundingClientRect();
-            const activeRect = activeItem.getBoundingClientRect();
-
-            setIndicatorStyle({
-                top: (activeRect.top - containerRect.top) + "px",
-                height: activeRect.height + "px",
-                opacity: 1,
-            });
-        } else {
-            setIndicatorStyle(prev => ({ ...prev, opacity: 0 }));
-        }
-    }, [activeIndex, isExpanded, menuItems.length]);
 
     const BREAKPOINTS = {
         'mobile-md': 375, 'mobile-lg': 425, 'tablet': 768,
