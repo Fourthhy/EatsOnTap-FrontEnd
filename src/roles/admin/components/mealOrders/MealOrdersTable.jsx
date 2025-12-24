@@ -1,43 +1,71 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Check, X, Trash2, Clock } from 'lucide-react';
+import { Check, X, Trash2, Clock, CalendarDays } from 'lucide-react'; 
 import { GenericTable } from '../../../../components/global/table/GenericTable';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // --- MOCK DATA ---
 const generateMockRequests = () => {
-    const senders = ["Ms. Maria Santos", "Mr. Rudy Iba", "Ms. Sophie Sarcia", "Mr. Lorence Tagailog"];
-    const sections = ["1-Luke", "1-John", "2-Peter", "3-Paul", "5-Jonas"];
+    const senders = ["Ms. Maria Santos", "Mr. Rudy Iba", "Ms. Sophie Sarcia", "Mr. Lorence Tagailog", "Event Organizer A", "Event Organizer B"];
+    const sections = ["1-Luke", "1-John", "2-Peter", "3-Paul", "5-Jonas", "Sports Fest", "Seminary Night"];
 
-    return Array.from({ length: 50 }).map((_, index) => ({
-        id: index + 1,
-        sectionProgram: sections[index % sections.length],
-        sender: senders[index % senders.length],
-        recipientCount: Math.floor(Math.random() * 40) + 30,
-        waivedCount: Math.floor(Math.random() * 5),
-        timeSent: "7:10 AM",
-        status: index % 4 === 0 ? "Approved" : (index % 7 === 0 ? "Rejected" : "Pending"),
-    }));
+    return Array.from({ length: 50 }).map((_, index) => {
+        const isEvent = Math.random() > 0.7;
+        return {
+            id: index + 1,
+            sectionProgram: isEvent ? sections[Math.floor(Math.random() * 2) + 5] : sections[index % 5],
+            sender: senders[index % senders.length],
+            recipientCount: Math.floor(Math.random() * 40) + 30,
+            waivedCount: Math.floor(Math.random() * 5),
+            timeSent: "7:10 AM",
+            type: isEvent ? 'Event' : 'Regular',
+            status: index % 4 === 0 ? "Approved" : (index % 7 === 0 ? "Rejected" : "Pending"),
+        };
+    });
 };
 
 const MealOrdersTable = () => {
-    // --- STATE ---
     const [activeTab, setActiveTab] = useState('All');
-    const [orderType, setOrderType] = useState('Pending Orders');
+    const [orderType, setOrderType] = useState('Pending Meal Orders');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedIds, setSelectedIds] = useState([]);
     const [allRequests, setAllRequests] = useState([]);
+    
+    // --- NEW: State to delay the unmounting of the Action Bar ---
+    const [showActionBar, setShowActionBar] = useState(false);
 
     useEffect(() => {
         setAllRequests(generateMockRequests());
     }, []);
 
+    // --- NEW: Handle Action Bar Visibility with Delay ---
+    useEffect(() => {
+        if (selectedIds.length > 0) {
+            setShowActionBar(true);
+        } else {
+            // Wait for exit animation (300ms) before removing the element entirely
+            // This ensures the Default Header comes back only after the blue bar leaves
+            const timer = setTimeout(() => setShowActionBar(false), 300);
+            return () => clearTimeout(timer);
+        }
+    }, [selectedIds.length]);
+
+
     // --- FILTERING ---
     const filteredData = useMemo(() => {
         let data = allRequests;
-        if (orderType === 'Confirmed Orders') {
+
+        if (orderType === 'Confirmed Meal Orders') {
             data = data.filter(r => r.status === 'Approved' || r.status === 'Rejected');
+        } else if (orderType === 'Event Meal Request') {
+            data = data.filter(r => r.status === 'Pending' && r.type === 'Event');
         } else {
-            data = data.filter(r => r.status === 'Pending');
+            data = data.filter(r => r.status === 'Pending' && r.type === 'Regular');
         }
+
+        if (activeTab !== 'All') {
+             // Add logic here if needed
+        }
+
         if (searchTerm) {
             const lowerTerm = searchTerm.toLowerCase();
             data = data.filter(r =>
@@ -64,7 +92,6 @@ const MealOrdersTable = () => {
     };
 
     const handleSelectAllGlobal = () => {
-        // Selects every ID currently visible in the filtered list
         const allIds = filteredData.map(item => item.id);
         setSelectedIds(allIds);
     };
@@ -72,8 +99,6 @@ const MealOrdersTable = () => {
     const handleDeselectAll = () => {
         setSelectedIds([]);
     }
-
-    // --- PROPS PREPARATION ---
 
     const tabs = [
         { id: 'All', label: 'All' },
@@ -83,29 +108,17 @@ const MealOrdersTable = () => {
         { id: 'College', label: 'College' }
     ];
 
-    // --- FIXED: VIEW SWITCHER (Pure Inline Styles) ---
     const viewSwitcher = (
-        <div style={{
-            backgroundColor: '#f3f4f6',
-            padding: '4px',
-            borderRadius: '8px',
-            display: 'flex',
-            gap: '4px'
-        }}>
-            {['Pending Orders', 'Confirmed Orders'].map(type => {
+        <div style={{ backgroundColor: '#f3f4f6', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
+            {['Pending Meal Orders', 'Confirmed Meal Orders', 'Event Meal Request'].map(type => {
                 const isActive = orderType === type;
                 return (
                     <button
                         key={type}
                         onClick={() => { setOrderType(type); setSelectedIds([]); }}
                         style={{
-                            padding: '6px 12px',
-                            borderRadius: '6px',
-                            fontSize: '12px',
-                            fontWeight: 500,
-                            border: 'none',
-                            cursor: 'pointer',
-                            // Active vs Inactive Logic
+                            padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 500,
+                            border: 'none', cursor: 'pointer',
                             backgroundColor: isActive ? 'white' : 'transparent',
                             color: isActive ? '#4268BD' : '#6b7280',
                             boxShadow: isActive ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none',
@@ -119,43 +132,34 @@ const MealOrdersTable = () => {
         </div>
     );
 
-    // --- HEADER OVERRIDE (Action Bar) ---
-    const actionBar = selectedIds.length > 0 ? (
-        <div className="animate-in fade-in slide-in-from-top-2 duration-200"
+    // --- ACTION BAR (Using showActionBar state) ---
+    // We render this if showActionBar is true.
+    // Inside, we toggle `animate` props based on `selectedIds.length` to trigger the slide up/down.
+    const actionBar = showActionBar ? (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            // If we have selections, stay visible (y:0). If 0, animate out (y:20).
+            animate={selectedIds.length > 0 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
             style={{
-                height: '100%',
-                width: '100%',
-                backgroundColor: '#4268BD',
-                color: 'white',
-                padding: '0 24px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center'
+                height: '100%', width: '100%', backgroundColor: '#4268BD', color: 'white',
+                padding: '0 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center'
             }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    {/* Close / Deselect Button */}
                     <button onClick={handleDeselectAll} style={{ padding: '8px', borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center', zIndex: 1000 }}>
                         <X size={20} />
                     </button>
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                         <span style={{ fontWeight: 500, fontSize: 14 }}>{selectedIds.length} Selected</span>
-
-                        {/* THE NEW SELECT ALL TRIGGER */}
                         {selectedIds.length < filteredData.length ? (
                             <button
                                 onClick={handleSelectAllGlobal}
                                 className="hover:text-blue-200 transition-colors"
                                 style={{
-                                    color: '#dbeafe',
-                                    fontSize: '12px',
-                                    background: 'none',
-                                    border: 'none',
-                                    padding: 0,
-                                    cursor: 'pointer',
-                                    textDecoration: 'underline',
-                                    textAlign: 'left'
+                                    color: '#dbeafe', fontSize: '12px', background: 'none', border: 'none',
+                                    padding: 0, cursor: 'pointer', textDecoration: 'underline', textAlign: 'left'
                                 }}
                             >
                                 Select all {filteredData.length} items
@@ -175,17 +179,14 @@ const MealOrdersTable = () => {
                     </button>
                 </div>
             </div>
-        </div>
+        </motion.div>
     ) : null;
 
     // --- RENDER ROW ---
     const renderRow = (item, index, startIndex, selection) => {
         const cellStyle = {
-            fontFamily: 'geist, sans-serif',
-            fontSize: '12px',
-            color: '#4b5563',
-            padding: '6px 0px',
-            borderBottom: '1px solid #f3f4f6'
+            fontFamily: 'geist, sans-serif', fontSize: '12px', color: '#4b5563',
+            padding: '6px 0px', borderBottom: '1px solid #f3f4f6'
         };
 
         const getStatusBadge = (status) => {
@@ -209,32 +210,34 @@ const MealOrdersTable = () => {
             );
         };
 
-        // Safety check: ensure selection object exists
         const isSelected = selection?.isSelected || false;
+        const showCheckbox = orderType !== 'Confirmed Meal Orders';
 
         return (
             <tr key={item.id}
                 className="hover:bg-gray-50 transition-colors"
                 style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}
             >
-                {/* Checkbox Column */}
                 <td style={{ padding: '12px 24px', width: '48px', borderBottom: '1px solid #f3f4f6' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <input
-                            type={orderType === 'Pending Orders' ? 'checkbox' : 'none'}
+                            type={showCheckbox ? 'checkbox' : 'hidden'}
                             checked={isSelected}
-                            // FIXED: Added onClick stopPropagation to prevent row clicks (if any) from interfering
                             onClick={(e) => e.stopPropagation()}
                             onChange={() => selection?.toggleSelection()}
                             style={{
-                                width: '16px', height: '16px',
-                                borderRadius: '4px', cursor: 'pointer',
+                                width: '16px', height: '16px', borderRadius: '4px', cursor: 'pointer',
                                 accentColor: '#4268BD', zIndex: 1000
                             }}
                         />
                     </div>
                 </td>
-                <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>{item.sectionProgram}</td>
+                <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {item.type === 'Event' && <CalendarDays size={14} className="text-purple-500" />}
+                        {item.sectionProgram}
+                    </div>
+                </td>
                 <td style={cellStyle}>{item.sender}</td>
                 <td style={cellStyle}>{item.recipientCount}</td>
                 <td style={cellStyle}>{item.waivedCount}</td>
@@ -244,34 +247,42 @@ const MealOrdersTable = () => {
         );
     };
 
+    const getTableTitle = () => {
+        if (orderType === 'Pending Meal Orders') return 'Pending Requests';
+        if (orderType === 'Event Meal Request') return 'Event Requests';
+        return 'Order History';
+    }
+
     return (
-        <GenericTable
-            title={orderType === 'Pending Orders' ? 'Pending Requests' : 'Order History'}
-            subtitle="Manage your daily meal distribution"
-            data={filteredData}
-            columns={['Section/Program', 'Sender', 'Recipient Count', 'Waived', 'Time Sent', 'Status']}
-            renderRow={renderRow}
+        <AnimatePresence>
+            <GenericTable
+                title={getTableTitle()}
+                subtitle={orderType === 'Event Meal Request' ? "Manage special event meal distributions" : "Manage your daily meal distribution"}
+                data={filteredData}
+                columns={['Section/Program', 'Sender', 'Recipient Count', 'Waived', 'Time Sent', 'Status']}
+                renderRow={renderRow}
 
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={(id) => { setActiveTab(id); setSelectedIds([]); }}
+                tabs={tabs}
+                activeTab={activeTab}
+                onTabChange={(id) => { setActiveTab(id); setSelectedIds([]); }}
 
-            customActions={viewSwitcher}
-            overrideHeader={actionBar}
+                customActions={viewSwitcher}
+                overrideHeader={actionBar}
 
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
 
-            selectedIds={selectedIds}
-            onSelectionChange={setSelectedIds}
-            primaryKey="id"
+                selectedIds={selectedIds}
+                onSelectionChange={setSelectedIds}
+                primaryKey="id"
 
-            metrics={[
-                { label: 'Total', value: filteredData.length },
-                { label: 'Approved', value: allRequests.filter(r => r.status === 'Approved').length, color: '#059669' },
-                { label: 'Rejected', value: allRequests.filter(r => r.status === 'Rejected').length, color: '#DC2626' }
-            ]}
-        />
+                metrics={[
+                    { label: 'Total', value: filteredData.length },
+                    { label: 'Approved', value: allRequests.filter(r => r.status === 'Approved').length, color: '#059669' },
+                    { label: 'Rejected', value: allRequests.filter(r => r.status === 'Rejected').length, color: '#DC2626' }
+                ]}
+            />
+        </AnimatePresence>
     );
 };
 
