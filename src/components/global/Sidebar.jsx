@@ -7,16 +7,24 @@ import logo from "/lv-logo.svg";
 import { SidebarItem } from "./SidebarItem";
 import { Tooltip } from "flowbite-react";
 
-
-
 function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, settingMenu }) {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const [activeIndex, setActiveIndex] = useState(0);
-
-    const containerRef = useRef(null);
-    const itemRefs = useRef([]); // To store references to each menu item
     const navigate = useNavigate();
     const location = useLocation();
+
+    // --- FIX 1: Initialize state based on current URL to prevent "flash" on refresh ---
+    const [onSettings, setOnSettings] = useState(() => 
+        location.pathname.includes('/admin/settings')
+    );
+    
+    const [activeIndex, setActiveIndex] = useState(() => {
+        const index = menuItems.findIndex(item => location.pathname.includes(item.path));
+        // If we found a match, use it. If not, default to 0 only if we aren't on settings.
+        return index !== -1 ? index : 0;
+    });
+
+    const [isExpanded, setIsExpanded] = useState(false);
+    const containerRef = useRef(null);
+    const itemRefs = useRef([]); 
 
     const handleLogout = () => {
         logout();
@@ -27,24 +35,36 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
         setIsExpanded(!isExpanded);
     };
 
-    // Sync activeIndex with the URL
+    // --- FIX 2: Update useEffect to explicitly handle Settings path ---
     useEffect(() => {
         const currentPath = location.pathname;
-        const activeItemIndex = menuItems.findIndex(item => currentPath.includes(item.path));
-
-        if (activeItemIndex !== -1 && activeItemIndex !== activeIndex) {
-            setActiveIndex(activeItemIndex);
+        
+        // Check if we are on the Settings page
+        if (currentPath.includes('/admin/settings')) {
+            setOnSettings(true);
+            setActiveIndex(-1); // Deselect main menu items
+            return;
         }
-    }, [location.pathname, menuItems, activeIndex]);
+
+        // Check if we are on a Main Menu page
+        const activeItemIndex = menuItems.findIndex(item => currentPath.includes(item.path));
+        if (activeItemIndex !== -1) {
+            setActiveIndex(activeItemIndex);
+            setOnSettings(false);
+        }
+    }, [location.pathname, menuItems]);
 
     // Handle Click to Navigate
     const handleItemClick = (index) => {
         setActiveIndex(index);
+        setOnSettings(false);
         navigate(menuItems[index].path);
     };
 
-    //handle click of settings
+    // Handle click of settings
     const handleSettingsClick = () => {
+        setActiveIndex(-1); // Deselect main menu items
+        setOnSettings(true);
         navigate('/admin/settings');
     }
 
@@ -54,10 +74,8 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
     };
 
     const { breakpoint } = useBreakpoint(BREAKPOINTS, 'mobile-md');
-
     const sidebarWidth = isExpanded ? "280px" : "80px";
     const transitionDuration = "300ms";
-    const indicatorMargin = isExpanded ? '0.75rem' : '0.25rem';
 
     return (
         <div style={{ width: "100%", minHeight: "100vh", backgroundColor: "#F4FDFF" }}>
@@ -71,7 +89,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
-                    transition: `width ${transitionDuration} cubic-bezier(0.4, 0, 0.2, 1)`, // Smoother curve
+                    transition: `width ${transitionDuration} cubic-bezier(0.4, 0, 0.2, 1)`,
                     position: "fixed",
                     top: 0,
                     left: 0,
@@ -110,14 +128,11 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                                 key={i}
                                 content={<p className="font-geist w-[120px]" style={{ padding: "10px 15px" }}>{item.text}</p>}
                                 placement="right"
-                                // Some libraries don't support "none". 
-                                // If "none" doesn't work, use disabled={isExpanded}
                                 trigger={isExpanded ? "none" : "hover"}
                                 style="light"
                                 animation="duration-300"
                                 arrow={false}
                             >
-                                {/* Wrapper div with ref to capture exact position */}
                                 <div ref={el => itemRefs.current[i] = el}>
                                     <SidebarItem
                                         icon={item.icon}
@@ -149,14 +164,14 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                                 style="light"
                                 animation="duration-300"
                             >
-                                {/* Wrapper div with ref to capture exact position */}
                                 <div ref={el => itemRefs.current[i] = el}>
                                     <SidebarItem
                                         index={i}
                                         icon={item.icon}
                                         text={item.text}
                                         expanded={isExpanded}
-                                        active={activeIndex === i}
+                                        // Ensure item is NOT active if we are on settings
+                                        active={!onSettings && activeIndex === i}
                                         onClick={() => handleItemClick(i)}
                                     />
                                 </div>
@@ -164,8 +179,6 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                         ))}
                     </nav>
                 </div>
-
-
 
                 {/* Footer Buttons */}
                 <div >
@@ -183,10 +196,10 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                                     icon={setting.icon}
                                     text={setting.text}
                                     expanded={isExpanded}
-                                    active={false}
-                                    onClick={handleSettingsClick} 
+                                    // FIX 3: Actually use the state for Settings item
+                                    active={onSettings}
+                                    onClick={handleSettingsClick}
                                 />
-
                             </Tooltip>
                         ))}
                     </div>
