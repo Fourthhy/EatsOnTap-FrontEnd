@@ -4,6 +4,8 @@ import { ButtonGroup } from '../../../../components/global/ButtonGroup';
 import { EventDisplayer } from './EventDisplayer';
 import { EventDetailModal } from './EventDetailModal';
 
+import { motion } from 'framer-motion';
+
 // --- MOCK DATA ---
 // explicitly defined classification as requested
 const MOCK_ALL_EVENTS = [
@@ -39,7 +41,7 @@ const MOCK_ALL_EVENTS = [
         eventName: "Parents Orientation",
         eventDate: "2025-08-15",
         classification: "upcoming", // Explicit Definition
-        selectedColor: "#fef9c3", 
+        selectedColor: "#fef9c3",
         selectedDepartments: ["All"],
         selectedPrograms: ["All Levels"]
     }
@@ -99,13 +101,17 @@ export function EventDashboard() {
             <EventDetailModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
-                events={filteredEvents} 
+                events={filteredEvents}
                 initialEventId={selectedEventId}
             />
 
             {/* DASHBOARD CONTENT */}
             <div style={dashboardStyle}>
-                <div className="w-full flex justify-between items-center px-4 py-2 bg-white rounded-md shadow-md" style={{ padding: 5}}>
+                <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: "spring", delay: 0.1 }}
+                    className="w-full flex justify-between items-center px-4 py-2 bg-white rounded-md shadow-md" style={{ padding: 5 }}>
                     <ButtonGroup
                         buttonListGroup={buttonListGroup}
                         activeId={activeTab}
@@ -113,15 +119,19 @@ export function EventDashboard() {
                         activeColor="#4268BD"
                     />
                     <AddEventForm />
-                </div>
+                </motion.div>
 
-                <div className="flex-1 overflow-y-auto">
+                <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: "spring", delay: 0.1 }}
+                    className="flex-1 overflow-y-auto">
                     <EventDisplayer
                         events={filteredEvents}
                         onEventClick={handleCardClick}
                     />
-                </div>
+                </motion.div>
             </div>
-        </div>
+        </div >
     );
 }

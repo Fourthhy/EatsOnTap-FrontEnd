@@ -4,6 +4,8 @@ import { ButtonGroup } from '../ButtonGroup';
 import { PrimaryActionButton } from './PrimaryActionButton';
 import { TablePagination } from './TablePagination';
 
+import { motion } from "framer-motion";
+
 const ITEM_HEIGHT_ESTIMATE_PX = 40;
 
 const GenericTable = ({
@@ -14,7 +16,7 @@ const GenericTable = ({
     columns = [],
     renderRow,
     metrics,
-    
+
     // Header & Navigation Props
     tabs = [],
     activeTab,
@@ -22,20 +24,20 @@ const GenericTable = ({
     customActions = null,  // Injected controls (e.g. View Switcher)
     overrideHeader = null, // Replaces Search/Date row (e.g. Bulk Action Bar)
     customThead = null,    // Replaces the standard <thead> (e.g. Matrix View)
-    
+
     // Action Props
     onPrimaryAction,
     primaryActionLabel = "",
     primaryActionIcon = null,
-    
+
     // Search Props
     searchTerm,
     onSearchChange,
-    
+
     // Pagination Config
     minItems = 4,
     maxItems = 15,
-    
+
     // Selection Props
     selectable = false,
     selectedIds = [],
@@ -57,14 +59,14 @@ const GenericTable = ({
     useEffect(() => {
         const wrapper = tableWrapperRef.current;
         if (!wrapper) return;
-        
+
         const observer = new ResizeObserver(entries => {
             const containerHeight = entries[0].contentRect.height;
             // Subtract approx header height (45px) to get body space
-            const availableSpace = containerHeight - 45; 
+            const availableSpace = containerHeight - 45;
             const calculatedItems = Math.floor(availableSpace / ITEM_HEIGHT_ESTIMATE_PX);
             const newItemsPerPage = Math.max(minItems, Math.min(maxItems, calculatedItems));
-            
+
             setItemsPerPage(prev => {
                 if (prev !== newItemsPerPage) {
                     setCurrentPage(1);
@@ -73,7 +75,7 @@ const GenericTable = ({
                 return prev;
             });
         });
-        
+
         observer.observe(wrapper);
         return () => observer.disconnect();
     }, [minItems, maxItems]);
@@ -107,7 +109,10 @@ const GenericTable = ({
         <div className="w-full h-[calc(100vh-90px)] flex flex-col p-6 font-['Geist',sans-serif] text-gray-900 overflow-hidden">
 
             {/* 1. TOP TOOLBAR (Tabs + Actions) */}
-            <div
+            <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", delay: 0.1 }}
                 className="w-full flex justify-between items-center px-4 py-2 mb-4 bg-white rounded-md shadow-md border border-gray-200"
                 style={{ padding: 5, marginTop: 15, marginBottom: 15 }}
             >
@@ -123,7 +128,7 @@ const GenericTable = ({
 
                 <div className="ml-auto flex items-center gap-2">
                     {customActions}
-                    
+
                     {primaryActionLabel && primaryActionIcon && (
                         <PrimaryActionButton
                             label={primaryActionLabel}
@@ -137,11 +142,15 @@ const GenericTable = ({
                         />
                     )}
                 </div>
-            </div>
+            </motion.div>
 
             {/* 2. MAIN CARD */}
-            <div className="bg-white rounded-md shadow-lg border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
-                
+            <motion.div
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ type: "spring", delay: 0.1 }}
+                className="bg-white rounded-md shadow-lg border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
+
                 {/* 2a. STATIC HEADER (Title & Metrics) */}
                 <div className="shrink-0 border-b border-gray-100">
                     <div className="px-6 pt-6 pb-4" style={{ padding: 15 }}>
@@ -200,13 +209,13 @@ const GenericTable = ({
                 {/* 3. TABLE SECTION */}
                 <div ref={tableWrapperRef} className="flex-1 overflow-y-hidden w-full">
                     <table className="w-full text-left border-collapse">
-                        
+
                         {/* 3a. TABLE HEADER (Custom Matrix OR Standard) */}
                         {customThead ? customThead : (
                             <thead className="bg-gray-50 sticky top-0 z-20">
                                 <tr style={{ height: '45px' }}>
                                     {selectable && (
-                                        <th className="border-b border-gray-200 bg-gray-50" 
+                                        <th className="border-b border-gray-200 bg-gray-50"
                                             style={{ width: '48px', padding: 0, position: 'relative', zIndex: 30 }}>
                                             <div className="flex items-center justify-center h-full w-full">
                                                 <label className="flex items-center justify-center w-full h-full cursor-pointer">
@@ -217,24 +226,24 @@ const GenericTable = ({
                                                         ref={input => { if (input) input.indeterminate = isIndeterminate; }}
                                                         onChange={handleSelectAll}
                                                         onClick={(e) => e.stopPropagation()} // Vital for z-index issues
-                                                        style={{ 
-                                                            width: '16px', 
-                                                            height: '16px', 
+                                                        style={{
+                                                            width: '16px',
+                                                            height: '16px',
                                                             accentColor: '#4268BD',
                                                             cursor: 'pointer',
                                                             position: 'relative',
-                                                            zIndex: 40 
+                                                            zIndex: 40
                                                         }}
                                                     />
                                                 </label>
                                             </div>
                                         </th>
                                     )}
-                                    
+
                                     {!selectable && (
                                         <th style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500 w-16"></th>
                                     )}
-                                    
+
                                     {columns.map((col, idx) => (
                                         <th key={idx} style={{ fontSize: 12 }} className="font-geist py-3 px-6 font-medium text-gray-500">
                                             {col}
@@ -257,12 +266,12 @@ const GenericTable = ({
                                     }
                                 }
                             }))}
-                            
+
                             {/* Padding Rows */}
                             {currentData.length < itemsPerPage && Array(itemsPerPage - currentData.length).fill(0).map((_, i) => (
                                 <tr key={`pad-${i}`} style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>
                                     {/* Handle colSpan based on modes */}
-                                    <td colSpan={columns.length + (selectable ? 1 : 1) + (customThead ? 20 : 0)}></td> 
+                                    <td colSpan={columns.length + (selectable ? 1 : 1) + (customThead ? 20 : 0)}></td>
                                 </tr>
                             ))}
                         </tbody>
@@ -270,13 +279,13 @@ const GenericTable = ({
                 </div>
 
                 {/* 4. FOOTER */}
-                <TablePagination 
+                <TablePagination
                     currentPage={currentPage}
                     totalPages={totalPages}
                     onPageChange={handlePageChange}
                 />
-            </div>
-        </div>
+            </motion.div>
+        </div >
     );
 };
 
