@@ -7,6 +7,8 @@ import logo from "/lv-logo.svg";
 import { SidebarItem } from "./SidebarItem";
 import { Tooltip } from "flowbite-react";
 
+
+
 function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, onClickAction }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -48,7 +50,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
 
     const { breakpoint } = useBreakpoint(BREAKPOINTS, 'mobile-md');
 
-    const sidebarWidth = isExpanded ? "280px" : "72px";
+    const sidebarWidth = isExpanded ? "280px" : "80px";
     const transitionDuration = "300ms";
     const indicatorMargin = isExpanded ? '0.75rem' : '0.25rem';
 
@@ -88,22 +90,10 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                             marginTop: "0.5rem",
                             position: "relative",
                             overflow: "visible",
+                            padding: "0px 3px"
                         }}
                         ref={containerRef}
                     >
-
-                        {/* Inline Indicator for smoother transitions */}
-                        {/* <div style={{
-                            position: "absolute",
-                            left: indicatorMargin,
-                            width: `calc(100% - (${indicatorMargin} * 2))`,
-                            backgroundColor: "white",
-                            borderRadius: "0.5rem",
-                            zIndex: 0,
-                            transition: "top 0.3s ease, height 0.3s ease, left 0.3s ease, width 0.3s ease",
-                            ...indicatorStyle,
-                        }} /> */}
-
                         {quickActionsLabel && isExpanded && (
                             <div style={{ margin: "10px 0", paddingLeft: "1rem" }}>
                                 <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{quickActionsLabel}</span>
