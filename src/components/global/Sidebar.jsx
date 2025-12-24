@@ -9,7 +9,7 @@ import { Tooltip } from "flowbite-react";
 
 
 
-function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, onClickAction }) {
+function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, settingMenu }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -160,27 +160,49 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                     </nav>
                 </div>
 
+
+
                 {/* Footer Buttons */}
-                <div style={{ padding: "1rem" }}>
-                    <button
-                        style={{
-                            display: "flex", alignItems: "center",
-                            justifyContent: isExpanded ? "flex-start" : "center",
-                            width: "100%", gap: "0.5rem",
-                            backgroundColor: "rgba(255, 255, 255, 0.3)",
-                            paddingTop: "0.75rem", paddingBottom: "0.75rem",
-                            borderRadius: "0.5rem", transition: "all 100ms ease",
-                            cursor: "pointer", border: "none",
-                            paddingLeft: isExpanded ? "1rem" : undefined,
-                            color: "white"
-                        }}
-                        onClick={handleLogout}
-                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#52728F")}
-                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.3)")}
-                    >
-                        <LogOut size={18} />
-                        {isExpanded && <span style={{ fontSize: "0.875rem" }}>Logout</span>}
-                    </button>
+                <div >
+                    <div style={{ padding: "1rem 1rem 1rem 3px" }} >
+                        {settingMenu && settingMenu.map((setting, i) => (
+                            <Tooltip
+                                key={i}
+                                content={<p className="font-geist w-[120px]" style={{ padding: "10px 15px" }}>{setting.text}</p>}
+                                placement="right"
+                                trigger={isExpanded ? "none" : "hover"}
+                                style="light"
+                                animation="duration-300"
+                                arrow={false}>
+                                <SidebarItem
+                                    icon={setting.icon}
+                                    text={setting.text}
+                                    expanded={isExpanded}
+                                    active={false} />
+                            </Tooltip>
+                        ))}
+                    </div>
+                    <div style={{ padding: "0px 1rem 1rem 1rem" }}>
+                        <button
+                            style={{
+                                display: "flex", alignItems: "center",
+                                justifyContent: isExpanded ? "flex-start" : "center",
+                                width: "100%", gap: "0.5rem",
+                                backgroundColor: "rgba(255, 255, 255, 0.3)",
+                                paddingTop: "0.75rem", paddingBottom: "0.75rem",
+                                borderRadius: "0.5rem", transition: "all 100ms ease",
+                                cursor: "pointer", border: "none",
+                                paddingLeft: isExpanded ? "1rem" : undefined,
+                                color: "white"
+                            }}
+                            onClick={handleLogout}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#52728F")}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.3)")}
+                        >
+                            <LogOut size={18} />
+                            {isExpanded && <span style={{ fontSize: "0.875rem" }}>Logout</span>}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -196,7 +218,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
             >
                 <Outlet context={{ handleToggleSidebar }} />
             </div>
-        </div>
+        </div >
     );
 }
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AddDishModal } from "./components/dashboard/AddDishModal";
 import { Sidebar } from "../../components/global/Sidebar";
-import { LayoutDashboard, Ticket, CalendarDays, ShoppingBag, BookOpen, Utensils } from "lucide-react";
+import { LayoutDashboard, Ticket, CalendarDays, ShoppingBag, BookOpen, Utensils, Settings } from "lucide-react";
 import { DateProvider } from "./components/dashboard/DatePicker";
 
 export default function AdminLayout() {
@@ -39,6 +39,10 @@ export default function AdminLayout() {
         { icon: <BookOpen size={20} />, text: "Records", path: "/admin/record" },
     ];
 
+    const settingMenu = [
+        { icon: <Settings size={20} />, text: "Settings", path: "/admin/settings" }
+    ]
+
     const quickActions = [
         { 
             icon: <Utensils size={20} />, 
@@ -58,6 +62,7 @@ export default function AdminLayout() {
                 menutItemsLabel={"Pages"}
                 quickActions={quickActions}
                 quickActionsLabel={"Quick Actions"}
+                settingMenu={settingMenu}
             />
 
             {/* Render Modal with all required logic props */}
