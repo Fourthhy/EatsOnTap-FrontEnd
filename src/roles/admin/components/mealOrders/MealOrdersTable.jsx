@@ -167,10 +167,10 @@ const MealOrdersTable = () => {
                 </div>
 
                 <div style={{ display: 'flex', gap: '12px' }}>
-                    <button onClick={handleBulkApprove} style={{ backgroundColor: 'white', color: '#4268BD', padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)' }}>
+                    <button onClick={handleBulkApprove} style={{ backgroundColor: '#10B981', color: '#white', padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)' }}>
                         <Check size={16} /> Approve
                     </button>
-                    <button onClick={handleBulkReject} style={{ backgroundColor: '#FF8772', color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)' }}>
+                    <button onClick={handleBulkReject} style={{ backgroundColor: 'white', color: '#EF4444', padding: '8px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)' }}>
                         <Trash2 size={16} /> Reject
                     </button>
                 </div>
@@ -221,7 +221,7 @@ const MealOrdersTable = () => {
                 <td style={{ padding: '12px 24px', width: '48px', borderBottom: '1px solid #f3f4f6' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <input
-                            type="checkbox"
+                            type={orderType === 'Pending Orders' ? 'checkbox' : 'none'}
                             checked={isSelected}
                             // FIXED: Added onClick stopPropagation to prevent row clicks (if any) from interfering
                             onClick={(e) => e.stopPropagation()}
@@ -265,8 +265,6 @@ const MealOrdersTable = () => {
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
             primaryKey="id"
-
-
 
             metrics={[
                 { label: 'Total', value: filteredData.length },
