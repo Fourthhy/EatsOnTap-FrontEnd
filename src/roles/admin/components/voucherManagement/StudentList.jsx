@@ -175,6 +175,7 @@ const StudentList = () => {
                 onPrimaryAction={() => setIsAddModalOpen(true)}
                 primaryActionLabel="Add Student"
                 primaryActionIcon={<Plus size={16} />}
+                
                 columns={['Student Name', 'Student ID', 'Regular/Irregular', 'DYNAMIC', 'RFID Link']}
                 dynamicHeaderLabel={getProgramHeaderLabel()}
                 data={filteredStudents}

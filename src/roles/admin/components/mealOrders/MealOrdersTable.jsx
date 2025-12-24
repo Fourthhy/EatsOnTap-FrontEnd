@@ -184,7 +184,7 @@ const MealOrdersTable = () => {
             fontFamily: 'geist, sans-serif',
             fontSize: '12px',
             color: '#4b5563',
-            padding: '12px 24px 12px 0px',
+            padding: '6px 0px',
             borderBottom: '1px solid #f3f4f6'
         };
 
@@ -234,7 +234,6 @@ const MealOrdersTable = () => {
                         />
                     </div>
                 </td>
-                <td style={cellStyle}>{startIndex + index + 1}</td>
                 <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>{item.sectionProgram}</td>
                 <td style={cellStyle}>{item.sender}</td>
                 <td style={cellStyle}>{item.recipientCount}</td>
@@ -250,7 +249,7 @@ const MealOrdersTable = () => {
             title={orderType === 'Pending Orders' ? 'Pending Requests' : 'Order History'}
             subtitle="Manage your daily meal distribution"
             data={filteredData}
-            columns={['', 'Section/Program', 'Sender', 'Recipient Count', 'Waived', 'Time Sent', 'Status']}
+            columns={['Section/Program', 'Sender', 'Recipient Count', 'Waived', 'Time Sent', 'Status']}
             renderRow={renderRow}
 
             tabs={tabs}

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { HeaderBar } from "../../../../components/global/HeaderBar"
-import { MealClaimRecordsTable } from "./MealClaimRecordsTable";
-import { OverallClaims } from "./OverallClaims";
+import { DailyClaimRecord } from "./DailyClaimRecord";
+import { OverallClaimRecord } from "./OverallClaimRecord";
 
-function DailyClaimRecords() {
+function ViewClaimRecords() {
     const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
     const [view, setView] = useState("daily");
     const switchView = () => {
@@ -19,11 +19,11 @@ function DailyClaimRecords() {
                 className="w-full h-auto flex flex-col justify-start">
                 <HeaderBar headerTitle="Records" userAvatar={USER_AVATAR} />
                 <div className="w-full flex justify-center">
-                    <div className="w-[95%]">
+                    <div className="w-[98%]">
                         {view === "daily" ?
-                            <MealClaimRecordsTable switchView={switchView} />
+                            <DailyClaimRecord switchView={switchView} />
                             :
-                            <OverallClaims switchView={switchView} />
+                            <OverallClaimRecord switchView={switchView} />
                         }
                     </div>
                 </div>
@@ -32,4 +32,4 @@ function DailyClaimRecords() {
     )
 }
 
-export { DailyClaimRecords }
+export { ViewClaimRecords }
