@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Calendar, Filter, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { ButtonGroup } from '../ButtonGroup'; // Your provided component
+import { Search, Calendar } from 'lucide-react'; // Removed Chevron/Filter imports as they are now in the sub-component
+import { ButtonGroup } from '../ButtonGroup'; 
+import { PrimaryActionButton } from './PrimaryActionButton';
+import { TablePagination } from './TablePagination'; 
+
 
 const ITEM_HEIGHT_ESTIMATE_PX = 40;
 
 const GenericTable = ({
     title,
     subtitle,
-    tabs = [], // Array of { label, id }
+    tabs = [], 
     activeTab,
     onTabChange,
     onPrimaryAction,
@@ -15,14 +18,13 @@ const GenericTable = ({
     primaryActionIcon = null,
     searchTerm,
     onSearchChange,
-    totalRecords,
-    metrics, //label, value, and color (black by default)
-    columns = [], // Array of strings or { label, width }
+    metrics, 
+    columns = [], 
     data = [],
-    renderRow, // Function: (item, index, startIndex) => ReactNode
-    dynamicHeaderLabel, // The label that changes based on filter
-    minItems = 4, // The minimum number of items, set 4 by default
-    maxItems = 15,   // The maximum number of items, set 15 by default
+    renderRow, 
+    dynamicHeaderLabel, 
+    minItems = 4, 
+    maxItems = 15,   
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(maxItems);
@@ -31,17 +33,11 @@ const GenericTable = ({
     // --- GET DATE --- 
     function getFormattedDate() {
         const today = new Date();
-
-        const options = {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric'
-        };
-
+        const options = { month: 'long', day: 'numeric', year: 'numeric' };
         return today.toLocaleDateString('en-US', options);
     }
 
-    // --- EXACT ORIGINAL HEIGHT CALCULATION LOGIC ---
+    // --- HEIGHT CALCULATION LOGIC ---
     useEffect(() => {
         const wrapper = tableWrapperRef.current;
         if (!wrapper) return;
@@ -60,8 +56,9 @@ const GenericTable = ({
         });
         observer.observe(wrapper);
         return () => observer.disconnect();
-    }, []);
+    }, [minItems, maxItems]);
 
+    // --- DATA SLICING ---
     const totalPages = Math.ceil(data.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const currentData = data.slice(startIndex, startIndex + itemsPerPage);
@@ -70,35 +67,15 @@ const GenericTable = ({
         if (newPage >= 1 && newPage <= totalPages) setCurrentPage(newPage);
     };
 
-    // --- NEW DYNAMIC PAGINATION LOGIC ---
-    const getVisiblePages = () => {
-        const maxVisible = 3;
-        let start = Math.max(1, currentPage - 1);
-        let end = Math.min(totalPages, start + maxVisible - 1);
-
-        // Adjust if we are at the end of the list
-        if (end - start + 1 < maxVisible) {
-            start = Math.max(1, end - maxVisible + 1);
-        }
-
-        const pages = [];
-        for (let i = start; i <= end; i++) {
-            pages.push(i);
-        }
-        return pages;
-    };
+    // NOTE: Removed getVisiblePages() because GenericTablePagination handles that logic now.
 
     return (
         <div className="w-full h-[calc(100vh-90px)] flex flex-col p-6 font-['Geist',sans-serif] text-gray-900 overflow-hidden">
 
-            {/* Top Navigation using your ButtonGroup */}
+            {/* Top Navigation */}
             <div
                 className="w-full flex justify-between items-center px-4 py-2 mb-4 bg-white rounded-md shadow-md border border-gray-200"
-                style={{
-                    padding: 5,
-                    marginTop: 15,
-                    marginBottom: 15,
-                }}
+                style={{ padding: 5, marginTop: 15, marginBottom: 15 }}
             >
                 <ButtonGroup
                     buttonListGroup={tabs}
@@ -111,21 +88,18 @@ const GenericTable = ({
                 />
 
                 {primaryActionLabel && primaryActionIcon ? (
-                    <button
+                    <PrimaryActionButton
+                        label={primaryActionLabel}
+                        icon={primaryActionIcon}
                         onClick={onPrimaryAction}
-                        className="ml-auto bg-[#4268BD] hover:bg-[#33549F] text-[#EEEEEE] cursor-pointer text-sm font-medium flex items-center shadow-sm transition-colors duration-200"
+                        className="ml-auto cursor-pointer text-sm font-medium shadow-sm"
                         style={{
                             marginLeft: 'auto', marginRight: 10,
                             padding: '10px 20px', borderRadius: 6, fontSize: 12, fontFamily: 'geist',
-                            display: 'flex', alignItems: 'center', gap: '8px',
                             boxShadow: "0 2px 6px #e5eaf0ac",
-                            border: "1px solid #ddddddaf",
                         }}
-                    >
-                        {primaryActionIcon} {primaryActionLabel}
-                    </button>
-                ) : ""}
-
+                    />
+                ) : null}
             </div>
 
             <div className="bg-white rounded-md shadow-lg border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
@@ -138,13 +112,11 @@ const GenericTable = ({
                         </div>
 
                         {metrics && metrics.map((metric, index) => (
-                            <div className="text-right" style={{ paddingRight: 20 }}>
+                            <div key={index} className="text-right" style={{ paddingRight: 20 }}>
                                 <span className="font-geist font-semibold" style={{ fontSize: 14 }}>{metric.label}: </span>
                                 <span className="font-geist font-bold" style={{ fontSize: 18, color: metric.color || '#000000' }}>{metric.value}</span>
                             </div>
                         ))}
-
-
                     </div>
                     <hr className="w-full" />
                     <div className="flex gap-4 items-center justify-between" style={{ marginTop: 4, marginBottom: 4 }}>
@@ -196,39 +168,14 @@ const GenericTable = ({
                     </table>
                 </div>
 
-                {/* Pagination Footer */}
-                <div className="p-4 border-t border-gray-100 flex items-center justify-center gap-2 shrink-0 bg-white" style={{ padding: '16px', borderTop: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <button
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="flex items-center gap-1 text-sm font-medium text-gray-500 bg-none hover:bg-gray-300 hover:text-gray-700 transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ padding: '8px 12px', borderRadius: '6px' }}
-                    >
-                        <ChevronLeft size={16} /> Previous
-                    </button>
-
-                    {getVisiblePages().map((page) => (
-                        <button
-                            key={page}
-                            onClick={() => handlePageChange(page)}
-                            className={`w-8 h-8 rounded-md text-sm font-medium flex items-center justify-center ${currentPage === page ? 'bg-[#4268BD] text-[#EEEEEE]' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors duration-200 cursor-pointer'}`}
-                            style={{ width: '32px', height: '32px', borderRadius: '6px', boxShadow: "0 2px 6px #e5eaf0ac", border: "1px solid #ddddddaf", }}
-                        >
-                            {page}
-                        </button>
-                    ))}
-
-                    {totalPages > getVisiblePages()[getVisiblePages().length - 1] && <span className="text-gray-400">...</span>}
-
-                    <button
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages || totalPages === 0}
-                        className="text-sm font-medium text-gray-500 bg-none hover:bg-gray-300 hover:text-gray-700 transition-colors duration-300 cursor-pointer flex items-center gap-1"
-                        style={{ padding: '8px 12px', borderRadius: '6px' }}
-                    >
-                        Next <ChevronRight size={16} />
-                    </button>
-                </div>
+                {/* 3. REPLACED THE OLD PAGINATION DIV WITH THE NEW COMPONENT 
+                   Notice how we map 'handlePageChange' to 'onPageChange'
+                */}
+                <TablePagination 
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                />
             </div>
         </div>
     );
