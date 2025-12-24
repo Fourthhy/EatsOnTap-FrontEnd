@@ -446,7 +446,7 @@ export default function AdminDashboard() {
                                                 </div>
                                             </div>
 
-                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}>
+                                            <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}>
                                                 <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
                                                     <CustomStatsCard
                                                         title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} hoverText="Measures how much money is actually spent on a meal when a student makes a claim." hoverValueText={"The ideal target range should be close to the currently assigned credit value (₱60)"} />
