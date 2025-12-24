@@ -16,16 +16,18 @@ function OngoingEvents({ events, isHyerlink = true }) {
           {events.length > 1 ? "Ongoing Events" : "Ongoing Event"} 
         </h2>
       </div>
+
       <div className="flex flex-col">
         {events.map((event, idx) => (
           <div
             key={event.title}
             style={{
               padding: "15px 15px",
-              marginBottom: 8
+              marginBottom: 8,
               // background: "#c7eaf290"
+              background: event.color
             }}
-            className="rounded-lg flex justify-between items-center bg-blue-50">
+            className="rounded-lg flex justify-between items-center">
             <div
               style={{ padding: "5px 0px 5px 0px" }}>
               <h3
@@ -64,6 +66,7 @@ function OngoingEvents({ events, isHyerlink = true }) {
           </div>
         ))}
       </div>
+
     </div>
   );
 }

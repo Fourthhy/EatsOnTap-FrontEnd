@@ -37,10 +37,10 @@ function EventsPanel({ events, isHyerlink = true, canViewAll = true }) {
             key={event.title}
             style={{
               padding: "15px 15px",
-              marginBottom: 8
-              // background: "#c7eaf290"
+              marginBottom: 8,
+              background: event.color
             }}
-            className="rounded-lg flex justify-between items-center bg-blue-50">
+            className="rounded-lg flex justify-between items-center">
             <div
               style={{ padding: "5px 0px 5px 0px" }}>
               <h3

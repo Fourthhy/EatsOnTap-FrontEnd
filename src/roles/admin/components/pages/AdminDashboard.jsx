@@ -228,14 +228,14 @@ export default function AdminDashboard() {
     }
 
     const upcomingEvents = [
-        { link: "#", title: "Teachers' Day", date: "Oct 5, 2025" },
-        { link: "#", title: "President' Day", date: "Nov 25, 2025" },
-        { link: "#", title: "College Intramurals", date: "Dec 15, 2025" },
-        { link: "#", title: "ICT Week", date: "Jan 19, 2026" }
+        { link: "#", color: "#dbeafe", title: "Teachers' Day", date: "Oct 5, 2025" },
+        { link: "#", color: "#fee2e2", title: "President' Day", date: "Nov 25, 2025" },
+        { link: "#", color: "#ffedd5", title: "College Intramurals", date: "Dec 15, 2025" },
+        { link: "#", color: "#f3e8ff", title: "ICT Week", date: "Jan 19, 2026" }
     ]
 
     const ongoingEvents = [
-        { link: "#", title: "Vacation!!!", date: "December 23, 2025" },
+        { link: "#", title: "Vacation!!!", date: "December 23, 2025", color: "#dcfce7" },
     ]
 
 
