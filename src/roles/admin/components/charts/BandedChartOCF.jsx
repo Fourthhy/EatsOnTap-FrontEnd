@@ -9,47 +9,55 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  DefaultLegendContent,
   DefaultTooltipContent,
 } from 'recharts';
-
-// #region Sample data for KPI-003 (TADMC)
-// UPDATED: AcceptableRange set to [0, 15]
-// UPDATED: Sample TADMC values scaled down to ~2-16 to fit visually within the new range
-
-// #endregion
 
 const renderTooltipWithoutRange = ({ payload, content, ...rest }) => {
   if (!payload) return <DefaultTooltipContent {...rest} />;
   const newPayload = payload.filter(x => x.dataKey !== 'AcceptableRange');
-  
   return <DefaultTooltipContent payload={newPayload} {...rest} />;
 };
 
-const renderLegendWithoutRange = ({ payload, content, ref, ...rest }) => {
-  if (!payload) return <DefaultLegendContent {...rest} />;
+// MODIFIED: Manual Legend Rendering for Gap and Centering
+const renderLegendWithoutRange = ({ payload }) => {
+  const items = [
+    {
+       value: 'Target Range (₱0-₱15)',
+       color: '#cccccc',
+       type: 'square'
+    },
+    {
+       value: 'Overclaim Frequency',
+       color: '#10B981', // Matches the requested Line color
+       type: 'line'
+    }
+  ];
 
-  const newPayload = payload
-    .filter(x => x.dataKey !== 'AcceptableRange')
-    .map(item => ({
-      ...item,
-      value: item.dataKey === 'TADMC' ? 'Overclaim Frequency' : item.value 
-    }));
-    
-  if (payload.some(x => x.dataKey === 'AcceptableRange')) {
-    newPayload.unshift({
-      dataKey: 'AcceptableRange',
-      color: '#cccccc',
-      type: 'square',
-      // UPDATED: Legend text to match new range
-      value: 'Target Range (₱0-₱15)'
-    });
-  }
-  return <DefaultLegendContent payload={newPayload} {...rest} />;
+  return (
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      gap: '24px', // Controls the gap between items
+      width: '100%' 
+    }}>
+      {items.map((entry, index) => (
+        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ 
+            width: '12px', 
+            height: '12px', 
+            backgroundColor: entry.color,
+            borderRadius: '2px'
+          }} />
+          <span style={{ color: '#374151', fontWeight: 500 }}>
+            {entry.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 };
 
-export function BandedChartOCF({data}) {
-  // Style object for the geist font
+export function BandedChartOCF({ data }) {
   const geistTickStyle = { fontFamily: 'geist', fontSize: 12, fill: '#666' };
 
   return (
@@ -58,7 +66,8 @@ export function BandedChartOCF({data}) {
       <ResponsiveContainer width="100%" height="98%">
         <ComposedChart
           data={data}
-          margin={{ top: 0, right: -20, left: 0, bottom: 0 }}
+          // Added top margin for Legend spacing
+          margin={{ top: 10, right: -20, left: 0, bottom: 0 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           
@@ -70,7 +79,6 @@ export function BandedChartOCF({data}) {
           <YAxis 
             yAxisId="left"
             orientation="left"
-            // UPDATED: Domain shifted to 0-20 to view the 0-15 range comfortably
             domain={[0, 20]}
             tick={geistTickStyle}
             label={{ 
@@ -84,7 +92,6 @@ export function BandedChartOCF({data}) {
           <YAxis 
             yAxisId="right"
             orientation="right"
-            // UPDATED: Domain shifted to match left axis
             domain={[0, 20]}
             tick={geistTickStyle}
             axisLine={false}
@@ -113,7 +120,7 @@ export function BandedChartOCF({data}) {
             type="monotone" 
             dataKey="TADMC" 
             name="Overclaim Frequency" 
-            stroke="#1919b5ff"
+            stroke="#10B981" // UPDATED COLOR
             strokeWidth={2} 
             connectNulls 
           />
@@ -122,13 +129,12 @@ export function BandedChartOCF({data}) {
             content={renderLegendWithoutRange} 
             wrapperStyle={{ 
               fontFamily: 'geist', 
-              fontSize: '12px' ,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'end',
+              fontSize: '12px',
+              paddingBottom: '20px', // ADDED PADDING
+              width: '100%'
             }}
             verticalAlign='top'
-            
+            align="center" // CENTERED
           />
         </ComposedChart>
       </ResponsiveContainer>

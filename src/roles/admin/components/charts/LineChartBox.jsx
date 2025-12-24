@@ -100,8 +100,8 @@ function LineChartBox({ data }) {
           />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#eaebec', strokeWidth: 2 }} />
 
-          <Line type="linear" dataKey="Pre-packed Food" stroke="#21198cff" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
-          <Line type="linear" dataKey="Customized Order" stroke="#3836b2ff" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+          <Line type="linear" dataKey="Pre-packed Food" stroke="#10B981" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+          <Line type="linear" dataKey="Customized Order" stroke="#047857" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
           <Line type="linear" dataKey="Unused vouchers" stroke="#D13B3B" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
 
           <Legend

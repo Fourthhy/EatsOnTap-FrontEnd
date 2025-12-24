@@ -175,10 +175,10 @@ function CustomTooltip({ active, payload, label }) {
               align="center"
             />
             {/* UPDATED: Claimed set to #0e7973ff */}
-            <Bar dataKey="Claimed" fill="#0e7973ff" radius={[5, 5, 5, 5]} />
+            <Bar dataKey="Claimed" fill="#10B981" radius={[5, 5, 5, 5]} />
             
             {/* UPDATED: Unclaimed set to #CF7171 */}
-            <Bar dataKey="Unclaimed" fill="#CF7171" radius={[5, 5, 5, 5]} />
+            <Bar dataKey="Unclaimed" fill="#EF4444" radius={[5, 5, 5, 5]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

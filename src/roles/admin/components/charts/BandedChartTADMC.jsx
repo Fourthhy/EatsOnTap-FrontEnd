@@ -9,51 +9,65 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  DefaultLegendContent,
   DefaultTooltipContent,
 } from 'recharts';
 
 const renderTooltipWithoutRange = ({ payload, content, ...rest }) => {
   if (!payload) return <DefaultTooltipContent {...rest} />;
   const newPayload = payload.filter(x => x.dataKey !== 'AcceptableRange');
-  
-  // Note: The styles passed to the <Tooltip> component are found in `rest` 
-  // and passed down to DefaultTooltipContent here.
   return <DefaultTooltipContent payload={newPayload} {...rest} />;
 };
 
-const renderLegendWithoutRange = ({ payload, content, ref, ...rest }) => {
-  if (!payload) return <DefaultLegendContent {...rest} />;
+// 1. Manually Render Legend for Gaps & Centering
+const renderLegendWithoutRange = ({ payload }) => {
+  const items = [
+    {
+       value: 'Target Range (₱58-₱62)',
+       color: '#ccccccff',
+       type: 'square'
+    },
+    {
+       value: 'Average Student Spending',
+       color: '#10B981', 
+       type: 'line'
+    }
+  ];
 
-  const newPayload = payload
-    .filter(x => x.dataKey !== 'AcceptableRange')
-    .map(item => ({
-      ...item,
-      value: item.dataKey === 'TADMC' ? 'Average Student Spending' : item.value 
-    }));
-    
-  if (payload.some(x => x.dataKey === 'AcceptableRange')) {
-    newPayload.unshift({
-      dataKey: 'AcceptableRange',
-      color: '#ccccccff',
-      type: 'square',
-      value: 'Target Range (₱58-₱62)'
-    });
-  }
-  return <DefaultLegendContent payload={newPayload} {...rest} />;
+  return (
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      gap: '24px', // Gap between legend items
+      width: '100%' 
+    }}>
+      {items.map((entry, index) => (
+        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ 
+            width: '12px', 
+            height: '12px', 
+            backgroundColor: entry.color,
+            borderRadius: '2px' 
+          }} />
+          <span style={{ color: '#374151', fontWeight: 500 }}>
+            {entry.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 };
 
-export function BandedChartTADMC({data}) {
-  // Style object for the geist font
+export function BandedChartTADMC({ data }) {
   const geistTickStyle = { fontFamily: 'geist', fontSize: 12, fill: '#666' };
 
   return (
     <div style={{ padding: '10px', width: '100%', height: '300px', display: "flex", justifyContent: "center", alignItems: "end" }}>
 
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="98%">
         <ComposedChart
           data={data}
-          margin={{ top: 0, right: -20, left: 0, bottom: 0 }}
+          // 2. INCREASED TOP MARGIN: This pushes the chart down to make room for the Legend
+          margin={{ top: 30, right: -20, left: 0, bottom: 0 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           
@@ -83,12 +97,11 @@ export function BandedChartTADMC({data}) {
             axisLine={false}
           />
 
-          {/* MODIFIED TOOLTIP */}
           <Tooltip 
             content={renderTooltipWithoutRange}
-            contentStyle={{ fontFamily: 'geist', fontSize: '12px', borderColor: "rgba(102, 102, 102, 0.5)", borderRadius: 5 }} // Styles the box
-            labelStyle={{ fontFamily: 'geist', fontSize: '12px' }}   // Styles the header (Day)
-            itemStyle={{ fontFamily: 'geist', fontSize: '12px' }}    // Styles the value list
+            contentStyle={{ fontFamily: 'geist', fontSize: '12px', borderColor: "rgba(102, 102, 102, 0.5)", borderRadius: 5 }}
+            labelStyle={{ fontFamily: 'geist', fontSize: '12px' }} 
+            itemStyle={{ fontFamily: 'geist', fontSize: '12px' }}  
           />
           
           <Area 
@@ -107,7 +120,7 @@ export function BandedChartTADMC({data}) {
             type="monotone" 
             dataKey="TADMC" 
             name="Average Student Spending" 
-            stroke="#1919b5ff"
+            stroke="#10B981"
             strokeWidth={2} 
             connectNulls 
           />
@@ -116,13 +129,13 @@ export function BandedChartTADMC({data}) {
             content={renderLegendWithoutRange} 
             wrapperStyle={{ 
               fontFamily: 'geist', 
-              fontSize: '12px' ,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'end',
+              fontSize: '12px',
+              // 3. FIXED: ADDED PADDING HERE
+              paddingBottom: '20px', 
+              width: '100%'
             }}
             verticalAlign='top'
-            align="end"
+            align="center"
           />
         </ComposedChart>
       </ResponsiveContainer>

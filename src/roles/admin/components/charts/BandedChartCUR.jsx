@@ -9,47 +9,55 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  DefaultLegendContent,
   DefaultTooltipContent,
 } from 'recharts';
-
-// #region Sample data for KPI-003 (TADMC)
-// UPDATED: AcceptableRange set to [90, 100]
-// UPDATED: Sample TADMC values increased to ~95 to fit visually within the new range
-
-// #endregion
 
 const renderTooltipWithoutRange = ({ payload, content, ...rest }) => {
   if (!payload) return <DefaultTooltipContent {...rest} />;
   const newPayload = payload.filter(x => x.dataKey !== 'AcceptableRange');
-  
   return <DefaultTooltipContent payload={newPayload} {...rest} />;
 };
 
-const renderLegendWithoutRange = ({ payload, content, ref, ...rest }) => {
-  if (!payload) return <DefaultLegendContent {...rest} />;
+// 1. Manually Render Legend for Gaps & Centering
+const renderLegendWithoutRange = ({ payload }) => {
+  const items = [
+    {
+       value: 'Target Range (₱90-₱100)',
+       color: '#cccccc',
+       type: 'square'
+    },
+    {
+       value: 'Credit Utilization Rate',
+       color: '#10B981', // Updated to consistent green. Change back to #1919b5ff if needed.
+       type: 'line'
+    }
+  ];
 
-  const newPayload = payload
-    .filter(x => x.dataKey !== 'AcceptableRange')
-    .map(item => ({
-      ...item,
-      value: item.dataKey === 'TADMC' ? 'Credit Utilization Rate' : item.value 
-    }));
-    
-  if (payload.some(x => x.dataKey === 'AcceptableRange')) {
-    newPayload.unshift({
-      dataKey: 'AcceptableRange',
-      color: '#cccccc',
-      type: 'square',
-      // UPDATED: Legend text to match new range
-      value: 'Target Range (₱90-₱100)'
-    });
-  }
-  return <DefaultLegendContent payload={newPayload} {...rest} />;
+  return (
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      gap: '24px', // Gap between legend items
+      width: '100%' 
+    }}>
+      {items.map((entry, index) => (
+        <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ 
+            width: '12px', 
+            height: '12px', 
+            backgroundColor: entry.color,
+            borderRadius: '2px'
+          }} />
+          <span style={{ color: '#374151', fontWeight: 500 }}>
+            {entry.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 };
 
-export function BandedChartCUR({data}) {
-  // Style object for the geist font
+export function BandedChartCUR({ data }) {
   const geistTickStyle = { fontFamily: 'geist', fontSize: 12, fill: '#666' };
 
   return (
@@ -58,7 +66,8 @@ export function BandedChartCUR({data}) {
       <ResponsiveContainer width="100%" height="98%">
         <ComposedChart
           data={data}
-          margin={{ top: 0, right: -20, left: 0, bottom: 0 }}
+          // 2. INCREASED TOP MARGIN: Pushes chart down for Legend
+          margin={{ top: 30, right: -20, left: 0, bottom: 0 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           
@@ -70,7 +79,6 @@ export function BandedChartCUR({data}) {
           <YAxis 
             yAxisId="left"
             orientation="left"
-            // UPDATED: Domain shifted to 85-105 to view the 90-100 range comfortably
             domain={[85, 100]}
             tick={geistTickStyle}
             label={{ 
@@ -84,7 +92,6 @@ export function BandedChartCUR({data}) {
           <YAxis 
             yAxisId="right"
             orientation="right"
-            // UPDATED: Domain shifted to 85-105 to match left axis
             domain={[85, 105]}
             tick={geistTickStyle}
             axisLine={false}
@@ -113,7 +120,7 @@ export function BandedChartCUR({data}) {
             type="monotone" 
             dataKey="TADMC" 
             name="Credit Utilization Rate" 
-            stroke="#1919b5ff"
+            stroke="#10B981" // Consistent Green
             strokeWidth={2} 
             connectNulls 
           />
@@ -122,13 +129,13 @@ export function BandedChartCUR({data}) {
             content={renderLegendWithoutRange} 
             wrapperStyle={{ 
               fontFamily: 'geist', 
-              fontSize: '12px' ,
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'end',
+              fontSize: '12px',
+              // 3. PADDING BELOW LEGEND
+              paddingBottom: '20px', 
+              width: '100%'
             }}
             verticalAlign='top'
-            
+            align="center"
           />
         </ComposedChart>
       </ResponsiveContainer>
