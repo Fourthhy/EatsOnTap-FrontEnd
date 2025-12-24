@@ -19,7 +19,6 @@ const generateMockParticipants = (eventId, programs = []) => {
                 studentId: `2023-${1000 + (i * 5) + Math.floor(Math.random() * 100)}`,
                 program: prog,
                 status: randomStatus,
-                // Mocking Credit Value for students
                 creditValue: '3.0 Units' 
             });
         }
@@ -61,7 +60,7 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
 
     const currentEvent = events[currentIndex];
     
-    // Helper boolean for cleaner logic
+    // Logic Flag: True if Ongoing or Recent
     const isNotUpcoming = currentEvent && currentEvent.classification !== 'upcoming';
 
     // --- DATA MEMOIZATION ---
@@ -70,23 +69,17 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
     }, [currentEvent]);
 
     // --- TABS CONFIGURATION ---
+    // FIX: Removed the condition that hid tabs for upcoming events. 
+    // Now ALL events show ALL tabs.
     const tabs = useMemo(() => {
         if (!currentEvent) return [];
         
-        const defaultTabs = [{ id: 'Sections/Programs', label: 'Sections/Programs' }];
-
-        // RULE: If Upcoming, ONLY show Sections/Programs. 
-        // If Ongoing/Recent, show All + Individual Programs.
-        if (isNotUpcoming) {
-            return [
-                ...defaultTabs,
-                { id: 'All', label: 'All Students' },
-                ...(currentEvent.selectedPrograms || []).map(p => ({ id: p, label: p }))
-            ];
-        }
-
-        return defaultTabs;
-    }, [currentEvent, isNotUpcoming]);
+        return [
+            { id: 'Sections/Programs', label: 'Sections/Programs' },
+            { id: 'All', label: 'All Students' },
+            ...(currentEvent.selectedPrograms || []).map(p => ({ id: p, label: p }))
+        ];
+    }, [currentEvent]);
 
     // --- DYNAMIC DATA PROCESSING ---
     const processedData = useMemo(() => {
@@ -132,14 +125,13 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
     const columns = useMemo(() => {
         if (activeTab === 'Sections/Programs') {
             const cols = ['Section/Program Name', 'Number of Students'];
-            // If NOT upcoming, add Status and Credit
             if (isNotUpcoming) cols.push('Status', 'Credit Value');
             return cols;
         }
         
         // Student Lists
         const cols = ['Name', 'ID', 'Section'];
-        // RULE: If NOT upcoming, apply columns to ALL TABS
+        // FIX: Only push Status/Credit if it is NOT upcoming
         if (isNotUpcoming) cols.push('Status', 'Credit Value');
         
         return cols;
@@ -168,7 +160,7 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
                     </td>
                     <td style={cellStyle}>{item.studentCount} Students</td>
                     
-                    {/* Render Extra Columns if NOT upcoming */}
+                    {/* Only render extra cells if NOT upcoming */}
                     {isNotUpcoming && (
                         <>
                             <td style={cellStyle}>
@@ -201,7 +193,7 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
                 <td style={cellStyle}>{item.studentId}</td>
                 <td style={cellStyle}>{item.program}</td>
 
-                {/* Render Extra Columns if NOT upcoming */}
+                {/* FIX: Only render Status/Credit cells if NOT upcoming */}
                 {isNotUpcoming && (
                     <>
                         <td style={cellStyle}>
@@ -223,7 +215,7 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
 
     if (!isOpen || !currentEvent) return null;
 
-    // --- STYLES (Unchanged) ---
+    // --- STYLES ---
     const s = {
         backdrop: { position: 'fixed', inset: 0, zIndex: 3000, backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingRight: '16px', transition: 'opacity 300ms ease-out', opacity: isAnimating ? 1 : 0 },
         container: { position: 'relative', display: 'flex', flexDirection: 'row', gap: '24px', width: 'auto', maxWidth: '1200px', height: '90vh', maxHeight: '90vh', transition: 'transform 400ms cubic-bezier(0.16, 1, 0.3, 1)', transform: isAnimating ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.98)' },
@@ -289,6 +281,7 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
                             renderRow={renderRow}
                             metrics={[
                                 { label: 'Total Students', value: rawTableData.length },
+                                // Dynamically show "Present" metric ONLY if not upcoming
                                 ...(isNotUpcoming ? [{ 
                                     label: 'Present', 
                                     value: rawTableData.filter(x => x.status === 'Attended').length, 
