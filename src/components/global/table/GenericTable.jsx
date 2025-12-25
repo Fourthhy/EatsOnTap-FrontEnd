@@ -121,15 +121,17 @@ const GenericTable = ({
                 className="w-full flex justify-between items-center px-4 py-2 mb-4 bg-white rounded-md shadow-md border border-gray-200"
                 style={{ padding: 5, marginTop: 15, marginBottom: 15 }}
             >
-                <ButtonGroup
-                    buttonListGroup={tabs}
-                    activeId={activeTab}
-                    onSetActiveId={(id) => {
-                        onTabChange?.(id);
-                        setCurrentPage(1);
-                    }}
-                    activeColor="#4268BD"
-                />
+                {tabs.length == 0 ? <>&nbsp;</> :
+                    <ButtonGroup
+                        buttonListGroup={tabs}
+                        activeId={activeTab}
+                        onSetActiveId={(id) => {
+                            onTabChange?.(id);
+                            setCurrentPage(1);
+                        }}
+                        activeColor="#4268BD"
+                    />}
+
 
                 {/* UPDATED: Container now uses specific 10px gap */}
                 <div className="ml-auto flex items-center" style={{ gap: '10px' }}>

@@ -235,7 +235,7 @@ const MealOrdersTable = () => {
 
         return (
             <tr key={item.id}
-                className="hover:bg-gray-50 transition-colors"
+                className="hover:bg-gray-50 transition-colors duration-200"
                 style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}
             >
                 <td style={{ padding: '12px 24px', width: '48px', borderBottom: '1px solid #f3f4f6' }}>
