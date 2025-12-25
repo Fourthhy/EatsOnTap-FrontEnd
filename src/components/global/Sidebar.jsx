@@ -74,7 +74,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
     };
 
     const { breakpoint } = useBreakpoint(BREAKPOINTS, 'mobile-md');
-    const sidebarWidth = isExpanded ? "280px" : "80px";
+    const sidebarWidth = isExpanded ? "288px" : "80px";
     const transitionDuration = "300ms";
 
     return (
