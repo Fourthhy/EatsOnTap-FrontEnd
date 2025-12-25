@@ -3,13 +3,13 @@ function StatsCard({ title, value, subtitle, acceptanceRate, expectingPostiveRes
     const calculatedColor =
         expectingPostiveResult === true // Is the expectation explicitly POSITIVE?
             ? value >= acceptanceRate // -> If YES, check for success (>=)
-                ? "#0e7973ff" // Success (Green)
-                : "#CF7171" // Failure (Red)
+                ? "#10B981" // Success (Green)
+                : "#EF4444" // Failure (Red)
 
             : expectingPostiveResult === false // -> If NO, is the expectation explicitly NEGATIVE?
                 ? value <= acceptanceRate // -> If YES, check for success (<=)
-                    ? "#076560" // Success (Green)
-                    : "#CF7171" // Failure (Red)
+                    ? "#10B981" // Success (Green)
+                    : "#EF4444" // Failure (Red)
 
                 : "#4C4B4B"; // -> If neither true nor false (neutral/undefined), use Neutral Gray
 

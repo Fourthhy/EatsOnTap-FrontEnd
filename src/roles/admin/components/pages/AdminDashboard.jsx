@@ -32,12 +32,10 @@ export default function AdminDashboard() {
     const extractedMealRequestData = {
         acceptedRequests: [
             { title: "Accepted Request Rate", value: 100, subtitle: "Overall", acceptanceRate: 95, expectingPositiveResult: true, isPercentage: true },
-            { title: "Accepted Request Count", value: 34, subtitle: "Today" },
             { title: "Total Eligible Students", value: 1500, subtitle: "Today" }
         ],
         rejectedRequests: [
             { title: "Rejected Request Rate", value: 0, subtitle: "Overall", acceptanceRate: 5, expectingPositiveResult: false, isPercentage: true },
-            { title: "Rejected Request Count", value: 0, subtitle: "Today" },
             { title: "Total Waived Students", value: 0, subtitle: "Today" }
         ]
     }
@@ -46,6 +44,7 @@ export default function AdminDashboard() {
         today: [
             {
                 barChartData: [
+                    { dayOfWeek: "Monday", dish1: "Shanghai", dish2: "Gulay", Claimed: 390, Unclaimed: 1250 },
                     { dayOfWeek: "Tuesday", dish1: "Burger Steak", dish2: "", Claimed: 420, Unclaimed: 1503 },
                     { dayOfWeek: "Wednesday", dish1: "Menudo", dish2: "Adobo", Claimed: 100, Unclaimed: 2175 },
                     { dayOfWeek: "Thursday", dish1: "Fried Chicken", dish2: "Ampalaya", Claimed: 200, Unclaimed: 1863 },
@@ -55,10 +54,12 @@ export default function AdminDashboard() {
             },
             {
                 trendsData: [
-                    { dataSpan: "Jan", "Pre-packed Food": 200, "Customized Order": 200, "Unused vouchers": 300 },
-                    { dataSpan: "Feb", "Pre-packed Food": 1300, "Customized Order": 300, "Unused vouchers": 100 },
-                    { dataSpan: "Mar", "Pre-packed Food": 1200, "Customized Order": 100, "Unused vouchers": 500 },
-                    { dataSpan: "Apr", "Pre-packed Food": 900, "Customized Order": 50, "Unused vouchers": 50 },
+                    { "dataSpan": "Monday", "Pre-packed Food": 200, "Customized Order": 200, "Unused vouchers": 300 },
+                    { "dataSpan": "Tuesday", "Pre-packed Food": 1300, "Customized Order": 300, "Unused vouchers": 100 },
+                    { "dataSpan": "Wednesday", "Pre-packed Food": 1200, "Customized Order": 100, "Unused vouchers": 500 },
+                    { "dataSpan": "Thursday", "Pre-packed Food": 900, "Customized Order": 50, "Unused vouchers": 50 },
+                    { "dataSpan": "Friday", "Pre-packed Food": 1500, "Customized Order": 450, "Unused vouchers": 150 },
+                    { "dataSpan": "Saturday", "Pre-packed Food": 1800, "Customized Order": 600, "Unused vouchers": 200 }
                 ]
             },
             {
@@ -483,7 +484,7 @@ export default function AdminDashboard() {
                                                     className="flex h-[270px] w-[98%] border-[#D9D9D9] border-[1px]" style={{ marginBottom: 10, borderRadius: 10 }}
                                                 >
                                                     <div className="w-[25%] h-auto flex items-center justify-center" style={{ paddingTop: 20, paddingBottom: 20, marginLeft: 20 }}>
-                                                        <CustomStatsCard title={"Unclaim Count"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} hoverText="The count of how many claims are not claimed for this day" />
+                                                        <CustomStatsCard title={"Unclaim Count Today"} value={100} subtitle={"Today"} isPeso={false} isPercentage={false} isHasAcceptableRange={false} hoverText="The count of how many claims are not claimed for this day" />
                                                     </div>
                                                     <div className="h-[100%] w-[75%] flex justify-end items-center">
                                                         <LineChartBox data={getChartData('trendsData')} />
