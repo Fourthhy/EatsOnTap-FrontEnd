@@ -25,10 +25,15 @@ const GenericTable = ({
     overrideHeader = null, // Replaces Search/Date row (e.g. Bulk Action Bar)
     customThead = null,    // Replaces the standard <thead> (e.g. Matrix View)
 
-    // Action Props
+    // Primary Action Props
     onPrimaryAction,
     primaryActionLabel = "",
     primaryActionIcon = null,
+
+    // NEW: Secondary Action Props
+    onSecondaryAction,
+    secondaryActionLabel = "",
+    secondaryActionIcon = null,
 
     // Search Props
     searchTerm,
@@ -126,9 +131,11 @@ const GenericTable = ({
                     activeColor="#4268BD"
                 />
 
-                <div className="ml-auto flex items-center gap-2">
+                {/* UPDATED: Container now uses specific 10px gap */}
+                <div className="ml-auto flex items-center" style={{ gap: '10px' }}>
                     {customActions}
 
+                    {/* Primary Action Button */}
                     {primaryActionLabel && primaryActionIcon && (
                         <PrimaryActionButton
                             label={primaryActionLabel}
@@ -138,6 +145,22 @@ const GenericTable = ({
                             style={{
                                 padding: '10px 20px', borderRadius: 6, fontSize: 12, fontFamily: 'geist',
                                 boxShadow: "0 2px 6px #e5eaf0ac",
+                            }}
+                        />
+                    )}
+
+                    {/* NEW: Secondary Action Button */}
+                    {secondaryActionLabel && secondaryActionIcon && (
+                        <PrimaryActionButton
+                            label={secondaryActionLabel}
+                            icon={secondaryActionIcon}
+                            onClick={onSecondaryAction}
+                            className="cursor-pointer text-sm font-medium shadow-sm"
+                            style={{
+                                padding: '10px 20px', borderRadius: 6, fontSize: 12, fontFamily: 'geist',
+                                boxShadow: "0 2px 6px #e5eaf0ac",
+                                // Optional: You might want a different background color to distinguish it
+                                // backgroundColor: 'white', border: '1px solid #E5E7EB' 
                             }}
                         />
                     )}

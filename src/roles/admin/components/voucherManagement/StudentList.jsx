@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 
 
-import { Search, Calendar, Filter, ChevronLeft, ChevronRight, Plus, User } from 'lucide-react';
+import { Search, Calendar, Filter, ChevronLeft, ChevronRight, Plus, User, Edit } from 'lucide-react';
 import { generateData } from './mockData';
 import { AddStudentModal } from './AddStudentModal';
 import { LinkStatusBadge } from './LinkStatusBadge';
@@ -13,6 +13,7 @@ const StudentList = () => {
     const [activeTab, setActiveTab] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const allStudents = useMemo(() => generateData(), []);
 
@@ -175,7 +176,13 @@ const StudentList = () => {
                 onPrimaryAction={() => setIsAddModalOpen(true)}
                 primaryActionLabel="Add Student"
                 primaryActionIcon={<Plus size={16} />}
+
+                // onSecondaryAction={() => setIsEditModalOpen(true)}
+                // secondaryActionLabel="Edit Student"
+                // secondaryActionIcon={<Edit size={16} />}
+
                 
+
                 columns={['Student Name', 'Student ID', 'Regular/Irregular', getProgramHeaderLabel(), 'RFID Link']}
                 data={filteredStudents}
                 renderRow={renderRow}
