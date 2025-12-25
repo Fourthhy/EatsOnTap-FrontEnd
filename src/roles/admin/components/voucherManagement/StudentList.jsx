@@ -19,7 +19,7 @@ const StudentList = () => {
     // Configuration for interchanging headers
     const getProgramHeaderLabel = () => {
         if (activeTab === 'all') return 'Program / Section';
-        if (activeTab === 'Higher Education') return 'Programs';
+        if (activeTab === 'higherEducation') return 'Programs';
         return 'Section';
     };
 
@@ -176,8 +176,7 @@ const StudentList = () => {
                 primaryActionLabel="Add Student"
                 primaryActionIcon={<Plus size={16} />}
                 
-                columns={['Student Name', 'Student ID', 'Regular/Irregular', 'DYNAMIC', 'RFID Link']}
-                dynamicHeaderLabel={getProgramHeaderLabel()}
+                columns={['Student Name', 'Student ID', 'Regular/Irregular', getProgramHeaderLabel(), 'RFID Link']}
                 data={filteredStudents}
                 renderRow={renderRow}
             />
