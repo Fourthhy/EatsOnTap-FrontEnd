@@ -10,11 +10,13 @@ const theme = {
         textMain: '#111827',
         textSec: '#6B7280',
         border: '#E5E7EB',
-        white: '#FFFFFF',
+        white: '#FFFFFF',      // Used for Backgrounds
+        textWhite: '#EEEEEE',  // Used for Text (Separated)
         bg: '#F9FAFB'
     },
     fonts: { main: "'Geist', sans-serif" },
-    radius: { md: '8px', lg: '12px', full: '9999px' },
+    // UPDATED: Radius set to 6px
+    radius: { md: '6px', lg: '6px', full: '9999px' },
     shadows: { sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', md: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }
 };
 
@@ -27,7 +29,7 @@ const ToggleSwitch = ({ checked, onChange }) => {
         transition: 'background-color 0.2s', display: 'flex', alignItems: 'center',
     };
     const knobStyle = {
-        width: '20px', height: '20px', backgroundColor: 'white', borderRadius: theme.radius.full,
+        width: '20px', height: '20px', backgroundColor: theme.colors.white, borderRadius: theme.radius.full,
         position: 'absolute', left: checked ? '22px' : '2px', transition: 'left 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
         boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
     };
@@ -70,7 +72,9 @@ const ScheduleConfigForm = ({ type, data }) => {
             borderRadius: theme.radius.md, fontSize: '14px', color: theme.colors.textMain, outline: 'none', fontFamily: theme.fonts.main
         },
         button: {
-            backgroundColor: theme.colors.primary, color: 'white', border: 'none', borderRadius: theme.radius.md,
+            backgroundColor: theme.colors.primary, 
+            color: theme.colors.textWhite, // UPDATED: Using #EEEEEE
+            border: 'none', borderRadius: theme.radius.md,
             padding: '10px 20px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', fontFamily: theme.fonts.main
         }
     };

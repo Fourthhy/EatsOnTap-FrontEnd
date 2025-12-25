@@ -25,6 +25,7 @@ const VirtualCreditConfiguration = () => {
     const theme = {
         colors: {
             primary: '#4268BD',
+            whiteText: '#EEEEEE',
             white: '#FFFFFF',
             textMain: '#111827',
             textSec: '#6B7280',
@@ -32,7 +33,8 @@ const VirtualCreditConfiguration = () => {
             inputBg: '#F9FAFB',
         },
         fonts: { main: "'Geist', sans-serif" },
-        radius: { md: '8px', lg: '12px' },
+        // UPDATED: Changed all radius values to 6px
+        radius: { md: '6px', lg: '6px' },
         shadows: { sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }
     };
 
@@ -54,11 +56,12 @@ const VirtualCreditConfiguration = () => {
             fontSize: '14px', color: theme.colors.textMain, outline: 'none', fontFamily: theme.fonts.main
         },
         button: {
-            backgroundColor: theme.colors.primary, color: theme.colors.white, border: 'none',
+            backgroundColor: theme.colors.primary, color: theme.colors.whiteText, border: 'none',
             borderRadius: theme.radius.md, padding: '10px 20px', fontSize: '14px',
             fontWeight: '500', cursor: 'pointer', fontFamily: theme.fonts.main
         },
-        iconBox: { padding: '8px', backgroundColor: '#EFF6FF', color: theme.colors.primary, borderRadius: '8px' }
+        // UPDATED: Changed borderRadius to 6px
+        iconBox: { padding: '8px', backgroundColor: '#EFF6FF', color: theme.colors.primary, borderRadius: '6px' }
     };
 
     return (
