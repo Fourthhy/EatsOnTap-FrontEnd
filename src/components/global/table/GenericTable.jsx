@@ -185,12 +185,14 @@ const GenericTable = ({
                                 <p className="font-geist text-gray-500" style={{ fontSize: 13 }}>{subtitle}</p>
                             </div>
 
-                            {metrics && metrics.map((metric, index) => (
-                                <div key={index} className="text-right" style={{ paddingRight: 20 }}>
-                                    <span className="font-geist font-semibold" style={{ fontSize: 14 }}>{metric.label}: </span>
-                                    <span className="font-geist font-bold" style={{ fontSize: 18, color: metric.color || '#000000' }}>{metric.value}</span>
-                                </div>
-                            ))}
+                            <div className="flex gap-6">
+                                {metrics && metrics.map((metric, index) => (
+                                    <div key={index} className="text-right" style={{ paddingRight: 10 }}>
+                                        <span className="font-geist font-semibold" style={{ fontSize: 14 }}>{metric.label}: </span>
+                                        <span className="font-geist font-bold" style={{ fontSize: 18, color: metric.color || '#000000' }}>{metric.value}</span>
+                                    </div>
+                                ))
+                                }</div>
                         </div>
                     </div>
 
