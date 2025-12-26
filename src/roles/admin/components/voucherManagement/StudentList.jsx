@@ -4,13 +4,14 @@ import {
     ArrowLeft, Archive, TrendingUp, Eye, 
     X, ChevronDown, School, Users 
 } from 'lucide-react';
+import { FaChalkboardTeacher } from "react-icons/fa";
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateData } from './mockData';
 import { AddStudentModal } from './AddStudentModal';
 import { LinkStatusBadge } from './LinkStatusBadge';
 import { GenericTable } from '../../../../components/global/table/GenericTable';
 
-// --- DATA SOURCE (Programs & Sections Structure) ---
+// --- DATA SOURCE: Programs & Sections ---
 const programsAndSections = [
     {
         category: "preschool",
@@ -62,7 +63,18 @@ const programsAndSections = [
     }
 ];
 
-// --- EXTRACTED COMPONENT: Action Bar ---
+// --- MOCK DATA: Advisers (Updated for Filter Testing) ---
+const adviserRegistry = [
+    { id: "T-001", name: "Mr. Roberto Gomez", department: "Primary Education", assignment: "Grade 1 - Luke", years: 5 },
+    { id: "T-002", name: "Ms. Sarah Lim", department: "Primary Education", assignment: "Grade 1 - John", years: 3 },
+    { id: "T-003", name: "Dr. Alan Turing", department: "Higher Education", assignment: "BSIT-1A", years: 10 },
+    { id: "T-004", name: "Mr. Isaac Newton", department: "Senior High School", assignment: "STEM A", years: 8 },
+    { id: "T-005", name: "Ms. Elena Ramos", department: "Preschool", assignment: "Nursery - Sun", years: 2 },
+    { id: "T-006", name: "Mr. Arthur King", department: "Intermediate", assignment: "Grade 4 - Michael", years: 6 },
+    { id: "T-007", name: "Mr. Antonio Luna", department: "Junior High School", assignment: "Grade 7 - Rizal", years: 4 },
+];
+
+// --- SUB-COMPONENT: Selection Action Bar (Unchanged) ---
 const SelectionActionBar = ({ 
     selectedSection, 
     onClearSelection, 
@@ -71,7 +83,6 @@ const SelectionActionBar = ({
     nextSections, 
     onViewStudents 
 }) => {
-
     const styles = {
         actionBarContainer: {
             height: '100%', width: '100%', backgroundColor: '#4268BD', color: 'white',
@@ -123,7 +134,6 @@ const SelectionActionBar = ({
             </div>
 
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                {/* Archive Dropdown */}
                 <div style={{ position: 'relative' }}>
                     <button 
                         onClick={(e) => { e.stopPropagation(); onToggleDropdown('archive'); }}
@@ -142,7 +152,6 @@ const SelectionActionBar = ({
                     )}
                 </div>
 
-                {/* Advance Dropdown */}
                 <div style={{ position: 'relative' }}>
                     <button 
                         onClick={(e) => { e.stopPropagation(); onToggleDropdown('advance'); }}
@@ -168,7 +177,6 @@ const SelectionActionBar = ({
                     )}
                 </div>
 
-                {/* View Students Button */}
                 <button 
                     onClick={onViewStudents}
                     style={styles.primaryButton}
@@ -182,21 +190,56 @@ const SelectionActionBar = ({
     );
 };
 
+// --- SUB-COMPONENT: Hover Expanding Button ---
+const SwitcherButton = ({ mode, currentMode, icon, label, onClick }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const isActive = currentMode === mode;
+    const shouldExpand = isActive || isHovered;
+
+    return (
+        <button
+            onClick={onClick}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            style={{
+                padding: '6px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 500,
+                border: 'none', cursor: 'pointer',
+                backgroundColor: isActive ? 'white' : 'transparent',
+                color: isActive ? '#4268BD' : '#6b7280',
+                boxShadow: isActive ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none',
+                transition: 'background-color 200ms ease, color 200ms ease',
+                display: 'flex', alignItems: 'center', gap: '6px', height: '32px', outline: 'none'
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {icon}
+            </div>
+            
+            <motion.span
+                initial={false}
+                animate={{ width: shouldExpand ? 'auto' : 0, opacity: shouldExpand ? 1 : 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                style={{ overflow: 'hidden', whiteSpace: 'nowrap', display: 'inline-block' }}
+            >
+                {label}
+            </motion.span>
+        </button>
+    );
+};
+
 const StudentList = () => {
-    // --- STATE ---
     const [viewMode, setViewMode] = useState('sections'); 
     const [activeTab, setActiveTab] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     
-    // Selection State
     const [selectedSection, setSelectedSection] = useState(null); 
     const [isActionBarVisible, setIsActionBarVisible] = useState(false); 
     const [activeActionDropdown, setActiveActionDropdown] = useState(null); 
 
     const allStudents = useMemo(() => generateData(), []);
 
-    // --- HELPERS ---
+    // --- HELPER: Flatten Levels ---
     const allLevelsFlat = useMemo(() => {
         let levels = [];
         programsAndSections.forEach(cat => {
@@ -215,6 +258,7 @@ const StudentList = () => {
         return [];
     };
 
+    // --- HELPER: Filtering Sections ---
     const getFlattenedSections = () => {
         const relevantCategories = activeTab === 'all' 
             ? programsAndSections 
@@ -246,26 +290,51 @@ const StudentList = () => {
         return flatList;
     };
 
-    // --- UPDATED FILTERING LOGIC ---
+    // --- HELPER: Filtering Advisers ---
+    const getAdviserData = () => {
+        // Map Tab ID to Adviser Department String
+        const tabToDeptMap = {
+            'all': 'All',
+            'preschool': 'Preschool',
+            'primaryEducation': 'Primary Education',
+            'intermediate': 'Intermediate',
+            'juniorHighSchool': 'Junior High School',
+            'seniorHighSchool': 'Senior High School',
+            'higherEducation': 'Higher Education'
+        };
+
+        const targetDept = tabToDeptMap[activeTab];
+
+        return adviserRegistry.filter(teacher => {
+            const matchesTab = activeTab === 'all' || teacher.department === targetDept;
+            const matchesSearch = teacher.name.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesTab && matchesSearch;
+        });
+    };
+
+    // --- MAIN FILTER LOGIC (Strict Separation) ---
     const getTableData = () => {
-        if (viewMode === 'sections') return getFlattenedSections();
-        
-        // FIX: Broaden the Drilldown Filter
-        // If we selected "Grade 1 - Luke", we want to see ANYONE who is "Grade 1".
-        // This compensates for the fact that the students don't have a "Luke" section assigned yet.
+        // 1. ADVISER VIEW - Strict Return
+        if (viewMode === 'advisers') {
+            return getAdviserData();
+        }
+
+        // 2. SECTION VIEW - Strict Return
+        if (viewMode === 'sections') {
+            return getFlattenedSections();
+        }
+
+        // 3. DRILLDOWN VIEW - Specific Filter
         if (viewMode === 'drilldown' && selectedSection) {
             return allStudents.filter(s => {
                 const studentProgram = (s.program || "").toLowerCase();
                 const level = (selectedSection.level || "").toLowerCase();
                 const sectionName = (selectedSection.sectionName || "").toLowerCase();
-
-                // 1. Matches the Level (e.g. "grade 1" matches "grade 1")
-                // 2. Or Matches the Section (e.g. "bsit 1" matches "bsit-1a")
                 return studentProgram === level || sectionName.includes(studentProgram);
             });
         }
 
-        // Standard Filter for View All Students
+        // 4. STUDENT VIEW (Default Fallback) - Standard Filter
         return allStudents.filter(student => {
             let matchesTab = true;
             const level = (student.program || student.section || "").toLowerCase();
@@ -303,7 +372,7 @@ const StudentList = () => {
 
     const renderStudentRow = (student, index, startIndex) => (
         <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-            <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }}>{startIndex + index + 1}</td>
+            <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }}></td>
             <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-7.5 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden text-gray-500">
@@ -321,7 +390,6 @@ const StudentList = () => {
 
     const renderSectionRow = (section, index, startIndex) => {
         const isSelected = selectedSection && selectedSection.id === section.id;
-        
         return (
             <tr 
                 key={section.id} 
@@ -331,13 +399,12 @@ const StudentList = () => {
                         setIsActionBarVisible(true);
                     } else {
                         setSelectedSection(null);
-                        // Header will close via onExitComplete
                     }
                 }}
                 className="transition-colors cursor-pointer"
                 style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}
             >
-                <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }}>{startIndex + index + 1}</td>
+                <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }}></td>
                 <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>{section.level}</td>
                 <td style={cellStyle}>{section.sectionName}</td>
                 <td style={cellStyle}>
@@ -353,8 +420,31 @@ const StudentList = () => {
         );
     };
 
+    const renderAdviserRow = (adviser, index, startIndex) => (
+        <tr key={adviser.id} className="h-11 hover:bg-gray-50 transition-colors">
+            <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }}></td>
+            <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>{adviser.name}</td>
+            <td style={cellStyle}>{adviser.department}</td>
+            <td style={cellStyle}>{adviser.assignment}</td>
+        </tr>
+    );
+
+    // --- VARIABLES ---
     const isSectionView = viewMode === 'sections';
     const isDrilldown = viewMode === 'drilldown';
+    const isAdviserView = viewMode === 'advisers';
+
+    const getColumns = () => {
+        if (isSectionView) return ['Level', 'Section Name', 'Adviser', 'Student Count'];
+        if (isAdviserView) return ['Teacher Name', 'Department', 'Assignment'];
+        return ['Student Name', 'Student ID', 'Type', 'Program / Section', 'RFID Link'];
+    };
+
+    const getRenderRow = () => {
+        if (isSectionView) return renderSectionRow;
+        if (isAdviserView) return renderAdviserRow;
+        return renderStudentRow;
+    };
 
     const actionBarWithAnimation = (
         <AnimatePresence onExitComplete={() => setIsActionBarVisible(false)}>
@@ -366,10 +456,7 @@ const StudentList = () => {
                     activeDropdown={activeActionDropdown}
                     onToggleDropdown={(type) => setActiveActionDropdown(prev => prev === type ? null : type)}
                     nextSections={getNextLevelSections(selectedSection.level)}
-                    onViewStudents={() => {
-                        setViewMode('drilldown');
-                        // Do not clear selectedSection yet (needed for filtering)
-                    }}
+                    onViewStudents={() => setViewMode('drilldown')}
                 />
             )}
         </AnimatePresence>
@@ -377,32 +464,27 @@ const StudentList = () => {
 
     const viewSwitcher = !isDrilldown ? (
         <div style={{ backgroundColor: '#f3f4f6', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
-            {['sections', 'students'].map(mode => {
-                const isActive = viewMode === mode;
-                const label = mode === 'sections' ? 'View Sections' : 'View Students';
-                return (
-                    <button
-                        key={mode}
-                        onClick={() => { 
-                            setViewMode(mode); 
-                            setSelectedSection(null); 
-                            setIsActionBarVisible(false);
-                        }}
-                        style={{
-                            padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 500,
-                            border: 'none', cursor: 'pointer',
-                            backgroundColor: isActive ? 'white' : 'transparent',
-                            color: isActive ? '#4268BD' : '#6b7280',
-                            boxShadow: isActive ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none',
-                            transition: 'all 200ms ease',
-                            display: 'flex', alignItems: 'center', gap: '6px'
-                        }}
-                    >
-                        {mode === 'sections' ? <School size={14} /> : <Users size={14} />}
-                        {label}
-                    </button>
-                );
-            })}
+            <SwitcherButton 
+                mode="sections" 
+                currentMode={viewMode} 
+                icon={<School size={14} />} 
+                label="View Sections" 
+                onClick={() => { setViewMode('sections'); setSelectedSection(null); setIsActionBarVisible(false); }} 
+            />
+            <SwitcherButton 
+                mode="students" 
+                currentMode={viewMode} 
+                icon={<Users size={14} />} 
+                label="View Students" 
+                onClick={() => { setViewMode('students'); setSelectedSection(null); setIsActionBarVisible(false); }} 
+            />
+            <SwitcherButton 
+                mode="advisers" 
+                currentMode={viewMode} 
+                icon={<FaChalkboardTeacher size={14} />} 
+                label="View Advisers" 
+                onClick={() => { setViewMode('advisers'); setSelectedSection(null); setIsActionBarVisible(false); }} 
+            />
         </div>
     ) : null;
 
@@ -411,15 +493,15 @@ const StudentList = () => {
             <AddStudentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
 
             <GenericTable
-                title={isDrilldown 
-                    ? `Students in ${selectedSection?.level} - ${selectedSection?.sectionName}` 
-                    : (isSectionView ? "Section Overview" : "Student Master List")
-                }
-                subtitle={isDrilldown 
-                    ? "Manage students in this specific section" 
-                    : (isSectionView ? "Manage academic sections and advisers" : "Manage individual student records")
-                }
+                title={isDrilldown ? `Students in ${selectedSection?.level} - ${selectedSection?.sectionName}` : 
+                      (isSectionView ? "Section Overview" : 
+                      (isAdviserView ? "Faculty Management" : "Student Master List"))}
                 
+                subtitle={isDrilldown ? "Manage students in this specific section" : 
+                         (isSectionView ? "Manage academic sections and advisers" : 
+                         (isAdviserView ? "Manage teacher assignments" : "Manage individual student records"))}
+                
+                // FIXED: Hide tabs ONLY in Drilldown. Advisers should see tabs now.
                 tabs={isDrilldown ? [] : [
                     { label: 'All', id: 'all' },
                     { label: 'Preschool', id: 'preschool' },
@@ -436,33 +518,28 @@ const StudentList = () => {
                 onSearchChange={setSearchTerm}
 
                 metrics={[{ label: "Total Records", value: getTableData().length }]}
-                
                 customActions={viewSwitcher}
-
                 overrideHeader={isActionBarVisible ? actionBarWithAnimation : null}
 
                 onPrimaryAction={() => {
                     if (isDrilldown) {
-                        // GO BACK LOGIC: Reset everything
                         setViewMode('sections');
                         setSelectedSection(null);
                         setIsActionBarVisible(false);
                     } else if (isSectionView) {
                         console.log("Add Section Modal");
+                    } else if (isAdviserView) {
+                        console.log("Add Teacher Modal");
                     } else {
                         setIsAddModalOpen(true);
                     }
                 }}
-                primaryActionLabel={isDrilldown ? "Go Back" : (isSectionView ? "Add Section" : "Add Student")}
+                primaryActionLabel={isDrilldown ? "Go Back" : (isSectionView ? "Add Section" : (isAdviserView ? "Add Teacher" : "Add Student"))}
                 primaryActionIcon={isDrilldown ? <ArrowLeft size={16} /> : <Plus size={16} />}
 
-                columns={isSectionView 
-                    ? ['Level', 'Section Name', 'Adviser', 'Student Count'] 
-                    : ['Student Name', 'Student ID', 'Type', 'Program / Section', 'RFID Link']
-                }
-
+                columns={getColumns()}
                 data={getTableData()}
-                renderRow={isSectionView ? renderSectionRow : renderStudentRow}
+                renderRow={getRenderRow()}
             />
         </>
     );

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Check, X, Trash2, Clock, CalendarDays } from 'lucide-react';
+import { Check, X, Trash2, Clock, CalendarDays, Calendar, CheckCircle } from 'lucide-react';
 import { GenericTable } from '../../../../components/global/table/GenericTable';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -7,22 +7,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 const generateMockRequests = () => {
     const senders = ["Ms. Maria Santos", "Mr. Rudy Iba", "Ms. Sophie Sarcia", "Mr. Lorence Tagailog", "Event Organizer A", "Event Organizer B"];
 
-    // Split sections to categorize them easily
     const basicEdSections = ["Kinder-Love", "Grade 1-Faith", "Grade 4-Hope", "Grade 7-Rizal", "Grade 10-Bonifacio", "Grade 11-STEM", "Grade 12-ABM"];
     const higherEdSections = ["BSIT 1-A", "BSCS 2-B", "AB Broadcasting 3-A", "BSSW 4-C", "Associate CT 1-A"];
     const eventSections = ["Sports Fest", "Seminary Night", "Teachers Conference", "Foundation Day"];
 
     return Array.from({ length: 50 }).map((_, index) => {
-        const isEvent = Math.random() > 0.8; // 20% chance of being an event
+        const isEvent = Math.random() > 0.8; 
 
         let section = "";
         let category = "";
 
         if (isEvent) {
             section = eventSections[Math.floor(Math.random() * eventSections.length)];
-            category = "Event"; // Events usually don't fall strictly into basic/higher unless specified, treated as separate or neutral
+            category = "Event";
         } else {
-            // Randomly assign Basic vs Higher Ed (60% Basic, 40% Higher)
             const isBasic = Math.random() > 0.4;
             if (isBasic) {
                 section = basicEdSections[Math.floor(Math.random() * basicEdSections.length)];
@@ -41,16 +39,66 @@ const generateMockRequests = () => {
             waivedCount: Math.floor(Math.random() * 5),
             timeSent: "7:10 AM",
             type: isEvent ? 'Event' : 'Regular',
-            category: category, // Added for filtering tabs
+            category: category, 
             status: index % 4 === 0 ? "Approved" : (index % 7 === 0 ? "Rejected" : "Pending"),
         };
     });
 };
 
-const MealOrdersTable = () => {
-    // --- UPDATED TABS ---
-    const [activeTab, setActiveTab] = useState('All');
+// --- SUB-COMPONENT: Hover Expanding Button ---
+const SwitcherButton = ({ mode, currentMode, icon, label, onClick }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const isActive = currentMode === mode;
+    const shouldExpand = isActive || isHovered;
 
+    return (
+        <button
+            onClick={onClick}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            style={{
+                padding: '6px 10px', 
+                borderRadius: '6px', 
+                fontSize: '12px', 
+                fontWeight: 500,
+                border: 'none', 
+                cursor: 'pointer',
+                backgroundColor: isActive ? 'white' : 'transparent',
+                color: isActive ? '#4268BD' : '#6b7280',
+                boxShadow: isActive ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none',
+                transition: 'background-color 200ms ease, color 200ms ease',
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '6px',
+                height: '32px', // Fixed height for consistency
+                outline: 'none'
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {icon}
+            </div>
+            
+            <motion.span
+                initial={false}
+                animate={{ 
+                    width: shouldExpand ? 'auto' : 0,
+                    opacity: shouldExpand ? 1 : 0
+                }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                style={{ 
+                    overflow: 'hidden', 
+                    whiteSpace: 'nowrap',
+                    display: 'inline-block'
+                }}
+            >
+                {label}
+            </motion.span>
+        </button>
+    );
+};
+
+const MealOrdersTable = () => {
+    const [activeTab, setActiveTab] = useState('All');
     const [orderType, setOrderType] = useState('Pending Meal Orders');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedIds, setSelectedIds] = useState([]);
@@ -69,7 +117,6 @@ const MealOrdersTable = () => {
             return () => clearTimeout(timer);
         }
     }, [selectedIds.length]);
-
 
     // --- FILTERING ---
     const filteredData = useMemo(() => {
@@ -126,34 +173,36 @@ const MealOrdersTable = () => {
         setSelectedIds([]);
     }
 
-    // --- UPDATED TABS CONFIG ---
     const tabs = [
         { id: 'All', label: 'All' },
         { id: 'Basic Education', label: 'Basic Education' },
         { id: 'Higher Education', label: 'Higher Education' }
     ];
 
+    // --- NEW DYNAMIC VIEW SWITCHER ---
     const viewSwitcher = (
         <div style={{ backgroundColor: '#f3f4f6', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
-            {['Pending Meal Orders', 'Confirmed Meal Orders', 'Event Meal Request'].map(type => {
-                const isActive = orderType === type;
-                return (
-                    <button
-                        key={type}
-                        onClick={() => { setOrderType(type); setSelectedIds([]); }}
-                        style={{
-                            padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 500,
-                            border: 'none', cursor: 'pointer',
-                            backgroundColor: isActive ? 'white' : 'transparent',
-                            color: isActive ? '#4268BD' : '#6b7280',
-                            boxShadow: isActive ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none',
-                            transition: 'all 200ms ease'
-                        }}
-                    >
-                        {type}
-                    </button>
-                );
-            })}
+            <SwitcherButton 
+                mode="Pending Meal Orders" 
+                currentMode={orderType} 
+                icon={<Clock size={14} />} 
+                label="Pending Orders" 
+                onClick={() => { setOrderType('Pending Meal Orders'); setSelectedIds([]); }} 
+            />
+            <SwitcherButton 
+                mode="Confirmed Meal Orders" 
+                currentMode={orderType} 
+                icon={<CheckCircle size={14} />} 
+                label="Confirmed Orders" 
+                onClick={() => { setOrderType('Confirmed Meal Orders'); setSelectedIds([]); }} 
+            />
+            <SwitcherButton 
+                mode="Event Meal Request" 
+                currentMode={orderType} 
+                icon={<Calendar size={14} />} 
+                label="Event Requests" 
+                onClick={() => { setOrderType('Event Meal Request'); setSelectedIds([]); }} 
+            />
         </div>
     );
 

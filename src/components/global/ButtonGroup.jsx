@@ -13,7 +13,7 @@ const ButtonGroupItem = ({
   const isActive = buttonData.id === activeId;
 
   const baseStyle = {
-    padding: '0.5rem 1rem',
+    padding: '0.5rem 0.80rem',
     borderRadius: 6,
     fontSize: 12,
     fontWeight: 400,
