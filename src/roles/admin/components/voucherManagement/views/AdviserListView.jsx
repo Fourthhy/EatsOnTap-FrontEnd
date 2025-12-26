@@ -57,7 +57,7 @@ export const AdviserListView = ({ switcher }) => {
             tabs={[
                 { label: 'All', id: 'all' },
                 { label: 'Preschool', id: 'preschool' },
-                { label: 'Primary', id: 'primaryEducation' },
+                { label: 'Primary Education', id: 'primaryEducation' },
                 { label: 'Intermediate', id: 'intermediate' },
                 { label: 'Junior Highschool', id: 'juniorHighSchool' },
                 { label: 'Senior Highschool', id: 'seniorHighSchool' },
