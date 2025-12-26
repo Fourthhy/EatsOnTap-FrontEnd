@@ -255,7 +255,7 @@ const MealOrdersTable = () => {
     const renderRow = (item, index, startIndex, selection) => {
         const cellStyle = {
             fontFamily: 'geist, sans-serif', fontSize: '12px', color: '#4b5563',
-            padding: '6px 0px', borderBottom: '1px solid #f3f4f6'
+            borderBottom: '1px solid #f3f4f6', height: '43.5px', verticalAlign: 'middle'
         };
 
         const getStatusBadge = (status) => {

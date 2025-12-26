@@ -1,21 +1,41 @@
 // components/SelectionActionBar.jsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X, Archive, ChevronDown, TrendingUp, Eye } from 'lucide-react';
+import { X, Archive, ChevronDown, Eye, Edit, Save, UserPlus, CheckCircle } from 'lucide-react';
 
 export const SelectionActionBar = ({ 
-    selectedSection, 
+    selectedItem, 
+    variant = 'section', // 'section', 'student', 'promotion', 'graduation'
+    isEditing = false,
+    
+    // Common
     onClearSelection, 
+    
+    // Section Specific
+    onViewStudents,
+
+    // Student Specific (Edit Mode)
     activeDropdown, 
-    onToggleDropdown, 
-    nextSections, 
-    onViewStudents 
+    onToggleDropdown,
+    onEditStudent,
+    onSaveStudent,
+    onCancelEdit,
+    onArchiveOption,
+
+    // Promotion / Graduation Specific
+    selectedCount = 0,
+    onAssignStudents, 
+    onSavePromotion,  
+    onCancelPromotion 
 }) => {
     const styles = {
         actionBarContainer: {
             height: '100%', width: '100%', backgroundColor: '#4268BD', color: 'white',
             padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            fontFamily: 'geist, sans-serif'
+            fontFamily: 'geist, sans-serif',
+            // FIX: High Z-Index to ensure clickability over table headers
+            zIndex: 8000, 
+            position: 'relative' 
         },
         ghostButton: {
             backgroundColor: 'rgba(255, 255, 255, 0.1)', color: 'white', padding: '8px 16px',
@@ -27,20 +47,138 @@ export const SelectionActionBar = ({
             borderRadius: '8px', fontSize: '13px', fontWeight: 600, border: 'none', cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
         },
+        saveButton: {
+            backgroundColor: '#10B981', color: 'white', padding: '8px 16px',
+            borderRadius: '8px', fontSize: '13px', fontWeight: 600, border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+        },
+        cancelButton: {
+            backgroundColor: 'white', color: '#EF4444', padding: '8px 16px',
+            borderRadius: '8px', fontSize: '13px', fontWeight: 600, border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+        },
         dropdownMenu: {
             position: 'absolute', right: 0, marginTop: '8px', backgroundColor: 'white',
             borderRadius: '8px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-            overflow: 'hidden', zIndex: 50, color: '#1f2937', padding: '4px 0', minWidth: '160px'
+            overflow: 'hidden', zIndex: 8001, // Ensure dropdown sits on top of the bar
+            color: '#1f2937', padding: '4px 0', minWidth: '160px'
         },
         dropdownItem: {
             width: '100%', textAlign: 'left', padding: '8px 16px', fontSize: '14px',
             backgroundColor: 'transparent', border: 'none', cursor: 'pointer', color: '#374151',
             transition: 'background-color 0.15s'
         },
-        sectionLabel: {
-            fontSize: '11px', fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase',
-            letterSpacing: '0.05em', padding: '8px 16px'
+        disabledButton: {
+            opacity: 0.5, cursor: 'not-allowed', backgroundColor: 'rgba(255,255,255,0.5)', color: '#4268BD',
+            padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, border: 'none',
+            display: 'flex', alignItems: 'center', gap: '8px'
         }
+    };
+
+    const renderActions = () => {
+        // --- 1. EDIT MODE ---
+        if (isEditing) {
+            return (
+                <>
+                    <button style={styles.cancelButton} onClick={onCancelEdit}>
+                        <X size={16} /> Cancel
+                    </button>
+                    <button style={styles.saveButton} onClick={onSaveStudent}>
+                        <Save size={16} /> Save Changes
+                    </button>
+                </>
+            );
+        }
+
+        // --- 2. PROMOTION MODE ---
+        if (variant === 'promotion') {
+            return (
+                <>
+                    <button 
+                        style={selectedCount === 0 ? styles.disabledButton : styles.primaryButton} 
+                        onClick={selectedCount > 0 ? onAssignStudents : undefined}
+                    >
+                        <UserPlus size={16} /> Assign
+                    </button>
+                    <button style={styles.saveButton} onClick={onSavePromotion}>
+                        <CheckCircle size={16} /> Save
+                    </button>
+                </>
+            );
+        }
+
+        // --- 3. GRADUATION MODE ---
+        if (variant === 'graduation') {
+            return (
+                <>
+                    <div style={{ position: 'relative' }}>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); onToggleDropdown('archive'); }}
+                            style={styles.ghostButton}
+                        >
+                            <Archive size={16} /> Archive <ChevronDown size={14} />
+                        </button>
+                        {activeDropdown === 'archive' && (
+                            <div style={styles.dropdownMenu}>
+                                {['Graduate', 'Transfer', 'Drop'].map(opt => (
+                                    <button key={opt} style={styles.dropdownItem} onClick={() => onArchiveOption(opt)}>
+                                        {opt}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <button style={styles.cancelButton} onClick={onCancelPromotion}>
+                        <X size={16} /> Cancel
+                    </button>
+                </>
+            );
+        }
+
+        // --- 4. SECTION VIEW ---
+        if (variant === 'section') {
+            return (
+                <button onClick={onViewStudents} style={styles.primaryButton}>
+                    <Eye size={16} /> View Students
+                </button>
+            );
+        }
+
+        // --- 5. STUDENT VIEW ---
+        if (variant === 'student') {
+            return (
+                <>
+                    <div style={{ position: 'relative' }}>
+                        <button 
+                            onClick={(e) => { e.stopPropagation(); onToggleDropdown('archive'); }}
+                            style={styles.ghostButton}
+                        >
+                            <Archive size={16} /> Archive <ChevronDown size={14} />
+                        </button>
+                        {activeDropdown === 'archive' && (
+                            <div style={styles.dropdownMenu}>
+                                {['Graduate', 'Transfer', 'Drop'].map(opt => (
+                                    <button key={opt} style={styles.dropdownItem} onClick={() => onArchiveOption(opt)}>
+                                        {opt}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <button onClick={onEditStudent} style={styles.primaryButton}>
+                        <Edit size={16} /> Edit
+                    </button>
+                </>
+            );
+        }
+    };
+
+    const getLabel = () => {
+        if (variant === 'promotion' || variant === 'graduation') return `${selectedCount} Students Selected`;
+        if (variant === 'section') return `${selectedItem?.level || ''} - ${selectedItem?.sectionName || ''}`;
+        if (variant === 'student') return selectedItem?.name || 'Student';
+        return 'Item Selected';
     };
 
     return (
@@ -57,62 +195,12 @@ export const SelectionActionBar = ({
                     <X size={20} />
                 </button>
                 <span style={{ fontWeight: 500, fontSize: '14px' }}>
-                    {selectedSection.level} - {selectedSection.sectionName} Selected
+                    {getLabel()}
                 </span>
             </div>
 
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <div style={{ position: 'relative' }}>
-                    <button 
-                        onClick={(e) => { e.stopPropagation(); onToggleDropdown('archive'); }}
-                        style={styles.ghostButton}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-                    >
-                        <Archive size={16} /> Archive <ChevronDown size={14} />
-                    </button>
-                    {activeDropdown === 'archive' && (
-                        <div style={styles.dropdownMenu}>
-                            <button style={styles.dropdownItem} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                Graduate
-                            </button>
-                        </div>
-                    )}
-                </div>
-
-                <div style={{ position: 'relative' }}>
-                    <button 
-                        onClick={(e) => { e.stopPropagation(); onToggleDropdown('advance'); }}
-                        style={styles.ghostButton}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-                    >
-                        <TrendingUp size={16} /> Advance <ChevronDown size={14} />
-                    </button>
-                    {activeDropdown === 'advance' && (
-                        <div style={{ ...styles.dropdownMenu, minWidth: '192px', maxHeight: '240px', overflowY: 'auto' }}>
-                            <div style={styles.sectionLabel}>Move to Next Level</div>
-                            {nextSections.length > 0 ? (
-                                nextSections.map((sect, idx) => (
-                                    <button key={idx} style={styles.dropdownItem} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                                        {sect.name}
-                                    </button>
-                                ))
-                            ) : (
-                                <div style={{ padding: '8px 16px', fontSize: '12px', color: '#9ca3af', fontStyle: 'italic' }}>No next level found</div>
-                            )}
-                        </div>
-                    )}
-                </div>
-
-                <button 
-                    onClick={onViewStudents}
-                    style={styles.primaryButton}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-                >
-                    <Eye size={16} /> View Students
-                </button>
+                {renderActions()}
             </div>
         </motion.div>
     );
