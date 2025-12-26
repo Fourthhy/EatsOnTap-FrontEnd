@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useBreakpoint } from "use-breakpoint"
 import { useState } from "react";
 import { Input } from "@/components/ui/input"
@@ -13,6 +14,12 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const loginHeader = "Login - Eat's on Tap";
+
+  useEffect(() => {
+    document.title = loginHeader;
+  }, []);
 
   const handleSubmit = async () => {
     setLoading(true);
