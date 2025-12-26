@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import ProtectedRoute from "./ProtectedRoutes";
 import Login from "../Login";
-
 
 import HEStudentManagement from "../roles/adminAssitant/components/pages/HEStudentManagement"
 import MealEligibilityManagement from "../roles/adminAssitant/components/pages/MealEligibilityManagement"

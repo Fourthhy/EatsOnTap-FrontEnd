@@ -8,6 +8,7 @@ import { SidebarItem } from "./SidebarItem";
 import { Tooltip } from "flowbite-react";
 
 function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, settingMenu }) {
+    const [activeTab, setActiveTab] = useState(menuItems[0]?.text || "");
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -54,11 +55,17 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
         }
     }, [location.pathname, menuItems]);
 
+    useEffect(() => {
+        document.title = `${activeTab} - Eat's on Tap`;
+    }, [activeTab])
+
     // Handle Click to Navigate
     const handleItemClick = (index) => {
         setActiveIndex(index);
         setOnSettings(false);
         navigate(menuItems[index].path);
+        setActiveTab(menuItems[index].text);
+
     };
 
     // Handle click of settings
