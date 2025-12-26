@@ -142,20 +142,6 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                         }}
                         ref={containerRef}
                     >
-                        {/* --- QUICK ACTIONS LABEL --- */}
-                        <AnimatePresence>
-                            {quickActionsLabel && isExpanded && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-                                    animate={{ height: "auto", opacity: 1, marginBottom: 10 }}
-                                    exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    style={{ paddingLeft: "1rem", overflow: "hidden" }}
-                                >
-                                    <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{quickActionsLabel}</span>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
 
                         {/* --- FIX: QUICK ACTIONS --- */}
                         {/* Restored the logic to use item.onClickAction if provided (for Modals like Add Dish) */}
@@ -179,21 +165,6 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                         <div style={{ margin: "10px 0", width: "100%", display: "flex", justifyContent: "center" }}>
                             <hr style={{ width: "90%", opacity: 0.3 }} />
                         </div>
-
-                        {/* --- MAIN MENU LABEL --- */}
-                        <AnimatePresence>
-                            {menutItemsLabel && isExpanded && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-                                    animate={{ height: "auto", opacity: 1, marginBottom: 10 }}
-                                    exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    style={{ paddingLeft: "1rem", overflow: "hidden" }}
-                                >
-                                    <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{menutItemsLabel}</span>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
 
                         {menuItems.map((item, i) => (
                             <SidebarItem
