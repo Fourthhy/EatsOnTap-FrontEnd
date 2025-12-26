@@ -5,85 +5,75 @@ const SidebarItem = ({ index, icon, text, expanded, active, onClick }) => {
   return (
     <motion.div
       onClick={onClick}
-      // 1. CONTAINER ANIMATION (Width & Padding only, NO background color)
+      // 1. CONTAINER ANIMATION
+      // We animate width, but we KEEP padding-left constant so the icon never moves.
       initial={false}
       animate={{
-        width: expanded ? "280px" : "72px",
-        // We remove backgroundColor here to prevent blinking.
-        // We still animate text color.
-        color: active ? "#2b1677" : "#e5e7eb",
-        justifyContent: expanded ? "flex-start" : "center",
-        paddingLeft: expanded ? "1rem" : "0",
-        paddingRight: expanded ? "1rem" : "0",
+        width: expanded ? "280px" : "72px", 
+        // 72px width + margin auto in parent = centered in 80px sidebar
+        // Icon is approx 24px wide. 
+        // 72px - 24px = 48px remaining space. 24px padding on each side centers it.
+        paddingLeft: "24px", 
+        paddingRight: expanded ? "12px" : "24px",
       }}
-      // 2. Hover for INACTIVE items only
       whileHover={{
-        backgroundColor: active ? "transparent" : "rgba(20, 52, 99, 0.25)",
-        color: active ? "#2b1677" : "white",
+        backgroundColor: active ? "rgba(0,0,0,0)" : "rgba(20, 52, 99, 0.25)",
       }}
       style={{
         display: "flex",
         alignItems: "center",
+        justifyContent: "flex-start", // ALWAYS align left, rely on padding to center the icon
         height: "50px",
-        padding: "0.5rem",
         borderRadius: "0.5rem",
         cursor: "pointer",
         position: "relative",
-        overflow: "hidden",
+        overflow: "hidden", 
         zIndex: 1,
-        // Remove direct background color from style
+        // Active Text Color (Not background)
+        color: active ? "#2b1677" : "#e5e7eb",
+        // Force hardware acceleration to prevent jitter
+        transform: "translateZ(0)", 
       }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
     >
       
-      {/* 3. THE SLIDING INDICATOR (Absolute Positioned Background) */}
+      {/* 2. SLIDING ACTIVE BACKGROUND INDICATOR */}
       {active && (
         <motion.div
-          layoutId="sidebar-active-indicator" // This ID must be unique in the list but shared across items
+          layoutId="sidebar-active-indicator"
           style={{
             position: "absolute",
-            inset: 0, // Covers the whole parent
+            inset: 0,
             backgroundColor: "white",
             borderRadius: "0.5rem",
-            zIndex: -1, // Puts it behind the text/icon
+            zIndex: 0, // Behind everything
             boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)"
           }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
         />
       )}
 
-      {/* Icon Container */}
-      <motion.div
-        layout
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: index * 0.1 }}
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minWidth: "2rem",
-          zIndex: 1, // Ensure on top of slider
-        }}
-      >
+      {/* 3. ICON CONTAINER - STATIONARY */}
+      {/* Z-Index 10 ensures it stays above the sliding text */}
+      <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', minWidth: '24px' }}>
         {icon}
-      </motion.div>
+      </div>
 
-      {/* Text Label */}
-      <AnimatePresence mode="wait">
+      {/* 4. TEXT LABEL - SLIDING ANIMATION */}
+      {/* Z-Index 5 puts it logically "under" the icon layer if they overlapped, 
+          but visually next to it. */}
+      <AnimatePresence>
         {expanded && (
           <motion.span
-            initial={{ opacity: 0, x: -10 }}
+            initial={{ opacity: 0, x: -20 }} // Start slightly "behind" the icon
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            transition={{ duration: 0.2, delay: 0.1 }}
+            exit={{ opacity: 0, x: -20 }}    // Slide back "behind" on close
             style={{
               fontSize: "0.875rem",
               fontWeight: "500",
               whiteSpace: "nowrap",
-              marginLeft: "10px", // Added margin manually since we removed gap from flex
-              zIndex: 1, // Ensure on top of slider
-              // Apply gradient only if active
+              marginLeft: "12px",
+              zIndex: 5, 
               ...(active
                 ? {
                     background: "linear-gradient(to right, #263C70, #4973D6)",
@@ -92,6 +82,7 @@ const SidebarItem = ({ index, icon, text, expanded, active, onClick }) => {
                   }
                 : {}),
             }}
+            transition={{ duration: 0.2, ease: "easeOut" }} // Fast slide
           >
             {text}
           </motion.span>

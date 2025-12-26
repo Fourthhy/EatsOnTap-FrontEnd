@@ -5,75 +5,40 @@ import { LogOut } from "lucide-react";
 import { useBreakpoint } from "use-breakpoint";
 import logo from "/lv-logo.svg";
 import { SidebarItem } from "./SidebarItem";
-import { Tooltip } from "flowbite-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, settingMenu }) {
-    const [activeTab, setActiveTab] = useState(menuItems[0]?.text || "");
     const navigate = useNavigate();
     const location = useLocation();
 
-    // --- FIX 1: Initialize state based on current URL to prevent "flash" on refresh ---
-    const [onSettings, setOnSettings] = useState(() => 
-        location.pathname.includes('/admin/settings')
-    );
-    
-    const [activeIndex, setActiveIndex] = useState(() => {
-        const index = menuItems.findIndex(item => location.pathname.includes(item.path));
-        // If we found a match, use it. If not, default to 0 only if we aren't on settings.
-        return index !== -1 ? index : 0;
-    });
-
+    // --- STATE ---
     const [isExpanded, setIsExpanded] = useState(false);
     const containerRef = useRef(null);
-    const itemRefs = useRef([]); 
+
+    // --- HELPER: Determine if a path is active ---
+    const isPathActive = (path) => {
+        if (!path) return false;
+        if (location.pathname === path) return true;
+        if (path !== '/' && location.pathname.startsWith(path)) return true;
+        return false;
+    };
+
+    // --- EFFECT: Update Document Title ---
+    useEffect(() => {
+        const allItems = [...(quickActions || []), ...menuItems, ...(settingMenu || [])];
+        const currentItem = allItems.find(item => isPathActive(item.path));
+        const pageTitle = currentItem ? currentItem.text : "Dashboard";
+        document.title = `${pageTitle} - Eat's on Tap`;
+    }, [location.pathname, menuItems, quickActions, settingMenu]);
 
     const handleLogout = () => {
         logout();
         navigate('/');
     };
 
-    const handleToggleSidebar = () => {
-        setIsExpanded(!isExpanded);
+    const handleItemClick = (path) => {
+        navigate(path);
     };
-
-    // --- FIX 2: Update useEffect to explicitly handle Settings path ---
-    useEffect(() => {
-        const currentPath = location.pathname;
-        
-        // Check if we are on the Settings page
-        if (currentPath.includes('/admin/settings')) {
-            setOnSettings(true);
-            setActiveIndex(-1); // Deselect main menu items
-            return;
-        }
-
-        // Check if we are on a Main Menu page
-        const activeItemIndex = menuItems.findIndex(item => currentPath.includes(item.path));
-        if (activeItemIndex !== -1) {
-            setActiveIndex(activeItemIndex);
-            setOnSettings(false);
-        }
-    }, [location.pathname, menuItems]);
-
-    useEffect(() => {
-        document.title = `${activeTab} - Eat's on Tap`;
-    }, [activeTab])
-
-    // Handle Click to Navigate
-    const handleItemClick = (index) => {
-        setActiveIndex(index);
-        setOnSettings(false);
-        navigate(menuItems[index].path);
-        setActiveTab(menuItems[index].text);
-
-    };
-
-    // Handle click of settings
-    const handleSettingsClick = () => {
-        setActiveIndex(-1); // Deselect main menu items
-        setOnSettings(true);
-        navigate('/admin/settings');
-    }
 
     const BREAKPOINTS = {
         'mobile-md': 375, 'mobile-lg': 425, 'tablet': 768,
@@ -82,36 +47,91 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
 
     const { breakpoint } = useBreakpoint(BREAKPOINTS, 'mobile-md');
     const sidebarWidth = isExpanded ? "288px" : "80px";
-    const transitionDuration = "300ms";
+    
+    // Shared transition for sync
+    const springTransition = {
+        type: "spring",
+        stiffness: 500,
+        damping: 30,
+        mass: 0.8,
+    };
 
     return (
         <div style={{ width: "100%", minHeight: "100vh", backgroundColor: "#F4FDFF" }}>
             {/* 1. Sidebar */}
-            <div
+            <motion.div
+                initial={false}
+                animate={{ width: sidebarWidth }}
                 style={{
-                    width: sidebarWidth,
                     height: "100vh",
                     background: "linear-gradient(to bottom, #153FA3, #142345)",
                     color: "white",
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
-                    transition: `width ${transitionDuration} cubic-bezier(0.4, 0, 0.2, 1)`,
                     position: "fixed",
                     top: 0,
                     left: 0,
                     zIndex: 1000,
-                }}>
+                    overflow: "hidden"
+                }}
+                transition={springTransition}
+                onMouseEnter={() => setIsExpanded(true)}
+                onMouseLeave={() => setIsExpanded(false)}
+            >
                 <div>
-                    {/* Header/Logo Area */}
-                    <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem", marginBottom: "1.5rem" }}>
-                        <img src={logo} alt="Logo" style={{ width: isExpanded ? "3.5rem" : "2.5rem", height: isExpanded ? "3.5rem" : "2.5rem", transition: "all 300ms ease" }} />
-                        {isExpanded && (
-                            <div style={{ marginLeft: '10px' }} className="h-auto w-auto flex flex-col justify-center gap-0">
-                                <p style={{ fontWeight: "bold" }} className="font-geist text-[2.3vh] h-auto flex items-end">Eat's on Tap</p>
-                                <p style={{ fontWeight: 'regular' }} className="font-tolkien text-[1.5vh] h-auto flex items-start">LA VERDAD CHRISTIAN COLLEGE</p>
-                            </div>
-                        )}
+                    {/* --- LOGO AREA (ANIMATED) --- */}
+                    <div style={{ 
+                        display: "flex", 
+                        alignItems: "center", 
+                        marginTop: "1rem", 
+                        marginBottom: "1.5rem", 
+                        minHeight: "3.5rem",
+                        // PINNED LOGIC: Fixed left padding centers it in collapsed state (80px - 40px logo / 2 = 20px)
+                        // It stays pinned left when expanded.
+                        paddingLeft: "20px", 
+                        overflow: "hidden"
+                    }}>
+                        {/* Stationary Logo Image */}
+                        <motion.img 
+                            src={logo} 
+                            alt="Logo" 
+                            initial={false}
+                            animate={{ 
+                                width: isExpanded ? "3.5rem" : "2.5rem", 
+                                height: isExpanded ? "3.5rem" : "2.5rem" 
+                            }}
+                            style={{ 
+                                flexShrink: 0, // Prevent shrinking
+                                objectFit: "contain", 
+                                zIndex: 10, 
+                                position: "relative" 
+                            }}
+                            transition={springTransition}
+                        />
+                        
+                        {/* Sliding Text from behind */}
+                        <AnimatePresence>
+                            {isExpanded && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                    transition={{ duration: 0.2, ease: "easeOut" }}
+                                    style={{ 
+                                        marginLeft: '10px', 
+                                        display: "flex", 
+                                        flexDirection: "column", 
+                                        justifyContent: "center",
+                                        zIndex: 5, // Behind logo logically
+                                        whiteSpace: "nowrap"
+                                    }}
+                                >
+                                    <p style={{ fontWeight: "bold" }} className="font-geist text-[2.3vh] h-auto flex items-end">Eat's on Tap</p>
+                                    <p style={{ fontWeight: 'regular' }} className="font-tolkien text-[1.5vh] h-auto flex items-start">LA VERDAD CHRISTIAN COLLEGE</p>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
                     {/* Navigation Items */}
@@ -124,128 +144,154 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                         }}
                         ref={containerRef}
                     >
-                        {quickActionsLabel && isExpanded && (
-                            <div style={{ margin: "10px 0", paddingLeft: "1rem" }}>
-                                <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{quickActionsLabel}</span>
-                            </div>
-                        )}
+                        {/* --- ANIMATED QUICK ACTIONS LABEL --- */}
+                        {/* <AnimatePresence>
+                            {quickActionsLabel && isExpanded && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+                                    animate={{ height: "auto", opacity: 1, marginBottom: 10 }}
+                                    exit={{ height: 0, opacity: 0, marginBottom: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    style={{ paddingLeft: "1rem", overflow: "hidden" }}
+                                >
+                                    <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{quickActionsLabel}</span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence> */}
 
                         {quickActions && quickActions.map((item, i) => (
-                            <Tooltip
+                            <SidebarItem
                                 key={i}
-                                content={<p className="font-geist w-[120px]" style={{ padding: "10px 15px" }}>{item.text}</p>}
-                                placement="right"
-                                trigger={isExpanded ? "none" : "hover"}
-                                style="light"
-                                animation="duration-300"
-                                arrow={false}
-                            >
-                                <div ref={el => itemRefs.current[i] = el}>
-                                    <SidebarItem
-                                        icon={item.icon}
-                                        text={item.text}
-                                        expanded={isExpanded}
-                                        active={false}
-                                        onClick={item.onClickAction}
-                                    />
-                                </div>
-                            </Tooltip>
+                                icon={item.icon}
+                                text={item.text}
+                                expanded={isExpanded}
+                                active={isPathActive(item.path)}
+                                onClick={() => handleItemClick(item.path)}
+                            />
                         ))}
 
                         <div style={{ margin: "10px 0", width: "100%", display: "flex", justifyContent: "center" }}>
-                            <hr style={{ width: "90%" }} />
+                            <hr style={{ width: "90%", opacity: 0.3 }} />
                         </div>
 
-                        {menutItemsLabel && isExpanded && (
-                            <div style={{ margin: "10px 0", paddingLeft: "1rem" }}>
-                                <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{menutItemsLabel}</span>
-                            </div>
-                        )}
+                        {/* --- ANIMATED MAIN MENU LABEL --- */}
+                        {/* <AnimatePresence>
+                            {menutItemsLabel && isExpanded && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0, marginBottom: 0 }}
+                                    animate={{ height: "auto", opacity: 1, marginBottom: 10 }}
+                                    exit={{ height: 0, opacity: 0, marginBottom: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    style={{ paddingLeft: "1rem", overflow: "hidden" }}
+                                >
+                                    <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{menutItemsLabel}</span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence> */}
 
                         {menuItems.map((item, i) => (
-                            <Tooltip
+                            <SidebarItem
                                 key={i}
-                                content={<p className="font-geist w-[120px]" style={{ padding: "10px 15px" }}>{item.text}</p>}
-                                placement="right"
-                                trigger={isExpanded ? "none" : "hover"}
-                                style="light"
-                                animation="duration-300"
-                            >
-                                <div ref={el => itemRefs.current[i] = el}>
-                                    <SidebarItem
-                                        index={i}
-                                        icon={item.icon}
-                                        text={item.text}
-                                        expanded={isExpanded}
-                                        // Ensure item is NOT active if we are on settings
-                                        active={!onSettings && activeIndex === i}
-                                        onClick={() => handleItemClick(i)}
-                                    />
-                                </div>
-                            </Tooltip>
+                                index={i}
+                                icon={item.icon}
+                                text={item.text}
+                                expanded={isExpanded}
+                                active={isPathActive(item.path)}
+                                onClick={() => handleItemClick(item.path)}
+                            />
                         ))}
                     </nav>
                 </div>
 
-                {/* Footer Buttons */}
-                <div >
+                {/* Footer Buttons / Settings */}
+                <div>
                     <div style={{ padding: "1rem 1rem 1rem 3px" }} >
                         {settingMenu && settingMenu.map((setting, i) => (
-                            <Tooltip
+                            <SidebarItem
                                 key={i}
-                                content={<p className="font-geist w-[120px]" style={{ padding: "10px 15px" }}>{setting.text}</p>}
-                                placement="right"
-                                trigger={isExpanded ? "none" : "hover"}
-                                style="light"
-                                animation="duration-300"
-                                arrow={false}>
-                                <SidebarItem
-                                    icon={setting.icon}
-                                    text={setting.text}
-                                    expanded={isExpanded}
-                                    // FIX 3: Actually use the state for Settings item
-                                    active={onSettings}
-                                    onClick={handleSettingsClick}
-                                />
-                            </Tooltip>
+                                icon={setting.icon}
+                                text={setting.text}
+                                expanded={isExpanded}
+                                active={isPathActive(setting.path)}
+                                onClick={() => handleItemClick(setting.path)}
+                            />
                         ))}
                     </div>
+                    
+                    {/* --- UNIFIED LOGOUT BUTTON --- */}
                     <div style={{ padding: "0px 1rem 1rem 1rem" }}>
-                        <button
-                            style={{
-                                display: "flex", alignItems: "center",
-                                justifyContent: isExpanded ? "flex-start" : "center",
-                                width: "100%", gap: "0.5rem",
-                                backgroundColor: "rgba(255, 255, 255, 0.3)",
-                                paddingTop: "0.75rem", paddingBottom: "0.75rem",
-                                borderRadius: "0.5rem", transition: "all 100ms ease",
-                                cursor: "pointer", border: "none",
-                                paddingLeft: isExpanded ? "1rem" : undefined,
-                                color: "white"
-                            }}
+                        <motion.button
                             onClick={handleLogout}
-                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#52728F")}
-                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.3)")}
+                            layout
+                            initial={false}
+                            animate={{
+                                width: "100%", // Container stays full width of parent padding
+                                justifyContent: "flex-start", // Always left align like items
+                                backgroundColor: "rgba(255, 255, 255, 0.3)",
+                                paddingLeft: "12px", // Match SidebarItem Padding
+                            }}
+                            whileHover={{ backgroundColor: "#52728F" }}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                height: "50px", // Match SidebarItem Height
+                                borderRadius: "0.5rem",
+                                cursor: "pointer",
+                                border: "none",
+                                color: "white",
+                                position: "relative",
+                                overflow: "hidden"
+                            }}
+                            transition={springTransition}
                         >
-                            <LogOut size={18} />
-                            {isExpanded && <span style={{ fontSize: "0.875rem" }}>Logout</span>}
-                        </button>
+                            {/* 1. Stationary Icon Layer */}
+                            <div style={{ 
+                                position: 'relative', 
+                                zIndex: 10, 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                minWidth: '24px' // Match SidebarItem icon container width
+                            }}>
+                                <LogOut size={20} />
+                            </div>
+
+                            {/* 2. Sliding Text Layer */}
+                            <AnimatePresence>
+                                {isExpanded && (
+                                    <motion.span
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                        transition={{ duration: 0.2, ease: "easeOut" }}
+                                        style={{ 
+                                            fontSize: "0.875rem", 
+                                            marginLeft: "12px", // Match SidebarItem gap
+                                            whiteSpace: "nowrap",
+                                            zIndex: 5
+                                        }}
+                                    >
+                                        Logout
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </motion.button>
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
             {/* 2. Main Content Area */}
-            <div
+            <motion.div
+                initial={false}
+                animate={{ marginLeft: sidebarWidth, width: `calc(100% - ${sidebarWidth})` }}
+                transition={springTransition}
                 style={{
-                    marginLeft: sidebarWidth,
-                    transition: `margin-left ${transitionDuration} ease`,
-                    width: `calc(100% - ${sidebarWidth})`,
                     backgroundColor: "#f9fafb",
                     minHeight: "100vh",
                 }}
             >
-                <Outlet context={{ handleToggleSidebar }} />
-            </div>
+                <Outlet context={{ isSidebarOpen: isExpanded, handleToggleSidebar: () => setIsExpanded(!isExpanded) }} />
+            </motion.div>
         </div >
     );
 }

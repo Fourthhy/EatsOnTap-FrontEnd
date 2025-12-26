@@ -14,7 +14,7 @@ import {
 import { useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- MOCK DATA (As requested format) ---
+// --- MOCK DATA ---
 const DEFAULT_NOTIFICATIONS = [
     {
         date: "Today",
@@ -41,43 +41,26 @@ const DEFAULT_NOTIFICATIONS = [
 // --- HELPER: GET ICON & COLOR BY TYPE ---
 const getNotificationConfig = (type) => {
     switch (type) {
-        case 'Meal Request':
-            return { icon: Utensils, color: '#3B82F6', bg: '#EFF6FF' }; // Blue
-        case 'Event Meal Request':
-            return { icon: CalendarDays, color: '#F68A3A', bg: '#FFF7ED' }; // Orange
-        case 'Credit Change':
-            return { icon: Wallet, color: '#EAB308', bg: '#FEFCE8' }; // Yellow
-        case 'Export Report':
-            return { icon: FileDown, color: '#6B7280', bg: '#F3F4F6' }; // Gray
-        case 'Upcoming Event':
-            return { icon: Calendar, color: '#8B5CF6', bg: '#F5F3FF' }; // Purple
-        default:
-            return { icon: Clock, color: '#6B7280', bg: '#F3F4F6' };
+        case 'Meal Request': return { icon: Utensils, color: '#3B82F6', bg: '#EFF6FF' };
+        case 'Event Meal Request': return { icon: CalendarDays, color: '#F68A3A', bg: '#FFF7ED' };
+        case 'Credit Change': return { icon: Wallet, color: '#EAB308', bg: '#FEFCE8' };
+        case 'Export Report': return { icon: FileDown, color: '#6B7280', bg: '#F3F4F6' };
+        case 'Upcoming Event': return { icon: Calendar, color: '#8B5CF6', bg: '#F5F3FF' };
+        default: return { icon: Clock, color: '#6B7280', bg: '#F3F4F6' };
     }
 };
 
 // --- SUB-COMPONENT: NOTIFICATION DROPDOWN ---
 const NotificationDropdown = ({ isOpen, onClose, notifications }) => {
-    // Styles extracted/adapted from your ExportReportModal
     const dropdownStyle = {
-        position: 'fixed',
-        top: '70px', // Below the 60px header
-        right: '20px',
-        width: '420px', // Adapted width (600px is too wide for a corner dropdown, 420px is standard large)
-        maxHeight: '80vh',
-        backgroundColor: 'white',
-        borderRadius: '12px',
+        position: 'fixed', top: '70px', right: '20px', width: '420px', maxHeight: '80vh',
+        backgroundColor: 'white', borderRadius: '12px',
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05)',
-        zIndex: 9000,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        fontFamily: 'geist'
+        zIndex: 9000, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'geist'
     };
 
     const headerStyle = {
-        padding: '20px 24px',
-        borderBottom: '1px solid #f3f4f6',
+        padding: '20px 24px', borderBottom: '1px solid #f3f4f6',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         backgroundColor: 'white', zIndex: 10
     };
@@ -86,12 +69,7 @@ const NotificationDropdown = ({ isOpen, onClose, notifications }) => {
         <AnimatePresence>
             {isOpen && (
                 <>
-                    {/* Invisible Backdrop to close on click outside */}
-                    <div 
-                        style={{ position: 'fixed', inset: 0, zIndex: 8999 }} 
-                        onClick={onClose} 
-                    />
-                    
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 8999 }} onClick={onClose} />
                     <motion.div
                         initial={{ opacity: 0, y: -10, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -99,7 +77,6 @@ const NotificationDropdown = ({ isOpen, onClose, notifications }) => {
                         transition={{ duration: 0.2 }}
                         style={dropdownStyle}
                     >
-                        {/* Header */}
                         <div style={headerStyle}>
                             <div>
                                 <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#111827' }}>Notifications</h3>
@@ -109,58 +86,26 @@ const NotificationDropdown = ({ isOpen, onClose, notifications }) => {
                                 <X size={18} />
                             </button>
                         </div>
-
-                        {/* Scrollable Content */}
                         <div style={{ overflowY: 'auto', padding: '0 0 12px 0' }}>
                             {notifications.map((group, groupIndex) => (
                                 <div key={groupIndex}>
-                                    {/* Date Header */}
-                                    <div style={{ 
-                                        padding: '12px 24px 8px', 
-                                        fontSize: '11px', fontWeight: 600, color: '#9CA3AF', 
-                                        textTransform: 'uppercase', letterSpacing: '0.05em' 
-                                    }}>
+                                    <div style={{ padding: '12px 24px 8px', fontSize: '11px', fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                         {group.date}
                                     </div>
-
-                                    {/* Items */}
                                     {group.data.map((item, itemIndex) => {
                                         const config = getNotificationConfig(item.notificationType);
                                         const Icon = config.icon;
-                                        
                                         return (
-                                            <div 
-                                                key={itemIndex}
-                                                className="hover:bg-gray-50 transition-colors"
-                                                style={{ 
-                                                    padding: '12px 24px', 
-                                                    display: 'flex', gap: '16px', 
-                                                    cursor: 'pointer', borderBottom: '1px solid #f9fafb' 
-                                                }}
-                                            >
-                                                {/* Icon Box */}
-                                                <div style={{
-                                                    minWidth: '36px', height: '36px', 
-                                                    borderRadius: '8px', 
-                                                    backgroundColor: config.bg, color: config.color,
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                }}>
+                                            <div key={itemIndex} className="hover:bg-gray-50 transition-colors" style={{ padding: '12px 24px', display: 'flex', gap: '16px', cursor: 'pointer', borderBottom: '1px solid #f9fafb' }}>
+                                                <div style={{ minWidth: '36px', height: '36px', borderRadius: '8px', backgroundColor: config.bg, color: config.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     <Icon size={18} />
                                                 </div>
-
-                                                {/* Text Content */}
                                                 <div style={{ flex: 1 }}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                                                        <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
-                                                            {item.notificationType}
-                                                        </span>
-                                                        <span style={{ fontSize: '11px', color: '#9CA3AF' }}>
-                                                            {item.time}
-                                                        </span>
+                                                        <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>{item.notificationType}</span>
+                                                        <span style={{ fontSize: '11px', color: '#9CA3AF' }}>{item.time}</span>
                                                     </div>
-                                                    <p style={{ margin: 0, fontSize: '13px', color: '#6B7280', lineHeight: '1.4' }}>
-                                                        {item.description}
-                                                    </p>
+                                                    <p style={{ margin: 0, fontSize: '13px', color: '#6B7280', lineHeight: '1.4' }}>{item.description}</p>
                                                 </div>
                                             </div>
                                         );
@@ -168,15 +113,8 @@ const NotificationDropdown = ({ isOpen, onClose, notifications }) => {
                                 </div>
                             ))}
                         </div>
-                        
-                        {/* Footer */}
                         <div style={{ padding: '12px', borderTop: '1px solid #f3f4f6', textAlign: 'center' }}>
-                            <button style={{ 
-                                background: 'transparent', border: 'none', 
-                                fontSize: '12px', fontWeight: 500, color: '#4268BD', cursor: 'pointer' 
-                            }}>
-                                Mark all as read
-                            </button>
+                            <button style={{ background: 'transparent', border: 'none', fontSize: '12px', fontWeight: 500, color: '#4268BD', cursor: 'pointer' }}>Mark all as read</button>
                         </div>
                     </motion.div>
                 </>
@@ -192,17 +130,22 @@ function HeaderBar({
     userName = "Sample Name", 
     userRole = "Sample Role",
     hasNotification = false,
-    notificationList = DEFAULT_NOTIFICATIONS // Default to mock data if prop not provided
+    notificationList = DEFAULT_NOTIFICATIONS 
 }) {
     const context = useOutletContext() || {};
+    
+    // FIX: Initialize isExpanded state safely checking if context exists
+    // Using a default of false if context is missing to prevent errors
     const [isExpanded, setIsExpanded] = useState(context.isSidebarOpen || false);
-    const handleToggleSidebar = context.handleToggleSidebar || (() => { });
+    
+    // FIX: Safely access the toggle handler
+    const handleToggleSidebar = context.handleToggleSidebar || (() => console.warn("Sidebar toggle not available"));
 
     // --- STATE ---
     const [isScrolled, setIsScrolled] = useState(false);
     const [isSimulating, setIsSimulating] = useState(false); 
     const [triggerShake, setTriggerShake] = useState(false); 
-    const [isProfileOpen, setIsProfileOpen] = useState(false); // Controls Notification Modal
+    const [isProfileOpen, setIsProfileOpen] = useState(false); 
 
     useEffect(() => {
         const handleScroll = () => {
@@ -212,17 +155,22 @@ function HeaderBar({
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // --- SIDEBAR SYNC ---
-    const handleMenuClick = () => {
-        setIsExpanded(prev => !prev);
-        handleToggleSidebar();
-    };
-
+    // --- SIDEBAR SYNC FIX ---
+    // Update local state whenever the context state changes
+    // This ensures that if the parent resets the state (e.g. on navigation),
+    // the local component reflects it immediately.
     useEffect(() => {
         if (context.isSidebarOpen !== undefined) {
             setIsExpanded(context.isSidebarOpen);
         }
     }, [context.isSidebarOpen]);
+
+    const handleMenuClick = () => {
+        // Optimistically update local state for instant feedback
+        setIsExpanded(prev => !prev);
+        // Call the parent handler to persist the state change
+        handleToggleSidebar();
+    };
 
     // --- HANDLERS ---
     const handleSimulationToggle = () => {
@@ -233,7 +181,6 @@ function HeaderBar({
 
     const handleProfileClick = () => {
         setIsProfileOpen(!isProfileOpen);
-        // Optional: Reset simulation when opening profile
         if (isSimulating) setIsSimulating(false);
     };
 
@@ -305,27 +252,12 @@ function HeaderBar({
                 notifications={notificationList}
             />
 
-            {/* --- 1. FIXED MENU ICON --- */}
-            <div 
-                onClick={handleMenuClick} 
-                className="hover:bg-gray-100"
-                style={{
-                    position: 'fixed', top: '15px', left: isExpanded ? '293px' : '90px', 
-                    zIndex: 8000, backgroundColor: 'white', width: '30px', height: '30px', borderRadius: 6,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-                    transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s' 
-                }}
-            >
-                {isExpanded ? <PanelRightOpen size={20} color={"#263C70"}/> : <PanelLeftOpen size={20} color={"#263C70"}/>}
-            </div>
-
             {/* --- 2. SIMULATION TRIGGER --- */}
             <div 
                 onClick={handleSimulationToggle} 
                 className="hover:bg-gray-100"
                 style={{
-                    position: 'fixed', top: '15px', left: isExpanded ? '333px' : '130px', 
+                    position: 'fixed', top: '15px', left: isExpanded ? '470px' : '260px', 
                     zIndex: 8000, backgroundColor: 'white', width: '30px', height: '30px', borderRadius: 6,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
@@ -338,7 +270,7 @@ function HeaderBar({
 
             {/* --- 3. FLOATING AVATAR (SCENARIO B - Scrolled) --- */}
             <div 
-                onClick={handleProfileClick} // UPDATED: Opens Notification Modal
+                onClick={handleProfileClick} 
                 style={{
                     position: 'fixed', top: '10px', right: '20px', zIndex: 8000,
                     opacity: isScrolled ? 1 : 0, pointerEvents: isScrolled ? 'auto' : 'none',
@@ -388,7 +320,7 @@ function HeaderBar({
                     <div className="w-auto h-auto flex gap-2">
                         <div style={{ 
                             width: '30px', height: '20px', 
-                            paddingLeft: isExpanded ? "360px" : "150px", 
+                            paddingLeft: isExpanded ? "290px" : "90px", 
                             transition: "padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)" 
                         }}></div>
                         <p style={{ fontWeight: '500' }} className="font-geist text-[2vh]"> 
@@ -405,7 +337,7 @@ function HeaderBar({
 
                         <div style={profileStyle}>
                             <div 
-                                onClick={handleProfileClick} // UPDATED: Opens Notification Modal
+                                onClick={handleProfileClick} 
                                 className="w-auto h-auto flex items-center justify-center" 
                                 style={{ 
                                     position: 'relative', cursor: 'pointer',
