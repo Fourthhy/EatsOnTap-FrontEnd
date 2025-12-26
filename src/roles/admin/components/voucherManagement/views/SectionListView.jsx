@@ -5,18 +5,23 @@ import { AnimatePresence } from 'framer-motion';
 import { GenericTable } from '../../../../../components/global/table/GenericTable';
 import { SelectionActionBar } from '../SelectionActionBar';
 import { programsAndSections } from '../studentListConfig';
+import { AddSectionModal } from '../components/AddSectionModal';
 
 export const SectionListView = ({ switcher, onNavigateToStudents }) => {
     const [activeTab, setActiveTab] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSection, setSelectedSection] = useState(null);
     const [isActionBarVisible, setIsActionBarVisible] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    // Initialize state with config data so we can append to it locally
+    const [sectionsData, setSectionsData] = useState(programsAndSections);
 
     // --- DATA LOGIC ---
     const flattenedSections = useMemo(() => {
         const relevantCategories = activeTab === 'all' 
-            ? programsAndSections 
-            : programsAndSections.filter(p => p.category === activeTab);
+            ? sectionsData 
+            : sectionsData.filter(p => p.category === activeTab);
 
         const flatList = [];
         relevantCategories.forEach(cat => {
@@ -34,14 +39,42 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                             level: level.gradeLevel,
                             sectionName: section.name,
                             adviser: section.adviser,
-                            studentCount: section.studentCount
+                            studentCount: section.studentCount || 0,
+                            category: cat.category // Keep ref for internal logic if needed
                         });
                     }
                 });
             });
         });
         return flatList;
-    }, [activeTab, searchTerm]);
+    }, [activeTab, searchTerm, sectionsData]);
+
+    // --- HANDLER: Add New Section ---
+    const handleAddSection = (newSection) => {
+        // Mocking the update: We need to find the right category and level in our state
+        // For simplicity in this mock, we will just force update the state by finding the right nested array
+        // In a real app, this would be an API call.
+        
+        setSectionsData(prev => {
+            const newData = JSON.parse(JSON.stringify(prev)); // Deep copy for immutability
+            
+            // 1. Find the category that contains this grade level
+            // We loop through to find where this level belongs
+            let targetCategory = newData.find(cat => cat.levels.some(l => l.gradeLevel === newSection.level));
+            
+            if (targetCategory) {
+                let targetLevel = targetCategory.levels.find(l => l.gradeLevel === newSection.level);
+                if (targetLevel) {
+                    targetLevel.sections.push({
+                        name: newSection.sectionName,
+                        adviser: newSection.adviser,
+                        studentCount: 0
+                    });
+                }
+            }
+            return newData;
+        });
+    };
 
     // --- RENDER ROW ---
     const renderSectionRow = (section, index, startIndex) => {
@@ -85,31 +118,39 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
     );
 
     return (
-        <GenericTable
-            title="Section Overview"
-            subtitle="Manage academic sections and advisers"
-            tabs={[
-                { label: 'All', id: 'all' }, 
-                { label: 'Preschool', id: 'preschool' }, 
-                { label: 'Primary', id: 'primaryEducation' }, 
-                { label: 'Intermediate', id: 'intermediate' },
-                { label: 'Junior Highschool', id: 'juniorHighSchool' }, 
-                { label: 'Senior Highschool', id: 'seniorHighSchool' }, 
-                { label: 'Higher Education', id: 'higherEducation' }
-            ]}
-            activeTab={activeTab}
-            onTabChange={(t) => { setActiveTab(t); setSelectedSection(null); }}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            customActions={switcher}
-            overrideHeader={isActionBarVisible ? actionBar : null}
-            columns={['Level', 'Section Name', 'Adviser', 'Student Count']}
-            data={flattenedSections}
-            renderRow={renderSectionRow}
-            onPrimaryAction={() => console.log("Add Section")}
-            primaryActionLabel="Add Section"
-            primaryActionIcon={<Plus size={16} />} // Using Eye temporarily or Plus
-            metrics={[{ label: "Total Sections", value: flattenedSections.length }]}
-        />
+        <>
+            <AddSectionModal 
+                isOpen={isAddModalOpen} 
+                onClose={() => setIsAddModalOpen(false)} 
+                onAdd={handleAddSection} 
+            />
+
+            <GenericTable
+                title="Section Overview"
+                subtitle="Manage academic sections and advisers"
+                tabs={[
+                    { label: 'All', id: 'all' }, 
+                    { label: 'Preschool', id: 'preschool' }, 
+                    { label: 'Primary Education', id: 'primaryEducation' }, 
+                    { label: 'Intermediate', id: 'intermediate' },
+                    { label: 'Junior Highschool', id: 'juniorHighSchool' }, 
+                    { label: 'Senior Highschool', id: 'seniorHighSchool' }, 
+                    { label: 'Higher Education', id: 'higherEducation' }
+                ]}
+                activeTab={activeTab}
+                onTabChange={(t) => { setActiveTab(t); setSelectedSection(null); }}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                customActions={switcher}
+                overrideHeader={isActionBarVisible ? actionBar : null}
+                columns={['Level', 'Section Name', 'Adviser', 'Student Count']}
+                data={flattenedSections}
+                renderRow={renderSectionRow}
+                onPrimaryAction={() => setIsAddModalOpen(true)}
+                primaryActionLabel="Add Section"
+                primaryActionIcon={<Plus size={16} />}
+                metrics={[{ label: "Total Sections", value: flattenedSections.length }]}
+            />
+        </>
     );
 };
