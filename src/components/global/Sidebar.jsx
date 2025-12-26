@@ -87,8 +87,6 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                         marginTop: "1rem", 
                         marginBottom: "1.5rem", 
                         minHeight: "3.5rem",
-                        // PINNED LOGIC: Fixed left padding centers it in collapsed state (80px - 40px logo / 2 = 20px)
-                        // It stays pinned left when expanded.
                         paddingLeft: "20px", 
                         overflow: "hidden"
                     }}>
@@ -102,7 +100,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                                 height: isExpanded ? "3.5rem" : "2.5rem" 
                             }}
                             style={{ 
-                                flexShrink: 0, // Prevent shrinking
+                                flexShrink: 0,
                                 objectFit: "contain", 
                                 zIndex: 10, 
                                 position: "relative" 
@@ -110,7 +108,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                             transition={springTransition}
                         />
                         
-                        {/* Sliding Text from behind */}
+                        {/* Sliding Text */}
                         <AnimatePresence>
                             {isExpanded && (
                                 <motion.div
@@ -123,7 +121,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                                         display: "flex", 
                                         flexDirection: "column", 
                                         justifyContent: "center",
-                                        zIndex: 5, // Behind logo logically
+                                        zIndex: 5,
                                         whiteSpace: "nowrap"
                                     }}
                                 >
@@ -144,8 +142,8 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                         }}
                         ref={containerRef}
                     >
-                        {/* --- ANIMATED QUICK ACTIONS LABEL --- */}
-                        {/* <AnimatePresence>
+                        {/* --- QUICK ACTIONS LABEL --- */}
+                        <AnimatePresence>
                             {quickActionsLabel && isExpanded && (
                                 <motion.div
                                     initial={{ height: 0, opacity: 0, marginBottom: 0 }}
@@ -157,8 +155,10 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                                     <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{quickActionsLabel}</span>
                                 </motion.div>
                             )}
-                        </AnimatePresence> */}
+                        </AnimatePresence>
 
+                        {/* --- FIX: QUICK ACTIONS --- */}
+                        {/* Restored the logic to use item.onClickAction if provided (for Modals like Add Dish) */}
                         {quickActions && quickActions.map((item, i) => (
                             <SidebarItem
                                 key={i}
@@ -166,7 +166,13 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                                 text={item.text}
                                 expanded={isExpanded}
                                 active={isPathActive(item.path)}
-                                onClick={() => handleItemClick(item.path)}
+                                onClick={() => {
+                                    if (item.onClickAction) {
+                                        item.onClickAction();
+                                    } else if (item.path) {
+                                        handleItemClick(item.path);
+                                    }
+                                }}
                             />
                         ))}
 
@@ -174,8 +180,8 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                             <hr style={{ width: "90%", opacity: 0.3 }} />
                         </div>
 
-                        {/* --- ANIMATED MAIN MENU LABEL --- */}
-                        {/* <AnimatePresence>
+                        {/* --- MAIN MENU LABEL --- */}
+                        <AnimatePresence>
                             {menutItemsLabel && isExpanded && (
                                 <motion.div
                                     initial={{ height: 0, opacity: 0, marginBottom: 0 }}
@@ -187,7 +193,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                                     <span className="font-geist" style={{ color: "white", fontSize: "0.8rem", fontWeight: 450 }}>{menutItemsLabel}</span>
                                 </motion.div>
                             )}
-                        </AnimatePresence> */}
+                        </AnimatePresence>
 
                         {menuItems.map((item, i) => (
                             <SidebarItem
@@ -218,23 +224,22 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                         ))}
                     </div>
                     
-                    {/* --- UNIFIED LOGOUT BUTTON --- */}
+                    {/* --- LOGOUT BUTTON --- */}
                     <div style={{ padding: "0px 1rem 1rem 1rem" }}>
                         <motion.button
                             onClick={handleLogout}
-                            layout
                             initial={false}
                             animate={{
-                                width: "100%", // Container stays full width of parent padding
-                                justifyContent: "flex-start", // Always left align like items
+                                width: "100%", 
+                                justifyContent: "flex-start", 
                                 backgroundColor: "rgba(255, 255, 255, 0.3)",
-                                paddingLeft: "12px", // Match SidebarItem Padding
+                                paddingLeft: "12px", 
                             }}
                             whileHover={{ backgroundColor: "#52728F" }}
                             style={{
                                 display: "flex",
                                 alignItems: "center",
-                                height: "50px", // Match SidebarItem Height
+                                height: "50px", 
                                 borderRadius: "0.5rem",
                                 cursor: "pointer",
                                 border: "none",
@@ -244,19 +249,17 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                             }}
                             transition={springTransition}
                         >
-                            {/* 1. Stationary Icon Layer */}
                             <div style={{ 
                                 position: 'relative', 
                                 zIndex: 10, 
                                 display: 'flex', 
                                 alignItems: 'center', 
                                 justifyContent: 'center',
-                                minWidth: '24px' // Match SidebarItem icon container width
+                                minWidth: '24px' 
                             }}>
                                 <LogOut size={20} />
                             </div>
 
-                            {/* 2. Sliding Text Layer */}
                             <AnimatePresence>
                                 {isExpanded && (
                                     <motion.span
@@ -266,7 +269,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                                         transition={{ duration: 0.2, ease: "easeOut" }}
                                         style={{ 
                                             fontSize: "0.875rem", 
-                                            marginLeft: "12px", // Match SidebarItem gap
+                                            marginLeft: "12px", 
                                             whiteSpace: "nowrap",
                                             zIndex: 5
                                         }}
