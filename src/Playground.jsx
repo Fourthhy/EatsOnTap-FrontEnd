@@ -1,4 +1,3 @@
-import { StudentList } from "../src/components/global/table/SampleStudentList";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, RotateCcw } from 'lucide-react';
