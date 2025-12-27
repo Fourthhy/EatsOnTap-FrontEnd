@@ -1,18 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-    PanelLeftOpen, 
-    PanelRightOpen, 
-    RotateCcw, 
-    X, 
-    Utensils, 
-    CalendarDays, 
-    Wallet, 
-    FileDown, 
-    Calendar,
-    Clock
-} from "lucide-react"; 
+import React, { useState, useEffect } from 'react';
+import { PanelLeftOpen, PanelRightOpen, RotateCcw } from "lucide-react"; 
 import { useOutletContext } from "react-router-dom";
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from "framer-motion"; // Ensure motion is imported
+
+import { NotificationDropdown } from './NotificationDropdown';
 
 // --- MOCK DATA ---
 const DEFAULT_NOTIFICATIONS = [
@@ -38,110 +29,19 @@ const DEFAULT_NOTIFICATIONS = [
     }
 ];
 
-// --- HELPER: GET ICON & COLOR BY TYPE ---
-const getNotificationConfig = (type) => {
-    switch (type) {
-        case 'Meal Request': return { icon: Utensils, color: '#3B82F6', bg: '#EFF6FF' };
-        case 'Event Meal Request': return { icon: CalendarDays, color: '#F68A3A', bg: '#FFF7ED' };
-        case 'Credit Change': return { icon: Wallet, color: '#EAB308', bg: '#FEFCE8' };
-        case 'Export Report': return { icon: FileDown, color: '#6B7280', bg: '#F3F4F6' };
-        case 'Upcoming Event': return { icon: Calendar, color: '#8B5CF6', bg: '#F5F3FF' };
-        default: return { icon: Clock, color: '#6B7280', bg: '#F3F4F6' };
-    }
-};
-
-// --- SUB-COMPONENT: NOTIFICATION DROPDOWN ---
-const NotificationDropdown = ({ isOpen, onClose, notifications }) => {
-    const dropdownStyle = {
-        position: 'fixed', top: '70px', right: '20px', width: '420px', maxHeight: '80vh',
-        backgroundColor: 'white', borderRadius: '12px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05)',
-        zIndex: 9000, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'geist'
-    };
-
-    const headerStyle = {
-        padding: '20px 24px', borderBottom: '1px solid #f3f4f6',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        backgroundColor: 'white', zIndex: 10
-    };
-
-    return (
-        <AnimatePresence>
-            {isOpen && (
-                <>
-                    <div style={{ position: 'fixed', inset: 0, zIndex: 8999 }} onClick={onClose} />
-                    <motion.div
-                        initial={{ opacity: 0, y: -10, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.98 }}
-                        transition={{ duration: 0.2 }}
-                        style={dropdownStyle}
-                    >
-                        <div style={headerStyle}>
-                            <div>
-                                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: '#111827' }}>Notifications</h3>
-                                <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#6B7280' }}>You have unread updates.</p>
-                            </div>
-                            <button onClick={onClose} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}>
-                                <X size={18} />
-                            </button>
-                        </div>
-                        <div style={{ overflowY: 'auto', padding: '0 0 12px 0' }}>
-                            {notifications.map((group, groupIndex) => (
-                                <div key={groupIndex}>
-                                    <div style={{ padding: '12px 24px 8px', fontSize: '11px', fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                        {group.date}
-                                    </div>
-                                    {group.data.map((item, itemIndex) => {
-                                        const config = getNotificationConfig(item.notificationType);
-                                        const Icon = config.icon;
-                                        return (
-                                            <div key={itemIndex} className="hover:bg-gray-50 transition-colors" style={{ padding: '12px 24px', display: 'flex', gap: '16px', cursor: 'pointer', borderBottom: '1px solid #f9fafb' }}>
-                                                <div style={{ minWidth: '36px', height: '36px', borderRadius: '8px', backgroundColor: config.bg, color: config.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                    <Icon size={18} />
-                                                </div>
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-                                                        <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>{item.notificationType}</span>
-                                                        <span style={{ fontSize: '11px', color: '#9CA3AF' }}>{item.time}</span>
-                                                    </div>
-                                                    <p style={{ margin: 0, fontSize: '13px', color: '#6B7280', lineHeight: '1.4' }}>{item.description}</p>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            ))}
-                        </div>
-                        <div style={{ padding: '12px', borderTop: '1px solid #f3f4f6', textAlign: 'center' }}>
-                            <button style={{ background: 'transparent', border: 'none', fontSize: '12px', fontWeight: 500, color: '#4268BD', cursor: 'pointer' }}>Mark all as read</button>
-                        </div>
-                    </motion.div>
-                </>
-            )}
-        </AnimatePresence>
-    );
-};
-
-// --- MAIN COMPONENT ---
 function HeaderBar({ 
     userAvatar, 
     headerTitle, 
     userName = "Sample Name", 
     userRole = "Sample Role",
+    userEmail = "user.email@laverdad.edu.ph",
     hasNotification = false,
     notificationList = DEFAULT_NOTIFICATIONS 
 }) {
     const context = useOutletContext() || {};
-    
-    // FIX: Initialize isExpanded state safely checking if context exists
-    // Using a default of false if context is missing to prevent errors
     const [isExpanded, setIsExpanded] = useState(context.isSidebarOpen || false);
-    
-    // FIX: Safely access the toggle handler
     const handleToggleSidebar = context.handleToggleSidebar || (() => console.warn("Sidebar toggle not available"));
 
-    // --- STATE ---
     const [isScrolled, setIsScrolled] = useState(false);
     const [isSimulating, setIsSimulating] = useState(false); 
     const [triggerShake, setTriggerShake] = useState(false); 
@@ -155,24 +55,12 @@ function HeaderBar({
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // --- SIDEBAR SYNC FIX ---
-    // Update local state whenever the context state changes
-    // This ensures that if the parent resets the state (e.g. on navigation),
-    // the local component reflects it immediately.
     useEffect(() => {
         if (context.isSidebarOpen !== undefined) {
             setIsExpanded(context.isSidebarOpen);
         }
     }, [context.isSidebarOpen]);
 
-    const handleMenuClick = () => {
-        // Optimistically update local state for instant feedback
-        setIsExpanded(prev => !prev);
-        // Call the parent handler to persist the state change
-        handleToggleSidebar();
-    };
-
-    // --- HANDLERS ---
     const handleSimulationToggle = () => {
         setTriggerShake(true);
         setTimeout(() => setTriggerShake(false), 500); 
@@ -184,7 +72,6 @@ function HeaderBar({
         if (isSimulating) setIsSimulating(false);
     };
 
-    // --- GREETING ANIMATION STATE ---
     const [animationPhase, setAnimationPhase] = useState(() => {
         const hasShown = sessionStorage.getItem('has_shown_greeting');
         return hasShown ? 'swap' : 'intro';
@@ -208,7 +95,6 @@ function HeaderBar({
         return () => { clearTimeout(timer1); clearTimeout(timer2); };
     }, []);
 
-    // --- STYLES ---
     const greetingStyle = {
         position: 'absolute', right: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
         width: '300px', fontFamily: "geist", fontSize: 14, fontWeight: 500, color: "#6B7280",
@@ -217,11 +103,15 @@ function HeaderBar({
         opacity: animationPhase === 'hold' ? 1 : 0, pointerEvents: 'none',
     };
 
+    // We remove the transition from here and handle it via AnimatePresence on children
     const profileStyle = {
         display: 'flex', flexDirection: 'row', gap: '12px', alignItems: 'center',
-        transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+        // Keep the position logic for the container
+        transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s',
         transform: animationPhase === 'swap' ? 'translateY(0)' : 'translateY(-20px)',
         opacity: animationPhase === 'swap' ? 1 : 0,
+        minWidth: '150px', // Prevent layout shift when content disappears
+        justifyContent: 'flex-end'
     };
 
     const isNotified = hasNotification || isSimulating;
@@ -245,11 +135,14 @@ function HeaderBar({
                 `}
             </style>
 
-            {/* --- NOTIFICATION DROPDOWN --- */}
             <NotificationDropdown 
                 isOpen={isProfileOpen} 
                 onClose={() => setIsProfileOpen(false)} 
                 notifications={notificationList}
+                userName={userName}
+                userRole={userRole}
+                userEmail={userEmail}
+                userAvatar={avatarSrc}
             />
 
             {/* --- 2. SIMULATION TRIGGER --- */}
@@ -257,8 +150,9 @@ function HeaderBar({
                 onClick={handleSimulationToggle} 
                 className="hover:bg-gray-100"
                 style={{
-                    position: 'fixed', top: '15px', left: isExpanded ? '470px' : '260px', 
-                    zIndex: 8000, backgroundColor: 'white', width: '30px', height: '30px', borderRadius: 6,
+                    position: 'fixed', top: '15px', left: isExpanded ? '480px' : '250px', 
+                    zIndex: 8000, backgroundColor: 'white', width: '30px', height: '30px', 
+                    borderRadius: 6,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
                     transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s' 
@@ -270,38 +164,46 @@ function HeaderBar({
 
             {/* --- 3. FLOATING AVATAR (SCENARIO B - Scrolled) --- */}
             <div 
-                onClick={handleProfileClick} 
                 style={{
                     position: 'fixed', top: '10px', right: '20px', zIndex: 8000,
-                    opacity: isScrolled ? 1 : 0, pointerEvents: isScrolled ? 'auto' : 'none',
+                    // If profile is open, we hide this entire block visually (or unmount it)
+                    pointerEvents: (isScrolled && !isProfileOpen) ? 'auto' : 'none',
                     transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                     transform: isScrolled ? 'translateY(0)' : 'translateY(-20px)',
-                    animation: triggerShake 
-                        ? 'shake 0.4s ease-in-out' 
-                        : (isNotified && isScrolled) ? 'bounceProfile 2s infinite' : 'none'
+                    opacity: isScrolled ? 1 : 0
                 }}
             >
-                <div style={{ position: 'relative', cursor: 'pointer' }}>
-                    <img 
-                        src={avatarSrc} alt="Profile" 
-                        style={{ 
-                            width: '40px', height: '40px', borderRadius: '12px', objectFit: 'cover',
-                            border: '2px solid white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                        }} 
-                    />
-                    {hasNotification && (
-                        <div style={{
-                            position: 'absolute', bottom: -2, right: -2, width: '12px', height: '12px', 
-                            backgroundColor: '#EF4444', borderRadius: '50%', border: '2px solid white' 
-                        }} />
+                <AnimatePresence>
+                    {!isProfileOpen && (
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            onClick={handleProfileClick}
+                            style={{ position: 'relative', cursor: 'pointer' }}
+                        >
+                            <img 
+                                src={avatarSrc} alt="Profile" 
+                                style={{ 
+                                    width: '40px', height: '40px', 
+                                    borderRadius: '12px',
+                                    objectFit: 'cover',
+                                    border: '2px solid white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                    animation: triggerShake 
+                                        ? 'shake 0.4s ease-in-out' 
+                                        : (isNotified && isScrolled) ? 'bounceProfile 2s infinite' : 'none'
+                                }} 
+                            />
+                            {isNotified && (
+                                <div style={{
+                                    position: 'absolute', bottom: -2, right: -2, width: '12px', height: '12px', 
+                                    backgroundColor: isSimulating ? '#F68A3A' : '#EF4444', 
+                                    borderRadius: '50%', border: '2px solid white' 
+                                }} />
+                            )}
+                        </motion.div>
                     )}
-                    {isSimulating && (
-                        <div style={{
-                            position: 'absolute', bottom: -2, right: -2, width: '12px', height: '12px', 
-                            backgroundColor: '#F68A3A', borderRadius: '50%', border: '2px solid white' 
-                        }} />
-                    )}
-                </div>
+                </AnimatePresence>
             </div>
 
             {/* --- 4. MAIN HEADER BAR (SCENARIO A - Present State) --- */}
@@ -320,7 +222,7 @@ function HeaderBar({
                     <div className="w-auto h-auto flex gap-2">
                         <div style={{ 
                             width: '30px', height: '20px', 
-                            paddingLeft: isExpanded ? "290px" : "90px", 
+                            paddingLeft: isExpanded ? "290px" : "80px", 
                             transition: "padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)" 
                         }}></div>
                         <p style={{ fontWeight: '500' }} className="font-geist text-[2vh]"> 
@@ -336,36 +238,48 @@ function HeaderBar({
                         )}
 
                         <div style={profileStyle}>
-                            <div 
-                                onClick={handleProfileClick} 
-                                className="w-auto h-auto flex items-center justify-center" 
-                                style={{ 
-                                    position: 'relative', cursor: 'pointer',
-                                    animation: (isNotified && !isScrolled && animationPhase === 'swap') ? 'bounceProfile 2s infinite' : 'none'
-                                }}
-                            >
-                                <img
-                                    style={{ borderRadius: 12, width: 40, height: 40, objectFit: 'cover' }}
-                                    src={avatarSrc}
-                                    alt="User Avatar"
-                                />
-                                {(hasNotification || isSimulating) && (
-                                    <div style={{
-                                        position: 'absolute', bottom: -2, right: -2, width: '12px', height: '12px', 
-                                        backgroundColor: isSimulating ? '#F68A3A' : '#EF4444', 
-                                        borderRadius: '50%', border: '2px solid white' 
-                                    }} />
-                                )}
-                            </div>
+                            <AnimatePresence>
+                                {!isProfileOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, x: 10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: 10 }} // Slide out to right
+                                        transition={{ duration: 0.2 }}
+                                        style={{ display: 'flex', flexDirection: 'row', gap: '12px', alignItems: 'center' }}
+                                    >
+                                        <div 
+                                            onClick={handleProfileClick} 
+                                            className="w-auto h-auto flex items-center justify-center" 
+                                            style={{ 
+                                                position: 'relative', cursor: 'pointer',
+                                                animation: (isNotified && !isScrolled && animationPhase === 'swap') ? 'bounceProfile 2s infinite' : 'none'
+                                            }}
+                                        >
+                                            <img
+                                                style={{ borderRadius: 12, width: 40, height: 40, objectFit: 'cover' }}
+                                                src={avatarSrc}
+                                                alt="User Avatar"
+                                            />
+                                            {isNotified && (
+                                                <div style={{
+                                                    position: 'absolute', bottom: -2, right: -2, width: '12px', height: '12px', 
+                                                    backgroundColor: isSimulating ? '#F68A3A' : '#EF4444', 
+                                                    borderRadius: '50%', border: '2px solid white' 
+                                                }} />
+                                            )}
+                                        </div>
 
-                            <div className="flex flex-col items-start justify-start">
-                                <span style={{ fontFamily: "geist", color: "#000", fontWeight: "600", fontSize: 13, lineHeight: '1.2' }}>
-                                    {userName}
-                                </span>
-                                <p style={{ fontFamily: "geist", color: "#9CA3AF", fontWeight: "400", fontSize: 11 }}>
-                                    {userRole}
-                                </p>
-                            </div>
+                                        <div className="flex flex-col items-start justify-start">
+                                            <span style={{ fontFamily: "geist", color: "#000", fontWeight: "600", fontSize: 13, lineHeight: '1.2' }}>
+                                                {userName}
+                                            </span>
+                                            <p style={{ fontFamily: "geist", color: "#9CA3AF", fontWeight: "400", fontSize: 11 }}>
+                                                {userRole}
+                                            </p>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </div>
