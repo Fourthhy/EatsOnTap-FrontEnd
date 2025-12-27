@@ -133,10 +133,10 @@ export const AdviserListView = ({ switcher }) => {
                     </td>
                     
                     {/* --- UPDATED NAME INPUT WITH PADDING --- */}
-                    <td style={cellStyle}>
+                    <td style={{...cellStyle, paddingRight: "10px"}}>
                         <input 
-                            className="w-full border rounded text-xs focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
-                            style={{ padding: '8px 12px' }} // Added padding here
+                            className="w-full border rounded text-xs focus:ring-1 focus:ring-[#4268BD] outline-none transition-all" 
+                            style={{ padding: '8px 0px' }} // Added padding here
                             value={editFormData.name} 
                             onChange={e => setEditFormData({...editFormData, name: e.target.value})} 
                             autoFocus
