@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Play, RotateCcw } from 'lucide-react';
 import { Save, AlertTriangle, Power, Clock, Calendar, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import SystemSettings from "../src/roles/admin/components/pages/SystemSettings";
+import { GlobalLoader } from "./components/global/GlobalLoader";
 
 
 const StickyLayout = () => {
@@ -194,11 +195,19 @@ const FramerShowcase = () => {
   );
 };
 
+function LoadingScreenText() {
+  return (
+    <>
+
+    </>
+  )
+}
+
 
 function Playground() {
   return (
     <>
-      <SystemSettings />
+      <GlobalLoader />
     </>
   );
 }

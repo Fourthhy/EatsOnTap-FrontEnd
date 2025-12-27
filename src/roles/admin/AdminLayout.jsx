@@ -1,10 +1,18 @@
 import React, { useState } from "react";
+import { LayoutDashboard, Ticket, CalendarDays, ShoppingBag, BookOpen, Utensils, Settings } from "lucide-react";
+
+// --- IMPORTS ---
 import { AddDishModal } from "./components/dashboard/AddDishModal";
 import { Sidebar } from "../../components/global/Sidebar";
-import { LayoutDashboard, Ticket, CalendarDays, ShoppingBag, BookOpen, Utensils, Settings } from "lucide-react";
 import { DateProvider } from "./components/dashboard/DatePicker";
 
-export default function AdminLayout() {
+// --- NEW CONTEXT IMPORTS ---
+import { AdminProvider } from "../../context/AdminContext";
+import { LoaderProvider } from "../../context/LoaderContext";
+import { GlobalLoader } from "../../components/global/GlobalLoader";
+
+// This Inner Component contains your original logic
+const AdminLayoutContent = () => {
     // --- MODAL & MEAL STATE LOGIC ---
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [addedTodaysDish, setAddedTodaysDish] = useState(false);
@@ -47,7 +55,6 @@ export default function AdminLayout() {
         { 
             icon: <Utensils size={20} />, 
             text: "Add Dish", 
-            // Logic: Ensure current saved menu is loaded when opening
             onClickAction: () => {
                 if (todaysMenu.length > 0) setMeals([...todaysMenu]);
                 setIsModalOpen(true);
@@ -56,7 +63,10 @@ export default function AdminLayout() {
     ];
 
     return (
-        <DateProvider>
+        <>
+            {/* The Loader sits on top of everything */}
+            <GlobalLoader />
+
             <Sidebar
                 menuItems={menuItems}
                 menutItemsLabel={"Pages"}
@@ -65,7 +75,6 @@ export default function AdminLayout() {
                 settingMenu={settingMenu}
             />
 
-            {/* Render Modal with all required logic props */}
             <AddDishModal 
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
@@ -76,6 +85,20 @@ export default function AdminLayout() {
                 isSaveDisabled={isSaveDisabled}
                 addedTodaysDish={addedTodaysDish}
             />
-        </DateProvider>
+        </>
+    );
+};
+
+// --- MAIN EXPORT ---
+// Wraps the content in the necessary Providers
+export default function AdminLayout() {
+    return (
+        <AdminProvider>
+            <LoaderProvider>
+                <DateProvider>
+                    <AdminLayoutContent />
+                </DateProvider>
+            </LoaderProvider>
+        </AdminProvider>
     );
 }
