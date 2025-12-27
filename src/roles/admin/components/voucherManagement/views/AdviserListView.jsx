@@ -2,12 +2,26 @@ import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { GenericTable } from '../../../../../components/global/table/GenericTable';
 import { adviserRegistry } from '../studentListConfig';
+import { AddAdviserModal } from '../components/AddAdviserModal';
 
 export const AdviserListView = ({ switcher }) => {
     const [activeTab, setActiveTab] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    
+    // Initialize with config data but keep local state for updates
+    const [advisersData, setAdvisersData] = useState(adviserRegistry);
 
-    const filteredAdvisers = adviserRegistry.filter(adv => {
+    const handleAddAdviser = (newAdviser) => {
+        const entry = {
+            id: `adv-${Date.now()}`,
+            ...newAdviser,
+            years: parseInt(newAdviser.years) || 0
+        };
+        setAdvisersData(prev => [entry, ...prev]);
+    };
+
+    const filteredAdvisers = advisersData.filter(adv => {
         const tabToDeptMap = {
             'all': 'All',
             'preschool': 'Preschool',
@@ -51,32 +65,40 @@ export const AdviserListView = ({ switcher }) => {
     );
 
     return (
-        <GenericTable
-            title="Faculty Management"
-            subtitle="Manage teacher assignments"
-            tabs={[
-                { label: 'All', id: 'all' },
-                { label: 'Preschool', id: 'preschool' },
-                { label: 'Primary Education', id: 'primaryEducation' },
-                { label: 'Intermediate', id: 'intermediate' },
-                { label: 'Junior Highschool', id: 'juniorHighSchool' },
-                { label: 'Senior Highschool', id: 'seniorHighSchool' },
-                { label: 'Higher Education', id: 'higherEducation' }
-            ]}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            customActions={switcher}
-            
-            columns={['Teacher Name', 'Department', 'Assignment', 'Years of Service']}
-            data={filteredAdvisers}
-            renderRow={renderRow}
-            
-            onPrimaryAction={() => console.log("Add Teacher")}
-            primaryActionLabel="Add Teacher"
-            primaryActionIcon={<Plus size={16} />}
-            metrics={[{ label: "Total Staff", value: filteredAdvisers.length }]}
-        />
+        <>
+            <AddAdviserModal 
+                isOpen={isAddModalOpen} 
+                onClose={() => setIsAddModalOpen(false)} 
+                onAdd={handleAddAdviser} 
+            />
+
+            <GenericTable
+                title="Faculty Management"
+                subtitle="Manage teacher assignments"
+                tabs={[
+                    { label: 'All', id: 'all' },
+                    { label: 'Preschool', id: 'preschool' },
+                    { label: 'Primary Education', id: 'primaryEducation' },
+                    { label: 'Intermediate', id: 'intermediate' },
+                    { label: 'Junior High School', id: 'juniorHighSchool' },
+                    { label: 'Senior High School', id: 'seniorHighSchool' },
+                    { label: 'Higher Education', id: 'higherEducation' }
+                ]}
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                customActions={switcher}
+                
+                columns={['Teacher Name', 'Department', 'Assignment', 'Years of Service']}
+                data={filteredAdvisers}
+                renderRow={renderRow}
+                
+                onPrimaryAction={() => setIsAddModalOpen(true)}
+                primaryActionLabel="Add Teacher"
+                primaryActionIcon={<Plus size={16} />}
+                metrics={[{ label: "Total Staff", value: filteredAdvisers.length }]}
+            />
+        </>
     );
 };
