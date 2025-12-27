@@ -19,8 +19,8 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
 
     // --- DATA LOGIC ---
     const flattenedSections = useMemo(() => {
-        const relevantCategories = activeTab === 'all' 
-            ? sectionsData 
+        const relevantCategories = activeTab === 'all'
+            ? sectionsData
             : sectionsData.filter(p => p.category === activeTab);
 
         const flatList = [];
@@ -28,8 +28,8 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
             cat.levels.forEach(level => {
                 level.sections.forEach(section => {
                     const searchLower = searchTerm.toLowerCase();
-                    const matchesSearch = 
-                        section.name.toLowerCase().includes(searchLower) || 
+                    const matchesSearch =
+                        section.name.toLowerCase().includes(searchLower) ||
                         section.adviser.toLowerCase().includes(searchLower) ||
                         level.gradeLevel.toLowerCase().includes(searchLower);
 
@@ -54,14 +54,14 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
         // Mocking the update: We need to find the right category and level in our state
         // For simplicity in this mock, we will just force update the state by finding the right nested array
         // In a real app, this would be an API call.
-        
+
         setSectionsData(prev => {
             const newData = JSON.parse(JSON.stringify(prev)); // Deep copy for immutability
-            
+
             // 1. Find the category that contains this grade level
             // We loop through to find where this level belongs
             let targetCategory = newData.find(cat => cat.levels.some(l => l.gradeLevel === newSection.level));
-            
+
             if (targetCategory) {
                 let targetLevel = targetCategory.levels.find(l => l.gradeLevel === newSection.level);
                 if (targetLevel) {
@@ -76,29 +76,57 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
         });
     };
 
+    const cellStyle = {
+        fontSize: '12px',
+        color: '#4b5563',
+        borderBottom: '1px solid #f3f4f6',
+        height: '44px',
+        verticalAlign: 'middle'
+    };
+
     // --- RENDER ROW ---
     const renderSectionRow = (section, index, startIndex) => {
         const isSelected = selectedSection?.id === section.id;
+
         return (
-            <tr 
-                key={section.id} 
+            <tr
+                key={section.id}
                 onClick={() => {
-                    if (!isSelected) { setSelectedSection(section); setIsActionBarVisible(true); } 
+                    if (!isSelected) { setSelectedSection(section); setIsActionBarVisible(true); }
                     else { setSelectedSection(null); setIsActionBarVisible(false); }
                 }}
                 className="transition-colors cursor-pointer"
-                style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent', borderBottom: '1px solid #f3f4f6' }}
+                style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}
             >
-                <td style={{ padding: '12px', textAlign: 'center', width: '48px', fontSize: '12px', color: '#6b7280' }}>{startIndex + index + 1}</td>
-                <td style={{ padding: '12px', fontSize: '12px', fontWeight: 500, color: '#111827' }}>{section.level}</td>
-                <td style={{ padding: '12px', fontSize: '12px', color: '#4b5563' }}>{section.sectionName}</td>
-                <td style={{ padding: '12px', fontSize: '12px', color: '#4b5563' }}>
+                {/* Index Column */}
+                <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }}>
+                    {startIndex + index + 1}
+                </td>
+
+                {/* Level Column (Bold) */}
+                <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
+                    {section.level}
+                </td>
+
+                {/* Section Name */}
+                <td style={cellStyle}>
+                    {section.sectionName}
+                </td>
+
+                {/* Adviser Column */}
+                <td style={cellStyle}>
                     <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"><User size={12} /></div>
+                        <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                            <User size={12} />
+                        </div>
                         {section.adviser}
                     </div>
                 </td>
-                <td style={{ padding: '12px', fontSize: '12px', color: '#4b5563' }}>{section.studentCount}</td>
+
+                {/* Student Count */}
+                <td style={cellStyle}>
+                    {section.studentCount}
+                </td>
             </tr>
         );
     };
@@ -107,7 +135,7 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
     const actionBar = (
         <AnimatePresence onExitComplete={() => setIsActionBarVisible(false)}>
             {isActionBarVisible && selectedSection && (
-                <SelectionActionBar 
+                <SelectionActionBar
                     variant="section"
                     selectedItem={selectedSection}
                     onClearSelection={() => { setSelectedSection(null); setIsActionBarVisible(false); }}
@@ -119,22 +147,22 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
 
     return (
         <>
-            <AddSectionModal 
-                isOpen={isAddModalOpen} 
-                onClose={() => setIsAddModalOpen(false)} 
-                onAdd={handleAddSection} 
+            <AddSectionModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                onAdd={handleAddSection}
             />
 
             <GenericTable
                 title="Section Overview"
                 subtitle="Manage academic sections and advisers"
                 tabs={[
-                    { label: 'All', id: 'all' }, 
-                    { label: 'Preschool', id: 'preschool' }, 
-                    { label: 'Primary Education', id: 'primaryEducation' }, 
+                    { label: 'All', id: 'all' },
+                    { label: 'Preschool', id: 'preschool' },
+                    { label: 'Primary Education', id: 'primaryEducation' },
                     { label: 'Intermediate', id: 'intermediate' },
-                    { label: 'Junior Highschool', id: 'juniorHighSchool' }, 
-                    { label: 'Senior Highschool', id: 'seniorHighSchool' }, 
+                    { label: 'Junior Highschool', id: 'juniorHighSchool' },
+                    { label: 'Senior Highschool', id: 'seniorHighSchool' },
                     { label: 'Higher Education', id: 'higherEducation' }
                 ]}
                 activeTab={activeTab}
