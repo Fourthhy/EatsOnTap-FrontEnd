@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Plus, ArrowLeft, GraduationCap, User } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 
@@ -18,11 +18,13 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
     const [allStudents, setAllStudents] = useState(() => generateData());
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-    // Selection
+    // Selection & Actions
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedIds, setSelectedIds] = useState([]);
-    const [isActionBarVisible, setIsActionBarVisible] = useState(false);
     const [activeActionDropdown, setActiveActionDropdown] = useState(null);
+    
+    // Header Visibility State (Fix for Search Bar issue)
+    const [headerVisible, setHeaderVisible] = useState(false);
 
     // Edit Mode
     const [isEditing, setIsEditing] = useState(false);
@@ -32,6 +34,22 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
     const [promotionMode, setPromotionMode] = useState(null); // 'individual', 'graduation'
     const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
     const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
+
+    // --- EFFECT: MANAGE HEADER VISIBILITY ---
+    //  We determine if actions are active based on selection or modes.
+    const shouldShowActions = selectedIds.length > 0 || selectedItem !== null || promotionMode !== null;
+
+    useEffect(() => {
+        if (shouldShowActions) {
+            setHeaderVisible(true);
+        } else {
+            // Delay hiding the header wrapper to allow the Action Bar's exit animation to play
+            const timer = setTimeout(() => {
+                setHeaderVisible(false);
+            }, 300); // Matches typical Framer Motion exit duration
+            return () => clearTimeout(timer);
+        }
+    }, [shouldShowActions]);
 
     // --- HELPERS ---
     const allLevelsFlat = useMemo(() => {
@@ -64,7 +82,6 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
                 const program = (s.program || "").toLowerCase();
                 const level = drilldownContext.level.toLowerCase();
                 const section = drilldownContext.sectionName.toLowerCase();
-                // Match program to either the level name or the specific section name
                 return program === level || section.includes(program) || program.includes(section);
             });
         }
@@ -119,7 +136,6 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
         if (isGraduatingLevel(drilldownContext.level)) {
             setPromotionMode('graduation');
             setSelectedIds(filteredStudents.map(s => s.id));
-            setIsActionBarVisible(true);
         } else {
             setIsPromotionModalOpen(true);
         }
@@ -140,7 +156,7 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
     const exitPromotion = () => {
         setPromotionMode(null);
         setSelectedIds([]);
-        setIsActionBarVisible(false);
+        // Header visibility handled by effect
     };
 
     // --- HANDLERS: EDIT ---
@@ -155,10 +171,8 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
         
         if (selectedItem?.id === student.id) {
             setSelectedItem(null);
-            setIsActionBarVisible(false);
         } else {
             setSelectedItem(student);
-            setIsActionBarVisible(true);
         }
     };
 
@@ -226,16 +240,17 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
     if (promotionMode === 'individual') variant = 'promotion';
     if (promotionMode === 'graduation') variant = 'graduation';
 
+    // The AnimatePresence wrapper is now managed by the parent's `headerVisible` state logic
     const actionBar = (
-        <AnimatePresence onExitComplete={() => setIsActionBarVisible(false)}>
-            {(isActionBarVisible || promotionMode) && (
+        <AnimatePresence>
+            {shouldShowActions && (
                 <SelectionActionBar 
                     key="bar"
                     variant={variant}
                     selectedItem={selectedItem}
                     onClearSelection={() => {
                         if (promotionMode) exitPromotion();
-                        else { setSelectedItem(null); setIsActionBarVisible(false); setIsEditing(false); }
+                        else { setSelectedItem(null); setIsEditing(false); }
                     }}
                     // Edit
                     isEditing={isEditing}
@@ -262,7 +277,7 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
                 isOpen={isPromotionModalOpen} onClose={() => setIsPromotionModalOpen(false)}
                 nextSections={drilldownContext ? getNextLevelSections(drilldownContext.level) : []}
                 onBulkPromote={handleBulkPromote}
-                onSelectType={t => { setIsPromotionModalOpen(false); if(t === 'individual') { setPromotionMode('individual'); setIsActionBarVisible(true); } }}
+                onSelectType={t => { setIsPromotionModalOpen(false); if(t === 'individual') { setPromotionMode('individual'); } }}
             />
             <AssignmentModal 
                 isOpen={isAssignmentModalOpen} onClose={() => setIsAssignmentModalOpen(false)}
@@ -274,7 +289,6 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
                 title={drilldownContext ? `Students in ${drilldownContext.level} - ${drilldownContext.sectionName}` : "Student Master List"}
                 subtitle={drilldownContext ? "Manage students in this section" : "Manage all student records"}
                 
-                // FIXED: Full Tabs Configuration
                 tabs={!drilldownContext ? [
                     { label: 'All', id: 'all' }, 
                     { label: 'Preschool', id: 'preschool' }, 
@@ -290,7 +304,10 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
                 customActions={switcher}
-                overrideHeader={actionBar}
+                
+                // FIXED: Now correctly passes null when inactive, ensuring search bar renders
+                overrideHeader={headerVisible ? actionBar : null}
+                
                 onPrimaryAction={() => drilldownContext ? onGoBack() : setIsAddModalOpen(true)}
                 primaryActionLabel={drilldownContext ? "Go Back" : "Add Student"}
                 primaryActionIcon={drilldownContext ? <ArrowLeft size={16}/> : <Plus size={16}/>}

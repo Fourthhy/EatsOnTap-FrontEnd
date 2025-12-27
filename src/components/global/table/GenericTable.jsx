@@ -4,7 +4,7 @@ import { ButtonGroup } from '../ButtonGroup';
 import { PrimaryActionButton } from './PrimaryActionButton';
 import { TablePagination } from './TablePagination';
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ITEM_HEIGHT_ESTIMATE_PX = 40;
 
@@ -21,16 +21,16 @@ const GenericTable = ({
     tabs = [],
     activeTab,
     onTabChange,
-    customActions = null,  // Injected controls (e.g. View Switcher)
-    overrideHeader = null, // Replaces Search/Date row (e.g. Bulk Action Bar)
-    customThead = null,    // Replaces the standard <thead> (e.g. Matrix View)
+    customActions = null,
+    overrideHeader = null,
+    customThead = null,
 
     // Primary Action Props
     onPrimaryAction,
     primaryActionLabel = "",
     primaryActionIcon = null,
 
-    // NEW: Secondary Action Props
+    // Secondary Action Props
     onSecondaryAction,
     secondaryActionLabel = "",
     secondaryActionIcon = null,
@@ -113,11 +113,8 @@ const GenericTable = ({
     return (
         <div className="w-full h-[calc(100vh-90px)] flex flex-col p-6 font-['Geist',sans-serif] text-gray-900 overflow-hidden">
 
-            {/* 1. TOP TOOLBAR (Tabs + Actions) */}
-            <motion.div
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", delay: 0.1 }}
+            {/* 1. TOP TOOLBAR (Tabs + Actions) - STATIC (No Animation to prevent dizzying) */}
+            <div
                 className="w-full flex justify-between items-center px-4 py-2 mb-4 bg-white rounded-md shadow-md border border-gray-200"
                 style={{ padding: 5, marginTop: 15, marginBottom: 15 }}
             >
@@ -130,10 +127,9 @@ const GenericTable = ({
                             setCurrentPage(1);
                         }}
                         activeColor="#4268BD"
-                    />}
+                    />
+                }
 
-
-                {/* UPDATED: Container now uses specific 10px gap */}
                 <div className="ml-auto flex items-center" style={{ gap: '10px' }}>
                     {customActions}
 
@@ -151,7 +147,7 @@ const GenericTable = ({
                         />
                     )}
 
-                    {/* NEW: Secondary Action Button */}
+                    {/* Secondary Action Button */}
                     {secondaryActionLabel && secondaryActionIcon && (
                         <PrimaryActionButton
                             label={secondaryActionLabel}
@@ -161,20 +157,14 @@ const GenericTable = ({
                             style={{
                                 padding: '10px 20px', borderRadius: 6, fontSize: 12, fontFamily: 'geist',
                                 boxShadow: "0 2px 6px #e5eaf0ac",
-                                // Optional: You might want a different background color to distinguish it
-                                // backgroundColor: 'white', border: '1px solid #E5E7EB' 
                             }}
                         />
                     )}
                 </div>
-            </motion.div>
+            </div>
 
             {/* 2. MAIN CARD */}
-            <motion.div
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: "spring", delay: 0.1 }}
-                className="bg-white rounded-md shadow-lg border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="bg-white rounded-md shadow-lg border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
 
                 {/* 2a. STATIC HEADER (Title & Metrics) */}
                 <div className="shrink-0 border-b border-gray-100">
@@ -201,12 +191,10 @@ const GenericTable = ({
                     {/* 2b. DYNAMIC HEADER ROW (Search OR Override) */}
                     <div style={{ height: '50px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         {overrideHeader ? (
-                            // RENDER ACTION BAR (Takes up full width)
                             <div className="w-full h-full">
                                 {overrideHeader}
                             </div>
                         ) : (
-                            // RENDER STANDARD SEARCH & CONTROLS
                             <div className="px-6 flex gap-4 items-center justify-between" style={{ padding: 15 }}>
                                 <div className="relative flex-1 max-w-md flex-row">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" size={14} />
@@ -237,7 +225,7 @@ const GenericTable = ({
                 <div ref={tableWrapperRef} className="flex-1 overflow-y-hidden w-full">
                     <table className="w-full text-left border-collapse">
 
-                        {/* 3a. TABLE HEADER (Custom Matrix OR Standard) */}
+                        {/* 3a. TABLE HEADER */}
                         {customThead ? customThead : (
                             <thead className="bg-gray-50 sticky top-0 z-20">
                                 <tr style={{ height: '45px' }}>
@@ -252,14 +240,10 @@ const GenericTable = ({
                                                         checked={isAllSelected}
                                                         ref={input => { if (input) input.indeterminate = isIndeterminate; }}
                                                         onChange={handleSelectAll}
-                                                        onClick={(e) => e.stopPropagation()} // Vital for z-index issues
+                                                        onClick={(e) => e.stopPropagation()}
                                                         style={{
-                                                            width: '16px',
-                                                            height: '16px',
-                                                            accentColor: '#4268BD',
-                                                            cursor: 'pointer',
-                                                            position: 'relative',
-                                                            zIndex: 40
+                                                            width: '16px', height: '16px', accentColor: '#4268BD',
+                                                            cursor: 'pointer', position: 'relative', zIndex: 40
                                                         }}
                                                     />
                                                 </label>
@@ -280,24 +264,47 @@ const GenericTable = ({
                             </thead>
                         )}
 
-                        {/* 3b. TABLE BODY */}
+                        {/* 3b. ANIMATED TABLE BODY */}
                         <tbody className="divide-y divide-gray-100">
-                            {currentData.map((item, index) => renderRow(item, index, startIndex, {
-                                isSelected: selectedIds.includes(item[primaryKey]),
-                                toggleSelection: () => {
-                                    const id = item[primaryKey];
-                                    if (selectedIds.includes(id)) {
-                                        onSelectionChange?.(selectedIds.filter(sid => sid !== id));
-                                    } else {
-                                        onSelectionChange?.([...selectedIds, id]);
-                                    }
-                                }
-                            }))}
+                            <AnimatePresence mode="wait">
+                                {currentData.map((item, index) => {
+                                    // Render the standard row
+                                    const rowContent = renderRow(item, index, startIndex, {
+                                        isSelected: selectedIds.includes(item[primaryKey]),
+                                        toggleSelection: () => {
+                                            const id = item[primaryKey];
+                                            if (selectedIds.includes(id)) {
+                                                onSelectionChange?.(selectedIds.filter(sid => sid !== id));
+                                            } else {
+                                                onSelectionChange?.([...selectedIds, id]);
+                                            }
+                                        }
+                                    });
 
-                            {/* Padding Rows */}
+                                    // WRAPPER: Convert the returned <tr> into a <motion.tr>
+                                    // This assumes renderRow returns a <tr>. We clone it to add motion props.
+                                    // NOTE: If renderRow returns a Fragment or custom component, this might need adjustment.
+                                    // But typically for GenericTable, it returns a <tr>.
+                                    return (
+                                        <motion.tr
+                                            key={item[primaryKey] || index}
+                                            layout // Smoothly animate position changes (reordering)
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            transition={{ duration: 0.2, delay: index * 0.03 }} // Staggered delay
+                                            // Pass through props from the original <tr>
+                                            {...rowContent.props}
+                                        >
+                                            {rowContent.props.children}
+                                        </motion.tr>
+                                    );
+                                })}
+                            </AnimatePresence>
+
+                            {/* STATIC PADDING ROWS (No Animation) */}
                             {currentData.length < itemsPerPage && Array(itemsPerPage - currentData.length).fill(0).map((_, i) => (
                                 <tr key={`pad-${i}`} style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>
-                                    {/* Handle colSpan based on modes */}
                                     <td colSpan={columns.length + (selectable ? 1 : 1) + (customThead ? 20 : 0)}></td>
                                 </tr>
                             ))}
@@ -311,7 +318,7 @@ const GenericTable = ({
                     totalPages={totalPages}
                     onPageChange={handlePageChange}
                 />
-            </motion.div>
+            </div>
         </div >
     );
 };
