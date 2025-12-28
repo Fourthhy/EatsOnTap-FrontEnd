@@ -9,6 +9,7 @@ import { DateProvider } from "./components/dashboard/DatePicker";
 // --- NEW CONTEXT IMPORTS ---
 import { AdminProvider } from "../../context/AdminContext";
 import { LoaderProvider } from "../../context/LoaderContext";
+import { DataProvider } from "../..//context/DataContext";
 import { GlobalLoader } from "../../components/global/GlobalLoader";
 
 // This Inner Component contains your original logic
@@ -52,13 +53,13 @@ const AdminLayoutContent = () => {
     ]
 
     const quickActions = [
-        { 
-            icon: <Utensils size={20} />, 
-            text: "Add Dish", 
+        {
+            icon: <Utensils size={20} />,
+            text: "Add Dish",
             onClickAction: () => {
                 if (todaysMenu.length > 0) setMeals([...todaysMenu]);
                 setIsModalOpen(true);
-            } 
+            }
         },
     ];
 
@@ -75,7 +76,7 @@ const AdminLayoutContent = () => {
                 settingMenu={settingMenu}
             />
 
-            <AddDishModal 
+            <AddDishModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 meals={meals}
@@ -94,11 +95,13 @@ const AdminLayoutContent = () => {
 export default function AdminLayout() {
     return (
         <AdminProvider>
-            <LoaderProvider>
-                <DateProvider>
-                    <AdminLayoutContent />
-                </DateProvider>
-            </LoaderProvider>
+            <DataProvider>
+                <LoaderProvider>
+                    <DateProvider>
+                        <AdminLayoutContent />
+                    </DateProvider>
+                </LoaderProvider>
+            </DataProvider>
         </AdminProvider>
     );
 }

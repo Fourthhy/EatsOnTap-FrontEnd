@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { APP_INITIALIZATION_MANIFEST } from '../config/dataManifest';
 
+// 1. IMPORT DATA CONTEXT & MOCK DATA
+import { useData } from './DataContext';
+import { MOCK_DASHBOARD_DATA, MOCK_EVENTS } from '../data/dashboardData';
+
 const LoaderContext = createContext();
 
 export const LoaderProvider = ({ children }) => {
@@ -8,44 +12,63 @@ export const LoaderProvider = ({ children }) => {
     const [progress, setProgress] = useState(0);
     const [currentLabel, setCurrentLabel] = useState("Initializing System...");
 
-    // MOCK API CALL
+    // 2. GRAB SETTERS FROM DATA CONTEXT
+    const { setDashboardData, setEvents } = useData();
+
     const mockApiCall = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     const executeLoadingSequence = async () => {
+        // ... (Check session logic here) ...
+        const isRefreshed = sessionStorage.getItem('is_session_active');
         let currentProgress = 0;
 
-        // HELPER
         const runTask = async (task) => {
             setCurrentLabel(task.label);
-            // Random delay for "Critical" items (400-800ms)
-            await mockApiCall(Math.floor(Math.random() * 400) + 400);
+            const delay = isRefreshed ? 0 : (Math.floor(Math.random() * 400) + 400);
+            await mockApiCall(delay);
+
+            // 3. INJECT DATA BASED ON TASK ID
+            // When specific tasks finish, we populate the relevant part of the state
+            if (task.id === 'dash_chart_daily') {
+                // In real app: const data = await api.getDaily();
+                // setDashboardData(prev => ({...prev, daily: data}));
+            }
+            
             currentProgress += task.weight;
             setProgress(currentProgress);
         };
 
-        // PHASE 1: CRITICAL (Sequential)
-        if (APP_INITIALIZATION_MANIFEST.critical) {
-            for (const task of APP_INITIALIZATION_MANIFEST.critical) {
-                await runTask(task);
-            }
+        // --- RUNNING THE TASKS ---
+        for (const task of APP_INITIALIZATION_MANIFEST.critical) {
+            await runTask(task);
         }
 
-        // PHASE 2: SECONDARY (Simulated Parallel with Stagger)
+        // ... (Secondary tasks logic) ...
         if (APP_INITIALIZATION_MANIFEST.secondary) {
-            const secondaryPromises = APP_INITIALIZATION_MANIFEST.secondary.map(async (task, index) => {
-                // Stagger delay: Item 1 waits 0ms, Item 2 waits 250ms, etc.
-                await mockApiCall(index * 250 + 300);
-                setCurrentLabel(task.label); 
-                currentProgress += task.weight;
-                // Cap progress at 100 visually
-                setProgress(Math.min(currentProgress, 100));
-            });
-            await Promise.all(secondaryPromises);
+             const secondaryPromises = APP_INITIALIZATION_MANIFEST.secondary.map(async (task, index) => {
+                 await mockApiCall(index * 250 + 300);
+                 setCurrentLabel(task.label); 
+                 currentProgress += task.weight;
+                 setProgress(Math.min(currentProgress, 100));
+             });
+             await Promise.all(secondaryPromises);
         }
 
-        // FINISH
+        // 4. FINAL DATA INJECTION (SIMULATION)
+        // Once the bar hits 100%, we dump the mock data into the Context
+        // This ensures the Dashboard has data when it renders
+        setDashboardData({
+            daily: MOCK_DASHBOARD_DATA.today,
+            weekly: MOCK_DASHBOARD_DATA.weekly,
+            monthly: MOCK_DASHBOARD_DATA.monthly,
+            overall: MOCK_DASHBOARD_DATA.overall
+        });
+        setEvents(MOCK_EVENTS);
+
+
         await mockApiCall(500); 
         setIsLoading(false);
+        sessionStorage.setItem('is_session_active', 'true');
     };
 
     useEffect(() => {

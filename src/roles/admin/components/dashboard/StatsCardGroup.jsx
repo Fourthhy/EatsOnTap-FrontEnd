@@ -1,21 +1,24 @@
 import { StatsCard } from "./StatsCard";
 import { useState } from "react";
+// Import Skeleton for the header/footer areas
+import { Skeleton } from "../../../../components/global/Skeleton";
 
 export function StatsCardGroup({
-    cardGroupTitle, //what is the title of the card group 
-    isDualPager, //does it handle primary and secondary pages (enable switching)
-    dualPageTitles, //array, what is the title for viewing primary and secondary pages
+    cardGroupTitle, 
+    isDualPager, 
+    dualPageTitles, 
 
-    primaryData = [], //for displaying first page data
-    secondaryData = [], //for displaying first page data
+    primaryData = [], 
+    secondaryData = [], 
 
-    urgentNotification, //if there is an urgent notification within the card group
-    notificationTitle, //what is the title of that notification (to be displayed in button from)
+    urgentNotification, 
+    notificationTitle, 
 
-    successMessage, //what is the message of a good status
-    failureMessage, //what is the message of a bad status
-    footnote, //footnote interpretation or a neutral message
-    displayDate, //boolean, if you want to display a message within that card group
+    successMessage, 
+    failureMessage, 
+    footnote, 
+    displayDate,
+    isLoading = false // NEW PROP
 }) {
     const [viewFirstPage, setViewFirstPage] = useState(false);
 
@@ -29,14 +32,12 @@ export function StatsCardGroup({
 
     const dateToday = getTodayDate();
 
-    // Determine the dataset to display based on toggle
-    // Reversing to match your original Right-to-Left layout preference
+    // Determine dataset
     const currentData = viewFirstPage
         ? [...secondaryData].reverse()
         : [...primaryData].reverse();
 
-    // Logic to check if the stats are "Good" or "Bad"
-    // Based on the first item of the primary data
+    // Logic for "Good/Bad" message
     const mainMetric = primaryData[0] || {};
     const {
         value: val1,
@@ -53,7 +54,6 @@ export function StatsCardGroup({
 
     const globalButtonBgColor = "cursor-pointer bg-[#4268BD] hover:bg-[#33549F] transition-colors duration-300";
 
-
     return (
         <div
             style={{
@@ -64,77 +64,99 @@ export function StatsCardGroup({
             }}
             className="flex flex-col justify-evenly w-full h-full"
         >
-            {/* ... Header and Buttons (Unchanged) ... */}
+            {/* --- HEADER SECTION --- */}
             <div style={{ paddingBottom: 5 }} className="w-full h-auto flex justify-between">
                 <div style={{ display: "flex", flexDirection: "column", paddingLeft: 6, width: "100%" }}>
-                    <span style={{ fontWeight: 500, fontSize: 12, color: "#000000", fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
-                        {cardGroupTitle}
-                    </span>
-                    {displayDate
-                        ? <>
+                    
+                    {/* Title Skeleton */}
+                    {isLoading ? (
+                        <Skeleton className="h-4 w-32 rounded mb-1" />
+                    ) : (
+                        <span style={{ fontWeight: 500, fontSize: 12, color: "#000000", fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
+                            {cardGroupTitle}
+                        </span>
+                    )}
+
+                    {/* Date Skeleton */}
+                    {isLoading ? (
+                         displayDate && <Skeleton className="h-3 w-20 rounded mt-1" />
+                    ) : (
+                        displayDate && (
                             <span style={{ color: "#353535", fontSize: 12, fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
                                 {dateToday}
                             </span>
-                        </>
-                        : ""}
+                        )
+                    )}
                 </div>
-                <div className="h-full w-full flex items-center justify-end">
-                    {isDualPager
-                        ? <>
+
+                {/* Buttons (Hidden during loading) */}
+                {!isLoading && (
+                    <div className="h-full w-full flex items-center justify-end">
+                        {isDualPager && (
                             <button
                                 style={{
-                                    marginBottom: 2,
-                                    marginRight: 5,
-                                    borderRadius: 6,
-                                    padding: "10px 12px",
-                                    fontFamily: "geist",
-                                    fontSize: 12,
-                                    color: "#eeeeee",
-                                    boxShadow: "0 2px 6px #e5eaf0ac",
-                                    border: "1px solid #ddddddaf",
+                                    marginBottom: 2, marginRight: 5, borderRadius: 6, padding: "10px 12px",
+                                    fontFamily: "geist", fontSize: 12, color: "#eeeeee",
+                                    boxShadow: "0 2px 6px #e5eaf0ac", border: "1px solid #ddddddaf",
                                 }}
                                 className={globalButtonBgColor}
                                 onClick={() => { setViewFirstPage(!viewFirstPage) }}
                             >
                                 {viewFirstPage ? dualPageTitles[0] : dualPageTitles[1]}
                             </button>
-                        </>
-                        : ""}
-                    {urgentNotification !== 0 && (
-                        <button
-                            style={{ marginBottom: 2, marginRight: 2, borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontFamily: "geist", fontSize: 12, boxShadow: "0 2px 6px #e5eaf0" }}
-                            className="hover:cursor-pointer bg-[#ffe6daff] hover:bg-[#ffd5c1ff]"
-                        >
-                            {notificationTitle + "(" + urgentNotification + ")"}
-                        </button>
-                    )}
-                </div>
+                        )}
+                        {urgentNotification !== 0 && (
+                            <button
+                                style={{ marginBottom: 2, marginRight: 2, borderRadius: 6, padding: "10px 12px", cursor: "pointer", fontFamily: "geist", fontSize: 12, boxShadow: "0 2px 6px #e5eaf0" }}
+                                className="hover:cursor-pointer bg-[#ffe6daff] hover:bg-[#ffd5c1ff]"
+                            >
+                                {notificationTitle + "(" + urgentNotification + ")"}
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
-            {/* Cards Loop */}
-            <div className="flex flex-row justify-evenly">
-                {currentData.map((item, index) => (
-                    <StatsCard
-                        key={index}
-                        title={item.title}
-                        value={item.value}
-                        subtitle={item.subtitle}
-                        acceptanceRate={item.acceptanceRate}
-                        expectingPostiveResult={item.expectingPositiveResult}
-                        isPercentage={item.isPercentage}
-                    />
-                ))}
+            {/* --- CARDS LOOP --- */}
+            <div className="flex flex-row justify-evenly gap-4"> 
+                {/* If LOADING: Render dummy cards (e.g. 2 of them) so layout holds shape.
+                   If LOADED: Render real data.
+                */}
+                {isLoading ? (
+                    <>
+                        <StatsCard isLoading={true} />
+                        <StatsCard isLoading={true} />
+                    </>
+                ) : (
+                    currentData.map((item, index) => (
+                        <StatsCard
+                            key={index}
+                            title={item.title}
+                            value={item.value}
+                            subtitle={item.subtitle}
+                            acceptanceRate={item.acceptanceRate}
+                            expectingPostiveResult={item.expectingPositiveResult}
+                            isPercentage={item.isPercentage}
+                            isLoading={false} // Explicitly false
+                        />
+                    ))
+                )}
             </div>
 
-            {/* 2. UPDATED SUMMARY SECTION */}
+            {/* --- SUMMARY FOOTER --- */}
             <div style={{ paddingTop: 8, fontSize: 12 }} className="w-full h-auto flex justify-center font-geist">
-                <p style={{ color: "#353535", fontSize: 11, fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
-                    {/* 3. Uses the new props based on the calculated result */}
-                    {summaryResult ? successMessage : failureMessage}
-                </p>
-                <p style={{ color: "#353535", fontSize: 11, fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
-                    {footnote}
-                </p>
+                {isLoading ? (
+                    <Skeleton className="h-3 w-48 rounded" />
+                ) : (
+                    <>
+                        <p style={{ color: "#353535", fontSize: 11, fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
+                            {summaryResult ? successMessage : failureMessage}
+                        </p>
+                        <p style={{ color: "#353535", fontSize: 11, fontFamily: "geist", width: "fit-content", height: "fit-content" }}>
+                            {footnote}
+                        </p>
+                    </>
+                )}
             </div>
         </div>
     );
