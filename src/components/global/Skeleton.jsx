@@ -21,7 +21,7 @@ export const Skeleton = ({ className = "", style = {} }) => {
             />
             
             {/* INLINE STYLE FOR ANIMATION (Put this in your global CSS if preferred) */}
-            <style jsx>{`
+            <style>{`
                 @keyframes shimmer {
                     0% { transform: translateX(-150%) skewX(-20deg); }
                     100% { transform: translateX(150%) skewX(-20deg); }

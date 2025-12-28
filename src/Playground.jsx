@@ -6,6 +6,10 @@ import { Save, AlertTriangle, Power, Clock, Calendar, ShieldAlert, CheckCircle2 
 import SystemSettings from "../src/roles/admin/components/pages/SystemSettings";
 import { GlobalLoader } from "./components/global/GlobalLoader";
 
+import { useData } from "../src/context/DataContext"
+
+import { AdminProvider } from "../src/context/AdminContext";
+import { DataProvider } from "../src/context/DataContext";
 
 const StickyLayout = () => {
   return (
@@ -195,10 +199,15 @@ const FramerShowcase = () => {
   );
 };
 
-function LoadingScreenText() {
+function SimulateFetch() {
+  const { programsAndSections } = useData();
   return (
     <>
-
+      <select>
+        {programsAndSections.map(prog => (
+          <option key={prog.id} value={prog.code}>{prog.name}</option>
+        ))}
+      </select>
     </>
   )
 }
@@ -207,7 +216,11 @@ function LoadingScreenText() {
 function Playground() {
   return (
     <>
-      <GlobalLoader />
+      <AdminProvider>
+        <DataProvider>
+          <SimulateFetch />
+        </DataProvider>
+      </AdminProvider>
     </>
   );
 }

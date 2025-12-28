@@ -1,13 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { User, Eye, Plus } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 
 import { GenericTable } from '../../../../../components/global/table/GenericTable';
 import { SelectionActionBar } from '../SelectionActionBar';
-import { programsAndSections } from '../studentListConfig';
+
 import { AddSectionModal } from '../components/AddSectionModal';
 
+// DATA FROM CONTEXT
+import { useData } from "../../../../../context/DataContext";
+
 export const SectionListView = ({ switcher, onNavigateToStudents }) => {
+    //get programs and sections from useData
+    const { programsAndSections } = useData();
+
     const [activeTab, setActiveTab] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSection, setSelectedSection] = useState(null);
@@ -17,7 +23,15 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
     // Initialize state with config data so we can append to it locally
     const [sectionsData, setSectionsData] = useState(programsAndSections);
 
+    useEffect(() => {
+        if (programsAndSections && programsAndSections.length > 0) {
+            setSectionsData(programsAndSections);
+        }
+    }, [programsAndSections]);
+
     // --- DATA LOGIC ---
+    // Inside SectionListView.jsx
+
     const flattenedSections = useMemo(() => {
         const relevantCategories = activeTab === 'all'
             ? sectionsData
@@ -28,19 +42,21 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
             cat.levels.forEach(level => {
                 level.sections.forEach(section => {
                     const searchLower = searchTerm.toLowerCase();
+
+                    // 🟢 FIX: Add ( || "") to prevent crashing on null values
                     const matchesSearch =
-                        section.name.toLowerCase().includes(searchLower) ||
-                        section.adviser.toLowerCase().includes(searchLower) ||
-                        level.gradeLevel.toLowerCase().includes(searchLower);
+                        (section.name || "").toLowerCase().includes(searchLower) ||
+                        (section.adviser || "").toLowerCase().includes(searchLower) ||
+                        (level.gradeLevel || "").toLowerCase().includes(searchLower);
 
                     if (matchesSearch) {
                         flatList.push({
                             id: `${level.gradeLevel}-${section.name}`,
                             level: level.gradeLevel,
                             sectionName: section.name,
-                            adviser: section.adviser,
+                            adviser: section.adviser || "No Adviser Assigned", // Display friendly text instead of null
                             studentCount: section.studentCount || 0,
-                            category: cat.category // Keep ref for internal logic if needed
+                            category: cat.category
                         });
                     }
                 });

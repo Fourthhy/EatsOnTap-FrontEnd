@@ -1,6 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { APP_INITIALIZATION_MANIFEST } from '../config/dataManifest';
 
+// 0. IMPORT CALL TO FETCH
+import { fetchProgramsAndSection } from "../functions/admin/programsAndSectionsFetch";
+
 // 1. IMPORT DATA CONTEXT & MOCK DATA
 import { useData } from './DataContext';
 import { MOCK_DASHBOARD_DATA, MOCK_EVENTS } from '../data/roles/admin/dashboard/dashboardData';
@@ -13,7 +16,7 @@ export const LoaderProvider = ({ children }) => {
     const [currentLabel, setCurrentLabel] = useState("Initializing System...");
 
     // 2. GRAB SETTERS FROM DATA CONTEXT
-    const { setDashboardData, setEvents } = useData();
+    const { setDashboardData, setEvents, setProgramsAndSections } = useData();
 
     const mockApiCall = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -23,6 +26,7 @@ export const LoaderProvider = ({ children }) => {
         let currentProgress = 0;
 
         const runTask = async (task) => {
+            console.log("⚡ Processing Task:", task.id); // <--- DEBUG LOG 1
             setCurrentLabel(task.label);
             const delay = isRefreshed ? 0 : (Math.floor(Math.random() * 400) + 400);
             await mockApiCall(delay);
@@ -33,7 +37,23 @@ export const LoaderProvider = ({ children }) => {
                 // In real app: const data = await api.getDaily();
                 // setDashboardData(prev => ({...prev, daily: data}));
             }
-            
+
+            //USE THE IMPORTED CALL TO FETCH FROM STEP 0 
+            if (task.id === "fetch_programs_and_sections") {
+                console.log("✅ MATCH FOUND! Starting fetch..."); // <--- DEBUG LOG 2
+                try {
+                    const data = await fetchProgramsAndSection();
+                    console.log("📦 Data received:", data); // <--- DEBUG LOG 3
+                    if (data) {
+                        setProgramsAndSections(data);
+                    }
+                } catch (err) {
+                    console.error("❌ Fetch failed:", err);
+                }
+            } else {
+                console.log("⚠️ No specific logic for:", task.id); // <--- DEBUG LOG 4
+            }
+
             currentProgress += task.weight;
             setProgress(currentProgress);
         };
@@ -45,13 +65,13 @@ export const LoaderProvider = ({ children }) => {
 
         // ... (Secondary tasks logic) ...
         if (APP_INITIALIZATION_MANIFEST.secondary) {
-             const secondaryPromises = APP_INITIALIZATION_MANIFEST.secondary.map(async (task, index) => {
-                 await mockApiCall(index * 250 + 300);
-                 setCurrentLabel(task.label); 
-                 currentProgress += task.weight;
-                 setProgress(Math.min(currentProgress, 100));
-             });
-             await Promise.all(secondaryPromises);
+            const secondaryPromises = APP_INITIALIZATION_MANIFEST.secondary.map(async (task, index) => {
+                await mockApiCall(index * 250 + 300);
+                setCurrentLabel(task.label);
+                currentProgress += task.weight;
+                setProgress(Math.min(currentProgress, 100));
+            });
+            await Promise.all(secondaryPromises);
         }
 
         // 4. FINAL DATA INJECTION (SIMULATION)
@@ -66,7 +86,7 @@ export const LoaderProvider = ({ children }) => {
         setEvents(MOCK_EVENTS);
 
 
-        await mockApiCall(500); 
+        await mockApiCall(500);
         setIsLoading(false);
         sessionStorage.setItem('is_session_active', 'true');
     };

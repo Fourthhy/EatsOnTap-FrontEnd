@@ -3,6 +3,11 @@ export const APP_INITIALIZATION_MANIFEST = {
     // Total Weight: 40%
     critical: [
         {
+            id: 'fetch_programs_and_sections',
+            label: 'Loading Student Registry...',
+            weight: 15
+        },
+        {
             id: 'dash_chart_daily',
             label: 'Fetching Daily Data for all charts (Last 6 days)...',
             weight: 10
@@ -27,11 +32,6 @@ export const APP_INITIALIZATION_MANIFEST = {
     // BATCH 2: HEAVY LISTS (Runs in background after critical is done)
     // Total Weight: 60%
     secondary: [
-        {
-            id: 'master_students',
-            label: 'Loading Student Registry...',
-            weight: 15
-        },
         {
             id: 'master_events',
             label: 'Syncing Event Calendar...',

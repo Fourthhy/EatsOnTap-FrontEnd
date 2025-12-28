@@ -5,11 +5,14 @@ const DataContext = createContext();
 export const DataProvider = ({ children }) => {
     // 1. DASHBOARD ANALYTICS
     const [dashboardData, setDashboardData] = useState({
-        daily: [],   
-        weekly: [],  
-        monthly: [], 
-        overall: {}  
+        daily: [],
+        weekly: [],
+        monthly: [],
+        overall: {}
     });
+
+    //fetched programs and sections from the database
+    const [programsAndSections, setProgramsAndSections] = useState([]);
 
     // 2. MASTER RECORDS
     const [students, setStudents] = useState([]);
@@ -27,7 +30,8 @@ export const DataProvider = ({ children }) => {
             events, setEvents,
             mealOrders, setMealOrders,
             claimRecords, setClaimRecords,
-            todaysMenu, setTodaysMenu
+            todaysMenu, setTodaysMenu,
+            programsAndSections, setProgramsAndSections
         }}>
             {children}
         </DataContext.Provider>
