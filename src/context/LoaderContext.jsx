@@ -3,7 +3,7 @@ import { APP_INITIALIZATION_MANIFEST } from '../config/dataManifest';
 
 // 1. IMPORT DATA CONTEXT & MOCK DATA
 import { useData } from './DataContext';
-import { MOCK_DASHBOARD_DATA, MOCK_EVENTS } from '../data/dashboardData';
+import { MOCK_DASHBOARD_DATA, MOCK_EVENTS } from '../data/roles/admin/dashboard/dashboardData';
 
 const LoaderContext = createContext();
 
