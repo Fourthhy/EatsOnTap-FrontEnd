@@ -3,9 +3,9 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 export async function fetchProgramsAndSection() {
     //don't forget to chagne to VITE_BASE_URL upon deployment
-    console.log("🌐 Fetching from:", `${import.meta.env.VITE_LOCALHOST}/api/fetch/getProgramsAndSections`);
+    console.log("🌐 Fetching from:", `${import.meta.env.VITE_BASE_URL}/api/fetch/getProgramsAndSections`);
     try {
-        const response = await fetch(`${VITE_LOCALHOST}/api/fetch/getProgramsAndSections`);
+        const response = await fetch(`${VITE_BASE_URL}/api/fetch/getProgramsAndSections`);
         if (!response.ok) {
             throw new Error('Failed to fetch programs and sections');
         }
