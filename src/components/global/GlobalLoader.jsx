@@ -1,9 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLoader } from '../../context/LoaderContext';
 
 export const GlobalLoader = () => {
     const { isLoading, progress, currentLabel } = useLoader();
+
+    // FIX: LAZY INITIALIZATION
+    // We pass a function to useState. This runs SYNCHRONOUSLY before the first render.
+    // No more flash!
+    const [shouldRenderOverlay] = useState(() => {
+        const isRefreshed = sessionStorage.getItem('is_session_active');
+        // If it's a refresh (isRefreshed exists), we return FALSE immediately.
+        return !isRefreshed; 
+    });
+
+    useEffect(() => {
+        // If this is a fresh login (overlay is showing), mark the session as active.
+        // We do this here so future refreshes will see the flag.
+        if (shouldRenderOverlay) {
+            sessionStorage.setItem('is_session_active', 'true');
+        }
+    }, [shouldRenderOverlay]);
+
+    // CHECK: If it's a refresh, this returns null on the very first frame.
+    if (!shouldRenderOverlay) return null;
 
     return (
         <AnimatePresence>
@@ -19,7 +39,6 @@ export const GlobalLoader = () => {
                         alignItems: 'center', justifyContent: 'center'
                     }}
                 >
-                    {/* Logo or Brand Icon could go here */}
                     <div className="flex flex-col items-center w-full gap-5">
                         <div>
                             <img src="/lv-logo.svg" alt="La Verdad Logo" />
@@ -30,7 +49,7 @@ export const GlobalLoader = () => {
                         </div>
 
                         <motion.p
-                            key={currentLabel} // Triggers animation when text changes
+                            key={currentLabel}
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
                             className="mt-4 text-sm text-gray-500 font-geist"
@@ -46,10 +65,6 @@ export const GlobalLoader = () => {
                             />
                         </div>
                         <p className="mt-1 text-xs text-gray-400 font-mono">{Math.min(100, Math.round(progress))}%</p>
-
-
-
-
                     </div>
                 </motion.div>
             )}

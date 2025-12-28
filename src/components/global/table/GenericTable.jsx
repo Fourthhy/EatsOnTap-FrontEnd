@@ -3,8 +3,12 @@ import { Search, Calendar } from 'lucide-react';
 import { ButtonGroup } from '../ButtonGroup';
 import { PrimaryActionButton } from './PrimaryActionButton';
 import { TablePagination } from './TablePagination';
-
 import { motion, AnimatePresence } from "framer-motion";
+
+// --- NEW IMPORTS ---
+// Adjust these paths if your folder structure is different
+import { useLoader } from '../../../context/LoaderContext';
+import { Skeleton } from '../../global/Skeleton'; 
 
 const ITEM_HEIGHT_ESTIMATE_PX = 40;
 
@@ -53,6 +57,10 @@ const GenericTable = ({
     const [itemsPerPage, setItemsPerPage] = useState(maxItems);
     const tableWrapperRef = useRef(null);
 
+    // --- HOOK: LOADER STATE ---
+    // This tells us if we should show the "Shimmer" or real data
+    const { isLoading } = useLoader();
+
     // --- HELPER: Date --- 
     function getFormattedDate() {
         const today = new Date();
@@ -67,7 +75,6 @@ const GenericTable = ({
 
         const observer = new ResizeObserver(entries => {
             const containerHeight = entries[0].contentRect.height;
-            // Subtract approx header height (45px) to get body space
             const availableSpace = containerHeight - 45;
             const calculatedItems = Math.floor(availableSpace / ITEM_HEIGHT_ESTIMATE_PX);
             const newItemsPerPage = Math.max(minItems, Math.min(maxItems, calculatedItems));
@@ -113,7 +120,7 @@ const GenericTable = ({
     return (
         <div className="w-full h-[calc(100vh-90px)] flex flex-col p-6 font-['Geist',sans-serif] text-gray-900 overflow-hidden">
 
-            {/* 1. TOP TOOLBAR (Tabs + Actions) - STATIC (No Animation to prevent dizzying) */}
+            {/* 1. TOP TOOLBAR */}
             <div
                 className="w-full flex justify-between items-center px-4 py-2 mb-4 bg-white rounded-md shadow-md border border-gray-200"
                 style={{ padding: 5, marginTop: 15, marginBottom: 15 }}
@@ -133,7 +140,6 @@ const GenericTable = ({
                 <div className="ml-auto flex items-center" style={{ gap: '10px' }}>
                     {customActions}
 
-                    {/* Primary Action Button */}
                     {primaryActionLabel && primaryActionIcon && (
                         <PrimaryActionButton
                             label={primaryActionLabel}
@@ -147,7 +153,6 @@ const GenericTable = ({
                         />
                     )}
 
-                    {/* Secondary Action Button */}
                     {secondaryActionLabel && secondaryActionIcon && (
                         <PrimaryActionButton
                             label={secondaryActionLabel}
@@ -166,7 +171,7 @@ const GenericTable = ({
             {/* 2. MAIN CARD */}
             <div className="bg-white rounded-md shadow-lg border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
 
-                {/* 2a. STATIC HEADER (Title & Metrics) */}
+                {/* 2a. STATIC HEADER */}
                 <div className="shrink-0 border-b border-gray-100">
                     <div className="px-6 pt-6 pb-4" style={{ padding: 15 }}>
                         <div className="flex justify-between items-center">
@@ -179,7 +184,12 @@ const GenericTable = ({
                                 {metrics && metrics.map((metric, index) => (
                                     <div key={index} className="text-right" style={{ paddingRight: 10 }}>
                                         <span className="font-geist font-semibold" style={{ fontSize: 14 }}>{metric.label}: </span>
-                                        <span className="font-geist font-bold" style={{ fontSize: 18, color: metric.color || '#000000' }}>{metric.value}</span>
+                                        {/* Use Skeleton for metrics if loading */}
+                                        {isLoading ? (
+                                            <Skeleton className="inline-block h-5 w-16 rounded ml-2 align-middle" />
+                                        ) : (
+                                            <span className="font-geist font-bold" style={{ fontSize: 18, color: metric.color || '#000000' }}>{metric.value}</span>
+                                        )}
                                     </div>
                                 ))
                                 }</div>
@@ -188,7 +198,7 @@ const GenericTable = ({
 
                     <hr className="w-full border-gray-100" />
 
-                    {/* 2b. DYNAMIC HEADER ROW (Search OR Override) */}
+                    {/* 2b. DYNAMIC HEADER ROW */}
                     <div style={{ height: '50px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         {overrideHeader ? (
                             <div className="w-full h-full">
@@ -264,46 +274,66 @@ const GenericTable = ({
                             </thead>
                         )}
 
-                        {/* 3b. ANIMATED TABLE BODY */}
+                        {/* 3b. TABLE BODY (With Skeleton Logic) */}
                         <tbody className="divide-y divide-gray-100">
-                            <AnimatePresence mode="wait">
-                                {currentData.map((item, index) => {
-                                    // Render the standard row
-                                    const rowContent = renderRow(item, index, startIndex, {
-                                        isSelected: selectedIds.includes(item[primaryKey]),
-                                        toggleSelection: () => {
-                                            const id = item[primaryKey];
-                                            if (selectedIds.includes(id)) {
-                                                onSelectionChange?.(selectedIds.filter(sid => sid !== id));
-                                            } else {
-                                                onSelectionChange?.([...selectedIds, id]);
+                            {isLoading ? (
+                                // --- RENDER SKELETON STATE ---
+                                Array(itemsPerPage).fill(0).map((_, i) => (
+                                    <tr key={`skeleton-${i}`} style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>
+                                        {/* Selection Checkbox Skeleton */}
+                                        <td className="px-6 py-3" style={{ width: selectable ? '48px' : '64px' }}>
+                                            <div className="flex justify-center">
+                                                <Skeleton className="h-4 w-4 rounded-sm" />
+                                            </div>
+                                        </td>
+                                        
+                                        {/* Dynamic Column Skeletons */}
+                                        {columns.map((_, colIndex) => (
+                                            <td key={colIndex} className="px-6 py-3">
+                                                {/* Vary width slightly for "organic" feel */}
+                                                <Skeleton 
+                                                    className="h-4 rounded" 
+                                                    style={{ width: `${Math.floor(Math.random() * 40) + 40}%` }} 
+                                                />
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))
+                            ) : (
+                                // --- RENDER REAL DATA ---
+                                <AnimatePresence mode="wait">
+                                    {currentData.map((item, index) => {
+                                        const rowContent = renderRow(item, index, startIndex, {
+                                            isSelected: selectedIds.includes(item[primaryKey]),
+                                            toggleSelection: () => {
+                                                const id = item[primaryKey];
+                                                if (selectedIds.includes(id)) {
+                                                    onSelectionChange?.(selectedIds.filter(sid => sid !== id));
+                                                } else {
+                                                    onSelectionChange?.([...selectedIds, id]);
+                                                }
                                             }
-                                        }
-                                    });
+                                        });
 
-                                    // WRAPPER: Convert the returned <tr> into a <motion.tr>
-                                    // This assumes renderRow returns a <tr>. We clone it to add motion props.
-                                    // NOTE: If renderRow returns a Fragment or custom component, this might need adjustment.
-                                    // But typically for GenericTable, it returns a <tr>.
-                                    return (
-                                        <motion.tr
-                                            key={item[primaryKey] || index}
-                                            layout // Smoothly animate position changes (reordering)
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -10 }}
-                                            transition={{ duration: 0.2, delay: index * 0.03 }} // Staggered delay
-                                            // Pass through props from the original <tr>
-                                            {...rowContent.props}
-                                        >
-                                            {rowContent.props.children}
-                                        </motion.tr>
-                                    );
-                                })}
-                            </AnimatePresence>
+                                        return (
+                                            <motion.tr
+                                                key={item[primaryKey] || index}
+                                                layout
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                transition={{ duration: 0.2, delay: index * 0.03 }}
+                                                {...rowContent.props}
+                                            >
+                                                {rowContent.props.children}
+                                            </motion.tr>
+                                        );
+                                    })}
+                                </AnimatePresence>
+                            )}
 
-                            {/* STATIC PADDING ROWS (No Animation) */}
-                            {currentData.length < itemsPerPage && Array(itemsPerPage - currentData.length).fill(0).map((_, i) => (
+                            {/* PADDING ROWS (Always render to maintain height if data is short) */}
+                            {!isLoading && currentData.length < itemsPerPage && Array(itemsPerPage - currentData.length).fill(0).map((_, i) => (
                                 <tr key={`pad-${i}`} style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>
                                     <td colSpan={columns.length + (selectable ? 1 : 1) + (customThead ? 20 : 0)}></td>
                                 </tr>
@@ -315,7 +345,7 @@ const GenericTable = ({
                 {/* 4. FOOTER */}
                 <TablePagination
                     currentPage={currentPage}
-                    totalPages={totalPages}
+                    totalPages={isLoading ? 1 : totalPages} // Disable pagination during loading
                     onPageChange={handlePageChange}
                 />
             </div>
