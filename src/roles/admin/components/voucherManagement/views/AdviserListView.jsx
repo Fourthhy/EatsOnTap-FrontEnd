@@ -9,14 +9,20 @@ import { AddAdviserModal } from '../components/AddAdviserModal';
 import { CustomEditDropdown } from '../components/CustomEditDropdown';
 
 // Data & Helpers
-import { adviserRegistry } from '../studentListConfig';
+import { useData } from "../../../../../context/DataContext"; // 1. IMPORT CONTEXT
 import { DEPARTMENT_SECTIONS, DEPARTMENTS } from '../config/adviserConfig';
 
 export const AdviserListView = ({ switcher }) => {
+    // 2. GET EXISTING DATA
+    const { programsAndSections } = useData();
+
     // --- STATE ---
     const [activeTab, setActiveTab] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
-    const [advisersData, setAdvisersData] = useState(adviserRegistry);
+    
+    // 3. INITIALIZE EMPTY (Will fill via Effect)
+    const [advisersData, setAdvisersData] = useState([]); 
+    
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     // Selection
@@ -40,6 +46,51 @@ export const AdviserListView = ({ switcher }) => {
             return () => clearTimeout(timer);
         }
     }, [shouldShowActions]);
+
+    // --- 🟢 EFFECT: TRANSFORM HIERARCHY TO FLAT LIST ---
+    // This turns your "School Structure" into a "Teacher List"
+    useEffect(() => {
+        if (programsAndSections && programsAndSections.length > 0) {
+            const extractedAdvisers = [];
+            
+            // Helper to map backend category codes to readable Department names
+            const mapDept = (cat) => {
+                const map = {
+                    'preschool': 'Preschool',
+                    'primaryEducation': 'Primary Education',
+                    'intermediate': 'Intermediate',
+                    'juniorHighSchool': 'Junior High School',
+                    'seniorHighSchool': 'Senior High School',
+                    'higherEducation': 'Higher Education'
+                };
+                return map[cat] || cat;
+            };
+
+            programsAndSections.forEach(category => {
+                category.levels.forEach(level => {
+                    level.sections.forEach((section, idx) => {
+                        // Only add if there is an adviser assigned
+                        if (section.adviser && section.adviser !== "Unassigned") {
+                            extractedAdvisers.push({
+                                id: `adv-${category.category}-${level.gradeLevel}-${idx}`, // Generate unique ID
+                                name: section.adviser,
+                                department: mapDept(category.category),
+                                // Assignment combines Level + Section Name
+                                assignment: `${level.gradeLevel} - ${section.name}`, 
+                                
+                                // Keep raw refs for editing later
+                                rawCategory: category.category,
+                                rawLevel: level.gradeLevel,
+                                rawSection: section.name
+                            });
+                        }
+                    });
+                });
+            });
+
+            setAdvisersData(extractedAdvisers);
+        }
+    }, [programsAndSections]);
 
 
     // --- FILTERING ---
@@ -66,6 +117,7 @@ export const AdviserListView = ({ switcher }) => {
 
     // --- HANDLERS: CRUD ---
     const handleAddAdviser = (newAdviser) => {
+        // In a real app, this would trigger an API call to create a user/assign them
         const entry = {
             id: `adv-${Date.now()}`,
             ...newAdviser,
@@ -93,6 +145,7 @@ export const AdviserListView = ({ switcher }) => {
     };
 
     const handleSaveEdit = () => {
+        // In a real app, you would API call here to update the Section's adviser
         setAdvisersData(prev => prev.map(item => 
             item.id === selectedItem.id ? editFormData : item
         ));
@@ -132,18 +185,16 @@ export const AdviserListView = ({ switcher }) => {
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mx-auto"/>
                     </td>
                     
-                    {/* --- UPDATED NAME INPUT WITH PADDING --- */}
                     <td style={{...cellStyle, paddingRight: "10px"}}>
                         <input 
                             className="w-full border rounded text-xs focus:ring-1 focus:ring-[#4268BD] outline-none transition-all" 
-                            style={{ padding: '8px 0px' }} // Added padding here
+                            style={{ padding: '8px 0px' }} 
                             value={editFormData.name} 
                             onChange={e => setEditFormData({...editFormData, name: e.target.value})} 
                             autoFocus
                         />
                     </td>
                     
-                    {/* Department Dropdown */}
                     <td style={cellStyle}>
                         <CustomEditDropdown 
                             value={editFormData.department} 
@@ -151,7 +202,6 @@ export const AdviserListView = ({ switcher }) => {
                             onChange={handleDepartmentChange} 
                         />
                     </td>
-                    {/* Assignment Dropdown */}
                     <td style={cellStyle}>
                         <CustomEditDropdown 
                             value={editFormData.assignment} 
