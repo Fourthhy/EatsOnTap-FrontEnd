@@ -4,8 +4,13 @@ export const APP_INITIALIZATION_MANIFEST = {
     critical: [
         {
             id: 'fetch_programs_and_sections',
+            label: 'Loading All Sections and Programs...',
+            weight: 8
+        },
+        {
+            id: 'fetch_all_students',
             label: 'Loading Student Registry...',
-            weight: 15
+            weight: 7
         },
         {
             id: 'dash_chart_daily',

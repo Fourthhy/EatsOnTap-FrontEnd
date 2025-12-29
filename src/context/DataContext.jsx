@@ -11,8 +11,11 @@ export const DataProvider = ({ children }) => {
         overall: {}
     });
 
-    //fetched programs and sections from the database
+    // fetched programs and sections from the database
     const [programsAndSections, setProgramsAndSections] = useState([]);
+
+    // fetched students from the database
+    const [allStudents, setAllStudents] = useState([]);
 
     // 2. MASTER RECORDS
     const [students, setStudents] = useState([]);
@@ -31,7 +34,8 @@ export const DataProvider = ({ children }) => {
             mealOrders, setMealOrders,
             claimRecords, setClaimRecords,
             todaysMenu, setTodaysMenu,
-            programsAndSections, setProgramsAndSections
+            programsAndSections, setProgramsAndSections,
+            allStudents, setAllStudents
         }}>
             {children}
         </DataContext.Provider>

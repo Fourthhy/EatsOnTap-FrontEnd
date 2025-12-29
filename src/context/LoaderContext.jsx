@@ -3,6 +3,7 @@ import { APP_INITIALIZATION_MANIFEST } from '../config/dataManifest';
 
 // 0. IMPORT CALL TO FETCH
 import { fetchProgramsAndSection } from "../functions/admin/programsAndSectionsFetch";
+import { fetchAllStudents } from '../functions/admin/allStudentsFetch';
 
 // 1. IMPORT DATA CONTEXT & MOCK DATA
 import { useData } from './DataContext';
@@ -16,7 +17,7 @@ export const LoaderProvider = ({ children }) => {
     const [currentLabel, setCurrentLabel] = useState("Initializing System...");
 
     // 2. GRAB SETTERS FROM DATA CONTEXT
-    const { setDashboardData, setEvents, setProgramsAndSections } = useData();
+    const { setDashboardData, setEvents, setProgramsAndSections, setAllStudents } = useData();
 
     const mockApiCall = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -38,9 +39,8 @@ export const LoaderProvider = ({ children }) => {
                 // setDashboardData(prev => ({...prev, daily: data}));
             }
 
-            //USE THE IMPORTED CALL TO FETCH FROM STEP 0 
+            //TASK TO FETCH PROGRAMS AND SECTIONS
             if (task.id === "fetch_programs_and_sections") {
-                console.log("✅ MATCH FOUND! Starting fetch..."); // <--- DEBUG LOG 2
                 try {
                     const data = await fetchProgramsAndSection();
                     console.log("📦 Data received:", data); // <--- DEBUG LOG 3
@@ -52,6 +52,22 @@ export const LoaderProvider = ({ children }) => {
                 }
             } else {
                 console.log("⚠️ No specific logic for:", task.id); // <--- DEBUG LOG 4
+            }
+
+            //TASK TO FETCH ALL STUDENTS
+            if (task.id === "fetch_all_students") {
+                try {
+                    const data = await fetchAllStudents();
+                    console.log("📦 Data received:", data);
+                    if (data) {
+                        setAllStudents(data)
+                    }
+                    console.log()
+                } catch (err) {
+                    console.error("❌ Fetch failed:", err);
+                }
+            } else {
+                console.error("⚠️ No specific logic for:", task.id)
             }
 
             currentProgress += task.weight;
