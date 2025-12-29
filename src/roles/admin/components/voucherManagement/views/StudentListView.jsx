@@ -195,7 +195,7 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
                 <td style={cellStyle}>{student.type}</td>
                 <td style={cellStyle}>{student.gradeLevel}</td>
                 <td style={cellStyle}>{student.program}</td>
-                <td style={cellStyle}><LinkStatusBadge isLinked={student.isLinked} student={student} /></td>
+                <td style={cellStyle} onClick={(e) => e.stopPropagation()}><LinkStatusBadge isLinked={student.isLinked} student={student} /></td>
             </tr>
         );
     };
