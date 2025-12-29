@@ -1,17 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { User, Eye, Plus } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { User, Plus } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 
 import { GenericTable } from '../../../../../components/global/table/GenericTable';
 import { SelectionActionBar } from '../SelectionActionBar';
-
 import { AddSectionModal } from '../components/AddSectionModal';
 
 // DATA FROM CONTEXT
 import { useData } from "../../../../../context/DataContext";
 
 export const SectionListView = ({ switcher, onNavigateToStudents }) => {
-    //get programs and sections from useData
     const { programsAndSections } = useData();
 
     const [activeTab, setActiveTab] = useState('all');
@@ -20,18 +18,29 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
     const [isActionBarVisible, setIsActionBarVisible] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-    // Initialize state with config data so we can append to it locally
-    const [sectionsData, setSectionsData] = useState(programsAndSections);
+    // Initialize state
+    const [sectionsData, setSectionsData] = useState([]);
 
+    // Sync Data
     useEffect(() => {
         if (programsAndSections && programsAndSections.length > 0) {
             setSectionsData(programsAndSections);
         }
     }, [programsAndSections]);
 
-    // --- DATA LOGIC ---
-    // Inside SectionListView.jsx
+    // --- 🟢 DYNAMIC COLUMN LOGIC ---
+    // 1. Determine the Label for the Name Column
+    const getNameLabel = () => {
+        if (activeTab === 'all') return "Section / Program";
+        if (activeTab === 'higherEducation') return "Program";
+        return "Section"; // Default for Basic Ed
+    };
 
+    // 2. Determine if Adviser Column should appear
+    // We show it for 'all' (mixed data) and basic ed tabs. We hide it ONLY for pure Higher Ed tab.
+    const showAdviserColumn = activeTab !== 'higherEducation';
+
+    // --- DATA LOGIC ---
     const flattenedSections = useMemo(() => {
         const relevantCategories = activeTab === 'all'
             ? sectionsData
@@ -42,8 +51,6 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
             cat.levels.forEach(level => {
                 level.sections.forEach(section => {
                     const searchLower = searchTerm.toLowerCase();
-
-                    // 🟢 FIX: Add ( || "") to prevent crashing on null values
                     const matchesSearch =
                         (section.name || "").toLowerCase().includes(searchLower) ||
                         (section.adviser || "").toLowerCase().includes(searchLower) ||
@@ -54,9 +61,10 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                             id: `${level.gradeLevel}-${section.name}`,
                             level: level.gradeLevel,
                             sectionName: section.name,
-                            adviser: section.adviser || "No Adviser Assigned", // Display friendly text instead of null
+                            // If Higher Ed or Unassigned, handle display text
+                            adviser: section.adviser || "Unassigned",
                             studentCount: section.studentCount || 0,
-                            category: cat.category
+                            category: cat.category 
                         });
                     }
                 });
@@ -65,44 +73,17 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
         return flatList;
     }, [activeTab, searchTerm, sectionsData]);
 
-    // --- HANDLER: Add New Section ---
-    const handleAddSection = (newSection) => {
-        // Mocking the update: We need to find the right category and level in our state
-        // For simplicity in this mock, we will just force update the state by finding the right nested array
-        // In a real app, this would be an API call.
-
-        setSectionsData(prev => {
-            const newData = JSON.parse(JSON.stringify(prev)); // Deep copy for immutability
-
-            // 1. Find the category that contains this grade level
-            // We loop through to find where this level belongs
-            let targetCategory = newData.find(cat => cat.levels.some(l => l.gradeLevel === newSection.level));
-
-            if (targetCategory) {
-                let targetLevel = targetCategory.levels.find(l => l.gradeLevel === newSection.level);
-                if (targetLevel) {
-                    targetLevel.sections.push({
-                        name: newSection.sectionName,
-                        adviser: newSection.adviser,
-                        studentCount: 0
-                    });
-                }
-            }
-            return newData;
-        });
-    };
-
-    const cellStyle = {
-        fontSize: '12px',
-        color: '#4b5563',
-        borderBottom: '1px solid #f3f4f6',
-        height: '44px',
-        verticalAlign: 'middle'
-    };
-
     // --- RENDER ROW ---
+    const cellStyle = {
+        fontSize: '12px', color: '#4b5563', borderBottom: '1px solid #f3f4f6', height: '44px', verticalAlign: 'middle'
+    };
+
     const renderSectionRow = (section, index, startIndex) => {
         const isSelected = selectedSection?.id === section.id;
+
+        // Check if this specific row is Higher Ed (to conditionally hide adviser content if needed)
+        // Note: In "All" tab, we might have mixed rows.
+        const isHigherEdRow = section.category === 'higherEducation';
 
         return (
             <tr
@@ -114,32 +95,32 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                 className="transition-colors cursor-pointer"
                 style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}
             >
-                {/* Index Column */}
                 <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }}>
                     {startIndex + index + 1}
                 </td>
-
-                {/* Level Column (Bold) */}
                 <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
                     {section.level}
                 </td>
-
-                {/* Section Name */}
                 <td style={cellStyle}>
                     {section.sectionName}
                 </td>
 
-                {/* Adviser Column */}
-                <td style={cellStyle}>
-                    <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                            <User size={12} />
-                        </div>
-                        {section.adviser}
-                    </div>
-                </td>
+                {/* Adviser Column (Conditionally Rendered) */}
+                {showAdviserColumn && (
+                    <td style={cellStyle}>
+                        {isHigherEdRow ? (
+                            <span className="text-gray-300">-</span> // Show dash for Higher Ed rows in "All" view
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                    <User size={12} />
+                                </div>
+                                {section.adviser}
+                            </div>
+                        )}
+                    </td>
+                )}
 
-                {/* Student Count */}
                 <td style={cellStyle}>
                     {section.studentCount}
                 </td>
@@ -161,17 +142,22 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
         </AnimatePresence>
     );
 
+    // --- CONSTRUCT COLUMNS ARRAY ---
+    const columns = ['Level', getNameLabel()]; // Always have Level + Name
+    if (showAdviserColumn) columns.push('Adviser'); // Conditionally add Adviser
+    columns.push('Student Count'); // Always add Count
+
     return (
         <>
             <AddSectionModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
-                onAdd={handleAddSection}
+                // Add handler logic here
             />
 
             <GenericTable
-                title="Section Overview"
-                subtitle="Manage academic sections and advisers"
+                title={activeTab === 'higherEducation' ? "Program Overview" : "Section Overview"}
+                subtitle={activeTab === 'higherEducation' ? "Manage academic programs" : "Manage academic sections and advisers"}
                 tabs={[
                     { label: 'All', id: 'all' },
                     { label: 'Preschool', id: 'preschool' },
@@ -187,13 +173,15 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                 onSearchChange={setSearchTerm}
                 customActions={switcher}
                 overrideHeader={isActionBarVisible ? actionBar : null}
-                columns={['Level', 'Section Name', 'Adviser', 'Student Count']}
+                
+                columns={columns} // 🟢 Pass the dynamic columns
+                
                 data={flattenedSections}
                 renderRow={renderSectionRow}
                 onPrimaryAction={() => setIsAddModalOpen(true)}
-                primaryActionLabel="Add Section"
+                primaryActionLabel={activeTab === 'higherEducation' ? "Add Program" : "Add Section"}
                 primaryActionIcon={<Plus size={16} />}
-                metrics={[{ label: "Total Sections", value: flattenedSections.length }]}
+                metrics={[{ label: "Total", value: flattenedSections.length }]}
             />
         </>
     );
