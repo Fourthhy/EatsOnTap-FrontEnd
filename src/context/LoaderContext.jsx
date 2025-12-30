@@ -1,11 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { APP_INITIALIZATION_MANIFEST } from '../config/dataManifest';
 
-// 0. IMPORT CALL TO FETCH
-import { fetchProgramsAndSection } from "../functions/admin/programsAndSectionsFetch";
-import { fetchAllStudents } from '../functions/admin/allStudentsFetch';
+// 🟢 KEEP: New API Import
+import { getUnifiedSchoolData } from '../functions/admin/getUnifiedSchoolData';
 
-// 1. IMPORT DATA CONTEXT & MOCK DATA
 import { useData } from './DataContext';
 import { MOCK_DASHBOARD_DATA, MOCK_EVENTS } from '../data/roles/admin/dashboard/dashboardData';
 
@@ -16,95 +14,104 @@ export const LoaderProvider = ({ children }) => {
     const [progress, setProgress] = useState(0);
     const [currentLabel, setCurrentLabel] = useState("Initializing System...");
 
-    // 2. GRAB SETTERS FROM DATA CONTEXT
-    const { setDashboardData, setEvents, setProgramsAndSections, setAllStudents } = useData();
+    // 2. GRAB SETTERS
+    const {
+        setDashboardData,
+        setEvents,
+        // ❌ DELETED: setProgramsAndSections, setAllStudents
+        setSchoolData
+    } = useData();
 
     const mockApiCall = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     const executeLoadingSequence = async () => {
-        // ... (Check session logic here) ...
         const isRefreshed = sessionStorage.getItem('is_session_active');
         let currentProgress = 0;
 
-        const runTask = async (task) => {
-            console.log("⚡ Processing Task:", task.id); // <--- DEBUG LOG 1
-            setCurrentLabel(task.label);
-            const delay = isRefreshed ? 0 : (Math.floor(Math.random() * 400) + 400);
-            await mockApiCall(delay);
-
-            // 3. INJECT DATA BASED ON TASK ID
-            // When specific tasks finish, we populate the relevant part of the state
-            if (task.id === 'dash_chart_daily') {
-                // In real app: const data = await api.getDaily();
-                // setDashboardData(prev => ({...prev, daily: data}));
-            }
-
-            //TASK TO FETCH PROGRAMS AND SECTIONS
-            if (task.id === "fetch_programs_and_sections") {
-                try {
-                    const data = await fetchProgramsAndSection();
-                    console.log("📦 Data received:", data); // <--- DEBUG LOG 3
-                    if (data) {
-                        setProgramsAndSections(data);
-                    }
-                } catch (err) {
-                    console.error("❌ Fetch failed:", err);
-                }
-            } else {
-                console.log("⚠️ No specific logic for:", task.id); // <--- DEBUG LOG 4
-            }
-
-            //TASK TO FETCH ALL STUDENTS
-            if (task.id === "fetch_all_students") {
-                try {
-                    const data = await fetchAllStudents();
-                    console.log("📦 Data received:", data);
-                    if (data) {
-                        setAllStudents(data)
-                    }
-                    console.log()
-                } catch (err) {
-                    console.error("❌ Fetch failed:", err);
-                }
-            } else {
-                console.error("⚠️ No specific logic for:", task.id)
-            }
-
-            currentProgress += task.weight;
-            setProgress(currentProgress);
-        };
-
-        // --- RUNNING THE TASKS ---
-        for (const task of APP_INITIALIZATION_MANIFEST.critical) {
-            await runTask(task);
-        }
-
-        // ... (Secondary tasks logic) ...
-        if (APP_INITIALIZATION_MANIFEST.secondary) {
-            const secondaryPromises = APP_INITIALIZATION_MANIFEST.secondary.map(async (task, index) => {
-                await mockApiCall(index * 250 + 300);
+        // 🟢 1. WRAP EVERYTHING IN TRY/CATCH
+        try {
+            const runTask = async (task) => {
+                console.log("⚡ Processing Task:", task.id);
                 setCurrentLabel(task.label);
+
+                const delay = isRefreshed ? 0 : (Math.floor(Math.random() * 400) + 400);
+                await mockApiCall(delay);
+
+                // --- TASKS ---
+                if (task.id === 'dash_chart_daily') {
+                    // Dashboard logic...
+                }
+
+                if (task.id === "fetch_unified_data") {
+                    try {
+                        console.log("🚀 Starting Unified Fetch...");
+
+                        // 🟢 DEBUG: Check if function exists
+                        if (typeof getUnifiedSchoolData !== 'function') {
+                            throw new Error("getUnifiedSchoolData import is missing or invalid!");
+                        }
+
+                        // 🟢 DEBUG: Check if setter exists
+                        if (typeof setSchoolData !== 'function') {
+                            throw new Error("setSchoolData is not defined in DataContext!");
+                        }
+
+                        const unifiedData = await getUnifiedSchoolData();
+
+                        if (unifiedData && unifiedData.length > 0) {
+                            setSchoolData(unifiedData);
+                            console.log("✅ Unified Data Saved");
+                        } else {
+                            console.warn("⚠️ Unified Data returned empty array");
+                        }
+                    } catch (err) {
+                        console.error("❌ Unified Fetch Task Failed:", err);
+                        // We don't throw here so the loop continues
+                    }
+                }
+
                 currentProgress += task.weight;
-                setProgress(Math.min(currentProgress, 100));
+                setProgress(currentProgress);
+            };
+
+            // --- CRITICAL LOOP ---
+            if (APP_INITIALIZATION_MANIFEST.critical) {
+                for (const task of APP_INITIALIZATION_MANIFEST.critical) {
+                    await runTask(task);
+                }
+            }
+
+            // --- SECONDARY LOOP ---
+            if (APP_INITIALIZATION_MANIFEST.secondary) {
+                const secondaryPromises = APP_INITIALIZATION_MANIFEST.secondary.map(async (task, index) => {
+                    await mockApiCall(index * 250 + 300);
+                    setCurrentLabel(task.label);
+                    currentProgress += task.weight;
+                    setProgress(Math.min(currentProgress, 100));
+                });
+                await Promise.all(secondaryPromises);
+            }
+
+            // --- DATA INJECTION ---
+            setDashboardData({
+                daily: MOCK_DASHBOARD_DATA.today,
+                weekly: MOCK_DASHBOARD_DATA.weekly,
+                monthly: MOCK_DASHBOARD_DATA.monthly,
+                overall: MOCK_DASHBOARD_DATA.overall
             });
-            await Promise.all(secondaryPromises);
+            setEvents(MOCK_EVENTS);
+
+            await mockApiCall(500);
+
+        } catch (globalError) {
+            console.error("🔥 CRITICAL LOADER ERROR:", globalError);
+            alert("System Validation Failed. Check console for details.");
+        } finally {
+            // 🟢 2. FINALLY BLOCK: ALWAYS RUNS
+            // This guarantees the loader turns off no matter what happens above
+            setIsLoading(false);
+            sessionStorage.setItem('is_session_active', 'true');
         }
-
-        // 4. FINAL DATA INJECTION (SIMULATION)
-        // Once the bar hits 100%, we dump the mock data into the Context
-        // This ensures the Dashboard has data when it renders
-        setDashboardData({
-            daily: MOCK_DASHBOARD_DATA.today,
-            weekly: MOCK_DASHBOARD_DATA.weekly,
-            monthly: MOCK_DASHBOARD_DATA.monthly,
-            overall: MOCK_DASHBOARD_DATA.overall
-        });
-        setEvents(MOCK_EVENTS);
-
-
-        await mockApiCall(500);
-        setIsLoading(false);
-        sessionStorage.setItem('is_session_active', 'true');
     };
 
     useEffect(() => {

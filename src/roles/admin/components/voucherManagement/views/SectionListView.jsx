@@ -10,7 +10,8 @@ import { AddSectionModal } from '../components/AddSectionModal';
 import { useData } from "../../../../../context/DataContext";
 
 export const SectionListView = ({ switcher, onNavigateToStudents }) => {
-    const { programsAndSections } = useData();
+    // 🟢 1. USE UNIFIED DATA STORE
+    const { schoolData } = useData(); 
 
     const [activeTab, setActiveTab] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
@@ -18,57 +19,70 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
     const [isActionBarVisible, setIsActionBarVisible] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-    // Initialize state
+    // Initialize state (Optional: you can use schoolData directly, but local state is fine too)
     const [sectionsData, setSectionsData] = useState([]);
 
     // Sync Data
     useEffect(() => {
-        if (programsAndSections && programsAndSections.length > 0) {
-            setSectionsData(programsAndSections);
+        if (schoolData && schoolData.length > 0) {
+            setSectionsData(schoolData);
         }
-    }, [programsAndSections]);
+    }, [schoolData]);
 
-    // --- 🟢 DYNAMIC COLUMN LOGIC ---
-    // 1. Determine the Label for the Name Column
+    // --- DYNAMIC COLUMN LOGIC ---
     const getNameLabel = () => {
         if (activeTab === 'all') return "Section / Program";
         if (activeTab === 'higherEducation') return "Program";
-        return "Section"; // Default for Basic Ed
+        return "Section"; 
     };
 
-    // 2. Determine if Adviser Column should appear
-    // We show it for 'all' (mixed data) and basic ed tabs. We hide it ONLY for pure Higher Ed tab.
     const showAdviserColumn = activeTab !== 'higherEducation';
 
-    // --- DATA LOGIC ---
+    // --- 🟢 UPDATED FLATTENING LOGIC ---
     const flattenedSections = useMemo(() => {
+        // Safety Check
+        if (!sectionsData || sectionsData.length === 0) return [];
+
         const relevantCategories = activeTab === 'all'
             ? sectionsData
             : sectionsData.filter(p => p.category === activeTab);
 
         const flatList = [];
+        
         relevantCategories.forEach(cat => {
-            cat.levels.forEach(level => {
-                level.sections.forEach(section => {
-                    const searchLower = searchTerm.toLowerCase();
-                    const matchesSearch =
-                        (section.name || "").toLowerCase().includes(searchLower) ||
-                        (section.adviser || "").toLowerCase().includes(searchLower) ||
-                        (level.gradeLevel || "").toLowerCase().includes(searchLower);
+            if (cat.levels) {
+                cat.levels.forEach(level => {
+                    if (level.sections) {
+                        level.sections.forEach(section => {
+                            // 🟢 KEY MAPPING: Backend uses 'levelName' and 'section'
+                            const currentLevelName = level.levelName || level.gradeLevel; 
+                            const currentSectionName = section.section || section.name;
 
-                    if (matchesSearch) {
-                        flatList.push({
-                            id: `${level.gradeLevel}-${section.name}`,
-                            level: level.gradeLevel,
-                            sectionName: section.name,
-                            // If Higher Ed or Unassigned, handle display text
-                            adviser: section.adviser || "Unassigned",
-                            studentCount: section.studentCount || 0,
-                            category: cat.category 
+                            const searchLower = searchTerm.toLowerCase();
+                            const matchesSearch =
+                                (currentSectionName || "").toLowerCase().includes(searchLower) ||
+                                (section.adviser || "").toLowerCase().includes(searchLower) ||
+                                (currentLevelName || "").toLowerCase().includes(searchLower);
+
+                            if (matchesSearch) {
+                                flatList.push({
+                                    id: `${currentLevelName}-${currentSectionName}`,
+                                    
+                                    // Display Fields
+                                    level: currentLevelName,
+                                    sectionName: currentSectionName,
+                                    adviser: section.adviser || "Unassigned",
+                                    studentCount: section.studentCount || 0,
+                                    category: cat.category,
+
+                                    // 🟢 CRITICAL: Attach the students array for the next view
+                                    students: section.students || [] 
+                                });
+                            }
                         });
                     }
                 });
-            });
+            }
         });
         return flatList;
     }, [activeTab, searchTerm, sectionsData]);
@@ -80,9 +94,6 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
 
     const renderSectionRow = (section, index, startIndex) => {
         const isSelected = selectedSection?.id === section.id;
-
-        // Check if this specific row is Higher Ed (to conditionally hide adviser content if needed)
-        // Note: In "All" tab, we might have mixed rows.
         const isHigherEdRow = section.category === 'higherEducation';
 
         return (
@@ -105,11 +116,10 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                     {section.sectionName}
                 </td>
 
-                {/* Adviser Column (Conditionally Rendered) */}
                 {showAdviserColumn && (
                     <td style={cellStyle}>
                         {isHigherEdRow ? (
-                            <span className="text-gray-300">-</span> // Show dash for Higher Ed rows in "All" view
+                            <span className="text-gray-300">-</span>
                         ) : (
                             <div className="flex items-center gap-2">
                                 <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
@@ -136,23 +146,23 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                     variant="section"
                     selectedItem={selectedSection}
                     onClearSelection={() => { setSelectedSection(null); setIsActionBarVisible(false); }}
+                    
+                    // 🟢 PASS THE WHOLE OBJECT (includes .students)
                     onViewStudents={() => onNavigateToStudents(selectedSection)}
                 />
             )}
         </AnimatePresence>
     );
 
-    // --- CONSTRUCT COLUMNS ARRAY ---
-    const columns = ['Level', getNameLabel()]; // Always have Level + Name
-    if (showAdviserColumn) columns.push('Adviser'); // Conditionally add Adviser
-    columns.push('Student Count'); // Always add Count
+    const columns = ['Level', getNameLabel()]; 
+    if (showAdviserColumn) columns.push('Adviser'); 
+    columns.push('Student Count'); 
 
     return (
         <>
             <AddSectionModal
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
-                // Add handler logic here
             />
 
             <GenericTable
@@ -173,9 +183,7 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                 onSearchChange={setSearchTerm}
                 customActions={switcher}
                 overrideHeader={isActionBarVisible ? actionBar : null}
-                
-                columns={columns} // 🟢 Pass the dynamic columns
-                
+                columns={columns}
                 data={flattenedSections}
                 renderRow={renderSectionRow}
                 onPrimaryAction={() => setIsAddModalOpen(true)}

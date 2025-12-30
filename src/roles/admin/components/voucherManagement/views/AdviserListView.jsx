@@ -12,7 +12,8 @@ import { useData } from "../../../../../context/DataContext";
 import { DEPARTMENT_SECTIONS, DEPARTMENTS } from '../config/adviserConfig';
 
 export const AdviserListView = ({ switcher }) => {
-    const { programsAndSections } = useData();
+    // 🟢 1. USE UNIFIED DATA STORE
+    const { schoolData } = useData();
 
     // --- STATE ---
     const [activeTab, setActiveTab] = useState('all');
@@ -41,9 +42,9 @@ export const AdviserListView = ({ switcher }) => {
         }
     }, [shouldShowActions]);
 
-    // --- EFFECT: TRANSFORM HIERARCHY ---
+    // --- 🟢 UPDATED: TRANSFORM HIERARCHY ---
     useEffect(() => {
-        if (programsAndSections && programsAndSections.length > 0) {
+        if (schoolData && schoolData.length > 0) {
             const extractedAdvisers = [];
             const mapDept = (cat) => {
                 const map = {
@@ -52,34 +53,41 @@ export const AdviserListView = ({ switcher }) => {
                     'intermediate': 'Intermediate',
                     'juniorHighSchool': 'Junior High School', 
                     'seniorHighSchool': 'Senior High School'
-                    // removed higherEducation map
                 };
                 return map[cat] || cat;
             };
 
-            programsAndSections.forEach(category => {
-                // 🟢 1. EXPLICITLY SKIP HIGHER ED
+            schoolData.forEach(category => {
+                // EXPLICITLY SKIP HIGHER ED
                 if (category.category === 'higherEducation') return;
 
-                category.levels.forEach(level => {
-                    level.sections.forEach((section, idx) => {
-                        if (section) {
-                            extractedAdvisers.push({
-                                id: `adv-${category.category}-${level.gradeLevel}-${idx}`,
-                                name: section.adviser || "Unassigned",
-                                department: mapDept(category.category),
-                                assignment: `${level.gradeLevel} - ${section.name}`, 
-                                rawCategory: category.category, 
-                                rawLevel: level.gradeLevel, 
-                                rawSection: section.name
+                if (category.levels) {
+                    category.levels.forEach(level => {
+                        if (level.sections) {
+                            level.sections.forEach((section, idx) => {
+                                // 🟢 FIX: Use 'section.section' instead of 'section.name'
+                                // 🟢 FIX: Use 'level.levelName' instead of 'level.gradeLevel'
+                                if (section) {
+                                    extractedAdvisers.push({
+                                        id: `adv-${category.category}-${level.levelName}-${idx}`,
+                                        name: section.adviser || "Unassigned",
+                                        department: mapDept(category.category),
+                                        assignment: `${level.levelName} - ${section.section}`, 
+                                        
+                                        // Keep raw data for edits if needed
+                                        rawCategory: category.category, 
+                                        rawLevel: level.levelName, 
+                                        rawSection: section.section
+                                    });
+                                }
                             });
                         }
                     });
-                });
+                }
             });
             setAdvisersData(extractedAdvisers);
         }
-    }, [programsAndSections]);
+    }, [schoolData]);
 
     // --- FILTERING ---
     const filteredAdvisers = useMemo(() => {
@@ -93,9 +101,7 @@ export const AdviserListView = ({ switcher }) => {
                 'seniorHighSchool': 'Senior High School'
             };
             
-            // If the tab is not in our map (e.g., leftover state), default to 'All' behavior or empty
             const targetDept = tabToDeptMap[activeTab];
-            
             const matchesTab = activeTab === 'all' || adv.department === targetDept;
             const matchesSearch = adv.name.toLowerCase().includes(searchTerm.toLowerCase());
             return matchesTab && matchesSearch;
@@ -124,7 +130,7 @@ export const AdviserListView = ({ switcher }) => {
     };
 
     // --- RENDERERS ---
-    const cellStyle = { fontFamily: 'geist, sans-serif', fontSize: '12px', color: '#4b5563', borderBottom: '1px solid #f3f4f6', height: '43.5px', verticalAlign: 'middle' };
+    const cellStyle = { fontSize: '12px', color: '#4b5563', borderBottom: '1px solid #f3f4f6', height: '43.5px', verticalAlign: 'middle' };
 
     const renderRow = (adviser, index, startIndex) => {
         if (isEditing && selectedItem?.id === adviser.id) {
@@ -175,7 +181,6 @@ export const AdviserListView = ({ switcher }) => {
             <AddAdviserModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onAdd={handleAddAdviser} />
             <GenericTable
                 title="Faculty Management" subtitle="Manage teacher assignments"
-                // 🟢 2. UPDATED TABS: Removed Higher Education
                 tabs={[
                     { label: 'All', id: 'all' }, 
                     { label: 'Preschool', id: 'preschool' }, 
@@ -187,7 +192,6 @@ export const AdviserListView = ({ switcher }) => {
                 activeTab={activeTab} onTabChange={setActiveTab} searchTerm={searchTerm} onSearchChange={setSearchTerm} customActions={switcher}
                 overrideHeader={headerVisible ? actionBar : null}
                 
-                // 🟢 3. FIXED COLUMN NAME
                 columns={['Teacher Name', 'Department', 'Section Assignment']} 
                 
                 data={filteredAdvisers} renderRow={renderRow}
