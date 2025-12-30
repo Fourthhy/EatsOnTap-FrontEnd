@@ -8,7 +8,12 @@ export const APP_INITIALIZATION_MANIFEST = {
         { 
             id: 'fetch_unified_data', 
             label: 'Optimizing School Records...', 
-            weight: 80 
+            weight: 70 
+        },
+        {
+            id: 'fetch_class_advisers',
+            label: 'Getting Class Advisers',
+            weight: 10
         }
     ],
     secondary: [

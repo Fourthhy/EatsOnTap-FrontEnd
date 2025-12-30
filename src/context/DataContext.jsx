@@ -10,6 +10,9 @@ export const DataProvider = ({ children }) => {
     // 🟢 KEEP: The Master Tree
     const [schoolData, setSchoolData] = useState([]);
 
+    // FOR CLASS ADVISERS
+    const [classAdvisers, setClassAdvisers] = useState([]);
+
     const [students, setStudents] = useState([]); 
     const [events, setEvents] = useState([]);
     const [mealOrders, setMealOrders] = useState([]);
@@ -29,6 +32,9 @@ export const DataProvider = ({ children }) => {
             mealOrders, setMealOrders,
             claimRecords, setClaimRecords,
             todaysMenu, setTodaysMenu,
+
+            //new Class advisers
+            classAdvisers, setClassAdvisers
         }}>
             {children}
         </DataContext.Provider>

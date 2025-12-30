@@ -3,6 +3,7 @@ import { APP_INITIALIZATION_MANIFEST } from '../config/dataManifest';
 
 // 🟢 KEEP: New API Import
 import { getUnifiedSchoolData } from '../functions/admin/getUnifiedSchoolData';
+import { getAllClassAdvisers } from '../functions/admin/getAllClassAdvisers';
 
 import { useData } from './DataContext';
 import { MOCK_DASHBOARD_DATA, MOCK_EVENTS } from '../data/roles/admin/dashboard/dashboardData';
@@ -18,8 +19,8 @@ export const LoaderProvider = ({ children }) => {
     const {
         setDashboardData,
         setEvents,
-        // ❌ DELETED: setProgramsAndSections, setAllStudents
-        setSchoolData
+        setSchoolData,
+        setClassAdvisers
     } = useData();
 
     const mockApiCall = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -67,6 +68,29 @@ export const LoaderProvider = ({ children }) => {
                     } catch (err) {
                         console.error("❌ Unified Fetch Task Failed:", err);
                         // We don't throw here so the loop continues
+                    }
+                }
+
+                if (task.id === "fetch_class_advisers") {
+                    try {
+                        console.log("Starting to fetch class adviser data!");
+
+                        if (typeof getAllClassAdvisers !== 'function') {
+                            throw new Error('getAllClassAdvisers import is missing or invalid!')
+                        }
+                        if (typeof setClassAdvisers !== 'function') {
+                            throw new Error('setClassAdvisers is not defined in the Data Context!');
+                        }
+
+                        const classAdvisers = await getAllClassAdvisers();
+                        if (classAdvisers && classAdvisers.length > 0) {
+                            setClassAdvisers(classAdvisers);
+                            console.log("Class Advisers Fetched and Saved!");
+                        } else {
+                            console.warn("Class ADvisers returned empty array")
+                        }
+                    } catch (error) {
+                        console.error("Failed to fetch class advisers")
                     }
                 }
 
