@@ -1,9 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronDown, Check } from 'lucide-react';
-import { programsAndSections, adviserRegistry } from '../studentListConfig';
 
-// Internal Dropdown for the Modal (Kept same as before)
+// IMPORT CONTEXT
+import { useData } from "../../../../../context/DataContext";
+
+// Internal Dropdown Component (Unchanged)
 const ModalDropdown = ({ label, value, options, onChange, placeholder = "Select..." }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -17,7 +19,8 @@ const ModalDropdown = ({ label, value, options, onChange, placeholder = "Select.
                     onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
                     style={{
                         width: '100%', padding: '10px 12px', fontSize: '13px', textAlign: 'left',
-                        backgroundColor: 'white', border: '1px solid #d1d5db', borderRadius: '8px',
+                        backgroundColor: 'white', border: '1px solid #d1d5db', 
+                        borderRadius: '6px',
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                         cursor: 'pointer', color: value ? '#111827' : '#9ca3af'
                     }}
@@ -35,7 +38,8 @@ const ModalDropdown = ({ label, value, options, onChange, placeholder = "Select.
                                 transition={{ duration: 0.2 }}
                                 style={{
                                     position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
-                                    backgroundColor: 'white', borderRadius: '8px',
+                                    backgroundColor: 'white', 
+                                    borderRadius: '6px',
                                     boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
                                     border: '1px solid #f3f4f6', zIndex: 150, maxHeight: '200px', overflowY: 'auto'
                                 }}
@@ -67,35 +71,117 @@ const ModalDropdown = ({ label, value, options, onChange, placeholder = "Select.
 };
 
 export const AddSectionModal = ({ isOpen, onClose, onAdd }) => {
+    const { schoolData } = useData();
+
+    // 🟢 1. ADD DEPARTMENT TO STATE
     const [formData, setFormData] = useState({
+        department: '',
         level: '',
         sectionName: '',
         adviser: ''
     });
 
-    // Extract unique levels from config
-    const levelOptions = useMemo(() => {
-        let levels = [];
-        programsAndSections.forEach(cat => cat.levels.forEach(l => levels.push(l.gradeLevel)));
-        return levels;
+    // Reset form when modal closes/opens
+    useEffect(() => {
+        if (!isOpen) setFormData({ department: '', level: '', sectionName: '', adviser: '' });
+    }, [isOpen]);
+
+    // 🟢 2. EXTRACT DEPARTMENTS (Friendly Names)
+    const departmentOptions = useMemo(() => {
+        const friendlyNames = {
+            'preschool': 'Preschool',
+            'primaryEducation': 'Primary Education',
+            'intermediate': 'Intermediate',
+            'juniorHighSchool': 'Junior High School',
+            'seniorHighSchool': 'Senior High School',
+            'higherEducation': 'Higher Education'
+        };
+        // Return keys that exist in schoolData, mapped to friendly names
+        return Object.keys(friendlyNames); 
+        // Or if you want the friendly text in the dropdown, we can map it later.
+        // For simple dropdown logic, let's use the friendly text as the Value.
+        // But to filter logic, we need to map back.
+        // Let's stick to using the Friendly Name in the UI.
     }, []);
 
-    // Extract adviser names
-    const adviserOptions = useMemo(() => adviserRegistry.map(a => a.name), []);
+    const friendlyToKeyMap = {
+        'Preschool': 'preschool',
+        'Primary Education': 'primaryEducation',
+        'Intermediate': 'intermediate',
+        'Junior High School': 'juniorHighSchool',
+        'Senior High School': 'seniorHighSchool',
+        'Higher Education': 'higherEducation'
+    };
+
+    const friendlyDeptOptions = Object.keys(friendlyToKeyMap);
+
+    // 🟢 3. EXTRACT LEVELS (Filtered by Selected Department)
+    const filteredLevelOptions = useMemo(() => {
+        if (!formData.department || !schoolData) return [];
+        
+        const key = friendlyToKeyMap[formData.department];
+        const categoryData = schoolData.find(c => c.category === key);
+
+        if (!categoryData || !categoryData.levels) return [];
+
+        // Extract level names
+        return categoryData.levels.map(l => l.levelName).sort();
+    }, [formData.department, schoolData]);
+
+    // 🟢 4. EXTRACT ADVISERS (Global List)
+    const adviserOptions = useMemo(() => {
+        if (!schoolData) return [];
+        let advisers = new Set();
+        schoolData.forEach(cat => {
+            if (cat.levels) {
+                cat.levels.forEach(l => {
+                    if (l.sections) {
+                        l.sections.forEach(s => {
+                            if (s.adviser && s.adviser !== "Unassigned") {
+                                advisers.add(s.adviser);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        return Array.from(advisers).sort();
+    }, [schoolData]);
+
+    // 🟢 5. CONDITIONAL LOGIC
+    const isHigherEd = formData.department === 'Higher Education';
+    
+    // Validation: Level & Section Name are always required.
+    // Adviser is NEVER required (it's optional for Basic Ed, hidden for Higher Ed).
+    const isFormValid = formData.department && formData.level && formData.sectionName;
 
     const handleSubmit = () => {
-        if (formData.level && formData.sectionName && formData.adviser) {
-            onAdd(formData);
-            setFormData({ level: '', sectionName: '', adviser: '' }); // Reset
+        if (isFormValid) {
+            // Clean up payload (remove adviser if Higher Ed)
+            const payload = {
+                ...formData,
+                adviser: isHigherEd ? null : formData.adviser,
+                categoryKey: friendlyToKeyMap[formData.department] // Helper for backend
+            };
+            onAdd(payload);
             onClose();
         }
     };
 
-    // Define animations variants
+    // STYLES
+    const activeStyles = { 
+        background: 'linear-gradient(to right, #4268BD, #3F6AC9)', 
+        cursor: 'pointer', fontWeight: '600', color: 'white', border: 'none'
+    };
+    
+    const disabledStyles = { 
+        backgroundColor: '#cccccc', background: '#cccccc', 
+        cursor: 'not-allowed', fontWeight: '400', color: 'white', border: 'none'
+    };
+
+    // Animation Variants
     const overlayVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1 },
-        exit: { opacity: 0, transition: { duration: 0.2 } }
+        hidden: { opacity: 0 }, visible: { opacity: 1 }, exit: { opacity: 0, transition: { duration: 0.2 } }
     };
 
     const modalVariants = {
@@ -109,71 +195,93 @@ export const AddSectionModal = ({ isOpen, onClose, onAdd }) => {
             {isOpen && (
                 <motion.div 
                     key="modal-overlay"
-                    variants={overlayVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    onClick={onClose} // Close on clicking backdrop
+                    variants={overlayVariants} initial="hidden" animate="visible" exit="exit"
+                    onClick={onClose}
                     style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}
                 >
                     <motion.div
                         key="modal-content"
                         variants={modalVariants}
-                        // initial, animate, exit are inherited from parent if variants match keys
-                        onClick={(e) => e.stopPropagation()} // Prevent click inside modal closing it
-                        style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', width: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', position: 'relative', zIndex: 110 }}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ 
+                            backgroundColor: 'white', borderRadius: '6px', padding: '24px', width: '400px', 
+                            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', position: 'relative', zIndex: 110 
+                        }}
                     >
                         {/* Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#111827', margin: 0 }}>Add New Section</h3>
+                            <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#111827', margin: 0 }}>
+                                {isHigherEd ? "Add New Program" : "Add New Section"}
+                            </h3>
                             <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: '4px' }}><X size={20} /></button>
                         </div>
 
-                        {/* Form */}
+                        {/* 1. Department Dropdown */}
                         <ModalDropdown 
-                            label="Grade Level / Year" 
+                            label="Department" 
+                            value={formData.department} 
+                            options={friendlyDeptOptions} 
+                            onChange={(val) => setFormData({ ...formData, department: val, level: '' })} // Reset level on dept change
+                        />
+
+                        {/* 2. Level Dropdown (Filtered) */}
+                        <ModalDropdown 
+                            label={isHigherEd ? "Year Level" : "Grade Level"} 
                             value={formData.level} 
-                            options={levelOptions} 
+                            options={filteredLevelOptions} 
+                            placeholder={formData.department ? "Select Level..." : "Select Department first"}
                             onChange={(val) => setFormData({...formData, level: val})} 
                         />
 
+                        {/* 3. Section/Program Name Input */}
                         <div style={{ marginBottom: '16px' }}>
-                            <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Section Name</label>
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>
+                                {isHigherEd ? "Program Name (e.g. BSIT)" : "Section Name"}
+                            </label>
                             <input 
                                 type="text" 
-                                placeholder="e.g. Rizal, A, 101"
+                                placeholder={isHigherEd ? "e.g. BS Information Systems" : "e.g. Rizal, A, 101"}
                                 value={formData.sectionName}
                                 onChange={(e) => setFormData({...formData, sectionName: e.target.value})}
-                                style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none', fontFamily: 'inherit' }}
+                                style={{ 
+                                    width: '100%', padding: '10px 12px', fontSize: '13px', 
+                                    borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none', fontFamily: 'inherit' 
+                                }}
                             />
                         </div>
 
-                        <ModalDropdown 
-                            label="Assigned Adviser" 
-                            value={formData.adviser} 
-                            options={adviserOptions} 
-                            onChange={(val) => setFormData({...formData, adviser: val})} 
-                        />
+                        {/* 4. Adviser Dropdown (Hidden for Higher Ed, Optional for others) */}
+                        {!isHigherEd && (
+                            <ModalDropdown 
+                                label="Assigned Adviser (Optional)" 
+                                value={formData.adviser} 
+                                options={adviserOptions} 
+                                onChange={(val) => setFormData({...formData, adviser: val})} 
+                            />
+                        )}
 
                         {/* Actions */}
                         <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
                             <button 
                                 onClick={onClose}
-                                style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: 'white', color: '#374151', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ 
+                                    flex: 1, padding: '10px', borderRadius: '6px', 
+                                    border: '1px solid #e5e7eb', backgroundColor: 'white', 
+                                    color: '#374151', fontSize: '13px', fontWeight: 500, cursor: 'pointer' 
+                                }}
                             >
                                 Cancel
                             </button>
                             <button 
                                 onClick={handleSubmit}
-                                disabled={!formData.level || !formData.sectionName || !formData.adviser}
+                                disabled={!isFormValid}
                                 style={{ 
-                                    flex: 1, padding: '10px', borderRadius: '8px', border: 'none', 
-                                    backgroundColor: (!formData.level || !formData.sectionName || !formData.adviser) ? '#93c5fd' : '#4268BD', 
-                                    color: 'white', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
-                                    transition: 'background-color 0.2s'
+                                    flex: 1, padding: '10px', borderRadius: '6px', fontSize: '13px', 
+                                    transition: 'background-color 0.2s',
+                                    ...(isFormValid ? activeStyles : disabledStyles)
                                 }}
                             >
-                                Create Section
+                                {isHigherEd ? "Create Program" : "Create Section"}
                             </button>
                         </div>
                     </motion.div>
