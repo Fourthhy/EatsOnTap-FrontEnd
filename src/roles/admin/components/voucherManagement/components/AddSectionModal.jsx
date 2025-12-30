@@ -1,11 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronDown, Check } from 'lucide-react';
+import { programsAndSections, adviserRegistry } from '../studentListConfig';
 
-// 1. IMPORT CONTEXT
-import { useData } from "../../../../../context/DataContext";
-
-// Internal Dropdown Component
+// Internal Dropdown for the Modal (Kept same as before)
 const ModalDropdown = ({ label, value, options, onChange, placeholder = "Select..." }) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -19,8 +17,7 @@ const ModalDropdown = ({ label, value, options, onChange, placeholder = "Select.
                     onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
                     style={{
                         width: '100%', padding: '10px 12px', fontSize: '13px', textAlign: 'left',
-                        backgroundColor: 'white', border: '1px solid #d1d5db',
-                        borderRadius: '6px', // 6px Radius
+                        backgroundColor: 'white', border: '1px solid #d1d5db', borderRadius: '8px',
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                         cursor: 'pointer', color: value ? '#111827' : '#9ca3af'
                     }}
@@ -38,12 +35,12 @@ const ModalDropdown = ({ label, value, options, onChange, placeholder = "Select.
                                 transition={{ duration: 0.2 }}
                                 style={{
                                     position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
-                                    backgroundColor: 'white', borderRadius: '6px',
+                                    backgroundColor: 'white', borderRadius: '8px',
                                     boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
                                     border: '1px solid #f3f4f6', zIndex: 150, maxHeight: '200px', overflowY: 'auto'
                                 }}
                             >
-                                {options.length > 0 ? options.map((opt) => (
+                                {options.map((opt) => (
                                     <button
                                         key={opt}
                                         onClick={(e) => { e.stopPropagation(); onChange(opt); setIsOpen(false); }}
@@ -59,11 +56,7 @@ const ModalDropdown = ({ label, value, options, onChange, placeholder = "Select.
                                         {value === opt && <Check size={14} className="text-blue-600" />}
                                         <span style={{ marginLeft: value === opt ? 0 : '22px' }}>{opt}</span>
                                     </button>
-                                )) : (
-                                    <div style={{ padding: '10px 12px', fontSize: '12px', color: '#9ca3af', textAlign: 'center' }}>
-                                        No existing advisers found
-                                    </div>
-                                )}
+                                ))}
                             </motion.div>
                         </>
                     )}
@@ -74,78 +67,61 @@ const ModalDropdown = ({ label, value, options, onChange, placeholder = "Select.
 };
 
 export const AddSectionModal = ({ isOpen, onClose, onAdd }) => {
-    // 2. USE DATA FROM CONTEXT
-    const { programsAndSections } = useData();
-
     const [formData, setFormData] = useState({
         level: '',
         sectionName: '',
         adviser: ''
     });
 
-    const [isHovered, setIsHovered] = useState(false);
-
-    // Extract unique levels
+    // Extract unique levels from config
     const levelOptions = useMemo(() => {
-        if (!programsAndSections) return [];
-        const levels = [];
+        let levels = [];
         programsAndSections.forEach(cat => cat.levels.forEach(l => levels.push(l.gradeLevel)));
-        return [...new Set(levels)];
-    }, [programsAndSections]);
+        return levels;
+    }, []);
 
-    // Extract Adviser names dynamically
-    const adviserOptions = useMemo(() => {
-        if (!programsAndSections) return [];
-        const advisers = new Set();
-        programsAndSections.forEach(cat => {
-            cat.levels.forEach(lvl => {
-                lvl.sections.forEach(sec => {
-                    if (sec.adviser && sec.adviser !== "Unassigned") {
-                        advisers.add(sec.adviser);
-                    }
-                });
-            });
-        });
-        return Array.from(advisers).sort();
-    }, [programsAndSections]);
+    // Extract adviser names
+    const adviserOptions = useMemo(() => adviserRegistry.map(a => a.name), []);
 
-    // --- 🟢 UPDATED SUBMIT LOGIC ---
     const handleSubmit = () => {
-        // Only require Level and Section Name
-        if (formData.level && formData.sectionName) {
-            onAdd({
-                ...formData,
-                // Default to "Unassigned" if empty
-                adviser: formData.adviser || "Unassigned"
-            });
-            setFormData({ level: '', sectionName: '', adviser: '' });
+        if (formData.level && formData.sectionName && formData.adviser) {
+            onAdd(formData);
+            setFormData({ level: '', sectionName: '', adviser: '' }); // Reset
             onClose();
         }
     };
 
-    // --- 🟢 UPDATED VALIDATION ---
-    // Adviser is no longer required for the button to enable
-    const isDisabled = !formData.level || !formData.sectionName;
+    // Define animations variants
+    const overlayVariants = {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1 },
+        exit: { opacity: 0, transition: { duration: 0.2 } }
+    };
 
-    // Button Colors
-    const buttonBgColor = isDisabled ? '#2CA4DD' : (isHovered ? '#33549F' : '#4268BD');
+    const modalVariants = {
+        hidden: { opacity: 0, scale: 0.95, y: 20 },
+        visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 30 } },
+        exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2 } }
+    };
 
     return (
         <AnimatePresence>
             {isOpen && (
-                <motion.div
+                <motion.div 
                     key="modal-overlay"
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    onClick={onClose}
+                    variants={overlayVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    onClick={onClose} // Close on clicking backdrop
                     style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}
                 >
                     <motion.div
                         key="modal-content"
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        onClick={(e) => e.stopPropagation()}
-                        style={{ backgroundColor: 'white', borderRadius: '6px', padding: '24px', width: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', position: 'relative', zIndex: 110 }}
+                        variants={modalVariants}
+                        // initial, animate, exit are inherited from parent if variants match keys
+                        onClick={(e) => e.stopPropagation()} // Prevent click inside modal closing it
+                        style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', width: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', position: 'relative', zIndex: 110 }}
                     >
                         {/* Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -154,56 +130,50 @@ export const AddSectionModal = ({ isOpen, onClose, onAdd }) => {
                         </div>
 
                         {/* Form */}
-                        <ModalDropdown
-                            label="Grade Level / Year"
-                            value={formData.level}
-                            options={levelOptions}
-                            onChange={(val) => setFormData({ ...formData, level: val })}
+                        <ModalDropdown 
+                            label="Grade Level / Year" 
+                            value={formData.level} 
+                            options={levelOptions} 
+                            onChange={(val) => setFormData({...formData, level: val})} 
                         />
 
                         <div style={{ marginBottom: '16px' }}>
-                            <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>{formData.level.includes("Year") ? "Program Name" : "Section Name"}</label>
-                            <input
-                                type="text"
+                            <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Section Name</label>
+                            <input 
+                                type="text" 
                                 placeholder="e.g. Rizal, A, 101"
                                 value={formData.sectionName}
-                                onChange={(e) => setFormData({ ...formData, sectionName: e.target.value })}
-                                style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none', fontFamily: 'inherit' }}
+                                onChange={(e) => setFormData({...formData, sectionName: e.target.value})}
+                                style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none', fontFamily: 'inherit' }}
                             />
                         </div>
 
-                        {formData.level.includes("Year") ? "" : (
-                            <ModalDropdown
-                                // 🟢 Label updated to indicate optionality
-                                label="Assigned Adviser (Optional)"
-                                value={formData.adviser}
-                                options={adviserOptions}
-                                onChange={(val) => setFormData({ ...formData, adviser: val })}
-                                placeholder="Select or leave empty..."
-                            />
-                        )}
+                        <ModalDropdown 
+                            label="Assigned Adviser" 
+                            value={formData.adviser} 
+                            options={adviserOptions} 
+                            onChange={(val) => setFormData({...formData, adviser: val})} 
+                        />
 
                         {/* Actions */}
                         <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-                            <button
+                            <button 
                                 onClick={onClose}
-                                style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #e5e7eb', backgroundColor: 'white', color: '#374151', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                                style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: 'white', color: '#374151', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
                             >
                                 Cancel
                             </button>
-                            <button
+                            <button 
                                 onClick={handleSubmit}
-                                disabled={isDisabled}
-                                onMouseEnter={() => setIsHovered(true)}
-                                onMouseLeave={() => setIsHovered(false)}
-                                style={{
-                                    flex: 1, padding: '10px', borderRadius: '6px', border: 'none',
-                                    backgroundColor: buttonBgColor,
-                                    color: 'white', fontSize: '13px', fontWeight: 500, cursor: isDisabled ? 'not-allowed' : 'pointer',
+                                disabled={!formData.level || !formData.sectionName || !formData.adviser}
+                                style={{ 
+                                    flex: 1, padding: '10px', borderRadius: '8px', border: 'none', 
+                                    backgroundColor: (!formData.level || !formData.sectionName || !formData.adviser) ? '#93c5fd' : '#4268BD', 
+                                    color: 'white', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
                                     transition: 'background-color 0.2s'
                                 }}
                             >
-                                Create {formData.level.includes("Year") ? "Program" : "Section"}
+                                Create Section
                             </button>
                         </div>
                     </motion.div>
