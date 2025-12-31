@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react'; // 🟢 Added useRef
 import { useParams } from "react-router-dom";
 import { Check } from "lucide-react";
 import { useBreakpoint } from "use-breakpoint"; 
@@ -63,6 +63,9 @@ export default function SubmitMealList() {
     const [loading, setLoading] = useState(true);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    
+    // 🟢 Ref to ensure we only auto-select ONCE upon entry
+    const selectionInitialized = useRef(false);
 
     // --- FETCH STUDENTS LOGIC ---
     const students = useMemo(() => {
@@ -88,6 +91,7 @@ export default function SubmitMealList() {
         return filtered.sort((a, b) => a.name.localeCompare(b.name));
     }, [schoolData, section, searchTerm]);
 
+    // --- 2. CHECK STATUS ON LOAD ---
     useEffect(() => {
         setLoading(true);
         isStudentMealSubmitted(section)
@@ -95,6 +99,20 @@ export default function SubmitMealList() {
             .catch(console.error)
             .finally(() => setTimeout(() => setLoading(false), 500));
     }, [section]);
+
+    // --- 🟢 3. AUTO-SELECT ALL LOGIC (UX Improvement) ---
+    useEffect(() => {
+        // Wait until loading is done and we have students
+        if (!loading && students.length > 0 && !selectionInitialized.current) {
+            // Only select all if it's NOT already submitted
+            if (!isSubmitted) {
+                const allIds = students.map(s => s.studentId);
+                setSelected(allIds);
+            }
+            // Mark as initialized so we don't overwrite user changes later
+            selectionInitialized.current = true;
+        }
+    }, [loading, students, isSubmitted]);
 
     const handleSubmit = async () => {
         try {
@@ -125,28 +143,22 @@ export default function SubmitMealList() {
         }
 
         // 🟢 A. MOBILE VIEW (Card Layout - No Checkbox)
-if (isMobile) {
+        if (isMobile) {
             return (
                 <tr 
                     key={student.studentId} 
                     onClick={handleRowClick}
                     className={`transition-all border-b border-gray-100 ${isSelected ? "bg-blue-50/50" : "bg-white"}`}
                 >
-                    {/* colSpan should match your total column count (4) to span full width */}
-                    <td colSpan={4} style={{ padding: '12px 16px', maxWidth: '100vw' }}> 
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: "100%" }}>
-                            
+                    <td colSpan={4} style={{ padding: '12px 16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                             {/* Left: Avatar + Info */}
-                            {/* minWidth: 0 is CRITICAL for text truncation in Flexbox */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
-                                
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm shrink-0">
                                     {student.name.charAt(0)}
                                 </div>
-                                
-                                <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                                    {/* Added 'truncate' class and block display to handle long names */}
-                                    <span className="truncate" style={{ fontSize: '14px', fontWeight: 600, color: '#111827', display: 'block' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <span style={{ fontSize: '14px', fontWeight: 600, color: '#111827' }}>
                                         {student.name}
                                     </span>
                                     <span style={{ fontSize: '12px', color: '#6b7280', fontFamily: 'monospace' }}>
@@ -154,8 +166,11 @@ if (isMobile) {
                                     </span>
                                 </div>
                             </div>
-
-                            {/* Right side content (if any) */}
+                            
+                            {/* Right: Status Badge Only */}
+                            <div>
+                                <StatusBadge type={statusType} />
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -258,14 +273,12 @@ if (isMobile) {
         );
     };
 
-    // Columns config
     const columns = ['#', 'Student Name', 'Student ID', 'Status'];
     const metrics = [
         { label: "Total Students", value: students.length },
         { label: "Selected", value: selected.length, color: "#2563EB" }
     ];
 
-    // Custom Header for Tablet (No Checkbox)
     const tabletThead = (
         <thead className="bg-gray-50 sticky top-0 z-20 shadow-sm">
             <tr style={{ height: '45px' }}>
@@ -278,10 +291,7 @@ if (isMobile) {
         </thead>
     );
 
-    // Mobile: Hidden. Tablet: Custom. Desktop: Null.
     const customTheadProp = isMobile ? <thead /> : (isTablet ? tabletThead : null);
-
-    // Disable Selectable on Mobile/Tablet to hide GenericTable's checkbox header
     const isSelectable = !isSubmitted && !isMobile && !isTablet;
 
     return (
