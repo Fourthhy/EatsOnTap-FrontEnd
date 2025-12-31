@@ -21,7 +21,6 @@ import UserManagement from "../roles/superAdmin/pages/UserManagement";
 import SystemLogs from "../roles/superAdmin/pages/SystemLogs";
 
 import SidebarLayout from "../components/custom/SidebarLayout";
-import ClassAdviserLanding from "@/roles/classAdviser/ClassAdviserLanding";
 
 import AdminLayout from "@/roles/admin/AdminLayout";
 import AdminDashboard from "../roles/admin/components/pages/AdminDashboard"
