@@ -13,7 +13,7 @@ import FoodItemClaim from "../roles/canteenStaff/FoodItemClaim";
 import ChancellorDashboard from "../roles/chancellor/ChancellorDashboard";
 import ChancellorLanding from "../roles/chancellor/ChancellorLanding";
 
-import SubmitMealList from "../roles/classAdviser/SubmitMealList";
+
 import FreeMealClaim from "../roles/foodServer/FreeMealClaim";
 
 import SuperAdminLayout from "../roles/superAdmin/SuperAdminLayout";
@@ -32,6 +32,9 @@ import StudentManagement from "../roles/admin/components/pages/StudentManagement
 import SystemSettings from "../roles/admin/components/pages/SystemSettings";
 
 import Playground from "../Playground";
+
+import ClassAdviserLayout from "../roles/classAdviser/ClassAdviserLayout";
+import SubmitMealList from "../roles/classAdviser/SubmitMealList";
 
 
 
@@ -87,7 +90,7 @@ export default function Routers() {
                     </Route>
                     <Route path="/classAdviser/:section/:userID" element={
                         <ProtectedRoute>
-                            <ClassAdviserLanding />
+                            <ClassAdviserLayout />
                         </ProtectedRoute>
                     }>
                         <Route path="submitMealList" element={<SubmitMealList />} />
