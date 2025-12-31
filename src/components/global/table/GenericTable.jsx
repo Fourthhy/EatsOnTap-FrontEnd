@@ -7,9 +7,9 @@ import { motion, AnimatePresence } from "framer-motion";
 
 // --- IMPORTS ---
 import { useLoader } from '../../../context/LoaderContext';
-import { Skeleton } from '../../global/Skeleton'; 
+import { Skeleton } from '../../global/Skeleton';
 
-const ITEM_HEIGHT_ESTIMATE_PX = 40; // Increased slightly for mobile touch targets
+const ITEM_HEIGHT_ESTIMATE_PX = 40;
 
 const GenericTable = ({
     // Content Props
@@ -54,6 +54,7 @@ const GenericTable = ({
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(maxItems);
+    const [isMobile, setIsMobile] = useState(false); // 🟢 1. Track Mobile State
     const tableWrapperRef = useRef(null);
 
     // --- HOOK: LOADER STATE ---
@@ -66,20 +67,32 @@ const GenericTable = ({
         return today.toLocaleDateString('en-US', options);
     }
 
+    // --- 🟢 2. DETECT MOBILE (Simple Resize Listener) ---
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile(); // Check on mount
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     // --- EFFECT: Height Calculation ---
     useEffect(() => {
         const wrapper = tableWrapperRef.current;
         if (!wrapper) return;
 
         const observer = new ResizeObserver(entries => {
-            // Safety check for mobile landscape or small screens
-            if(!entries || !entries[0]) return;
-            
+            if (!entries || !entries[0]) return;
+
+            // 🟢 3. IF MOBILE: Disable Auto-Calc, Show All Items (Infinite Scroll style)
+            if (window.innerWidth < 768) {
+                setItemsPerPage(9999); // Set to "Infinity" effectively
+                return;
+            }
+
             const containerHeight = entries[0].contentRect.height;
-            // Adjusted buffer for mobile headers which might stack and take more height
-            const headerBuffer = 55; 
+            const headerBuffer = 55;
             const availableSpace = containerHeight - headerBuffer;
-            
+
             if (availableSpace > 0) {
                 const calculatedItems = Math.floor(availableSpace / ITEM_HEIGHT_ESTIMATE_PX);
                 const newItemsPerPage = Math.max(minItems, Math.min(maxItems, calculatedItems));
@@ -124,37 +137,39 @@ const GenericTable = ({
     };
 
     return (
-        // 🟢 UPDATED: Responsive Padding (p-2 on mobile, p-6 on desktop)
         <div className="w-full h-[calc(100vh-80px)] md:h-[calc(100vh-90px)] flex flex-col p-2 md:p-6 font-['Geist',sans-serif] text-gray-900 overflow-hidden">
 
             {/* 1. TOP TOOLBAR (Tabs + Actions) */}
             <div
-                className="w-full flex flex-col md:flex-row justify-between items-start md:items-center px-4 py-3 md:py-2 mb-4 bg-white rounded-md shadow-md border border-gray-200 gap-4 md:gap-0"
+                className="w-full h-auto flex flex-col md:flex-row justify-between items-start md:items-center px-4 py-3 md:py-2 mb-4 bg-white rounded-md shadow-md border border-gray-200 gap-4 md:gap-0"
                 style={{ marginTop: 15, marginBottom: 15 }}
             >
-                {/* TABS SECTION - Scrollable on mobile */}
-                <div className="w-full md:w-auto overflow-x-auto pb-1 md:pb-0 hide-scrollbar" style={{ padding: 3 }}>
-                    {isLoading ? (
-                         <div className="flex gap-2 p-1">
-                            <Skeleton className="h-8 w-24 rounded-md" />
-                            <Skeleton className="h-8 w-24 rounded-md" />
-                         </div>
-                    ) : (
-                        tabs.length === 0 ? <>&nbsp;</> :
-                            <ButtonGroup
-                                buttonListGroup={tabs}
-                                activeId={activeTab}
-                                onSetActiveId={(id) => {
-                                    onTabChange?.(id);
-                                    setCurrentPage(1);
-                                }}
-                                activeColor="#4268BD"
-                            />
-                    )}
-                </div>
+                {/* TABS SECTION */}
+                {isMobile ? "" : (
+                    <div className="w-full md:w-auto overflow-x-auto pb-1 md:pb-0 hide-scrollbar" style={{ padding: 3 }}>
+                        {isLoading ? (
+                            <div className="flex gap-2 p-1">
+                                <Skeleton className="h-8 w-24 rounded-md" />
+                                <Skeleton className="h-8 w-24 rounded-md" />
+                            </div>
+                        ) : (
+                            tabs.length === 0 ? "" :
+                                <ButtonGroup
+                                    buttonListGroup={tabs}
+                                    activeId={activeTab}
+                                    onSetActiveId={(id) => {
+                                        onTabChange?.(id);
+                                        setCurrentPage(1);
+                                    }}
+                                    activeColor="#4268BD"
+                                />
+                        )}
+                    </div>
+                )}
 
-                {/* ACTIONS SECTION - Stacked on mobile */}
-                <div className="w-full md:w-auto flex items-center justify-end gap-2">
+
+                {/* ACTIONS SECTION */}
+                <div className="w-full h-full md:w-auto flex items-center justify-end gap-2">
                     {isLoading ? (
                         <>
                             <Skeleton className="h-9 w-20 md:w-32 rounded-md" />
@@ -168,7 +183,7 @@ const GenericTable = ({
                                     label={primaryActionLabel}
                                     icon={primaryActionIcon}
                                     onClick={onPrimaryAction}
-                                    className="cursor-pointer text-sm font-medium shadow-sm flex-1 md:flex-none justify-center"
+                                    className="cursor-pointer text-sm font-medium shadow-sm flex-1 md:flex-none justify-center h-full items-center"
                                     style={{
                                         padding: '10px 20px', borderRadius: 6, fontSize: 12, fontFamily: 'geist',
                                         boxShadow: "0 2px 6px #e5eaf0ac",
@@ -195,10 +210,10 @@ const GenericTable = ({
             {/* 2. MAIN CARD */}
             <div className="bg-white rounded-md shadow-lg border border-gray-200 flex flex-col flex-1 min-h-0 overflow-hidden">
 
-                {/* 2a. HEADER (Title & Metrics) */}
+                {/* 2a. HEADER */}
                 <div className="shrink-0 border-b border-gray-100">
                     <div className="px-4 py-4 md:px-6 md:pt-6 md:pb-4">
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4" style={{ padding: 10}}>
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4" style={{ padding: 10 }}>
                             {/* TITLE & SUBTITLE */}
                             <div>
                                 {isLoading ? (
@@ -214,7 +229,7 @@ const GenericTable = ({
                                 )}
                             </div>
 
-                            {/* METRICS - Wrap on mobile */}
+                            {/* METRICS */}
                             <div className="flex flex-wrap gap-4 md:gap-6 w-full md:w-auto">
                                 {metrics && metrics.map((metric, index) => (
                                     <div key={index} className="text-left md:text-right">
@@ -232,7 +247,7 @@ const GenericTable = ({
 
                     <hr className="w-full border-gray-100" />
 
-                    {/* 2b. DYNAMIC HEADER ROW (Search & Date) */}
+                    {/* 2b. DYNAMIC HEADER ROW */}
                     <div className="p-3 md:p-0 md:h-[50px] flex flex-col justify-center">
                         {overrideHeader ? (
                             <div className="w-full h-full">
@@ -240,7 +255,6 @@ const GenericTable = ({
                             </div>
                         ) : (
                             <div className="md:px-6 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between" style={{ padding: 10 }}>
-                                {/* SEARCH BAR */}
                                 <div className="relative flex-1 md:max-w-md">
                                     {isLoading ? (
                                         <Skeleton className="h-9 w-full rounded-md" />
@@ -263,12 +277,11 @@ const GenericTable = ({
                                     )}
                                 </div>
 
-                                {/* DATE DISPLAY - Hidden on very small screens if needed, or flexible */}
                                 <div className="flex gap-2 md:ml-auto">
                                     {isLoading ? (
                                         <Skeleton className="h-8 w-32 rounded-md" />
                                     ) : (
-                                        <button className="text-sm font-medium text-gray-600 flex items-center justify-center w-full md:w-auto hover:bg-gray-200 transition-colors" 
+                                        <button className="text-sm font-medium text-gray-600 flex items-center justify-center w-full md:w-auto hover:bg-gray-200 transition-colors"
                                             style={{ padding: '8px 12px', backgroundColor: '#f3f4f6', borderRadius: '6px', fontSize: 12, gap: '8px' }}>
                                             {getFormattedDate()} <Calendar size={12} />
                                         </button>
@@ -279,9 +292,9 @@ const GenericTable = ({
                     </div>
                 </div>
 
-                {/* 3. TABLE SECTION - 🟢 UPDATED: overflow-x-auto for mobile scroll */}
+                {/* 3. TABLE SECTION */}
                 <div ref={tableWrapperRef} className="flex-1 overflow-auto w-full relative">
-                    <table className="w-full text-left border-collapse min-w-[600px] md:min-w-full">
+                    <table className="w-full text-left border-collapse min-w-full">
 
                         {/* 3a. TABLE HEADER */}
                         {customThead ? customThead : (
@@ -329,7 +342,8 @@ const GenericTable = ({
                         {/* 3b. TABLE BODY */}
                         <tbody className="divide-y divide-gray-100">
                             {isLoading ? (
-                                Array(itemsPerPage).fill(0).map((_, i) => (
+                                // 🟢 4. SMART SKELETON COUNT: Only show 10 on mobile to avoid 9999 skeletons
+                                Array(isMobile ? 10 : itemsPerPage).fill(0).map((_, i) => (
                                     <tr key={`skeleton-${i}`} style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>
                                         <td className="px-6 py-3" style={{ width: selectable ? '48px' : '64px' }}>
                                             <div className="flex justify-center"><Skeleton className="h-4 w-4 rounded-sm" /></div>
@@ -373,7 +387,8 @@ const GenericTable = ({
                                 </AnimatePresence>
                             )}
 
-                            {!isLoading && currentData.length < itemsPerPage && Array(itemsPerPage - currentData.length).fill(0).map((_, i) => (
+                            {/* Padding Rows - Only show if not on mobile (since mobile is infinite scroll) */}
+                            {!isLoading && !isMobile && currentData.length < itemsPerPage && Array(itemsPerPage - currentData.length).fill(0).map((_, i) => (
                                 <tr key={`pad-${i}`} style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>
                                     <td colSpan={columns.length + (selectable ? 1 : 1) + (customThead ? 20 : 0)}></td>
                                 </tr>
@@ -382,12 +397,14 @@ const GenericTable = ({
                     </table>
                 </div>
 
-                {/* 4. FOOTER */}
-                <TablePagination
-                    currentPage={currentPage}
-                    totalPages={isLoading ? 1 : totalPages}
-                    onPageChange={handlePageChange}
-                />
+                {/* 4. FOOTER - 🟢 5. HIDE ON MOBILE */}
+                {!isMobile && (
+                    <TablePagination
+                        currentPage={currentPage}
+                        totalPages={isLoading ? 1 : totalPages}
+                        onPageChange={handlePageChange}
+                    />
+                )}
             </div>
         </div >
     );

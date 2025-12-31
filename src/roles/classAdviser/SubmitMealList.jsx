@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from "react-router-dom";
 import { Check } from "lucide-react";
+import { useBreakpoint } from "use-breakpoint"; 
 
 // 🟢 IMPORT THE NEW MODAL
 import { ConfirmModal } from "./components/ConfirmModal"; 
@@ -14,12 +15,48 @@ import { SubmitStudentMealList } from "../../functions/classAdviser/SubmitStuden
 import { isStudentMealSubmitted } from "../../functions/classAdviser/isStudentMealSubmitted";
 
 // 🟢 COMPONENTS
+import { HeaderBar } from "../../components/global/HeaderBar"; 
 import { GenericTable } from "../../components/global/table/GenericTable";
 
+// 🟢 Define Breakpoints
+const BREAKPOINTS = {
+    mobile: 0,
+    tablet: 768,
+    desktop: 1024,
+    wide: 1440
+};
+
+// --- STATUS BADGE COMPONENT ---
+const StatusBadge = ({ type }) => {
+    const styles = {
+        Eligible: { backgroundColor: '#d1fae5', color: '#047857', dotColor: '#10b981', text: 'Eligible' },
+        Waived: { backgroundColor: '#f3f4f6', color: '#6b7280', dotColor: '#9ca3af', text: 'Waived' }
+    };
+    const currentStyle = styles[type] || styles.Waived;
+
+    return (
+        <span
+            style={{
+                padding: '4px 12px', borderRadius: '12px', display: 'inline-flex', alignItems: 'center',
+                gap: '6px', backgroundColor: currentStyle.backgroundColor, color: currentStyle.color,
+                width: 'fit-content', fontSize: '12px', fontWeight: 500, fontFamily: 'geist, sans-serif'
+            }}
+        >
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: currentStyle.dotColor }}></span>
+            <span>{currentStyle.text}</span>
+        </span>
+    );
+};
+
 export default function SubmitMealList() {
+    // 🟢 Initialize Hook
+    const { breakpoint } = useBreakpoint(BREAKPOINTS, 'desktop');
+    const isMobile = breakpoint === 'mobile';
+    const isTablet = breakpoint === 'tablet';
+
     const { section, userID } = useParams();
     const { schoolData } = useData(); 
-    const { currentAdviser } = useClassAdviser(); 
+    const { currentAdviser, adviserDisplayName } = useClassAdviser(); 
 
     const [selected, setSelected] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -27,7 +64,7 @@ export default function SubmitMealList() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
-    // --- 1. FETCH STUDENTS LOGIC ---
+    // --- FETCH STUDENTS LOGIC ---
     const students = useMemo(() => {
         if (!schoolData || schoolData.length === 0) return [];
         let foundStudents = [];
@@ -51,7 +88,6 @@ export default function SubmitMealList() {
         return filtered.sort((a, b) => a.name.localeCompare(b.name));
     }, [schoolData, section, searchTerm]);
 
-    // --- 2. CHECK STATUS ON LOAD ---
     useEffect(() => {
         setLoading(true);
         isStudentMealSubmitted(section)
@@ -60,20 +96,18 @@ export default function SubmitMealList() {
             .finally(() => setTimeout(() => setLoading(false), 500));
     }, [section]);
 
-    // --- 3. SUBMIT LOGIC ---
     const handleSubmit = async () => {
         try {
             await SubmitStudentMealList(userID, section, selected);
             setIsSubmitted(true);
-            setShowModal(false); // Close modal on success
+            setShowModal(false);
         } catch (error) {
             console.error(error);
             setIsSubmitted(false);
-            // Optionally handle error state here
         }
     };
 
-    // --- 4. RENDER ROW ---
+    // --- RENDER ROW LOGIC ---
     const cellStyle = {
         fontFamily: 'geist, sans-serif', fontSize: '12px', color: '#4b5563',
         borderBottom: '1px solid #f3f4f6', height: '43.5px', verticalAlign: 'middle'
@@ -81,7 +115,95 @@ export default function SubmitMealList() {
 
     const renderRow = (student, index, startIndex, { isSelected, toggleSelection }) => {
         const handleRowClick = () => { if (!isSubmitted) toggleSelection(); };
+        
+        // Determine Status for Badge
+        let statusType = 'Waived';
+        if (isSubmitted) {
+            statusType = student.mealEligibilityStatus === "INELIGIBLE" ? "Waived" : "Eligible";
+        } else {
+            statusType = isSelected ? "Eligible" : "Waived";
+        }
 
+        // 🟢 A. MOBILE VIEW (Card Layout - No Checkbox)
+if (isMobile) {
+            return (
+                <tr 
+                    key={student.studentId} 
+                    onClick={handleRowClick}
+                    className={`transition-all border-b border-gray-100 ${isSelected ? "bg-blue-50/50" : "bg-white"}`}
+                >
+                    {/* colSpan should match your total column count (4) to span full width */}
+                    <td colSpan={4} style={{ padding: '12px 16px', maxWidth: '100vw' }}> 
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: "100%" }}>
+                            
+                            {/* Left: Avatar + Info */}
+                            {/* minWidth: 0 is CRITICAL for text truncation in Flexbox */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
+                                
+                                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm shrink-0">
+                                    {student.name.charAt(0)}
+                                </div>
+                                
+                                <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                                    {/* Added 'truncate' class and block display to handle long names */}
+                                    <span className="truncate" style={{ fontSize: '14px', fontWeight: 600, color: '#111827', display: 'block' }}>
+                                        {student.name}
+                                    </span>
+                                    <span style={{ fontSize: '12px', color: '#6b7280', fontFamily: 'monospace' }}>
+                                        {student.studentId}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Right side content (if any) */}
+                        </div>
+                    </td>
+                </tr>
+            );
+        }
+
+        // 🟢 B. TABLET VIEW (No Checkbox Column)
+        if (isTablet) {
+            return (
+                <tr 
+                    key={student.studentId} 
+                    onClick={handleRowClick}
+                    className={`transition-colors cursor-pointer group ${isSelected ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                    style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}
+                >
+                     {/* Index Column (#) */}
+                    <td style={{ ...cellStyle, textAlign: 'center', width: '48px', paddingLeft: '16px' }}>
+                        <span className="text-gray-400 font-medium">{startIndex + index + 1}</span>
+                    </td>
+
+                    {/* Name */}
+                    <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
+                                {student.name.charAt(0)}
+                            </div>
+                            <div className="flex flex-col">
+                                <span>{student.name}</span>
+                            </div>
+                        </div>
+                    </td>
+
+                    {/* ID */}
+                    <td style={cellStyle}>
+                        <span className="font-mono text-xs">{student.studentId}</span>
+                    </td>
+
+                    {/* Status Badge */}
+                    <td style={{ ...cellStyle, textAlign: 'right', paddingRight: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                             <StatusBadge type={statusType} />
+                        </div>
+                    </td>
+                </tr>
+            );
+        }
+
+        // 🟢 C. DESKTOP VIEW (Standard Table with Checkbox)
         return (
             <tr 
                 key={student.studentId} 
@@ -108,12 +230,10 @@ export default function SubmitMealList() {
                     </div>
                 </td>
 
-                {/* Index Column (#) */}
                 <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }}>
                     <span className="text-gray-400 font-medium">{startIndex + index + 1}</span>
                 </td>
 
-                {/* Student Name */}
                 <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
@@ -125,57 +245,67 @@ export default function SubmitMealList() {
                     </div>
                 </td>
 
-                {/* Student ID */}
                 <td style={cellStyle}>
                     <span className="font-mono text-xs">{student.studentId}</span>
                 </td>
 
-                {/* Status Column */}
-                <td style={cellStyle} className="text-right">
-                    {isSubmitted ? (
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${student.mealEligibilityStatus === "INELIGIBLE" ? "bg-gray-100 text-gray-500 border-gray-200" : "bg-green-50 text-green-600 border-green-100"}`}>
-                            {student.mealEligibilityStatus === "INELIGIBLE" ? "PENDING" : "SUBMITTED"}
-                        </span>
-                    ) : (
-                        <span className={`text-xs font-medium ${isSelected ? "text-blue-600" : "text-gray-300"}`}>
-                            {isSelected ? "Selected" : "—"}
-                        </span>
-                    )}
+                <td style={{ ...cellStyle, textAlign: 'right' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                        <StatusBadge type={statusType} />
+                    </div>
                 </td>
             </tr>
         );
     };
 
+    // Columns config
     const columns = ['#', 'Student Name', 'Student ID', 'Status'];
-    
     const metrics = [
         { label: "Total Students", value: students.length },
         { label: "Selected", value: selected.length, color: "#2563EB" }
     ];
 
+    // Custom Header for Tablet (No Checkbox)
+    const tabletThead = (
+        <thead className="bg-gray-50 sticky top-0 z-20 shadow-sm">
+            <tr style={{ height: '45px' }}>
+                {columns.map((col, idx) => (
+                    <th key={idx} style={{ fontSize: 12, whiteSpace: 'nowrap', padding: '12px 16px' }} className="font-geist font-medium text-gray-500">
+                        {col}
+                    </th>
+                ))}
+            </tr>
+        </thead>
+    );
+
+    // Mobile: Hidden. Tablet: Custom. Desktop: Null.
+    const customTheadProp = isMobile ? <thead /> : (isTablet ? tabletThead : null);
+
+    // Disable Selectable on Mobile/Tablet to hide GenericTable's checkbox header
+    const isSelectable = !isSubmitted && !isMobile && !isTablet;
+
     return (
-        <div className="bg-[#F4F6F9] font-geist flex flex-col overflow-hidden">
+        <div className="bg-[#F4F6F9] font-geist flex flex-col overflow-hidden" style={{ padding: isMobile ? 8 : 10 }}> 
             <ConfirmModal 
                 visible={showModal} 
                 onCancel={() => setShowModal(false)} 
-                onConfirm={handleSubmit} 
+                onConfirm={() => { setShowModal(false); handleSubmit(); }} 
             />
 
-            {/* MAIN CONTENT */}
             <div className="flex-1 flex flex-col relative">
                 <GenericTable
                     title="Student Roster"
                     subtitle={`Manage meal attendance for ${section}`}
                     
                     data={students}
-                    columns={columns}
+                    columns={isMobile ? [] : columns}
                     renderRow={renderRow}
                     metrics={metrics}
                     
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
 
-                    selectable={!isSubmitted} 
+                    selectable={isSelectable} 
                     selectedIds={selected}
                     onSelectionChange={setSelected}
                     primaryKey="studentId" 
@@ -183,6 +313,8 @@ export default function SubmitMealList() {
                     primaryActionLabel={isSubmitted ? "Submitted" : "Submit List"}
                     primaryActionIcon={<Check size={18} />} 
                     onPrimaryAction={isSubmitted ? null : () => setShowModal(true)}
+                    
+                    customThead={customTheadProp} 
                 />
             </div>
         </div>
