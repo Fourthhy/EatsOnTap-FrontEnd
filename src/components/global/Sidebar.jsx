@@ -46,7 +46,13 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
     };
 
     const { breakpoint } = useBreakpoint(BREAKPOINTS, 'mobile-md');
+    
+    // This controls the SIDEBAR width (Dynamic)
     const sidebarWidth = isExpanded ? "288px" : "80px";
+    
+    // 🟢 This controls the CONTENT margin (Static)
+    // We ALWAYS keep this at 80px so the content never gets squeezed.
+    const contentMargin = "80px"; 
     
     // Shared transition for sync
     const springTransition = {
@@ -58,7 +64,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
 
     return (
         <div style={{ width: "100%", minHeight: "100vh", backgroundColor: "#F4FDFF" }}>
-            {/* 1. Sidebar */}
+            {/* 1. Sidebar (Floating Layer) */}
             <motion.div
                 initial={false}
                 animate={{ width: sidebarWidth }}
@@ -72,8 +78,9 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                     position: "fixed",
                     top: 0,
                     left: 0,
-                    zIndex: 1000,
-                    overflow: "hidden"
+                    zIndex: 1000, // Stays above content
+                    overflow: "hidden",
+                    boxShadow: isExpanded ? "4px 0 24px rgba(0,0,0,0.25)" : "none" // Add shadow when open
                 }}
                 transition={springTransition}
                 onMouseEnter={() => setIsExpanded(true)}
@@ -142,9 +149,6 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                         }}
                         ref={containerRef}
                     >
-
-                        {/* --- FIX: QUICK ACTIONS --- */}
-                        {/* Restored the logic to use item.onClickAction if provided (for Modals like Add Dish) */}
                         {quickActions && quickActions.map((item, i) => (
                             <SidebarItem
                                 key={i}
@@ -255,17 +259,18 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
             </motion.div>
 
             {/* 2. Main Content Area */}
-            <motion.div
-                initial={false}
-                animate={{ marginLeft: sidebarWidth, width: `calc(100% - ${sidebarWidth})` }}
-                transition={springTransition}
+            {/* 🟢 FIX: We do NOT animate marginLeft anymore. It stays fixed at 80px. */}
+            <div
                 style={{
+                    marginLeft: contentMargin, // Fixed at 80px
+                    width: `calc(100% - ${contentMargin})`, // Fixed width
                     backgroundColor: "#f9fafb",
                     minHeight: "100vh",
+                    transition: "all 0.3s ease" // Optional smooth transition if window resizes
                 }}
             >
                 <Outlet context={{ isSidebarOpen: isExpanded, handleToggleSidebar: () => setIsExpanded(!isExpanded) }} />
-            </motion.div>
+            </div>
         </div >
     );
 }
