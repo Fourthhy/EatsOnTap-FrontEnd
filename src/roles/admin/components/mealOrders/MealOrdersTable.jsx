@@ -3,21 +3,92 @@ import { Clock, Calendar, CheckCircle, Check, X, CalendarDays } from 'lucide-rea
 import { GenericTable } from '../../../../components/global/table/GenericTable';
 import { AnimatePresence } from 'framer-motion';
 
-import { generateMockRequests } from './data/mealOrdersConfig';
+// 🟢 CONTEXT
+import { useData } from '../../../../context/DataContext';
+
 import { SwitcherButton } from './components/SwitcherButton';
 import { MealOrdersActionBar } from './components/MealOrderActionBar';
 
 const MealOrdersTable = () => {
+    // 🟢 Consume Real Data from Context
+    const { 
+        basicEducationMealRequest = [], 
+        higherEducationMealRequest = [], 
+        eventMealRequest = [] 
+    } = useData();
+
     const [activeTab, setActiveTab] = useState('All');
     const [orderType, setOrderType] = useState('Pending Meal Orders');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedIds, setSelectedIds] = useState([]);
-    const [allRequests, setAllRequests] = useState([]);
     const [showActionBar, setShowActionBar] = useState(false);
 
-    useEffect(() => {
-        setAllRequests(generateMockRequests());
-    }, []);
+    // --- 🟢 DATA NORMALIZATION ---
+    const allRequests = useMemo(() => {
+        // Helper: Convert "PENDING" -> "Pending"
+        const normalizeStatus = (status) => {
+            if (!status) return 'Pending';
+            return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+        };
+
+        const formatTime = (dateInput) => {
+            if (!dateInput) return '--:--';
+            return new Date(dateInput).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        };
+
+        // 1. Transform Basic Ed (Matches eligibilityBasicEdSchema)
+        const basic = basicEducationMealRequest.map(item => ({
+            id: item._id || item.eligibilityID,
+            sectionProgram: item.section, 
+            sender: item.requester,
+            recipientCount: item.forEligible?.length || 0,
+            waivedCount: item.forTemporarilyWaived?.length || 0, // ✅ Correct field
+            timeSent: formatTime(item.timeStamp),
+            type: 'Regular',
+            category: 'Basic Education',
+            status: normalizeStatus(item.status),
+            rawDate: item.timeStamp
+        }));
+
+        // 2. Transform Higher Ed (Matches eligibilityHigherEdSchema)
+        const higher = higherEducationMealRequest.map(item => ({
+            id: item._id || item.eligibilityID,
+            sectionProgram: `${item.program} ${item.year}`, 
+            sender: item.requester,
+            recipientCount: item.forEligible?.length || 0,
+            waivedCount: item.forWaived?.length || 0, // ✅ Correct field (different from Basic)
+            timeSent: formatTime(item.timeStamp),
+            type: 'Regular',
+            category: 'Higher Education',
+            status: normalizeStatus(item.status),
+            rawDate: item.timeStamp
+        }));
+
+        // 3. Transform Events (Matches Event Schema)
+        const events = eventMealRequest.map(item => {
+            // ✅ Calculate total recipients from both section list and program list
+            const sectionCount = item.forEligibleSection?.length || 0;
+            const programCount = item.forEligibleProgramsAndYear?.length || 0;
+
+            return {
+                id: item._id || item.eventID,
+                sectionProgram: item.eventName,
+                sender: "Event Organizer", // ✅ Schema has no 'requester', defaulting to static string
+                recipientCount: sectionCount + programCount,
+                waivedCount: item.forTemporarilyWaived?.length || 0,
+                // ✅ Use first date of eventSpan
+                timeSent: item.eventSpan && item.eventSpan.length > 0 ? new Date(item.eventSpan[0]).toLocaleDateString() : 'N/A', 
+                type: 'Event',
+                category: 'Event',
+                status: normalizeStatus(item.status),
+                rawDate: item.eventSpan?.[0] || new Date()
+            };
+        });
+
+        // Combine and Sort by Newest First
+        return [...basic, ...higher, ...events].sort((a, b) => new Date(b.rawDate) - new Date(a.rawDate));
+
+    }, [basicEducationMealRequest, higherEducationMealRequest, eventMealRequest]);
 
     // Helper to delay action bar exit animation
     useEffect(() => {
@@ -39,10 +110,11 @@ const MealOrdersTable = () => {
         } else if (orderType === 'Event Meal Request') {
             data = data.filter(r => r.status === 'Pending' && r.type === 'Event');
         } else {
+            // Pending Meal Orders (Regular)
             data = data.filter(r => r.status === 'Pending' && r.type === 'Regular');
         }
 
-        // 2. Filter by Tabs
+        // 2. Filter by Tabs (Tabs only apply to Regular orders usually, but we can filter events too if needed)
         if (activeTab === 'Basic Education') {
             data = data.filter(r => r.category === 'Basic Education');
         } else if (activeTab === 'Higher Education') {
@@ -68,16 +140,12 @@ const MealOrdersTable = () => {
 
     // --- HANDLERS ---
     const handleBulkApprove = () => {
-        setAllRequests(prev => prev.map(item =>
-            selectedIds.includes(item.id) ? { ...item, status: 'Approved' } : item
-        ));
+        console.log("Bulk Approve IDs:", selectedIds);
         setSelectedIds([]);
     };
 
     const handleBulkReject = () => {
-        setAllRequests(prev => prev.map(item =>
-            selectedIds.includes(item.id) ? { ...item, status: 'Rejected' } : item
-        ));
+        console.log("Bulk Reject IDs:", selectedIds);
         setSelectedIds([]);
     };
 
@@ -178,7 +246,6 @@ const MealOrdersTable = () => {
 
                 customActions={viewSwitcher}
                 
-                // Using the Separated Action Bar Component
                 overrideHeader={showActionBar ? (
                     <MealOrdersActionBar
                         selectedCount={selectedIds.length}

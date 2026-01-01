@@ -13,7 +13,12 @@ export const DataProvider = ({ children }) => {
     // FOR CLASS ADVISERS
     const [classAdvisers, setClassAdvisers] = useState([]);
 
-    const [students, setStudents] = useState([]); 
+    //FOR MEAL REQUESTS
+    const [basicEducationMealRequest, setBasicEducationMealRequest] = useState([]);
+    const [higherEducationMealRequest, setHigherEducationMealRequest] = useState([]);
+    const [eventMealRequest, setEventMealRequest] = useState([]);
+
+    const [students, setStudents] = useState([]);
     const [events, setEvents] = useState([]);
     const [mealOrders, setMealOrders] = useState([]);
     const [claimRecords, setClaimRecords] = useState([]);
@@ -22,19 +27,18 @@ export const DataProvider = ({ children }) => {
     return (
         <DataContext.Provider value={{
             dashboardData, setDashboardData,
-            
-            // ❌ REMOVED FROM EXPORT
-            
             schoolData, setSchoolData,
-
             students, setStudents,
             events, setEvents,
             mealOrders, setMealOrders,
             claimRecords, setClaimRecords,
             todaysMenu, setTodaysMenu,
+            classAdvisers, setClassAdvisers,
 
-            //new Class advisers
-            classAdvisers, setClassAdvisers
+            // For Meal Requests
+            basicEducationMealRequest, setBasicEducationMealRequest,
+            higherEducationMealRequest, setHigherEducationMealRequest,
+            eventMealRequest, setEventMealRequest,
         }}>
             {children}
         </DataContext.Provider>

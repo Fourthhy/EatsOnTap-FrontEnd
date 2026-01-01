@@ -5,7 +5,7 @@ export async function isStudentMealSubmitted(section) {
   // don't forget change to VITE_BASE_URL when deploying
   const token = localStorage.getItem('authToken');
   const response = await fetch(
-    `${VITE_BASE_URL}/api/eligibility/fetchRequestsBySection/${encodeURIComponent(section)}`,
+    `${VITE_LOCALHOST}/api/eligibility/fetchRequestsBySection/${encodeURIComponent(section)}`,
     {
       method: 'GET',
       headers: {

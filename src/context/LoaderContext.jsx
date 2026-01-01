@@ -1,9 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { APP_INITIALIZATION_MANIFEST } from '../config/dataManifest';
 
-// 🟢 KEEP: New API Import
+// API IMPORT 
 import { getUnifiedSchoolData } from '../functions/admin/getUnifiedSchoolData';
 import { getAllClassAdvisers } from '../functions/admin/getAllClassAdvisers';
+// NEW API IMPORT 
+import { getAllBasicEducationMealRequest } from "../functions/admin/getAllBasicEducationMealRequest";
+import { getAllHigherEducationMealRequest } from '../functions/admin/getAllHigherEducationMealRequest';
+import { getAllEvents } from '../functions/admin/getAllEvents';
 
 import { useData } from './DataContext';
 import { MOCK_DASHBOARD_DATA, MOCK_EVENTS } from '../data/roles/admin/dashboard/dashboardData';
@@ -20,7 +24,10 @@ export const LoaderProvider = ({ children }) => {
         setDashboardData,
         setEvents,
         setSchoolData,
-        setClassAdvisers
+        setClassAdvisers,
+        setBasicEducationMealRequest,
+        setHigherEducationMealRequest,
+        setEventMealRequest
     } = useData();
 
     const mockApiCall = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -93,6 +100,61 @@ export const LoaderProvider = ({ children }) => {
                         console.error("Failed to fetch class advisers")
                     }
                 }
+
+                if (task.id === "fetch_all_events") {
+                    try {
+
+                        console.log("Fetching Basic Education Meal Request Data!");
+                        if (typeof getAllBasicEducationMealRequest !== 'function') {
+                            throw new Error('getAllBasicEducationMealRequest import is missing or invaild!');
+                        }
+                        if (typeof setBasicEducationMealRequest !== 'function') {
+                            throw new Error('setBasicEducationMealRequest is not defined in the Data Context!');
+                        }
+                        const basicEducationMealRequest = await getAllBasicEducationMealRequest();
+                        setBasicEducationMealRequest(basicEducationMealRequest);
+                        if (basicEducationMealRequest.length > 0) {
+                            console.warn('Basic Education Meal Request returned no data!')
+                        } else {
+                            console.log('Basic Education Meal Request Data Saved!');
+                        }
+
+                        console.log("Fetching Basic Education Meal Request Data!");
+                        if (typeof getAllHigherEducationMealRequest !== 'function') {
+                            throw new Error('getAllHigherEducationMealRequest import is missing or invaild!');
+                        }
+                        if (typeof setHigherEducationMealRequest !== 'function') {
+                            throw new Error('setHigherEducationMealRequest is not defined in the Data Context!');
+                        }
+                        const higherEducationMealRequest = await getAllHigherEducationMealRequest();
+                        setHigherEducationMealRequest(higherEducationMealRequest);
+                        if (higherEducationMealRequest.length > 0) {
+                            console.warn('Higher Education Meal Request returned no data!')
+                        } else {
+                            console.log('Higher Education Meal Request Data Saved!');
+                        }
+
+                        console.log("Fetching Event Data!");
+                        if (typeof getAllEvents !== 'function') {
+                            throw new Error('getAllEvents import is missing or invaild!');
+                        }
+                        if (typeof setEventMealRequest !== 'function') {
+                            throw new Error('setEventMealRequest is not defined in the Data Context!');
+                        }
+                        const eventMealRequest = await getAllEvents();
+                        setEventMealRequest(eventMealRequest);
+                        if (higherEducationMealRequest.length > 0) {
+                            console.warn('Event Meal Request returned no data!')
+                        } else {
+                            console.log('Event Data Saved!');
+                        }
+
+                    } catch (error) {
+                        console.error("Failed to fetch meal requests!")
+                    }
+                }
+
+
 
                 currentProgress += task.weight;
                 setProgress(currentProgress);
