@@ -39,9 +39,3 @@ export const generateMockRequests = () => {
         };
     });
 };
-
-export const TABS = [
-    { id: 'All', label: 'All' },
-    { id: 'Basic Education', label: 'Basic Education' },
-    { id: 'Higher Education', label: 'Higher Education' }
-];

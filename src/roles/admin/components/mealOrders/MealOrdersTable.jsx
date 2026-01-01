@@ -3,7 +3,7 @@ import { Clock, Calendar, CheckCircle, Check, X, CalendarDays } from 'lucide-rea
 import { GenericTable } from '../../../../components/global/table/GenericTable';
 import { AnimatePresence } from 'framer-motion';
 
-import { generateMockRequests, TABS } from './data/mealOrdersConfig';
+import { generateMockRequests } from './data/mealOrdersConfig';
 import { SwitcherButton } from './components/SwitcherButton';
 import { MealOrdersActionBar } from './components/MealOrderActionBar';
 
@@ -59,6 +59,12 @@ const MealOrdersTable = () => {
         }
         return data;
     }, [allRequests, orderType, searchTerm, activeTab]);
+
+    const tabs = [
+        { id: 'All', label: 'All' },
+        { id: 'Basic Education', label: 'Basic Education' },
+        { id: 'Higher Education', label: 'Higher Education' }
+    ]
 
     // --- HANDLERS ---
     const handleBulkApprove = () => {
@@ -166,7 +172,7 @@ const MealOrdersTable = () => {
                 columns={['Section/Program', 'Sender', 'Recipient Count', 'Waived', 'Time Sent', 'Status']}
                 renderRow={renderRow}
 
-                tabs={TABS}
+                tabs={tabs}
                 activeTab={activeTab}
                 onTabChange={(id) => { setActiveTab(id); setSelectedIds([]); }}
 
@@ -174,7 +180,7 @@ const MealOrdersTable = () => {
                 
                 // Using the Separated Action Bar Component
                 overrideHeader={showActionBar ? (
-                    <MealOrdersActionBar 
+                    <MealOrdersActionBar
                         selectedCount={selectedIds.length}
                         totalCount={filteredData.length}
                         onDeselectAll={() => setSelectedIds([])}
