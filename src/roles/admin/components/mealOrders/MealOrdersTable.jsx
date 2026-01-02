@@ -11,6 +11,7 @@ import { useData } from '../../../../context/DataContext';
 
 // 🟢 API IMPORTS
 import { approveMealEligibilityRequest } from '../../../../functions/admin/approveMealEligibilityRequest';
+import { generateEligibilityList } from "../../../../functions/admin/generateEligibilityList";
 
 import { SwitcherButton } from './components/SwitcherButton';
 import { MealOrdersActionBar } from './components/MealOrderActionBar';
@@ -104,7 +105,17 @@ const MealOrdersTable = () => {
     // --- FILTERING LOGIC ---
     const filteredData = useMemo(() => {
         if (orderType === 'Unsubmitted Sections') {
-            const submittedSections = new Set(basicEducationMealRequest.map(req => req.section?.trim()));
+            const todayStr = new Date().toLocaleDateString();
+
+            const submittedSections = new Set(
+                basicEducationMealRequest
+                    .filter(req => {
+                        if (!req.timeStamp) return false;
+                        const reqDate = new Date(req.timeStamp).toLocaleDateString();
+                        return reqDate === todayStr; 
+                    })
+                    .map(req => req.section?.trim())
+            );
             
             const unsubmitted = classAdvisers
                 .filter(adviser => adviser.section && !submittedSections.has(adviser.section.trim()))
@@ -159,15 +170,13 @@ const MealOrdersTable = () => {
         return data;
     }, [allRequests, orderType, searchTerm, activeTab, classAdvisers, basicEducationMealRequest]);
 
-    // --- 🟢 STUDENT LIST DATA PREP (Updated for Nested Structure) ---
+    // --- 🟢 STUDENT LIST DATA PREP ---
     const sectionStudents = useMemo(() => {
         if (!viewingSection || !schoolData) return [];
         
         const targetSectionName = viewingSection.sectionRaw;
         let foundStudents = [];
 
-        // Traverse the School Data Hierarchy
-        // Structure: Category -> Levels -> Sections -> Students
         for (const category of schoolData) {
             if (category.levels) {
                 for (const level of category.levels) {
@@ -178,19 +187,20 @@ const MealOrdersTable = () => {
                         
                         if (matchedSection && matchedSection.students) {
                             foundStudents = matchedSection.students;
-                            break; // Stop looking if found
+                            break; 
                         }
                     }
                 }
             }
-            if (foundStudents.length > 0) break; // Stop outer loop if found
+            if (foundStudents.length > 0) break; 
         }
 
         // Map to table format
         return foundStudents.map(student => ({
-            id: student.id, 
+            // 🟢 FIX 1: Ensure we have distinct IDs
+            id: student.id || student._id, // This is the MongoDB ID (used for React Keys)
             name: student.name,
-            studentId: student.studentId,
+            studentId: student.studentId, // This is the School ID (used for Selection)
             status: 'Eligible' 
         }));
 
@@ -199,7 +209,8 @@ const MealOrdersTable = () => {
     // Auto-select all students when entering the view
     useEffect(() => {
         if (viewingSection && sectionStudents.length > 0) {
-            setSelectedStudentIds(sectionStudents.map(s => s.id));
+            // This selects the SCHOOL IDs
+            setSelectedStudentIds(sectionStudents.map(s => s.studentId));
         }
     }, [viewingSection, sectionStudents]);
 
@@ -232,10 +243,19 @@ const MealOrdersTable = () => {
         }
     };
 
-    const handleSubmitEligibilityList = () => {
+    const handleSubmitEligibilityList = async () => {
         console.log("Submitting Eligibility for:", viewingSection.sectionProgram);
         console.log("Selected Students:", selectedStudentIds);
-        setViewingSection(null);
+        try {
+            await generateEligibilityList(viewingSection.sectionProgram, selectedStudentIds)
+            // Refresh main data to remove section from unsubmitted list
+            await fetchAllBasicEducationMealRequest();
+        } catch (error) {
+            throw new Error("Error submitting generate list", error)
+        }
+        setTimeout(() => {
+            setViewingSection(null);
+        }, 500)
     };
 
     // --- RENDERERS ---
@@ -260,7 +280,6 @@ const MealOrdersTable = () => {
         const isSelected = selection?.isSelected || false;
         const isSelectable = orderType !== 'Confirmed Meal Orders';
 
-        // 🟢 SINGLE SELECTION LOGIC
         const handleRowClick = () => {
             if (!isSelectable) return;
             if (orderType === 'Unsubmitted Sections') {
@@ -352,7 +371,9 @@ const MealOrdersTable = () => {
                     selectable={true}
                     selectedIds={selectedStudentIds}
                     onSelectionChange={setSelectedStudentIds}
-                    primaryKey="id"
+                    
+                    // 🟢 FIX 2: Explicitly tell table to use 'studentId' for selection tracking
+                    primaryKey="studentId" 
 
                     onPrimaryAction={handleSubmitEligibilityList}
                     primaryActionLabel="Submit List"
