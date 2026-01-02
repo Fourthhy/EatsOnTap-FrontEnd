@@ -1,14 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { APP_INITIALIZATION_MANIFEST } from '../config/dataManifest';
 
-// API IMPORT 
-import { getUnifiedSchoolData } from '../functions/admin/getUnifiedSchoolData';
-import { getAllClassAdvisers } from '../functions/admin/getAllClassAdvisers';
-// NEW API IMPORT 
-import { getAllBasicEducationMealRequest } from "../functions/admin/getAllBasicEducationMealRequest";
-import { getAllHigherEducationMealRequest } from '../functions/admin/getAllHigherEducationMealRequest';
-import { getAllEvents } from '../functions/admin/getAllEvents';
-
 import { useData } from './DataContext';
 import { MOCK_DASHBOARD_DATA, MOCK_EVENTS } from '../data/roles/admin/dashboard/dashboardData';
 
@@ -19,15 +11,18 @@ export const LoaderProvider = ({ children }) => {
     const [progress, setProgress] = useState(0);
     const [currentLabel, setCurrentLabel] = useState("Initializing System...");
 
-    // 2. GRAB SETTERS
+    // 🟢 1. GRAB THE EXPOSED FETCH FUNCTIONS & SETTERS
     const {
+        // Fetchers (These update state internally)
+        fetchUnifiedSchoolData,
+        fetchAllClassAdvisers,
+        fetchAllBasicEducationMealRequest,
+        fetchAllHigherEducationMealRequest,
+        fetchAllEvents,
+        
+        // Manual Setters (Only for Mock Data injection)
         setDashboardData,
-        setEvents,
-        setSchoolData,
-        setClassAdvisers,
-        setBasicEducationMealRequest,
-        setHigherEducationMealRequest,
-        setEventMealRequest
+        setEvents
     } = useData();
 
     const mockApiCall = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -36,7 +31,6 @@ export const LoaderProvider = ({ children }) => {
         const isRefreshed = sessionStorage.getItem('is_session_active');
         let currentProgress = 0;
 
-        // 🟢 1. WRAP EVERYTHING IN TRY/CATCH
         try {
             const runTask = async (task) => {
                 console.log("⚡ Processing Task:", task.id);
@@ -45,116 +39,35 @@ export const LoaderProvider = ({ children }) => {
                 const delay = isRefreshed ? 0 : (Math.floor(Math.random() * 400) + 400);
                 await mockApiCall(delay);
 
-                // --- TASKS ---
-                if (task.id === 'dash_chart_daily') {
-                    // Dashboard logic...
-                }
-
+                // --- 🟢 SIMPLIFIED TASK HANDLERS ---
+                
+                // 1. Unified School Data
                 if (task.id === "fetch_unified_data") {
-                    try {
-                        console.log("🚀 Starting Unified Fetch...");
-
-                        // 🟢 DEBUG: Check if function exists
-                        if (typeof getUnifiedSchoolData !== 'function') {
-                            throw new Error("getUnifiedSchoolData import is missing or invalid!");
-                        }
-
-                        // 🟢 DEBUG: Check if setter exists
-                        if (typeof setSchoolData !== 'function') {
-                            throw new Error("setSchoolData is not defined in DataContext!");
-                        }
-
-                        const unifiedData = await getUnifiedSchoolData();
-
-                        if (unifiedData && unifiedData.length > 0) {
-                            setSchoolData(unifiedData);
-                            console.log("✅ Unified Data Saved");
-                        } else {
-                            console.warn("⚠️ Unified Data returned empty array");
-                        }
-                    } catch (err) {
-                        console.error("❌ Unified Fetch Task Failed:", err);
-                        // We don't throw here so the loop continues
-                    }
+                    await fetchUnifiedSchoolData(); 
                 }
 
+                // 2. Class Advisers
                 if (task.id === "fetch_class_advisers") {
-                    try {
-                        console.log("Starting to fetch class adviser data!");
-
-                        if (typeof getAllClassAdvisers !== 'function') {
-                            throw new Error('getAllClassAdvisers import is missing or invalid!')
-                        }
-                        if (typeof setClassAdvisers !== 'function') {
-                            throw new Error('setClassAdvisers is not defined in the Data Context!');
-                        }
-
-                        const classAdvisers = await getAllClassAdvisers();
-                        if (classAdvisers && classAdvisers.length > 0) {
-                            setClassAdvisers(classAdvisers);
-                            console.log("Class Advisers Fetched and Saved!");
-                        } else {
-                            console.warn("Class ADvisers returned empty array")
-                        }
-                    } catch (error) {
-                        console.error("Failed to fetch class advisers")
-                    }
+                    await fetchAllClassAdvisers();
                 }
 
-                if (task.id === "fetch_all_events") {
-                    try {
-
-                        console.log("Fetching Basic Education Meal Request Data!");
-                        if (typeof getAllBasicEducationMealRequest !== 'function') {
-                            throw new Error('getAllBasicEducationMealRequest import is missing or invaild!');
-                        }
-                        if (typeof setBasicEducationMealRequest !== 'function') {
-                            throw new Error('setBasicEducationMealRequest is not defined in the Data Context!');
-                        }
-                        const basicEducationMealRequest = await getAllBasicEducationMealRequest();
-                        setBasicEducationMealRequest(basicEducationMealRequest);
-                        if (basicEducationMealRequest.length > 0) {
-                            console.warn('Basic Education Meal Request returned no data!')
-                        } else {
-                            console.log('Basic Education Meal Request Data Saved!');
-                        }
-
-                        console.log("Fetching Basic Education Meal Request Data!");
-                        if (typeof getAllHigherEducationMealRequest !== 'function') {
-                            throw new Error('getAllHigherEducationMealRequest import is missing or invaild!');
-                        }
-                        if (typeof setHigherEducationMealRequest !== 'function') {
-                            throw new Error('setHigherEducationMealRequest is not defined in the Data Context!');
-                        }
-                        const higherEducationMealRequest = await getAllHigherEducationMealRequest();
-                        setHigherEducationMealRequest(higherEducationMealRequest);
-                        if (higherEducationMealRequest.length > 0) {
-                            console.warn('Higher Education Meal Request returned no data!')
-                        } else {
-                            console.log('Higher Education Meal Request Data Saved!');
-                        }
-
-                        console.log("Fetching Event Data!");
-                        if (typeof getAllEvents !== 'function') {
-                            throw new Error('getAllEvents import is missing or invaild!');
-                        }
-                        if (typeof setEventMealRequest !== 'function') {
-                            throw new Error('setEventMealRequest is not defined in the Data Context!');
-                        }
-                        const eventMealRequest = await getAllEvents();
-                        setEventMealRequest(eventMealRequest);
-                        if (higherEducationMealRequest.length > 0) {
-                            console.warn('Event Meal Request returned no data!')
-                        } else {
-                            console.log('Event Data Saved!');
-                        }
-
-                    } catch (error) {
-                        console.error("Failed to fetch meal requests!")
-                    }
+                // 3. Meal Requests (Grouped)
+                // Note: If your manifest splits these into separate task IDs, adjust accordingly.
+                // Assuming "fetch_all_events" or "fetch_meal_data" covers all meal requests:
+                if (task.id === "fetch_all_events" || task.id === "fetch_meal_data") {
+                    // We run these in parallel for speed, or sequential if preferred
+                    await Promise.all([
+                        fetchAllBasicEducationMealRequest(),
+                        fetchAllHigherEducationMealRequest(),
+                        fetchAllEvents()
+                    ]);
+                    console.log("✅ All Meal Request Data Synced");
                 }
 
-
+                // 4. Dashboard Charts (Still Mock for now)
+                if (task.id === 'dash_chart_daily') {
+                     // Logic handled in Data Injection phase below
+                }
 
                 currentProgress += task.weight;
                 setProgress(currentProgress);
@@ -178,7 +91,7 @@ export const LoaderProvider = ({ children }) => {
                 await Promise.all(secondaryPromises);
             }
 
-            // --- DATA INJECTION ---
+            // --- DATA INJECTION (MOCKS) ---
             setDashboardData({
                 daily: MOCK_DASHBOARD_DATA.today,
                 weekly: MOCK_DASHBOARD_DATA.weekly,
@@ -193,8 +106,6 @@ export const LoaderProvider = ({ children }) => {
             console.error("🔥 CRITICAL LOADER ERROR:", globalError);
             alert("System Validation Failed. Check console for details.");
         } finally {
-            // 🟢 2. FINALLY BLOCK: ALWAYS RUNS
-            // This guarantees the loader turns off no matter what happens above
             setIsLoading(false);
             sessionStorage.setItem('is_session_active', 'true');
         }

@@ -78,7 +78,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                     position: "fixed",
                     top: 0,
                     left: 0,
-                    zIndex: 1000, // Stays above content
+                    zIndex: 9000, // Stays above content
                     overflow: "hidden",
                     boxShadow: isExpanded ? "4px 0 24px rgba(0,0,0,0.25)" : "none" // Add shadow when open
                 }}
