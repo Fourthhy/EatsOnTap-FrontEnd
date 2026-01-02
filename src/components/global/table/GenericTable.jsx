@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Calendar } from 'lucide-react';
+import { Search, Calendar, FileQuestion } from 'lucide-react'; // 🟢 Added FileQuestion
 import { ButtonGroup } from '../ButtonGroup';
 import { PrimaryActionButton } from './PrimaryActionButton';
 import { TablePagination } from './TablePagination';
@@ -19,6 +19,10 @@ const GenericTable = ({
     columns = [],
     renderRow,
     metrics,
+    
+    // 🟢 New Prop for Customization
+    emptyMessage = "No records found",
+    emptyMessageIcon = <FileQuestion size={30} strokeWidth={1.5}/>,
 
     // Header & Navigation Props
     tabs = [],
@@ -54,7 +58,7 @@ const GenericTable = ({
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(maxItems);
-    const [isMobile, setIsMobile] = useState(false); // 🟢 1. Track Mobile State
+    const [isMobile, setIsMobile] = useState(false);
     const tableWrapperRef = useRef(null);
 
     // --- HOOK: LOADER STATE ---
@@ -67,10 +71,10 @@ const GenericTable = ({
         return today.toLocaleDateString('en-US', options);
     }
 
-    // --- 🟢 2. DETECT MOBILE (Simple Resize Listener) ---
+    // --- DETECT MOBILE ---
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
-        checkMobile(); // Check on mount
+        checkMobile(); 
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
@@ -83,9 +87,8 @@ const GenericTable = ({
         const observer = new ResizeObserver(entries => {
             if (!entries || !entries[0]) return;
 
-            // 🟢 3. IF MOBILE: Disable Auto-Calc, Show All Items (Infinite Scroll style)
             if (window.innerWidth < 768) {
-                setItemsPerPage(9999); // Set to "Infinity" effectively
+                setItemsPerPage(9999);
                 return;
             }
 
@@ -139,7 +142,7 @@ const GenericTable = ({
     return (
         <div className="w-full h-[calc(100vh-80px)] md:h-[calc(100vh-90px)] flex flex-col p-2 md:p-6 font-['Geist',sans-serif] text-gray-900 overflow-hidden">
 
-            {/* 1. TOP TOOLBAR (Tabs + Actions) */}
+            {/* 1. TOP TOOLBAR */}
             <div
                 className="w-full h-auto flex flex-col md:flex-row justify-between items-start md:items-center px-4 py-3 md:py-2 mb-4 bg-white rounded-md shadow-md border border-gray-200 gap-4 md:gap-0"
                 style={{ marginTop: 15, marginBottom: 15 }}
@@ -166,7 +169,6 @@ const GenericTable = ({
                         )}
                     </div>
                 )}
-
 
                 {/* ACTIONS SECTION */}
                 <div className="w-full h-full md:w-auto flex items-center justify-end gap-2">
@@ -342,7 +344,6 @@ const GenericTable = ({
                         {/* 3b. TABLE BODY */}
                         <tbody className="divide-y divide-gray-100">
                             {isLoading ? (
-                                // 🟢 4. SMART SKELETON COUNT: Only show 10 on mobile to avoid 9999 skeletons
                                 Array(isMobile ? 10 : itemsPerPage).fill(0).map((_, i) => (
                                     <tr key={`skeleton-${i}`} style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>
                                         <td className="px-6 py-3" style={{ width: selectable ? '48px' : '64px' }}>
@@ -355,7 +356,22 @@ const GenericTable = ({
                                         ))}
                                     </tr>
                                 ))
+                            ) : currentData.length === 0 ? (
+                                // 🟢 3. EMPTY STATE ROW
+                                <tr>
+                                    <td colSpan={columns.length + (selectable ? 1 : 1) + 20} className="text-center" style={{ paddingTop: "20px"}}>
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="flex flex-col items-center justify-center text-gray-400"
+                                        >
+                                            {emptyMessageIcon}
+                                            <p className="font-geist text-sm">{emptyMessage}</p>
+                                        </motion.div>
+                                    </td>
+                                </tr>
                             ) : (
+                                // DATA ROWS
                                 <AnimatePresence mode="wait">
                                     {currentData.map((item, index) => {
                                         const rowContent = renderRow(item, index, startIndex, {
@@ -387,8 +403,8 @@ const GenericTable = ({
                                 </AnimatePresence>
                             )}
 
-                            {/* Padding Rows - Only show if not on mobile (since mobile is infinite scroll) */}
-                            {!isLoading && !isMobile && currentData.length < itemsPerPage && Array(itemsPerPage - currentData.length).fill(0).map((_, i) => (
+                            {/* Padding Rows - Only show if has data and not on mobile */}
+                            {!isLoading && !isMobile && currentData.length > 0 && currentData.length < itemsPerPage && Array(itemsPerPage - currentData.length).fill(0).map((_, i) => (
                                 <tr key={`pad-${i}`} style={{ height: ITEM_HEIGHT_ESTIMATE_PX }}>
                                     <td colSpan={columns.length + (selectable ? 1 : 1) + (customThead ? 20 : 0)}></td>
                                 </tr>
@@ -397,7 +413,7 @@ const GenericTable = ({
                     </table>
                 </div>
 
-                {/* 4. FOOTER - 🟢 5. HIDE ON MOBILE */}
+                {/* 4. FOOTER */}
                 {!isMobile && (
                     <TablePagination
                         currentPage={currentPage}
