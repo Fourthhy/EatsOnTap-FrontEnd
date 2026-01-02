@@ -1,8 +1,60 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { User } from 'lucide-react';
-import { IoGrid } from "react-icons/io5";
-import { GenericTable } from '../../../../components/global/table/GenericTable'; 
-import { generateData } from './mockData'; 
+import React, { useState, useMemo } from 'react';
+import { User, CheckCircle, List, BarChart3 } from 'lucide-react';
+import { GenericTable } from '../../../../../components/global/table/GenericTable'; 
+import { generateData } from '../mockData'; 
+import { motion } from 'framer-motion'; // 🟢 Import Motion
+
+// 🟢 Switcher Button
+const SwitcherButton = ({ mode, currentMode, icon, label, onClick }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const isActive = currentMode === mode;
+    const shouldExpand = isActive || isHovered;
+
+    return (
+        <button
+            onClick={onClick}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            style={{
+                padding: '6px 10px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: 500,
+                border: 'none',
+                cursor: 'pointer',
+                backgroundColor: isActive ? 'white' : 'transparent',
+                color: isActive ? '#4268BD' : '#6b7280',
+                boxShadow: isActive ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none',
+                transition: 'background-color 200ms ease, color 200ms ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                height: '32px',
+                outline: 'none'
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {icon}
+            </div>
+
+            <motion.span
+                initial={false}
+                animate={{
+                    width: shouldExpand ? 'auto' : 0,
+                    opacity: shouldExpand ? 1 : 0
+                }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                style={{
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                    display: 'inline-block'
+                }}
+            >
+                {label}
+            </motion.span>
+        </button>
+    );
+};
 
 // --- REUSABLE SUB-COMPONENTS ---
 const ClaimStatusBadge = ({ isClaimed }) => {
@@ -39,7 +91,7 @@ const Avatar = () => (
     </div>
 );
 
-const DailyClaimRecord = ({ switchView }) => {
+const DailyClaimRecord = ({ switchView, currentView }) => { 
     // --- STATE ---
     const [activeTab, setActiveTab] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
@@ -139,12 +191,37 @@ const DailyClaimRecord = ({ switchView }) => {
         );
     };
 
+    const viewSwitcher = (
+        <div style={{ backgroundColor: '#f3f4f6', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px', margin: "5px" }}>
+            <SwitcherButton 
+                mode="eligible" 
+                currentMode={currentView} 
+                icon={<CheckCircle size={14} />} 
+                label="Eligible Sections" 
+                onClick={() => switchView('eligible')} 
+            />
+            <SwitcherButton 
+                mode="daily" 
+                currentMode={currentView} 
+                icon={<List size={14} />} 
+                label="Daily Record" 
+                onClick={() => switchView('daily')} 
+            />
+            <SwitcherButton 
+                mode="overall" 
+                currentMode={currentView} 
+                icon={<BarChart3 size={14} />} 
+                label="Overall Record" 
+                onClick={() => switchView('overall')} 
+            />
+        </div>
+    );
+
     return (
         <GenericTable
             title="All Meal Claim Records"
             subtitle="This table is about students' history of meal claiming."
             data={filteredStudents}
-            // Removed '#' from columns array to fix misalignment
             columns={['Student Name', 'Student ID', 'Program/Section', 'Claim Time', 'Status', 'Meal Type', 'Value']}
             renderRow={renderRow}
 
@@ -152,10 +229,8 @@ const DailyClaimRecord = ({ switchView }) => {
             activeTab={activeTab}
             onTabChange={setActiveTab}
             
-            // --- PRIMARY ACTIONS (Replaces Custom Action) ---
-            onPrimaryAction={switchView}
-            primaryActionLabel="View Overall Claims"
-            primaryActionIcon={<IoGrid size={16} />}
+            // 🟢 Pass the Switcher here
+            customActions={viewSwitcher}
 
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
