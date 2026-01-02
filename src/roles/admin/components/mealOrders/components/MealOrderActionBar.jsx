@@ -14,7 +14,7 @@ export const MealOrdersActionBar = ({ selectedCount, totalCount, onDeselectAll, 
                 padding: '0 24px', display: 'flex', flexDirection: 'column', justifyContent: 'center'
             }}
         >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', height: '100%', paddingTop: "5px", paddingBottom: "5px" }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <button onClick={onDeselectAll} style={{ padding: '8px', borderRadius: '50%', background: 'transparent', border: 'none', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center', zIndex: 1000 }}>
                         <X size={20} />

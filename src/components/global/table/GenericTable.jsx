@@ -250,7 +250,7 @@ const GenericTable = ({
                     {/* 2b. DYNAMIC HEADER ROW */}
                     <div className="p-3 md:p-0 md:h-[50px] flex flex-col justify-center">
                         {overrideHeader ? (
-                            <div className="w-full h-full">
+                            <div className="w-full h-[100%]">
                                 {overrideHeader}
                             </div>
                         ) : (
