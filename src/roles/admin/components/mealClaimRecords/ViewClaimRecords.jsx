@@ -11,7 +11,7 @@ function ViewClaimRecords() {
     const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
     
     // Options: 'eligible', 'daily', 'overall'
-    const [view, setView] = useState("daily"); 
+    const [view, setView] = useState("eligible"); 
 
     const switchView = (targetView) => {
         setView(targetView);

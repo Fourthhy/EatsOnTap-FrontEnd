@@ -200,7 +200,7 @@ const OverallClaimRecord = ({ switchView, currentView }) => {
                 mode="daily" 
                 currentMode={currentView} 
                 icon={<List size={14} />} 
-                label="Daily Record" 
+                label="Daily Claim Record" 
                 onClick={() => switchView('daily')} 
             />
             <SwitcherButton 
