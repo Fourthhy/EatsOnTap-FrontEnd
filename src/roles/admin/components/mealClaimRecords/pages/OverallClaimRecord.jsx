@@ -197,13 +197,6 @@ const OverallClaimRecord = ({ switchView, currentView }) => {
                 onClick={() => switchView('eligible')} 
             />
             <SwitcherButton 
-                mode="daily" 
-                currentMode={currentView} 
-                icon={<List size={14} />} 
-                label="Daily Claim Record" 
-                onClick={() => switchView('daily')} 
-            />
-            <SwitcherButton 
                 mode="overall" 
                 currentMode={currentView} 
                 icon={<BarChart3 size={14} />} 
