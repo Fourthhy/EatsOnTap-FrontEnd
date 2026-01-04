@@ -4,8 +4,10 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 export async function isStudentMealSubmitted(section) {
   // don't forget change to VITE_BASE_URL when deploying
   const token = localStorage.getItem('authToken');
+  const endpoint = `${VITE_BASE_URL}/api/eligibility/fetchRequestsBySection/${encodeURIComponent(section)}`
+  console.log(`Tyring to check if the section ${section} submitted their request at ${endpoint}`);
   const response = await fetch(
-    `${VITE_BASE_URL}/api/eligibility/fetchRequestsBySection/${encodeURIComponent(section)}`,
+    endpoint,
     {
       method: 'GET',
       headers: {
@@ -17,12 +19,12 @@ export async function isStudentMealSubmitted(section) {
     }
   );
   const data = await response.json();
+  console.log("=== DATA FROM CHECKING IS STUDENT MEAL SUBMITTED RECEIVED ===");
+  console.log(data)
 
-  if (!response.ok) {
-    throw new Error(data.message || 'fetch failed');
+  if (data.isSubmitted === true) {
+    return true
+  } else {
+    return fasle
   }
-
-  // If your API returns { submitted: true } or something meaningful, adjust here:
-  if (!data || (Array.isArray(data) && data.length === 0)) return false;
-  return true;
 }
