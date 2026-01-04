@@ -19,7 +19,7 @@ export const LoaderProvider = ({ children }) => {
         fetchAllBasicEducationMealRequest,
         fetchAllHigherEducationMealRequest,
         fetchAllEvents,
-        
+        fetchTodayClaimRecord,
         // Manual Setters (Only for Mock Data injection)
         setDashboardData,
         setEvents
@@ -63,6 +63,11 @@ export const LoaderProvider = ({ children }) => {
                     ]);
                     console.log("✅ All Meal Request Data Synced");
                 }
+
+                if (task.id === "fetch_today_claim_record") {
+                    await fetchTodayClaimRecord();
+                }
+
 
                 // 4. Dashboard Charts (Still Mock for now)
                 if (task.id === 'dash_chart_daily') {

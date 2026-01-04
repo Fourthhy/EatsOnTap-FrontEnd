@@ -8,7 +8,7 @@ export const APP_INITIALIZATION_MANIFEST = {
         {
             id: 'fetch_unified_data',
             label: 'Optimizing School Records...',
-            weight: 60
+            weight: 50
         },
         {
             id: 'fetch_class_advisers',
@@ -20,6 +20,11 @@ export const APP_INITIALIZATION_MANIFEST = {
             label: 'Getting All Meal Requests and Events',
             weight: 10
         },
+        {
+            id: 'fetch_today_claim_record',
+            label: 'Getting Claim Records Today',
+            weight: 10
+        }
     ],
     secondary: [
         { id: 'sync_events', label: 'Syncing Calendar Events...', weight: 10 },

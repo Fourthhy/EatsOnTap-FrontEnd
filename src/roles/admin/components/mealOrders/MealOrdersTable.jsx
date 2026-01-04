@@ -25,7 +25,8 @@ const MealOrdersTable = () => {
         classAdvisers = [],
         schoolData = [], 
         fetchAllBasicEducationMealRequest,
-        fetchAllHigherEducationMealRequest
+        fetchAllHigherEducationMealRequest,
+        fetchTodayClaimRecord
     } = useData();
 
     // --- MAIN TABLE STATE ---
@@ -231,6 +232,10 @@ const MealOrdersTable = () => {
 
         if (basicEdUpdated) fetchAllBasicEducationMealRequest();
         setSelectedIds([]);
+        console.log("DONE APPROVING ALL REQUEST 🥀");
+        setTimeout( async () => {
+            await fetchTodayClaimRecord()
+        }, 500);
     };
 
     const handleBulkReject = () => { setSelectedIds([]); };
