@@ -8,6 +8,7 @@ import { getAllBasicEducationMealRequest } from "../functions/admin/getAllBasicE
 import { getAllHigherEducationMealRequest } from '../functions/admin/getAllHigherEducationMealRequest';
 import { getAllEvents } from '../functions/admin/getAllEvents';
 import { getTodayClaimRecord } from '../functions/admin/getTodayClaimRecord';
+import { getOverallClaimRecord } from '../functions/admin/getOverallClaimRecord';
 
 const DataContext = createContext();
 
@@ -28,8 +29,9 @@ const DataProvider = ({ children }) => {
     const [mealOrders, setMealOrders] = useState([]);
     const [claimRecords, setClaimRecords] = useState([]);
     const [todaysMenu, setTodaysMenu] = useState([]);
-
     const [todayClaimRecord, setTodayClaimRecord] = useState([]);
+
+    const [overallClaimRecord, setOverallClaimRecord] = useState([]);
 
     // --- 🟢 WRAPPER FUNCTIONS (Wrapped in useCallback for Socket) ---
 
@@ -128,6 +130,20 @@ const DataProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching claim record data', error)
         }
+    }, []);
+
+    const fetchOverallClaimRecord = useCallback(async () => {
+        try {
+            if (typeof getOverallClaimRecord !== 'function') throw new Error('getOverallClaimRecord import missing!');
+            const data = await getOverallClaimRecord();
+            if (data && data.length === 0) {
+                console.warn("⚠️ Overall Claim Record Returned empty")
+            } else {
+                setOverallClaimRecord(data);
+            }
+        } catch (error) {
+            console.error('Error fetching overall claim record dataw', error)
+        }
     }, [])
 
     useEffect(() => {
@@ -171,7 +187,7 @@ const DataProvider = ({ children }) => {
             higherEducationMealRequest,
             eventMealRequest,
             todayClaimRecord,
-
+            overallClaimRecord,
 
             // Fetch Functions (For Loader or Manual Refresh)
             fetchUnifiedSchoolData,
@@ -180,6 +196,7 @@ const DataProvider = ({ children }) => {
             fetchAllHigherEducationMealRequest,
             fetchAllEvents,
             fetchTodayClaimRecord,
+            fetchOverallClaimRecord //this function will be called every after student claim.
         }}>
             {children}
         </DataContext.Provider>

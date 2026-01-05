@@ -20,7 +20,9 @@ export const LoaderProvider = ({ children }) => {
         fetchAllHigherEducationMealRequest,
         fetchAllEvents,
         fetchTodayClaimRecord,
-        // Manual Setters (Only for Mock Data injection)
+        fetchOverallClaimRecord,
+        
+        
         setDashboardData,
         setEvents
     } = useData();
@@ -66,6 +68,10 @@ export const LoaderProvider = ({ children }) => {
 
                 if (task.id === "fetch_today_claim_record") {
                     await fetchTodayClaimRecord();
+                }
+
+                if (task.id === "fetch_overall_claim_record") {
+                    await fetchOverallClaimRecord();
                 }
 
 
