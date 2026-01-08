@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
     Check, X, CheckCircle, BarChart3, ChevronDown, Calendar,
-    ArrowLeft, Users, User
+    ArrowLeft, Users, User, CircleQuestionMark
 } from 'lucide-react';
 import { GenericTable } from '../../../../../components/global/table/GenericTable';
 import { useData } from '../../../../../context/DataContext';
@@ -46,7 +46,10 @@ const SwitcherButton = ({ mode, currentMode, icon, label, onClick }) => {
 
 const CheckIcon = () => <Check size={16} style={{ color: '#059669' }} strokeWidth={3} />;
 const CrossIcon = () => <X size={16} style={{ color: '#DC2626' }} strokeWidth={3} />;
-const WaivedIcon = () => <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#F59E0B' }} />;
+// Waived is Gray
+const WaivedIcon = () => <div style={{ width: '8px', height: '8px', borderRadius: '50%' }} className="bg-gray-400" />;
+// 🟢 NEW: Unassigned is Yellow/Orange (indicating pending or no action)
+const UnassignedIcon = () => <div><CircleQuestionMark size={8} color={"#F59E0B"} /></div>;
 
 // --- 🟢 HELPER: Extract Months ---
 const extractAvailableMonths = (data = []) => {
@@ -91,8 +94,7 @@ const extractAvailableMonths = (data = []) => {
     }
     return months.sort((a, b) => new Date(b.value) - new Date(a.value));
 };
-
-// --- 🟢 HELPER: Monthly Claim Map ---
+// 🟢 UPDATED HELPER: Now stores the full record data
 const getMonthlyClaimMap = (history = [], targetMonthDate) => {
     const dayMap = {};
     if (!targetMonthDate) return dayMap;
@@ -102,6 +104,8 @@ const getMonthlyClaimMap = (history = [], targetMonthDate) => {
     history.forEach(record => {
         if (!record.date) return;
         const recDate = new Date(record.date);
+        
+        // Match Year and Month
         if (recDate.getMonth() === targetMonth && recDate.getFullYear() === targetYear) {
             const day = recDate.getDate();
             const remarks = Array.isArray(record.remarks) ? record.remarks : [record.remarks];
@@ -110,8 +114,13 @@ const getMonthlyClaimMap = (history = [], targetMonthDate) => {
             if (remarks.includes("CLAIMED")) status = 'check';
             else if (remarks.includes("UNCLAIMED")) status = 'cross';
             else if (remarks.includes("WAIVED")) status = 'waived';
+            else if (remarks.includes("UNASSIGNED")) status = 'unassigned';
 
-            dayMap[day] = status;
+            // 🟢 Store both Status AND the original Record Data
+            dayMap[day] = {
+                status: status,
+                data: record // Contains creditClaimed, date, etc.
+            };
         }
     });
     return dayMap;
@@ -236,10 +245,13 @@ const OverallClaimRecord = ({ switchView, currentView }) => {
     };
 
     // --- VIEW 2: STUDENT MATRIX RENDERER ---
+// --- VIEW 2: STUDENT MATRIX RENDERER ---
     const renderMatrixRow = (student) => {
         const cellStyle = { fontSize: '12px', fontFamily: "geist", color: "black", borderBottom: '1px solid #f3f4f6', height: '42px' };
+        
         return (
             <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                {/* NAME COLUMN */}
                 <td style={{ ...cellStyle, width: '250px', fontWeight: 500, color: '#1f2937', borderRight: '1px solid #e5e7eb' }}>
                     <div style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: "30px" }}>
                         <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -249,13 +261,72 @@ const OverallClaimRecord = ({ switchView, currentView }) => {
                     </div>
                     <div style={{ fontSize: '0.75rem', fontWeight: 400, color: '#4b5563', paddingLeft: '32px' }}>{student.studentId}</div>
                 </td>
+
+                {/* DAYS COLUMNS */}
                 {matrixData.weeks.map(week => (
                     week.days.map(day => {
-                        const status = student.claimMap[day.date];
+                        // 🟢 EXTRACT DATA OBJECT
+                        const cellInfo = student.claimMap[day.date]; 
+                        const status = cellInfo?.status; 
+                        const recordData = cellInfo?.data;
+
                         return (
-                            <td key={day.date} style={{ ...cellStyle, padding: '0.5rem 0', textAlign: 'center', width: '36px' }}>
-                                <div className="flex justify-center items-center h-full">
-                                    {status === 'check' ? <CheckIcon /> : status === 'cross' ? <CrossIcon /> : status === 'waived' ? <WaivedIcon /> : <span style={{ color: '#e5e7eb', fontSize: '10px' }}>•</span>}
+                            <td key={day.date} style={{ ...cellStyle, padding: '0.5rem 0', textAlign: 'center', width: '36px', position: 'relative' }}>
+                                
+                                {/* 🟢 HOVER CONTAINER (Group) */}
+                                <div 
+                                    className="group flex justify-center items-center h-full w-full cursor-help"
+                                    style={{ position: 'relative' }} // Needed for absolute positioning of tooltip
+                                >
+                                    {/* ICON */}
+                                    {status === 'check' ? <CheckIcon /> : 
+                                     status === 'cross' ? <CrossIcon /> : 
+                                     status === 'waived' ? <WaivedIcon /> : 
+                                     status === 'unassigned' ? <UnassignedIcon /> : 
+                                     <span style={{ color: '#e5e7eb', fontSize: '10px' }}>•</span>}
+
+                                    {/* 🟢 TOOLTIP (Hidden by default, block on hover) */}
+                                    {status && (
+                                        <div 
+                                            className="hidden group-hover:block absolute bottom-full mb-2 z-50 shadow-lg"
+                                            style={{
+                                                backgroundColor: '#4268BD', // Dark Gray
+                                                color: 'white',
+                                                padding: '6px 10px',
+                                                borderRadius: '6px',
+                                                fontSize: '11px',
+                                                whiteSpace: 'nowrap',
+                                                left: '50%',
+                                                transform: 'translateX(-50%)',
+                                                pointerEvents: 'none'
+                                            }}
+                                        >
+                                            {/* Tooltip Arrow */}
+                                            <div style={{
+                                                position: 'absolute', top: '100%', left: '50%', marginLeft: '-4px',
+                                                borderWidth: '4px', borderStyle: 'solid', zIndex: 9000,
+                                                borderColor: '#4268BD transparent transparent transparent'
+                                            }} />
+                                            
+                                            {/* Content Details */}
+                                            <div style={{ fontWeight: 600, marginBottom: '2px' }}>
+                                                {new Date(recordData.date).toLocaleDateString()}
+                                            </div>
+                                            
+                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
+                                                <span>Status:</span>
+                                                <span style={{ textTransform: 'capitalize' }}>{status}</span>
+                                            </div>
+
+                                            {/* 🟢 SHOW CREDIT IF CLAIMED */}
+                                            {status === 'check' && (
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between', color: '#34d399' }}>
+                                                    <span>Credit:</span>
+                                                    <span style={{ fontWeight: 700 }}>₱{recordData.creditClaimed?.toFixed(2) || '0.00'}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </td>
                         );

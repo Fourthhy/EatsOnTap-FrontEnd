@@ -133,13 +133,13 @@ const ScheduleConfigForm = ({ type, data }) => {
 // --- MAIN COMPONENT ---
 
 const OperationalScheduling = () => {
-    const [activeScheduleTab, setActiveScheduleTab] = useState('claim'); 
+    const [activeScheduleTab, setActiveScheduleTab] = useState('meal'); 
 
     // Mapped correctly for ButtonGroup usage (id and label)
     const scheduleTabs = [
-        { id: 'claim', label: 'Student Claim' },
         { id: 'meal', label: 'Submit Meal Request' },
         { id: 'assign', label: 'Assign Credits' },
+        { id: 'claim', label: 'Student Claim' },
         { id: 'remove', label: 'Remove Credits' },
     ];
 
