@@ -21,7 +21,7 @@ export const LoaderProvider = ({ children }) => {
         fetchAllEvents,
         fetchTodayClaimRecord,
         fetchOverallClaimRecord,
-        
+        fetchSectionProgramList,
         
         setDashboardData,
         setEvents
@@ -72,6 +72,7 @@ export const LoaderProvider = ({ children }) => {
 
                 if (task.id === "fetch_overall_claim_record") {
                     await fetchOverallClaimRecord();
+                    await fetchSectionProgramList();
                 }
 
 

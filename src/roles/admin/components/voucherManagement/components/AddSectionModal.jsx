@@ -73,7 +73,7 @@ const ModalDropdown = ({ label, value, options, onChange, placeholder = "Select.
 export const AddSectionModal = ({ isOpen, onClose, onAdd }) => {
     const { schoolData } = useData();
 
-    // 🟢 1. ADD DEPARTMENT TO STATE
+    // 🟢 1. STATE MANAGEMENT
     const [formData, setFormData] = useState({
         department: '',
         level: '',
@@ -86,23 +86,15 @@ export const AddSectionModal = ({ isOpen, onClose, onAdd }) => {
         if (!isOpen) setFormData({ department: '', level: '', sectionName: '', adviser: '' });
     }, [isOpen]);
 
-    // 🟢 2. EXTRACT DEPARTMENTS (Friendly Names)
-    const departmentOptions = useMemo(() => {
-        const friendlyNames = {
-            'preschool': 'Preschool',
-            'primaryEducation': 'Primary Education',
-            'intermediate': 'Intermediate',
-            'juniorHighSchool': 'Junior High School',
-            'seniorHighSchool': 'Senior High School',
-            'higherEducation': 'Higher Education'
-        };
-        // Return keys that exist in schoolData, mapped to friendly names
-        return Object.keys(friendlyNames); 
-        // Or if you want the friendly text in the dropdown, we can map it later.
-        // For simple dropdown logic, let's use the friendly text as the Value.
-        // But to filter logic, we need to map back.
-        // Let's stick to using the Friendly Name in the UI.
-    }, []);
+    // 🟢 2. HARDCODED LEVEL MAPPINGS (As requested)
+    const DEPARTMENT_LEVELS = useMemo(() => ({
+        'Preschool': ['0', 'Pre'],
+        'Primary Education': ['1', '2', '3'],
+        'Intermediate': ['4', '5', '6'],
+        'Junior High School': ['7', '8', '9', '10'],
+        'Senior High School': ['11', '12'],
+        'Higher Education': ['1', '2', '3', '4']
+    }), []);
 
     const friendlyToKeyMap = {
         'Preschool': 'preschool',
@@ -113,22 +105,16 @@ export const AddSectionModal = ({ isOpen, onClose, onAdd }) => {
         'Higher Education': 'higherEducation'
     };
 
-    const friendlyDeptOptions = Object.keys(friendlyToKeyMap);
+    // Options for Department Dropdown
+    const friendlyDeptOptions = Object.keys(DEPARTMENT_LEVELS);
 
-    // 🟢 3. EXTRACT LEVELS (Filtered by Selected Department)
+    // 🟢 3. GET LEVELS BASED ON SELECTION (Using Hardcoded Map)
     const filteredLevelOptions = useMemo(() => {
-        if (!formData.department || !schoolData) return [];
-        
-        const key = friendlyToKeyMap[formData.department];
-        const categoryData = schoolData.find(c => c.category === key);
+        if (!formData.department) return [];
+        return DEPARTMENT_LEVELS[formData.department] || [];
+    }, [formData.department, DEPARTMENT_LEVELS]);
 
-        if (!categoryData || !categoryData.levels) return [];
-
-        // Extract level names
-        return categoryData.levels.map(l => l.levelName).sort();
-    }, [formData.department, schoolData]);
-
-    // 🟢 4. EXTRACT ADVISERS (Global List)
+    // 🟢 4. EXTRACT ADVISERS (Global List from Context)
     const adviserOptions = useMemo(() => {
         if (!schoolData) return [];
         let advisers = new Set();
@@ -151,17 +137,15 @@ export const AddSectionModal = ({ isOpen, onClose, onAdd }) => {
     // 🟢 5. CONDITIONAL LOGIC
     const isHigherEd = formData.department === 'Higher Education';
     
-    // Validation: Level & Section Name are always required.
-    // Adviser is NEVER required (it's optional for Basic Ed, hidden for Higher Ed).
+    // Validation
     const isFormValid = formData.department && formData.level && formData.sectionName;
 
     const handleSubmit = () => {
         if (isFormValid) {
-            // Clean up payload (remove adviser if Higher Ed)
             const payload = {
                 ...formData,
                 adviser: isHigherEd ? null : formData.adviser,
-                categoryKey: friendlyToKeyMap[formData.department] // Helper for backend
+                categoryKey: friendlyToKeyMap[formData.department] // Backend Key
             };
             onAdd(payload);
             onClose();
@@ -197,7 +181,7 @@ export const AddSectionModal = ({ isOpen, onClose, onAdd }) => {
                     key="modal-overlay"
                     variants={overlayVariants} initial="hidden" animate="visible" exit="exit"
                     onClick={onClose}
-                    style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}
+                    style={{ position: 'fixed', inset: 0, zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}
                 >
                     <motion.div
                         key="modal-content"
@@ -221,10 +205,10 @@ export const AddSectionModal = ({ isOpen, onClose, onAdd }) => {
                             label="Department" 
                             value={formData.department} 
                             options={friendlyDeptOptions} 
-                            onChange={(val) => setFormData({ ...formData, department: val, level: '' })} // Reset level on dept change
+                            onChange={(val) => setFormData({ ...formData, department: val, level: '' })} 
                         />
 
-                        {/* 2. Level Dropdown (Filtered) */}
+                        {/* 2. Level Dropdown (Filtered by Hardcoded Map) */}
                         <ModalDropdown 
                             label={isHigherEd ? "Year Level" : "Grade Level"} 
                             value={formData.level} 
@@ -250,7 +234,7 @@ export const AddSectionModal = ({ isOpen, onClose, onAdd }) => {
                             />
                         </div>
 
-                        {/* 4. Adviser Dropdown (Hidden for Higher Ed, Optional for others) */}
+                        {/* 4. Adviser Dropdown (Hidden for Higher Ed) */}
                         {!isHigherEd && (
                             <ModalDropdown 
                                 label="Assigned Adviser (Optional)" 

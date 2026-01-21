@@ -9,6 +9,8 @@ import { getAllHigherEducationMealRequest } from '../functions/admin/getAllHighe
 import { getAllEvents } from '../functions/admin/getAllEvents';
 import { getTodayClaimRecord } from '../functions/admin/getTodayClaimRecord';
 import { getOverallClaimRecord } from '../functions/admin/getOverallClaimRecord';
+import { getSectionProgramList } from '../functions/admin/getSectionProgramList';
+
 
 const DataContext = createContext();
 
@@ -30,8 +32,9 @@ const DataProvider = ({ children }) => {
     const [claimRecords, setClaimRecords] = useState([]);
     const [todaysMenu, setTodaysMenu] = useState([]);
     const [todayClaimRecord, setTodayClaimRecord] = useState([]);
-
     const [overallClaimRecord, setOverallClaimRecord] = useState([]);
+
+    const [sectionProgram, setSectionProgram] = useState([])
 
     // --- 🟢 WRAPPER FUNCTIONS (Wrapped in useCallback for Socket) ---
 
@@ -146,6 +149,20 @@ const DataProvider = ({ children }) => {
         }
     }, [])
 
+    const fetchSectionProgramList = useCallback(async () => {
+        try {
+            if (typeof getSectionProgramList !== 'function') throw new Error('getSectionProgramList import missing!');
+            const data = await getSectionProgramList();
+            if (data && data.length === 0 ) {
+                console.warn("⚠️ Section Program List Returned Empty");
+            } else {
+                setSectionProgram(data)
+            }
+        } catch (error) {
+            console.error('Error fetching section program list');
+        }
+    }, [])
+
     useEffect(() => {
         // Initial fetch on load
 
@@ -170,6 +187,31 @@ const DataProvider = ({ children }) => {
         };
     }, [fetchAllBasicEducationMealRequest, fetchAllHigherEducationMealRequest]);
 
+    useEffect(() => {
+        // Connect to Socket
+        const socket = io(import.meta.env.VITE_LOCALHOST);
+
+        socket.on('connect', () => {
+            console.log("✅ Socket Connected for Student Updates:", socket.id);
+        });
+
+        // 🟢 LISTEN for the specific event from your backend
+        socket.on('update-student-register', (data) => {
+            console.log("🔔 New Student Added! Refreshing Data...", data);
+
+            // 🟢 TRIGGER REFRESH
+            // Reload the main data source that populates your tables/forms
+            fetchUnifiedSchoolData();
+
+            // If you have a separate list for just students, fetch that too
+            // fetchAllStudents(); 
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, [fetchUnifiedSchoolData]); // Add fetch function to dependency array
+
 
     return (
         <DataContext.Provider value={{
@@ -188,6 +230,7 @@ const DataProvider = ({ children }) => {
             eventMealRequest,
             todayClaimRecord,
             overallClaimRecord,
+            sectionProgram,
 
             // Fetch Functions (For Loader or Manual Refresh)
             fetchUnifiedSchoolData,
@@ -196,7 +239,8 @@ const DataProvider = ({ children }) => {
             fetchAllHigherEducationMealRequest,
             fetchAllEvents,
             fetchTodayClaimRecord,
-            fetchOverallClaimRecord //this function will be called every after student claim.
+            fetchOverallClaimRecord,
+            fetchSectionProgramList
         }}>
             {children}
         </DataContext.Provider>

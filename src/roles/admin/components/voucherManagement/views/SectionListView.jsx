@@ -38,7 +38,7 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
 
     const showAdviserColumn = activeTab !== 'higherEducation';
 
-    // --- 🟢 UPDATED FLATTENING LOGIC ---
+    // --- 🟢 FLATTENING LOGIC ---
     const flattenedSections = useMemo(() => {
         // Safety Check
         if (!sectionsData || sectionsData.length === 0) return [];
