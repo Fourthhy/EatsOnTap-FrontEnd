@@ -7,7 +7,7 @@ export async function isSettingActive(settingName) {
 
     try {
         // 🟢 CHANGE: Append the name to the URL
-        const response = await fetch(`${VITE_BASE_URL}/api/settings/fetchSetting/${settingName}`);
+        const response = await fetch(`${VITE_BASE_URL}/api/setting/fetchSetting/${settingName}`);
         
         if (!response.ok) {
             throw new Error(`Error: ${response.statusText}`);

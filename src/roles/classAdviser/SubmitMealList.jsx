@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams } from "react-router-dom";
-import { Check, Lock } from "lucide-react"; // 🟢 Added Lock icon for inactive state
+import { Check, Lock } from "lucide-react";
 import { useBreakpoint } from "use-breakpoint";
 
 // 🟢 IMPORT THE NEW MODAL
@@ -13,7 +13,7 @@ import { useClassAdviser } from "../../context/ClassAdviserContext";
 // 🟢 FUNCTIONS
 import { SubmitStudentMealList } from "../../functions/classAdviser/SubmitStudentMealList";
 import { isStudentMealSubmitted } from "../../functions/classAdviser/isStudentMealSubmitted";
-import { isSettingActive } from '../../functions/classAdviser/isSettingActive';
+import { isSettingActive } from '../../functions/isSettingActive';
 
 // 🟢 COMPONENTS
 import { HeaderBar } from "../../components/global/HeaderBar";
@@ -97,19 +97,37 @@ export default function SubmitMealList() {
 
     // --- 2. CHECK STATUS ON LOAD ---
     useEffect(() => {
+        let isMounted = true; // 🟢 1. Track if component is still active
         setLoading(true);
 
-        // 🟢 Parallel Fetching
         Promise.all([
-            isStudentMealSubmitted(section),
-            isSettingActive("SUBMIT-MEAL-REQUEST")
+            // 🟢 2. Attach .catch to EACH promise individually
+            // If this fails, we return false (or null) so the other request still succeeds
+            isStudentMealSubmitted(section).catch(err => {
+                console.error("Error checking submission:", err);
+                return false; // Default fallback
+            }),
+
+            isSettingActive("SUBMIT-MEAL-REQUEST").catch(err => {
+                console.error("Error checking settings:", err);
+                return false; // Default fallback
+            })
         ])
             .then(([submittedStatus, activeStatus]) => {
-                setIsSubmitted(submittedStatus);
-                setSettingActive(activeStatus);
+                // 🟢 3. Only update state if the user is still on this section
+                if (isMounted) {
+                    setIsSubmitted(submittedStatus);
+                    setSettingActive(activeStatus);
+                }
             })
-            .catch(console.error)
-            .finally(() => setTimeout(() => setLoading(false), 1000));
+            .finally(() => {
+                if (isMounted) setLoading(false);
+            });
+
+        // 🟢 4. Cleanup function
+        return () => {
+            isMounted = false;
+        };
 
     }, [section]);
 
@@ -246,7 +264,7 @@ export default function SubmitMealList() {
                 {/* Checkbox Column */}
                 <td style={{ padding: '0 12px', width: '48px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {!isSubmitted && settingActive === false ? (
+                        {!isSubmitted && settingActive ? ( // 🟢 Fixed: Only show checkbox if active AND not submitted
                             <input
                                 type="checkbox"
                                 checked={isSelected}
@@ -310,8 +328,35 @@ export default function SubmitMealList() {
 
     const customTheadProp = isMobile ? <thead /> : (isTablet ? tabletThead : null);
 
-    // 🟢 BLOCK SELECTION if setting is inactive
-    const isSelectable = settingActive === false && !isSubmitted && !isMobile && !isTablet;
+    // 🟢 FIXED: Selectable only if ACTIVE and NOT SUBMITTED
+    const isSelectable = settingActive && !isSubmitted && !isMobile && !isTablet;
+
+    // 🟢 HELPER: Determine Button State
+    const getPrimaryActionLabel = () => {
+        if (!settingActive) return ""; // Text is handled in primaryLabel
+        if (isSubmitted) return "";    // Text is handled in primaryLabel
+        return "Submit List";
+    };
+
+    const getPrimaryLabelContent = () => {
+        if (!settingActive) {
+            return (
+                <p className="w-full flex h-full items-center gap-2" style={{ padding: "10px 10px 10px 0px", color: '#6b7280' }}>
+                    <Lock size={18} />
+                    <span> Submission Closed </span>
+                </p>
+            );
+        }
+        if (isSubmitted) {
+            return (
+                <p className="w-full flex h-full items-center gap-2" style={{ padding: "10px 10px 10px 0px", color: '#059669' }}>
+                    <Check size={18} />
+                    <span> Submitted </span>
+                </p>
+            );
+        }
+        return null; // Default button shows up
+    };
 
     return (
         <div className="bg-[#F4F6F9] font-geist flex flex-col overflow-hidden" style={{ padding: isMobile ? 8 : 10 }}>
@@ -339,19 +384,13 @@ export default function SubmitMealList() {
                     onSelectionChange={setSelected}
                     primaryKey="studentId"
 
-                    // 🟢 DISABLE BUTTON if setting inactive
-                    primaryActionLabel={!settingActive === false ? "" : (isSubmitted ? "Submitted" : "Submit List")}
-                    primaryActionIcon={!settingActive === false ? "" : <Check size={18} />}
+                    // 🟢 BUTTON LOGIC FIXED
+                    primaryActionLabel={getPrimaryActionLabel()}
+                    primaryActionIcon={(!isSubmitted && settingActive) ? <Check size={18} /> : null}
                     onPrimaryAction={(!isSubmitted && settingActive) ? () => setShowModal(true) : null}
 
-                    primaryLabel={!settingActive === false ? (
-                        <>
-                            <p className="w-full flex h-full items-center gap-2" style={{ padding: "10px 10px 10px 0px" }}>
-                                <Lock size={18} />
-                                <span> Submission Closed </span>
-                            </p>
-                        </>
-                    ) : ""}
+                    // 🟢 CUSTOM TEXT FOR DISABLED STATES
+                    primaryLabel={getPrimaryLabelContent()}
 
                     customThead={customTheadProp}
                 />

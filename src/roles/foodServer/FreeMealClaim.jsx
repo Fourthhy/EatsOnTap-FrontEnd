@@ -7,6 +7,7 @@ import { FaCheckCircle } from "react-icons/fa";
 
 // 🟢 Import your function (Adjust path if necessary)
 import { claimMeal } from "../../functions/foodServer/claimMeal";
+import { isSettingActive } from "../../functions/isSettingActive"
 
 export default function FreeMealClaim() {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -14,6 +15,11 @@ export default function FreeMealClaim() {
     const [mealClaimData, setMealClaimData] = useState({})
     // 🟢 1. State for the input
     const [studentId, setStudentId] = useState("");
+    
+    // 🟢 NEW STATE: Track System Status
+    const [isSystemActive, setIsSystemActive] = useState(true);
+    const [systemMessage, setSystemMessage] = useState("");
+
     // 🟢 2. Ref to keep input focused
     const inputRef = useRef(null);
     const navigate = useNavigate();
@@ -25,6 +31,9 @@ export default function FreeMealClaim() {
 
     // 🟢 3. Handle the Scan (Enter Key)
     const handleScan = async (e) => {
+        // Safety check: Prevent scan if system is inactive
+        if (!isSystemActive) return;
+
         if (e.key === 'Enter') {
             e.preventDefault();
 
@@ -50,17 +59,32 @@ export default function FreeMealClaim() {
     };
 
     useEffect(() => {
+        // 🟢 CHECK SETTING STATUS ON MOUNT
+        const checkSystemStatus = async () => {
+            try {
+                const status = await isSettingActive("STUDENT-CLAIM");
+                // Expected format: { response: boolean, message: string }
+                if (status) {
+                    setIsSystemActive(status.response);
+                    setSystemMessage(status.message);
+                }
+            } catch (error) {
+                console.error("Failed to check system status:", error);
+            }
+        };
+        checkSystemStatus();
+
         const timer = setInterval(() => {
             setCurrentDateTime(new Date());
         }, 1000);
 
-        // 🟢 4. Ensure focus on load
-        if (inputRef.current) {
+        // 🟢 4. Ensure focus on load (Only if active)
+        if (inputRef.current && isSystemActive) {
             inputRef.current.focus();
         }
 
         return () => clearInterval(timer);
-    }, []);
+    }, [isSystemActive]); // Added dependency to refire focus if status changes
 
     const dateString = currentDateTime.toLocaleDateString('en-US', {
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
@@ -158,24 +182,32 @@ export default function FreeMealClaim() {
                                                 </p>
                                             </div>
 
-                                            {/* 🟢 INTEGRATED INPUT */}
+                                            {/* 🟢 INTEGRATED INPUT - DISABLED IF INACTIVE */}
                                             <Input
                                                 ref={inputRef}
+                                                disabled={!isSystemActive} // Disable input
                                                 value={studentId}
                                                 onChange={(e) => setStudentId(e.target.value)}
                                                 onKeyDown={handleScan}
-                                                autoFocus={true}
+                                                autoFocus={isSystemActive} // Only autofocus if active
                                                 style={{
-                                                    background: '#FFFFFF',
+                                                    background: isSystemActive ? '#FFFFFF' : '#e5e7eb', // Grey out if disabled
                                                     width: '23vw',
                                                     height: '6vh',
                                                     paddingLeft: '5px',
                                                     font: 'geist',
-                                                    margin: "0px 0px 25px 0px"
+                                                    margin: "0px 0px 10px 0px", // Reduced margin slightly for error msg space
+                                                    cursor: isSystemActive ? 'text' : 'not-allowed'
                                                 }}
                                                 type="text"
-                                                placeholder="Student ID"
+                                                // Show system message as placeholder if inactive
+                                                placeholder={isSystemActive ? "Student ID" : systemMessage || "Claim Disabled at this time"}
                                             />
+                                            
+                                            {/* Optional: Show message text below input if inactive */}
+                                            {!isSystemActive && (
+                                                <p className="text-red-300 font-geist text-sm">{systemMessage}</p>
+                                            )}
 
                                         </div>
                                     </div>
