@@ -3,6 +3,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect, useRef } from 'react';
+import { FaCheckCircle } from "react-icons/fa";
 
 // 🟢 Import your function (Adjust path if necessary)
 import { claimMeal } from "../../functions/foodServer/claimMeal";
@@ -218,6 +219,7 @@ export default function FreeMealClaim() {
                         pointerEvents: "none"
                     }}
                 />
+
                 <div style={{
                     position: "relative",
                     zIndex: 10,
@@ -228,7 +230,20 @@ export default function FreeMealClaim() {
                     justifyContent: "start",
                     alignItems: "center"
                 }}>
-                    <img src="/studentClaim/Eligible_Sinage.svg" alt="Eligible Sinage" style={{ width: "170px", height: "170px" }} />
+
+                    {/* <img src="/studentClaim/Eligible_Sinage.svg" alt="Eligible Sinage" style={{ width: "170px", height: "170px" }} />    */}
+                        {mealClaimData.temporaryClaimStatus[0] == "ELIGIBLE" ? (
+                            <img src="/studentClaim/Eligible_Sinage.svg" alt="Eligible Sinage" style={{ width: "170px", height: "170px" }} />
+                        ) : ""}
+                        {mealClaimData.temporaryClaimStatus[0] == "CLAIMED" ? (
+                            <img
+                                src="/studentClaim/ALREADY_CLAIMED.svg"
+                                alt="Background"
+                                style={{ width: "190px", height: "190px" }}
+                            />
+                        ) : ""}
+
+
                     <div style={{ width: "100%", height: "55%", display: "flex", justifyContent: "center", alignItems: "start" }}>
 
                         {/* 🟢 PARENT CONTAINER (Relative) */}
@@ -239,19 +254,36 @@ export default function FreeMealClaim() {
                         }}>
 
                             {/* 🟢 1. IMAGE LAYER (Absolute - Back) */}
-                            <img
-                                src="/studentClaim/Card_Template_BSIS.svg"
-                                alt="claim card"
-                                style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "contain",
-                                    zIndex: 0
-                                }}
-                            />
+                            {mealClaimData.section === 'BSIS' ? (
+                                <img
+                                    src="/studentClaim/Card_Template_BSIS.svg"
+                                    alt="claim card"
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "contain",
+                                        zIndex: 0
+                                    }}
+                                />
+                            ) : mealClaimData.section === 'ACT' ? (
+                                <img
+                                    src="/studentClaim/Card_Template_ACT.svg"
+                                    alt="claim card"
+                                    style={{
+                                        position: "absolute",
+                                        top: 0,
+                                        left: 0,
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "contain",
+                                        zIndex: 0
+                                    }}
+                                />
+                            ) : ""}
+
 
                             {/* 🟢 2. CONTENT LAYER (Absolute - Front) */}
                             <div style={{
@@ -262,12 +294,13 @@ export default function FreeMealClaim() {
                                 <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "start", padding: "5px" }}>
 
                                     <div className="w-[45%] h-[20%] flex flex-row">
-                                        <img src="lv-logo.svg" alt="lv-logo" style={{ height: "60px", width: "60px", margin: "5px 20px 5px 20px" }} />
+                                        <img src="lv-logo.svg" alt="lv-logo" style={{ height: "60px", width: "60px", margin: "5px 10px 5px 20px" }} />
                                         <div className="h-[100%] flex items-center">
-                                            <p style={{ fontWeight: 400 }} className="font-geist text-md text-white">{mealClaimData.last_name}, {mealClaimData.first_name}</p>
+                                            {/*<p style={{ fontWeight: 400 }} className="font-geist text-md text-white">{mealClaimData.last_name}, {mealClaimData.first_name}</p>*/}
+                                            <p style={{ fontWeight: 400 }} className="font-geist text-md text-white">Eat's on Tap Validity Card</p>
                                         </div>
                                     </div>
-                                    <div className="w-[45%] h-[80%]" style={{ paddingTop: "20px"}}>
+                                    <div className="w-[45%] h-[80%]" style={{ paddingTop: "20px" }}>
                                         <div className="h-[100%] w-[100] flex items-center justify-between" style={{ marginLeft: "20px" }}>
                                             <div className="w-[100%] h-[100%] flex flex-row">
                                                 <div className="w-auto flex flex-col items-center gap-2">
@@ -276,19 +309,28 @@ export default function FreeMealClaim() {
                                                         {dateOnlyString.toUpperCase()} | {timeString}
                                                     </p>
                                                 </div>
-                                                <div style={{ marginLeft: "20px", display: "flex", flexDirection: "column", gap: 20, paddingTop: "20px" }} className="h-[100%] flex flex-column justify-start">
+                                                <div style={{ marginLeft: "20px", display: "flex", flexDirection: "column", gap: 20 }} className="h-[100%] flex flex-column justify-start">
                                                     <div>
-                                                        <p style={{ fontWeight: 400 }} className="font-geist text-lg text-white">{mealClaimData.section} - {mealClaimData.year}</p>
+                                                        <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{mealClaimData.last_name}, {mealClaimData.first_name}</p>
+                                                        <p style={{ fontWeight: 350 }} className="font-geist text-xs text-[#999797]">Student Name</p>
+                                                    </div>
+                                                    <div>
+                                                        <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{mealClaimData.section} - {mealClaimData.year}</p>
                                                         <p style={{ fontWeight: 350 }} className="font-geist text-xs text-[#999797]">Section / Year</p>
                                                     </div>
                                                     <div>
-                                                        <p style={{ fontWeight: 400 }} className="font-geist text-lg text-white">{mealClaimData.studentID}</p>
+                                                        <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{mealClaimData.studentID}</p>
                                                         <p style={{ fontWeight: 350 }} className="font-geist text-xs text-[#999797]">StudentID</p>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div>
-                                                <img src="/studentClaim/logo-BSIS.svg" alt='bsis-logo' style={{ width: "170px", height: "170px" }} />
+                                                {mealClaimData.section === 'ACT' ? (
+                                                    <img src="/studentClaim/logo-ACT.svg" al t='bsis-logo' style={{ width: "170px", height: "170px", paddingBottom: "10px" }} />
+
+                                                ) : mealClaimData.section === 'BSIS' ? (
+                                                    <img src="/studentClaim/logo-BSIS.svg" al t='bsis-logo' style={{ width: "170px", height: "170px", paddingBottom: "10px" }} />
+                                                ) : ""}
                                             </div>
                                         </div>
                                     </div>

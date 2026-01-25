@@ -4,7 +4,7 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 export async function SubmitStudentMealList(userID, section, forEligible) {
     //do not forget to change to VITE_BASE_URL when deploying
     const token = localStorage.getItem('authToken');
-    const response = await fetch(`${VITE_BASE_URL}/api/eligibility/submitListforBasicEduc`, {
+    const response = await fetch(`${VITE_LOCALHOST}/api/eligibility/submitListforBasicEduc`, {
         method: 'POST',
         headers: {
             // 2. This is the part you were missing!

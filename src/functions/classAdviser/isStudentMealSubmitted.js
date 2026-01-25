@@ -4,7 +4,7 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 export async function isStudentMealSubmitted(section) {
   // don't forget change to VITE_BASE_URL when deploying
   const token = localStorage.getItem('authToken');
-  const endpoint = `${VITE_BASE_URL}/api/eligibility/fetchRequestsBySection/${encodeURIComponent(section)}`
+  const endpoint = `${VITE_LOCALHOST}/api/eligibility/fetchRequestsBySection/${encodeURIComponent(section)}`
   console.log(`Tyring to check if the section ${section} submitted their request at ${endpoint}`);
   const response = await fetch(
     endpoint,

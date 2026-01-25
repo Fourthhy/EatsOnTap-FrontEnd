@@ -189,7 +189,7 @@ const DataProvider = ({ children }) => {
 
     useEffect(() => {
         // Connect to Socket
-        const socket = io(import.meta.env.VITE_LOCALHOST);
+        const socket = io(import.meta.env.VITE_BASE_URL);
 
         socket.on('connect', () => {
             console.log("✅ Socket Connected for Student Updates:", socket.id);

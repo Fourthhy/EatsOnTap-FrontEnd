@@ -4,7 +4,7 @@ const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 export async function claimMeal(studentInput) {
     // 🟢 CHANGE 1: Append data to URL as a query parameter
     // We use encodeURIComponent to ensure special characters (like spaces) don't break the URL
-    const targetUrl = `${VITE_BASE_URL}/api/claim/fakeMealClaim?studentInput=${encodeURIComponent(studentInput)}`;
+    const targetUrl = `${VITE_LOCALHOST}/api/claim/fakeMealClaim?studentInput=${encodeURIComponent(studentInput)}`;
     
     console.log("🌐 Fetching Student Data from:", targetUrl);
 
