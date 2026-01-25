@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'; // 🟢 Added useRef
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams } from "react-router-dom";
-import { Check } from "lucide-react";
-import { useBreakpoint } from "use-breakpoint"; 
+import { Check, Lock } from "lucide-react"; // 🟢 Added Lock icon for inactive state
+import { useBreakpoint } from "use-breakpoint";
 
 // 🟢 IMPORT THE NEW MODAL
-import { ConfirmModal } from "./components/ConfirmModal"; 
+import { ConfirmModal } from "./components/ConfirmModal";
 
 // 🟢 CONTEXTS
 import { useData } from "../../context/DataContext";
@@ -13,9 +13,10 @@ import { useClassAdviser } from "../../context/ClassAdviserContext";
 // 🟢 FUNCTIONS
 import { SubmitStudentMealList } from "../../functions/classAdviser/SubmitStudentMealList";
 import { isStudentMealSubmitted } from "../../functions/classAdviser/isStudentMealSubmitted";
+import { isSettingActive } from '../../functions/classAdviser/isSettingActive';
 
 // 🟢 COMPONENTS
-import { HeaderBar } from "../../components/global/HeaderBar"; 
+import { HeaderBar } from "../../components/global/HeaderBar";
 import { GenericTable } from "../../components/global/table/GenericTable";
 
 // 🟢 Define Breakpoints
@@ -55,15 +56,18 @@ export default function SubmitMealList() {
     const isTablet = breakpoint === 'tablet';
 
     const { section, userID } = useParams();
-    const { schoolData } = useData(); 
-    const { currentAdviser, adviserDisplayName } = useClassAdviser(); 
+    const { schoolData } = useData();
+    const { currentAdviser, adviserDisplayName } = useClassAdviser();
 
     const [selected, setSelected] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(true);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    
+
+    // 🟢 Default to false to prevent interaction before load
+    const [settingActive, setSettingActive] = useState(false);
+
     // 🟢 Ref to ensure we only auto-select ONCE upon entry
     const selectionInitialized = useRef(false);
 
@@ -72,18 +76,18 @@ export default function SubmitMealList() {
         if (!schoolData || schoolData.length === 0) return [];
         let foundStudents = [];
         schoolData.forEach(cat => {
-            if(cat.levels) cat.levels.forEach(lvl => {
-                if(lvl.sections) lvl.sections.forEach(sec => {
+            if (cat.levels) cat.levels.forEach(lvl => {
+                if (lvl.sections) lvl.sections.forEach(sec => {
                     if (sec.section === section) foundStudents = sec.students || [];
                 });
             });
         });
-        
+
         let filtered = foundStudents;
         if (searchTerm) {
             const lower = searchTerm.toLowerCase();
-            filtered = foundStudents.filter(s => 
-                s.name.toLowerCase().includes(lower) || 
+            filtered = foundStudents.filter(s =>
+                s.name.toLowerCase().includes(lower) ||
                 s.studentId.toLowerCase().includes(lower)
             );
         }
@@ -94,25 +98,32 @@ export default function SubmitMealList() {
     // --- 2. CHECK STATUS ON LOAD ---
     useEffect(() => {
         setLoading(true);
-        isStudentMealSubmitted(section)
-            .then(setIsSubmitted)
+
+        // 🟢 Parallel Fetching
+        Promise.all([
+            isStudentMealSubmitted(section),
+            isSettingActive("SUBMIT-MEAL-REQUEST")
+        ])
+            .then(([submittedStatus, activeStatus]) => {
+                setIsSubmitted(submittedStatus);
+                setSettingActive(activeStatus);
+            })
             .catch(console.error)
-            .finally(() => setTimeout(() => setLoading(false), 500));
+            .finally(() => setTimeout(() => setLoading(false), 1000));
+
     }, [section]);
 
-    // --- 🟢 3. AUTO-SELECT ALL LOGIC (UX Improvement) ---
+    // --- 🟢 3. AUTO-SELECT ALL LOGIC (Updated Condition) ---
     useEffect(() => {
-        // Wait until loading is done and we have students
+        // Only run if loaded, have students, not initialized, NOT submitted, AND setting is ACTIVE
         if (!loading && students.length > 0 && !selectionInitialized.current) {
-            // Only select all if it's NOT already submitted
-            if (!isSubmitted) {
+            if (!isSubmitted && settingActive) {
                 const allIds = students.map(s => s.studentId);
                 setSelected(allIds);
             }
-            // Mark as initialized so we don't overwrite user changes later
             selectionInitialized.current = true;
         }
-    }, [loading, students, isSubmitted]);
+    }, [loading, students, isSubmitted, settingActive]);
 
     const handleSubmit = async () => {
         try {
@@ -132,8 +143,14 @@ export default function SubmitMealList() {
     };
 
     const renderRow = (student, index, startIndex, { isSelected, toggleSelection }) => {
-        const handleRowClick = () => { if (!isSubmitted) toggleSelection(); };
-        
+
+        // 🟢 BLOCK TOGGLE if setting is inactive
+        const handleRowClick = () => {
+            if (!isSubmitted && settingActive) {
+                toggleSelection();
+            }
+        };
+
         // Determine Status for Badge
         let statusType = 'Waived';
         if (isSubmitted) {
@@ -145,10 +162,10 @@ export default function SubmitMealList() {
         // 🟢 A. MOBILE VIEW (Card Layout - No Checkbox)
         if (isMobile) {
             return (
-                <tr 
-                    key={student.studentId} 
+                <tr
+                    key={student.studentId}
                     onClick={handleRowClick}
-                    className={`transition-all border-b border-gray-100 ${isSelected ? "bg-blue-50/50" : "bg-white"}`}
+                    className={`transition-all border-b border-gray-100 ${isSelected ? "bg-blue-50/50" : "bg-white"} ${!settingActive ? "cursor-not-allowed opacity-75" : ""}`}
                 >
                     <td colSpan={4} style={{ padding: '12px 16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -166,7 +183,7 @@ export default function SubmitMealList() {
                                     </span>
                                 </div>
                             </div>
-                            
+
                             {/* Right: Status Badge Only */}
                             <div>
                                 <StatusBadge type={statusType} />
@@ -180,13 +197,13 @@ export default function SubmitMealList() {
         // 🟢 B. TABLET VIEW (No Checkbox Column)
         if (isTablet) {
             return (
-                <tr 
-                    key={student.studentId} 
+                <tr
+                    key={student.studentId}
                     onClick={handleRowClick}
-                    className={`transition-colors cursor-pointer group ${isSelected ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                    className={`transition-colors cursor-pointer group ${isSelected ? "bg-blue-50" : "hover:bg-gray-50"} ${!settingActive ? "cursor-not-allowed opacity-75" : ""}`}
                     style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}
                 >
-                     {/* Index Column (#) */}
+                    {/* Index Column (#) */}
                     <td style={{ ...cellStyle, textAlign: 'center', width: '48px', paddingLeft: '16px' }}>
                         <span className="text-gray-400 font-medium">{startIndex + index + 1}</span>
                     </td>
@@ -211,7 +228,7 @@ export default function SubmitMealList() {
                     {/* Status Badge */}
                     <td style={{ ...cellStyle, textAlign: 'right', paddingRight: '16px' }}>
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                             <StatusBadge type={statusType} />
+                            <StatusBadge type={statusType} />
                         </div>
                     </td>
                 </tr>
@@ -220,16 +237,16 @@ export default function SubmitMealList() {
 
         // 🟢 C. DESKTOP VIEW (Standard Table with Checkbox)
         return (
-            <tr 
-                key={student.studentId} 
+            <tr
+                key={student.studentId}
                 onClick={handleRowClick}
-                className={`transition-colors cursor-pointer group ${isSelected ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                className={`transition-colors cursor-pointer group ${isSelected ? "bg-blue-50" : "hover:bg-gray-50"} ${!settingActive ? "cursor-not-allowed opacity-75" : ""}`}
                 style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}
             >
                 {/* Checkbox Column */}
                 <td style={{ padding: '0 12px', width: '48px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {!isSubmitted ? (
+                        {!isSubmitted && settingActive === false ? (
                             <input
                                 type="checkbox"
                                 checked={isSelected}
@@ -292,39 +309,51 @@ export default function SubmitMealList() {
     );
 
     const customTheadProp = isMobile ? <thead /> : (isTablet ? tabletThead : null);
-    const isSelectable = !isSubmitted && !isMobile && !isTablet;
+
+    // 🟢 BLOCK SELECTION if setting is inactive
+    const isSelectable = settingActive === false && !isSubmitted && !isMobile && !isTablet;
 
     return (
-        <div className="bg-[#F4F6F9] font-geist flex flex-col overflow-hidden" style={{ padding: isMobile ? 8 : 10 }}> 
-            <ConfirmModal 
-                visible={showModal} 
-                onCancel={() => setShowModal(false)} 
-                onConfirm={() => { setShowModal(false); handleSubmit(); }} 
+        <div className="bg-[#F4F6F9] font-geist flex flex-col overflow-hidden" style={{ padding: isMobile ? 8 : 10 }}>
+            <ConfirmModal
+                visible={showModal}
+                onCancel={() => setShowModal(false)}
+                onConfirm={() => { setShowModal(false); handleSubmit(); }}
             />
 
             <div className="flex-1 flex flex-col relative">
                 <GenericTable
                     title="Student Roster"
                     subtitle={`Manage meal attendance for ${section}`}
-                    
+
                     data={students}
                     columns={isMobile ? [] : columns}
                     renderRow={renderRow}
                     metrics={metrics}
-                    
+
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
 
-                    selectable={isSelectable} 
+                    selectable={isSelectable}
                     selectedIds={selected}
                     onSelectionChange={setSelected}
-                    primaryKey="studentId" 
+                    primaryKey="studentId"
 
-                    primaryActionLabel={isSubmitted ? "Submitted" : "Submit List"}
-                    primaryActionIcon={<Check size={18} />} 
-                    onPrimaryAction={isSubmitted ? null : () => setShowModal(true)}
-                    
-                    customThead={customTheadProp} 
+                    // 🟢 DISABLE BUTTON if setting inactive
+                    primaryActionLabel={!settingActive === false ? "" : (isSubmitted ? "Submitted" : "Submit List")}
+                    primaryActionIcon={!settingActive === false ? "" : <Check size={18} />}
+                    onPrimaryAction={(!isSubmitted && settingActive) ? () => setShowModal(true) : null}
+
+                    primaryLabel={!settingActive === false ? (
+                        <>
+                            <p className="w-full flex h-full items-center gap-2" style={{ padding: "10px 10px 10px 0px" }}>
+                                <Lock size={18} />
+                                <span> Submission Closed </span>
+                            </p>
+                        </>
+                    ) : ""}
+
+                    customThead={customTheadProp}
                 />
             </div>
         </div>

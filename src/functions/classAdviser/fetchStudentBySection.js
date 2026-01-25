@@ -7,7 +7,7 @@ export async function fetchStudentsBySection(section) {
   const token = localStorage.getItem('authToken');
 
   try {
-    const response = await fetch(`${VITE_LOCALHOST}/api/students/getSection/${encodeURIComponent(section)}`, {
+    const response = await fetch(`${VITE_BASE_URL}/api/students/getSection/${encodeURIComponent(section)}`, {
       method: 'GET', // Explicitly stating method is good practice
       headers: {
         // 2. This is the part you were missing!

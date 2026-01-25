@@ -37,6 +37,8 @@ const GenericTable = ({
     primaryActionLabel = "",
     primaryActionIcon = null,
 
+    primaryLabel = "",
+
     // Secondary Action Props
     onSecondaryAction,
     secondaryActionLabel = "",
@@ -204,6 +206,9 @@ const GenericTable = ({
                                     }}
                                 />
                             )}
+                            {primaryLabel !== "" ? (
+                                <p className="font-geist text-gray-500 text-xs md:text-sm">{primaryLabel}</p>
+                            ) : ""}
                         </>
                     )}
                 </div>
