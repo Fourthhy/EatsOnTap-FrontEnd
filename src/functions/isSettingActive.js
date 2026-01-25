@@ -16,6 +16,7 @@ export async function isSettingActive(settingName) {
         const data = await response.json();
         
         // Return the boolean value (true/false)
+        console.log(`Setting "${settingName}" is active:`, data.isActive);
         return data.isActive; 
 
     } catch (error) {
