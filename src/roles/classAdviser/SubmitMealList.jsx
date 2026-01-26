@@ -339,19 +339,19 @@ export default function SubmitMealList() {
     };
 
     const getPrimaryLabelContent = () => {
+        if (isSubmitted) {
+            return (
+                <p className="w-full flex h-full items-center gap-1" style={{ padding: "10px 10px 10px 0px", color: '#059669' }}>
+                    <Check size={18} />
+                    <span> Submitted </span>
+                </p>
+            );
+        }
         if (!settingActive) {
             return (
                 <p className="w-full flex h-full items-center gap-2" style={{ padding: "10px 10px 10px 0px", color: '#6b7280' }}>
                     <Lock size={18} />
                     <span> Submission Closed </span>
-                </p>
-            );
-        }
-        if (isSubmitted) {
-            return (
-                <p className="w-full flex h-full items-center gap-2" style={{ padding: "10px 10px 10px 0px", color: '#059669' }}>
-                    <Check size={18} />
-                    <span> Submitted </span>
                 </p>
             );
         }
