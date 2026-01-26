@@ -20,7 +20,7 @@ export const ClassAdviserProvider = ({ children }) => {
     // 4. Derive Display Name
     const adviserDisplayName = useMemo(() => {
         if (!currentAdviser) return "Adviser";
-        return `${currentAdviser.honorific} ${currentAdviser.last_name}`;
+        return `${currentAdviser.first_name} ${currentAdviser.last_name}`;
     }, [currentAdviser]);
 
     const value = {
