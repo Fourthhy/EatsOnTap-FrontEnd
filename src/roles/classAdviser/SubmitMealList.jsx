@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams } from "react-router-dom";
-import { Check, Lock } from "lucide-react";
+import { Check, Lock, ChevronDown, ChevronUp } from "lucide-react"; 
 import { useBreakpoint } from "use-breakpoint";
 
 // 🟢 IMPORT THE NEW MODAL
@@ -27,18 +27,20 @@ const BREAKPOINTS = {
     wide: 1440
 };
 
-// --- STATUS BADGE COMPONENT ---
+// --- 🟢 STATUS BADGE (STATIC - Uses Dot) ---
 const StatusBadge = ({ type }) => {
     const styles = {
         Eligible: { backgroundColor: '#d1fae5', color: '#047857', dotColor: '#10b981', text: 'Eligible' },
-        Waived: { backgroundColor: '#f3f4f6', color: '#6b7280', dotColor: '#9ca3af', text: 'Waived' }
+        Waived: { backgroundColor: '#ffedd5', color: '#c2410c', dotColor: '#f97316', text: 'Waived' },
+        Absent: { backgroundColor: '#f3f4f6', color: '#4b5563', dotColor: '#9ca3af', text: 'Absent' }
     };
+    
     const currentStyle = styles[type] || styles.Waived;
 
     return (
         <span
             style={{
-                padding: '4px 12px', borderRadius: '12px', display: 'inline-flex', alignItems: 'center',
+                padding: '4px 16px', borderRadius: '12px', display: 'inline-flex', alignItems: 'center',
                 gap: '6px', backgroundColor: currentStyle.backgroundColor, color: currentStyle.color,
                 width: 'fit-content', fontSize: '12px', fontWeight: 500, fontFamily: 'geist, sans-serif'
             }}
@@ -49,26 +51,137 @@ const StatusBadge = ({ type }) => {
     );
 };
 
+// --- 🟢 STATUS DROPDOWN (INTERACTIVE - Uses Chevron) ---
+const StatusDropdown = ({ currentStatus, onChange, disabled }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    // Styles Map
+    const styles = {
+        Waived: { backgroundColor: '#ffedd5', color: '#c2410c' },
+        Absent: { backgroundColor: '#f3f4f6', color: '#4b5563' }
+    };
+    const activeStyle = styles[currentStatus] || styles.Waived;
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const handleSelect = (status) => {
+        onChange(status);
+        setIsOpen(false);
+    };
+
+    if (disabled) {
+        return <StatusBadge type={currentStatus} />;
+    }
+
+    return (
+        <div 
+            ref={dropdownRef}
+            style={{ position: 'relative', display: 'inline-block' }} 
+            onClick={(e) => e.stopPropagation()} 
+        >
+            {/* 1. THE TRIGGER */}
+            <div 
+                onClick={() => setIsOpen(!isOpen)}
+                style={{ 
+                    cursor: 'pointer', 
+                    padding: '4px 12px', 
+                    borderRadius: '12px', 
+                    display: 'inline-flex', 
+                    alignItems: 'center',
+                    gap: '6px', 
+                    backgroundColor: activeStyle.backgroundColor, 
+                    color: activeStyle.color,
+                    width: 'fit-content', 
+                    fontSize: '12px', 
+                    fontWeight: 500, 
+                    fontFamily: 'geist, sans-serif',
+                    transition: 'all 0.2s',
+                    userSelect: 'none'
+                }}
+            >
+                {isOpen ? <ChevronUp size={14} strokeWidth={2.5} /> : <ChevronDown size={14} strokeWidth={2.5} />}
+                <span>{currentStatus}</span>
+            </div>
+
+            {/* 2. THE MENU */}
+            {isOpen && (
+                <div style={{
+                    position: 'absolute',
+                    top: '120%', right: 0, zIndex: 50,
+                    minWidth: '120px',
+                    backgroundColor: 'white',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.05)',
+                    padding: '4px',
+                    border: '1px solid #f3f4f6',
+                    animation: 'fadeIn 0.1s ease-out'
+                }}>
+                    {/* Option: Waived */}
+                    <div 
+                        onClick={() => handleSelect('Waived')}
+                        style={{
+                            padding: '8px 12px', borderRadius: '8px', cursor: 'pointer',
+                            fontSize: '12px', fontWeight: 500, color: '#c2410c',
+                            backgroundColor: currentStatus === 'Waived' ? '#fff7ed' : 'transparent',
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            transition: 'background-color 0.1s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fff7ed'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = currentStatus === 'Waived' ? '#fff7ed' : 'transparent'}
+                    >
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#f97316' }}></span>
+                        Waived
+                    </div>
+
+                    {/* Option: Absent */}
+                    <div 
+                        onClick={() => handleSelect('Absent')}
+                        style={{
+                            padding: '8px 12px', borderRadius: '8px', cursor: 'pointer',
+                            fontSize: '12px', fontWeight: 500, color: '#4b5563',
+                            backgroundColor: currentStatus === 'Absent' ? '#f3f4f6' : 'transparent',
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            marginTop: '2px', transition: 'background-color 0.1s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = currentStatus === 'Absent' ? '#f3f4f6' : 'transparent'}
+                    >
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#9ca3af' }}></span>
+                        Absent
+                    </div>
+                </div>
+            )}
+            <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+        </div>
+    );
+};
+
 export default function SubmitMealList() {
-    // 🟢 Initialize Hook
     const { breakpoint } = useBreakpoint(BREAKPOINTS, 'desktop');
     const isMobile = breakpoint === 'mobile';
     const isTablet = breakpoint === 'tablet';
 
     const { section, userID } = useParams();
     const { schoolData } = useData();
-    const { currentAdviser, adviserDisplayName } = useClassAdviser();
 
-    const [selected, setSelected] = useState([]);
+    const [selected, setSelected] = useState([]); // Tracks "Eligible" IDs
+    const [exceptions, setExceptions] = useState({}); // Tracks "Absent" IDs
+    
     const [searchTerm, setSearchTerm] = useState("");
     const [loading, setLoading] = useState(true);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [showModal, setShowModal] = useState(false);
-
-    // 🟢 Default to false to prevent interaction before load
     const [settingActive, setSettingActive] = useState(false);
 
-    // 🟢 Ref to ensure we only auto-select ONCE upon entry
     const selectionInitialized = useRef(false);
 
     // --- FETCH STUDENTS LOGIC ---
@@ -95,26 +208,16 @@ export default function SubmitMealList() {
         return filtered.sort((a, b) => a.name.localeCompare(b.name));
     }, [schoolData, section, searchTerm]);
 
-    // --- 2. CHECK STATUS ON LOAD ---
+    // --- CHECK STATUS ON LOAD ---
     useEffect(() => {
-        let isMounted = true; // 🟢 1. Track if component is still active
+        let isMounted = true;
         setLoading(true);
 
         Promise.all([
-            // 🟢 2. Attach .catch to EACH promise individually
-            // If this fails, we return false (or null) so the other request still succeeds
-            isStudentMealSubmitted(section).catch(err => {
-                console.error("Error checking submission:", err);
-                return false; // Default fallback
-            }),
-
-            isSettingActive("SUBMIT-MEAL-REQUEST").catch(err => {
-                console.error("Error checking settings:", err);
-                return false; // Default fallback
-            })
+            isStudentMealSubmitted(section).catch(err => { console.error(err); return false; }),
+            isSettingActive("SUBMIT-MEAL-REQUEST").catch(err => { console.error(err); return false; })
         ])
             .then(([submittedStatus, activeStatus]) => {
-                // 🟢 3. Only update state if the user is still on this section
                 if (isMounted) {
                     setIsSubmitted(submittedStatus);
                     setSettingActive(activeStatus);
@@ -124,16 +227,11 @@ export default function SubmitMealList() {
                 if (isMounted) setLoading(false);
             });
 
-        // 🟢 4. Cleanup function
-        return () => {
-            isMounted = false;
-        };
-
+        return () => { isMounted = false; };
     }, [section]);
 
-    // --- 🟢 3. AUTO-SELECT ALL LOGIC (Updated Condition) ---
+    // --- AUTO-SELECT ALL LOGIC ---
     useEffect(() => {
-        // Only run if loaded, have students, not initialized, NOT submitted, AND setting is ACTIVE
         if (!loading && students.length > 0 && !selectionInitialized.current) {
             if (!isSubmitted && settingActive) {
                 const allIds = students.map(s => s.studentId);
@@ -143,13 +241,32 @@ export default function SubmitMealList() {
         }
     }, [loading, students, isSubmitted, settingActive]);
 
+    // --- HANDLE EXCEPTION CHANGE ---
+    const handleExceptionChange = (studentId, newStatus) => {
+        setExceptions(prev => {
+            const next = { ...prev };
+            if (newStatus === 'Absent') {
+                next[studentId] = 'Absent';
+            } else {
+                delete next[studentId]; // Back to default (Waived)
+            }
+            return next;
+        });
+    };
+
+    // --- HANDLE SUBMIT ---
     const handleSubmit = async () => {
         try {
-            await SubmitStudentMealList(userID, section, selected);
+            const forEligible = selected;
+            // Get IDs where value is explicitly 'Absent'
+            const forAbsent = Object.keys(exceptions).filter(id => exceptions[id] === 'Absent');
+            
+            await SubmitStudentMealList(userID, section, forEligible, forAbsent);
             setIsSubmitted(true);
             setShowModal(false);
         } catch (error) {
             console.error(error);
+            alert("Failed to submit. Please try again.");
             setIsSubmitted(false);
         }
     };
@@ -162,22 +279,57 @@ export default function SubmitMealList() {
 
     const renderRow = (student, index, startIndex, { isSelected, toggleSelection }) => {
 
-        // 🟢 BLOCK TOGGLE if setting is inactive
         const handleRowClick = () => {
             if (!isSubmitted && settingActive) {
                 toggleSelection();
+                if (!isSelected) {
+                    handleExceptionChange(student.studentId, 'Waived');
+                }
             }
         };
 
-        // Determine Status for Badge
-        let statusType = 'Waived';
+        // 🟢 FIXED STATUS LOGIC
+        let statusDisplay;
+        
         if (isSubmitted) {
-            statusType = student.mealEligibilityStatus === "INELIGIBLE" ? "Waived" : "Eligible";
+            // 🟢 1. Try to use Server Data (If refreshed)
+            const serverStatus = student.mealEligibilityStatus;
+            
+            if (serverStatus) {
+                // If backend data exists, map strictly
+                let type = "Eligible";
+                if (serverStatus === "INELIGIBLE") type = "Waived";
+                else if (serverStatus === "ABSENT") type = "Absent";
+                
+                statusDisplay = <StatusBadge type={type} />;
+            } else {
+                // 🟢 2. Fallback to Local State (Immediate View after Click)
+                // This ensures "Absent" stays "Absent" right after submission
+                if (selected.includes(student.studentId)) {
+                    statusDisplay = <StatusBadge type="Eligible" />;
+                } else if (exceptions[student.studentId] === 'Absent') {
+                    statusDisplay = <StatusBadge type="Absent" />;
+                } else {
+                    statusDisplay = <StatusBadge type="Waived" />;
+                }
+            }
         } else {
-            statusType = isSelected ? "Eligible" : "Waived";
+            // 🟢 Active Editing Mode
+            if (isSelected) {
+                statusDisplay = <StatusBadge type="Eligible" />;
+            } else {
+                const currentException = exceptions[student.studentId] || 'Waived';
+                statusDisplay = (
+                    <StatusDropdown 
+                        currentStatus={currentException}
+                        disabled={!settingActive}
+                        onChange={(val) => handleExceptionChange(student.studentId, val)}
+                    />
+                );
+            }
         }
 
-        // 🟢 A. MOBILE VIEW (Card Layout - No Checkbox)
+        // --- MOBILE VIEW ---
         if (isMobile) {
             return (
                 <tr
@@ -187,7 +339,6 @@ export default function SubmitMealList() {
                 >
                     <td colSpan={4} style={{ padding: '12px 16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                            {/* Left: Avatar + Info */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm shrink-0">
                                     {student.name.charAt(0)}
@@ -201,10 +352,8 @@ export default function SubmitMealList() {
                                     </span>
                                 </div>
                             </div>
-
-                            {/* Right: Status Badge Only */}
-                            <div>
-                                <StatusBadge type={statusType} />
+                            <div onClick={(e) => e.stopPropagation()}>
+                                {statusDisplay}
                             </div>
                         </div>
                     </td>
@@ -212,78 +361,12 @@ export default function SubmitMealList() {
             );
         }
 
-        // 🟢 B. TABLET VIEW (No Checkbox Column)
-        if (isTablet) {
-            return (
-                <tr
-                    key={student.studentId}
-                    onClick={handleRowClick}
-                    className={`transition-colors cursor-pointer group ${isSelected ? "bg-blue-50" : "hover:bg-gray-50"} ${!settingActive ? "cursor-not-allowed opacity-75" : ""}`}
-                    style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}
-                >
-                    {/* Index Column (#) */}
-                    <td style={{ ...cellStyle, textAlign: 'center', width: '48px', paddingLeft: '16px' }}>
-                        <span className="text-gray-400 font-medium">{startIndex + index + 1}</span>
-                    </td>
-
-                    {/* Name */}
-                    <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
-                                {student.name.charAt(0)}
-                            </div>
-                            <div className="flex flex-col">
-                                <span>{student.name}</span>
-                            </div>
-                        </div>
-                    </td>
-
-                    {/* ID */}
-                    <td style={cellStyle}>
-                        <span className="font-mono text-xs">{student.studentId}</span>
-                    </td>
-
-                    {/* Status Badge */}
-                    <td style={{ ...cellStyle, textAlign: 'right', paddingRight: '16px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <StatusBadge type={statusType} />
-                        </div>
-                    </td>
-                </tr>
-            );
-        }
-
-        // 🟢 C. DESKTOP VIEW (Standard Table with Checkbox)
-        return (
-            <tr
-                key={student.studentId}
-                onClick={handleRowClick}
-                className={`transition-colors cursor-pointer group ${isSelected ? "bg-blue-50" : "hover:bg-gray-50"} ${!settingActive ? "cursor-not-allowed opacity-75" : ""}`}
-                style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}
-            >
-                {/* Checkbox Column */}
-                <td style={{ padding: '0 12px', width: '48px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {!isSubmitted && settingActive ? ( // 🟢 Fixed: Only show checkbox if active AND not submitted
-                            <input
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={toggleSelection}
-                                style={{
-                                    width: '16px', height: '16px', borderRadius: '4px', cursor: 'pointer',
-                                    accentColor: '#4268BD'
-                                }}
-                            />
-                        ) : (
-                            <div style={{ width: '16px', height: '16px' }} />
-                        )}
-                    </div>
-                </td>
-
+        // --- SHARED CELLS ---
+        const commonCells = (
+            <>
                 <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }}>
                     <span className="text-gray-400 font-medium">{startIndex + index + 1}</span>
                 </td>
-
                 <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
@@ -294,68 +377,89 @@ export default function SubmitMealList() {
                         </div>
                     </div>
                 </td>
-
                 <td style={cellStyle}>
                     <span className="font-mono text-xs">{student.studentId}</span>
                 </td>
-
-                <td style={{ ...cellStyle, textAlign: 'right' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                        <StatusBadge type={statusType} />
+                <td style={{ ...cellStyle, textAlign: 'right', paddingRight: isTablet ? '16px' : '0' }}>
+                    <div style={{ display: 'flex', justifyContent: isTablet ? 'flex-end' : 'flex-start' }} onClick={(e) => e.stopPropagation()}>
+                        {statusDisplay}
                     </div>
                 </td>
+            </>
+        );
+
+        // --- TABLET/DESKTOP WRAPPERS ---
+        const rowClass = `transition-colors cursor-pointer group ${isSelected ? "bg-blue-50" : "hover:bg-gray-50"} ${!settingActive ? "cursor-not-allowed opacity-75" : ""}`;
+        const rowStyle = { backgroundColor: isSelected ? '#eff6ff' : 'transparent' };
+
+        if (isTablet) {
+            return (
+                <tr key={student.studentId} onClick={handleRowClick} className={rowClass} style={rowStyle}>
+                    {commonCells}
+                </tr>
+            );
+        }
+
+        return (
+            <tr key={student.studentId} onClick={handleRowClick} className={rowClass} style={rowStyle}>
+                <td style={{ padding: '0 12px', width: '48px', borderBottom: '1px solid #f3f4f6', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {!isSubmitted && settingActive ? (
+                            <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={handleRowClick}
+                                style={{ width: '16px', height: '16px', borderRadius: '4px', cursor: 'pointer', accentColor: '#4268BD' }}
+                            />
+                        ) : (
+                            <div style={{ width: '16px', height: '16px' }} />
+                        )}
+                    </div>
+                </td>
+                {commonCells}
             </tr>
         );
     };
 
     const columns = ['#', 'Student Name', 'Student ID', 'Status'];
+    const absentCount = Object.values(exceptions).filter(v => v === 'Absent').length;
     const metrics = [
         { label: "Total Students", value: students.length },
-        { label: "Selected", value: selected.length, color: "#2563EB" }
+        { label: "Eligible", value: selected.length, color: "#059669" }, 
+        { label: "Absent", value: absentCount, color: "#4b5563" }, 
     ];
 
     const tabletThead = (
         <thead className="bg-gray-50 sticky top-0 z-20 shadow-sm">
             <tr style={{ height: '45px' }}>
                 {columns.map((col, idx) => (
-                    <th key={idx} style={{ fontSize: 12, whiteSpace: 'nowrap', padding: '12px 16px' }} className="font-geist font-medium text-gray-500">
-                        {col}
-                    </th>
+                    <th key={idx} style={{ fontSize: 12, whiteSpace: 'nowrap', padding: '12px 16px' }} className="font-geist font-medium text-gray-500">{col}</th>
                 ))}
             </tr>
         </thead>
     );
 
     const customTheadProp = isMobile ? <thead /> : (isTablet ? tabletThead : null);
-
-    // 🟢 FIXED: Selectable only if ACTIVE and NOT SUBMITTED
     const isSelectable = settingActive && !isSubmitted && !isMobile && !isTablet;
 
-    // 🟢 HELPER: Determine Button State
     const getPrimaryActionLabel = () => {
-        if (!settingActive) return ""; // Text is handled in primaryLabel
-        if (isSubmitted) return "";    // Text is handled in primaryLabel
+        if (!settingActive) return ""; 
+        if (isSubmitted) return "";
         return "Submit List";
     };
 
     const getPrimaryLabelContent = () => {
-        if (isSubmitted) {
-            return (
-                <p className="w-full flex h-full items-center gap-1" style={{ padding: "10px 10px 10px 0px", color: '#059669' }}>
-                    <Check size={18} />
-                    <span> Submitted </span>
-                </p>
-            );
-        }
-        if (!settingActive) {
-            return (
-                <p className="w-full flex h-full items-center gap-2" style={{ padding: "10px 10px 10px 0px", color: '#6b7280' }}>
-                    <Lock size={18} />
-                    <span> Submission Closed </span>
-                </p>
-            );
-        }
-        return null; // Default button shows up
+        if (isSubmitted) return (
+            <p className="w-full flex h-full items-center gap-1" style={{ padding: "10px 10px 10px 0px", color: '#059669' }}>
+                <Check size={18} /><span> Submitted </span>
+            </p>
+        );
+        if (!settingActive) return (
+            <p className="w-full flex h-full items-center gap-2" style={{ padding: "10px 10px 10px 0px", color: '#6b7280' }}>
+                <Lock size={18} /><span> Submission Closed </span>
+            </p>
+        );
+        return null;
     };
 
     return (
@@ -364,34 +468,28 @@ export default function SubmitMealList() {
                 visible={showModal}
                 onCancel={() => setShowModal(false)}
                 onConfirm={() => { setShowModal(false); handleSubmit(); }}
+                title="Confirm Submission?"
+                message={`You are submitting: ${selected.length} Eligible, ${absentCount} Absent. This cannot be undone.`}
             />
 
             <div className="flex-1 flex flex-col relative">
                 <GenericTable
                     title="Student Roster"
                     subtitle={`Manage meal attendance for ${section}`}
-
                     data={students}
                     columns={isMobile ? [] : columns}
                     renderRow={renderRow}
                     metrics={metrics}
-
                     searchTerm={searchTerm}
                     onSearchChange={setSearchTerm}
-
                     selectable={isSelectable}
                     selectedIds={selected}
                     onSelectionChange={setSelected}
                     primaryKey="studentId"
-
-                    // 🟢 BUTTON LOGIC FIXED
                     primaryActionLabel={getPrimaryActionLabel()}
                     primaryActionIcon={(!isSubmitted && settingActive) ? <Check size={18} /> : null}
                     onPrimaryAction={(!isSubmitted && settingActive) ? () => setShowModal(true) : null}
-
-                    // 🟢 CUSTOM TEXT FOR DISABLED STATES
                     primaryLabel={getPrimaryLabelContent()}
-
                     customThead={customTheadProp}
                 />
             </div>

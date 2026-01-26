@@ -57,6 +57,8 @@ const MealOrdersTable = () => {
             sender: item.requester,
             recipientCount: item.forEligible?.length || 0,
             waivedCount: item.forTemporarilyWaived?.length || 0,
+            // 🟢 ADDED: Absent Count
+            absentCount: item.forAbsentStudents?.length || 0, 
             timeSent: formatTime(item.timeStamp),
             type: 'Regular',
             category: 'Basic Education',
@@ -70,6 +72,8 @@ const MealOrdersTable = () => {
             sender: item.requester,
             recipientCount: item.forEligible?.length || 0,
             waivedCount: item.forWaived?.length || 0,
+            // 🟢 ADDED: Absent Count
+            absentCount: item.forAbsent?.length || 0,
             timeSent: formatTime(item.timeStamp),
             type: 'Regular',
             category: 'Higher Education',
@@ -83,6 +87,8 @@ const MealOrdersTable = () => {
             sender: "Event Organizer",
             recipientCount: (item.forEligibleSection?.length || 0) + (item.forEligibleProgramsAndYear?.length || 0),
             waivedCount: item.forTemporarilyWaived?.length || 0,
+            // 🟢 ADDED: Absent Count (Default to 0 if not applicable for events)
+            absentCount: item.forAbsent?.length || 0,
             timeSent: item.eventSpan?.[0] ? new Date(item.eventSpan[0]).toLocaleDateString() : 'N/A', 
             type: 'Event',
             category: 'Event',
@@ -131,6 +137,7 @@ const MealOrdersTable = () => {
                         sender: fullName || "No Adviser Assigned",
                         recipientCount: "N/A",
                         waivedCount: "N/A",
+                        absentCount: "N/A", // 🟢 ADDED placeholder
                         timeSent: "Not Submitted",
                         type: 'Regular',
                         category: 'Basic Education',
@@ -171,7 +178,7 @@ const MealOrdersTable = () => {
         return data;
     }, [allRequests, orderType, searchTerm, activeTab, classAdvisers, basicEducationMealRequest]);
 
-    // --- 🟢 STUDENT LIST DATA PREP ---
+    // --- STUDENT LIST DATA PREP ---
     const sectionStudents = useMemo(() => {
         if (!viewingSection || !schoolData) return [];
         
@@ -198,10 +205,9 @@ const MealOrdersTable = () => {
 
         // Map to table format
         return foundStudents.map(student => ({
-            // 🟢 FIX 1: Ensure we have distinct IDs
-            id: student.id || student._id, // This is the MongoDB ID (used for React Keys)
+            id: student.id || student._id, 
             name: student.name,
-            studentId: student.studentId, // This is the School ID (used for Selection)
+            studentId: student.studentId, 
             status: 'Eligible' 
         }));
 
@@ -210,7 +216,6 @@ const MealOrdersTable = () => {
     // Auto-select all students when entering the view
     useEffect(() => {
         if (viewingSection && sectionStudents.length > 0) {
-            // This selects the SCHOOL IDs
             setSelectedStudentIds(sectionStudents.map(s => s.studentId));
         }
     }, [viewingSection, sectionStudents]);
@@ -316,6 +321,10 @@ const MealOrdersTable = () => {
                     <>
                         <td style={cellStyle}>{item.recipientCount}</td>
                         <td style={cellStyle}>{item.waivedCount}</td>
+                        
+                        {/* 🟢 ADDED: Absent Cell */}
+                        <td style={cellStyle}>{item.absentCount}</td>
+                        
                         <td style={cellStyle}>{item.timeSent}</td>
                     </>
                 )}
@@ -377,7 +386,6 @@ const MealOrdersTable = () => {
                     selectedIds={selectedStudentIds}
                     onSelectionChange={setSelectedStudentIds}
                     
-                    // 🟢 FIX 2: Explicitly tell table to use 'studentId' for selection tracking
                     primaryKey="studentId" 
 
                     onPrimaryAction={handleSubmitEligibilityList}
@@ -407,9 +415,10 @@ const MealOrdersTable = () => {
         </div>
     );
 
+    // 🟢 UPDATED COLUMNS: Added 'Absent'
     const columns = orderType === "Unsubmitted Sections" 
         ? ['Section/Program', 'Class Adviser', 'Status'] 
-        : ['Section/Program', 'Class Adviser', 'Recipient Count', 'Waived', 'Time Sent', 'Status'];
+        : ['Section/Program', 'Class Adviser', 'Recipient Count', 'Waived', 'Absent', 'Time Sent', 'Status'];
 
     return (
         <AnimatePresence mode="wait">
