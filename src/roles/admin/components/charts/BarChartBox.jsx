@@ -4,25 +4,6 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Cart
 function BarChartBox({ data }) {
   const geistTickStyle = { fontFamily: 'geist', fontSize: 12, fill: '#666' };
 
-  function DishTick({ x, y, payload }) {
-    const { dish1, dish2, dayOfWeek } = data[payload.index];
-    return (
-      <>
-        <g transform={`translate(${x},${y})`}>
-          <text x={0} y={8} dy={0} textAnchor="middle" fill="#000" fontSize={11} fontFamily="geist">
-            {/* {dish1} {dish2 && "/"} */}
-            {dayOfWeek}
-          </text>
-          {/* {dish2 && (
-            <text x={0} y={8} dy={14} textAnchor="middle" fill="#000" fontSize={11} fontFamily="geist">
-              {dish2}
-            </text>
-          )} */}
-        </g>
-      </>
-    );
-  }
-
 function CustomTooltip({ active, payload, label }) {
   if (active && payload && payload.length) {
     // Access the data object for the current hover item
@@ -44,8 +25,7 @@ function CustomTooltip({ active, payload, label }) {
       >
         {/* Header: Dish Names */}
         <div style={{ fontWeight: 600, fontSize: 14, color: "#111", marginBottom: 8 }}>
-          {data.dish1}
-          {data.dish2 ? ` / ${data.dish2}` : ""}
+          {data.dayOfWeek} {data.date !== "" ? "" : "/"} {data.date} 
         </div>
 
         {/* Body: Statistics */}

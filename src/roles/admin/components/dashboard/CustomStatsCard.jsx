@@ -109,7 +109,7 @@ export function CustomStatsCard({
                                 onMouseEnter={() => setIsValueHovered(true)}
                                 onMouseLeave={() => setIsValueHovered(false)}
                                 style={{
-                                    fontSize: 25,
+                                    fontSize: 30,
                                     fontWeight: "500",
                                     margin: "8px 0",
                                     color: isHasAcceptableRange ? acceptableIndicator : "#111827",

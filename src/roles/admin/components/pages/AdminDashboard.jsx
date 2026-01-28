@@ -68,13 +68,26 @@ export default function AdminDashboard() {
     // --- MOCKED/DERIVED DATA FOR CARDS ---
     const mealRequestData = {
         accepted: [
-            { title: "Accepted Request Rate", value: 100, subtitle: "Overall", acceptanceRate: 95, expectingPositiveResult: true, isPercentage: true },
-            { title: "Total Eligible Students", value: students?.length || 1500, subtitle: "Today" } 
+            { title: "Absent Students", value: 0, subtitle: "Today" },
+            { title: "Waived Students", value: 0, subtitle: "Today" },
+            { title: "Eligible Students", value: students?.length || 1500, subtitle: "Today" } 
         ],
         rejected: [
             { title: "Rejected Request Rate", value: 0, subtitle: "Overall", acceptanceRate: 5, expectingPositiveResult: false, isPercentage: true },
-            { title: "Total Waived Students", value: 0, subtitle: "Today" }
+            { title: "Accepted Request Rate", value: 100, subtitle: "Overall", acceptanceRate: 95, expectingPositiveResult: true, isPercentage: true },
+            
         ]
+    };
+
+    function getMetricName (selectedTab) {
+        switch (selectedTab) {
+            case 1: return "Today"
+            break;
+            case 2: return "This Week"
+            break;
+            case 3: return "This Month"
+            break;
+        }
     };
 
     return (
@@ -128,9 +141,8 @@ export default function AdminDashboard() {
                                         cardGroupTitle={"Meal Eligibilty List Count"}
                                         urgentNotification={0}
                                         isDualPager={true}
-                                        dualPageTitles={["View Accepted Requests", "View Rejected Requests"]}
-                                        successMessage="Great job! The acceptance rate is above the target."
-                                        failureMessage="Warning: Acceptance rate is critically low."
+                                        dualPageTitles={["View Student Counts", "View Request Rates"]}
+                                        footnote={"Data as of this current day"}
                                         primaryData={mealRequestData.accepted}
                                         secondaryData={mealRequestData.rejected}
                                         isLoading={isLoading} 
@@ -159,6 +171,7 @@ export default function AdminDashboard() {
                                                         primaryData={extractedData.overall?.mostMealClaims || []} 
                                                         secondaryData={extractedData.overall?.leastMealClaims || []}
                                                         isLoading={isLoading}
+                                                        urgentNotification={0}
                                                     />
                                                 </div>
 
@@ -167,6 +180,7 @@ export default function AdminDashboard() {
                                                         cardGroupTitle={"Claims Count"} isDualPager={false}
                                                         primaryData={extractedData.overall?.claimsCount || []} 
                                                         isLoading={isLoading}
+                                                        urgentNotification={0}
                                                     />
                                                 </div>
 
@@ -175,6 +189,7 @@ export default function AdminDashboard() {
                                                         cardGroupTitle={"KPI Metrics"} isDualPager={false}
                                                         primaryData={extractedData.overall?.KPIreports || []} 
                                                         isLoading={isLoading}
+                                                        urgentNotification={0}
                                                     />
                                                 </div>
                                                 
@@ -183,6 +198,7 @@ export default function AdminDashboard() {
                                                         cardGroupTitle={"Consumed Credits"} isDualPager={false}
                                                         primaryData={extractedData.overall?.consumedCredits || []} 
                                                         isLoading={isLoading}
+                                                        urgentNotification={0}
                                                     />
                                                 </div>
                                            </div>
@@ -212,10 +228,12 @@ export default function AdminDashboard() {
                                                     className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" 
                                                     style={{ marginTop: 10, marginBottom: 10, borderRadius: 10 }}
                                                 >
-                                                    <div className="w-[25%] h-auto flex items-center justify-center" style={{ padding: 20, marginLeft: 20 }}>
+                                                    <div className="w-[30%] h-auto flex items-center justify-center" style={{ padding: 10 }}>
                                                         <CustomStatsCard 
-                                                            title={"Dish Claims Today"} value={100} subtitle={"Today's Meal: Adobo"} 
+                                                            title={`Dish Claims ${getMetricName(selectedTab)}`} value={100} subtitle={selectedTab === 1 ? "Today's Meal: Adobo" : "Successful Meal Claims"} 
                                                             isLoading={isLoading}
+                                                            hoverText={"The total number of dish claims made by students today."}
+
                                                         />
                                                     </div>
                                                     <div className="h-[100%] w-[75%] flex justify-end items-center p-4">
@@ -236,10 +254,11 @@ export default function AdminDashboard() {
                                                     className="flex h-[270px] w-[98%] border-[#D9D9D9] border-[1px]" 
                                                     style={{ marginBottom: 10, borderRadius: 10 }}
                                                 >
-                                                    <div className="w-[25%] h-auto flex items-center justify-center" style={{ padding: 20, marginLeft: 20 }}>
+                                                    <div className="w-[30%] h-auto flex items-center justify-center" style={{ padding: 10 }}>
                                                         <CustomStatsCard 
-                                                            title={"Unclaim Count Today"} value={100} subtitle={"Today"} 
+                                                            title={`Unclaim Count ${getMetricName(selectedTab)}`} value={100} 
                                                             isLoading={isLoading}
+                                                            hoverText={"The total number of dish that haven't claimed today"}
                                                         />
                                                     </div>
                                                     <div className="h-[100%] w-[75%] flex justify-end items-center p-4">
@@ -260,10 +279,11 @@ export default function AdminDashboard() {
                                                     className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" 
                                                     style={{ marginBottom: 10, borderRadius: 10 }}
                                                 >
-                                                    <div className="w-[25%] h-auto flex items-center justify-center" style={{ padding: 20, marginLeft: 20 }}>
+                                                    <div className="w-[30%] h-auto flex items-center justify-center" style={{ padding: 10 }}>
                                                         <CustomStatsCard 
-                                                            title={"Average Student Spending"} value={61} subtitle={"Today"} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} 
+                                                            title={"Average Student Spending"} value={61} subtitle={getMetricName(selectedTab)} isPeso={true} isHasAcceptableRange={true} acceptableRate={[58, 62]} 
                                                             isLoading={isLoading}
+                                                            hoverText={"Measures how much money is actually spent on a meal when a student makes a claim, combining the school’s subsidy (credit) and student’s out-of-pocket spending (excess)."}
                                                         />
                                                     </div>
                                                     <div className="h-[100%] w-[75%] flex justify-end items-center p-4">
@@ -284,10 +304,11 @@ export default function AdminDashboard() {
                                                     className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" 
                                                     style={{ marginBottom: 10, borderRadius: 10 }}
                                                 >
-                                                    <div className="w-[25%] h-auto flex items-center justify-center" style={{ padding: 20, marginLeft: 20 }}>
+                                                    <div className="w-[30%] h-auto flex items-center justify-center" style={{ padding: 10 }}>
                                                         <CustomStatsCard 
-                                                            title={"Credit Utilization Rate"} value={95} subtitle={"Today"} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]}
+                                                            title={"Credit Utilization Rate"} value={95} subtitle={getMetricName(selectedTab)} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[90, 100]}
                                                             isLoading={isLoading}
+                                                            hoverText={"The percentage of the total allocated credit budget that is actually consumed by the students before the unused amount is automatically removed."}
                                                         />
                                                     </div>
                                                     <div className="h-[100%] w-[75%] flex justify-end items-center p-4">
@@ -308,10 +329,11 @@ export default function AdminDashboard() {
                                                     className="flex h-full w-[98%] border-[#D9D9D9] border-[1px]" 
                                                     style={{ marginBottom: 10, borderRadius: 10 }}
                                                 >
-                                                    <div className="w-[25%] h-auto flex items-center justify-center" style={{ padding: 20, marginLeft: 20 }}>
+                                                    <div className="w-[30%] h-auto flex items-center justify-center" style={{ padding: 10 }}>
                                                         <CustomStatsCard 
-                                                            title={"Overclaim Frequency"} value={7} subtitle={"Today"} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]}
+                                                            title={"Overclaim Frequency"} value={7} subtitle={getMetricName(selectedTab)} isPercentage={true} isHasAcceptableRange={true} acceptableRate={[0, 15]}
                                                             isLoading={isLoading}
+                                                            hoverText={"The frequency at which students’ total food item cost exceed the assigned credit value"}
                                                         />
                                                     </div>
                                                     <div className="h-[100%] w-[75%] flex justify-end items-center p-4">
@@ -340,7 +362,7 @@ export default function AdminDashboard() {
                                 transition={{ type: "spring", delay: 0 }}
                             >
                                 <OngoingEvents 
-                                    events={events || []} 
+                                    events={events[1] || []} 
                                     isLoading={isLoading} 
                                 />
                             </motion.div>
@@ -351,7 +373,7 @@ export default function AdminDashboard() {
                                 transition={{ type: "spring", delay: 0 }}
                             >
                                 <EventsPanel 
-                                    events={events || []} 
+                                    events={events[0] || []} 
                                     isLoading={isLoading} 
                                 />
                             </motion.div>

@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { departments, PROGRAM_STRUCTURE, getAllPrograms } from './data'; // Adjust path
-import { Calendar, Search, X, Check, Tag } from 'lucide-react';
+import { Calendar, Search, X, Check, Tag, Edit2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { addEvent } from '../../../../functions/admin/addEvent';
 
 // --- CONSTANTS ---
 const EVENT_COLORS = [
@@ -20,13 +21,72 @@ const getProgramsForDepartments = (selectedDepts) => {
     return [...new Set(filteredPrograms)];
 };
 
+// --- 🟢 ANIMATED PAGE BUTTON COMPONENT ---
+const AnimatedPageButton = ({ page, isActive, onClick }) => {
+    const [animState, setAnimState] = useState({ width: '0%', opacity: 0 });
+
+    useEffect(() => {
+        if (isActive) {
+            setAnimState({ width: '0%', opacity: 0 });
+            const timer = setTimeout(() => {
+                setAnimState({ width: '100%', opacity: 1 });
+            }, 10);
+            return () => clearTimeout(timer);
+        } else {
+            setAnimState({ width: '0%', opacity: 0 });
+        }
+    }, [isActive]);
+
+    const baseStyle = {
+        width: '28px',
+        height: '28px',
+        borderRadius: '6px',
+        boxShadow: isActive ? "0 2px 6px #e5eaf0ac" : "none",
+        position: 'relative',
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '12px',
+        fontWeight: 500,
+        cursor: 'pointer',
+        border: 'none',
+        fontFamily: 'geist',
+        transition: 'color 200ms ease',
+        backgroundColor: 'transparent',
+    };
+
+    return (
+        <button
+            type="button"
+            onClick={() => onClick(page)}
+            className={`${isActive ? 'text-[#EEEEEE]' : 'text-gray-500 hover:bg-white hover:text-gray-700'}`}
+            style={baseStyle}
+        >
+            {isActive && (
+                <div
+                    style={{
+                        position: 'absolute', top: 0, left: 0, height: '100%',
+                        backgroundColor: '#4268BD', zIndex: 0,
+                        width: animState.width, opacity: animState.opacity,
+                        transition: 'width 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms ease',
+                    }}
+                />
+            )}
+            <span style={{ position: 'relative', zIndex: 10 }}>{page}</span>
+        </button>
+    );
+};
+
 export const AddEventForm = () => {
     // --- MODAL STATE ---
     const [isOpen, setIsOpen] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     
-    // --- HOVER STATE FOR ANIMATION ---
+    // --- UI INTERACTION STATE ---
     const [isTriggerHovered, setIsTriggerHovered] = useState(false);
+    const [isEditingName, setIsEditingName] = useState(true); 
+    const [isDeptContainerHovered, setIsDeptContainerHovered] = useState(false);
 
     // --- FORM STATE ---
     const [eventName, setEventName] = useState('');
@@ -35,6 +95,8 @@ export const AddEventForm = () => {
     const [selectedDepartments, setSelectedDepartments] = useState([]);
     const [selectedPrograms, setSelectedPrograms] = useState([]);
     const [validationError, setValidationError] = useState({});
+
+    const nameInputRef = useRef(null);
 
     // --- PAGINATION ---
     const [currentPage, setCurrentPage] = useState(1);
@@ -55,7 +117,25 @@ export const AddEventForm = () => {
         return allProgramsToDisplay.slice(startIndex, endIndex);
     }, [allProgramsToDisplay, currentPage]);
 
-    // --- HANDLERS (Identical to previous) ---
+    // --- PAGINATION LOGIC HELPER ---
+    const getVisiblePages = () => {
+        const pages = [];
+        if (totalPages <= 5) { 
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            if (currentPage <= 3) {
+                pages.push(1, 2, 3, 4);
+            } else if (currentPage >= totalPages - 2) {
+                pages.push(totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                pages.push(currentPage - 1, currentPage, currentPage + 1);
+            }
+        }
+        return pages;
+    };
+    const visiblePages = getVisiblePages();
+
+    // --- HANDLERS ---
     const resetForm = () => {
         setEventName('');
         setEventDate('');
@@ -64,6 +144,7 @@ export const AddEventForm = () => {
         setValidationError({});
         setSelectedColor(EVENT_COLORS[0].value);
         setCurrentPage(1);
+        setIsEditingName(true);
     };
 
     const handleCloseModal = () => {
@@ -79,6 +160,18 @@ export const AddEventForm = () => {
         const value = e.target.value;
         setEventName(value);
         if (validationError.eventName && value.trim()) setValidationError(prev => ({ ...prev, eventName: false }));
+    };
+
+    useEffect(() => {
+        if (isEditingName && nameInputRef.current) {
+            nameInputRef.current.focus();
+        }
+    }, [isEditingName]);
+
+    const handleNameBlur = () => {
+        if (eventName.trim()) {
+            setIsEditingName(false);
+        }
     };
 
     const handleEventDateChange = (e) => {
@@ -123,8 +216,10 @@ export const AddEventForm = () => {
         if (pageNumber >= 1 && pageNumber <= totalPages) setCurrentPage(pageNumber);
     };
 
-    const handleCreateEvent = (e) => {
+    // 🟢 UPDATED: SUBMIT HANDLER TO MATCH BACKEND MODEL
+    const handleCreateEvent = async (e) => {
         e.preventDefault();
+        
         const errors = {};
         if (!eventName.trim()) errors.eventName = true;
         if (!eventDate) errors.eventDate = true;
@@ -135,10 +230,46 @@ export const AddEventForm = () => {
         setValidationError(errors);
 
         if (Object.keys(errors).length === 0) {
-            console.log('✅ Form Submitted Successfully!', { eventName, eventDate, selectedColor, selectedDepartments, selectedPrograms });
-            alert(`Event Created Successfully!`);
-            handleCloseModal();
-            resetForm();
+            try {
+                // 1. Parse Date
+                const dateObj = new Date(eventDate);
+                const startDay = dateObj.getDate();
+                const endDay = dateObj.getDate(); 
+                const startMonth = dateObj.toLocaleString('default', { month: 'long' });
+                const endMonth = dateObj.toLocaleString('default', { month: 'long' });
+
+                // 2. Determine Scope
+                const eventScope = selectedDepartments.includes('All') 
+                    ? 'School-Wide' 
+                    : 'Departmental';
+
+                // 3. Construct Payload (Matching the new Model/Controller)
+                const payload = {
+                    eventName: eventName,
+                    eventScope: eventScope,
+                    startDay: startDay,
+                    endDay: endDay,
+                    startMonth: startMonth,
+                    endMonth: endMonth,
+                    eventColor: selectedColor, // 🟢 Sending the Color
+                    forEligibleSection: selectedPrograms,
+                    forEligibleProgramsAndYear: [],
+                    forTemporarilyWaived: [] 
+                };
+
+                console.log('Sending Payload:', payload);
+
+                // 4. Call API
+                const response = await addEvent(payload);
+
+                alert(response.message || "Event Created Successfully!");
+                handleCloseModal();
+                resetForm();
+
+            } catch (error) {
+                console.error(error);
+                alert(`Error: ${error.message}`);
+            }
         }
     };
 
@@ -152,73 +283,37 @@ export const AddEventForm = () => {
         ? 'animate-out fade-out slide-out-to-top-3'
         : 'animate-in fade-in slide-in-from-top-3';
 
-    // -------------------------------------------------------------------------
-    // --- ANIMATION IMPLEMENTATION (BASED ON ButtonGroup) ---
-    // -------------------------------------------------------------------------
-    
-    // 1. Container Style (Similar to ButtonGroupItem baseStyle)
-    const buttonContainerStyle = {
-        position: 'relative', // Context for absolute child
-        padding: '8px 16px',
-        borderRadius: 6,
-        fontSize: 12,
-        fontWeight: 500,
-        fontFamily: 'geist',
-        cursor: 'pointer',
-        border: 'none',
-        backgroundColor: '#4268BD', // Default Blue Base
-        color: 'white',
-        overflow: 'hidden', // Ensures the sliding background doesn't spill out
-        display: 'flex',
+    // 🟢 REPLICATED CELL STYLE (For Sections)
+    const cellStyle = {
+        fontFamily: 'geist, sans-serif', 
+        fontSize: '12px', 
+        color: '#4b5563',
+        borderBottom: '1px solid #f3f4f6', 
+        height: '43.5px', 
+        display: 'flex', 
         alignItems: 'center',
-        justifyContent: 'center'
+        padding: '0 12px',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s ease'
     };
 
-    // 2. Sliding Indicator Style (Similar to indicatorBaseStyle)
+    const buttonContainerStyle = {
+        position: 'relative', padding: '8px 16px', borderRadius: 6, fontSize: 12, fontWeight: 500, fontFamily: 'geist', cursor: 'pointer', border: 'none', backgroundColor: '#4268BD', color: 'white', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center'
+    };
     const buttonIndicatorStyle = {
-        position: 'absolute',
-        top: 0,
-        left: 0, // Anchored to left
-        height: '100%',
-        backgroundColor: '#33549F', // Darker Blue for Hover state
-        zIndex: 0, // Behind text
-        
-        // EXACT ANIMATION SEQUENCE FROM YOUR SNIPPET:
-        transition: 'width 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-        width: isTriggerHovered ? '100%' : '0%', // Animate width instead of left position
+        position: 'absolute', top: 0, left: 0, height: '100%', backgroundColor: '#33549F', zIndex: 0, transition: 'width 300ms cubic-bezier(0.4, 0, 0.2, 1)', width: isTriggerHovered ? '100%' : '0%',
     };
+    const buttonTextStyle = { position: 'relative', zIndex: 10, pointerEvents: 'none' };
 
-    // 3. Text Style (Ensures text sits on top of the slider)
-    const buttonTextStyle = {
-        position: 'relative',
-        zIndex: 10, // Higher than indicator
-        pointerEvents: 'none', // Clicks pass through to button
-    };
-    // -------------------------------------------------------------------------
-
-
-    const modalOverlayStyle = {
-        position: 'fixed',
-        top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        zIndex: 1000, backdropFilter: 'blur(2px)',
-        opacity: isClosing ? 0 : 1, transition: 'opacity 0.3s ease-in-out'
-    };
-
-    const modalContentStyle = {
-        backgroundColor: 'white', borderRadius: '0.75rem',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-        width: '90%', maxWidth: '900px', maxHeight: '90vh',
-        display: 'flex', flexDirection: 'row', position: 'relative', overflow: 'hidden'
-    };
+    const modalOverlayStyle = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9000, backdropFilter: 'blur(2px)', opacity: isClosing ? 0 : 1, transition: 'opacity 0.3s ease-in-out' };
+    const modalContentStyle = { backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', width: '90%', maxWidth: '900px', maxHeight: '95vh', height: '95vh', display: 'flex', flexDirection: 'row', position: 'relative', overflow: 'hidden' };
 
     const leftPanelStyle = { flex: 1.4, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: 10, overflowY: 'auto' };
     const rightPanelStyle = { flex: 1, backgroundColor: '#f9fafb', borderLeft: '1px solid #e5e7eb', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1rem' };
 
     const inputStyle = { backgroundColor: '#f3f4f6', border: 'none', padding: '10px 10px', borderRadius: '0.5rem', width: '100%', outline: 'none', color: '#374151', fontSize: 14, fontFamily: "geist" };
     const departmentChipStyle = (dept) => ({ padding: '5px 10px', borderRadius: 12, fontSize: 12, cursor: 'pointer', backgroundColor: selectedDepartments.includes(dept) ? '#3b82f6' : '#f3f4f6', color: selectedDepartments.includes(dept) ? 'white' : '#4b5563', fontFamily: "geist", transition: 'all 0.15s ease-in-out' });
-    const labelStyle = (isError) => ({ fontSize: 14, fontWeight: 450, fontFamily: "geist", color: isError ? 'red' : 'inherit' });
+    const labelStyle = (isError) => ({ fontSize: 14, fontWeight: 450, fontFamily: "geist", color: isError ? 'red' : 'inherit', whiteSpace: 'nowrap' });
     const colorSwatchStyle = (color, isSelected) => ({ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: color, cursor: 'pointer', border: isSelected ? '2px solid #3b82f6' : '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.1s ease', transform: isSelected ? 'scale(1.1)' : 'scale(1)', boxShadow: isSelected ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' });
     const dateButtonStyle = (isError) => ({ position: 'relative', padding: "5px 10px", fontSize: 12, fontFamily: "geist", fontWeight: 450, borderRadius: 8, border: isError ? '1px solid red' : '1px solid #e5e7eb', backgroundColor: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: isError ? 'red' : (eventDate ? '#374151' : '#4b5563') });
     const submitButtonStyle = (isDisabled) => {
@@ -231,21 +326,11 @@ export const AddEventForm = () => {
 
     return (
         <>
-            {/* --- ANIMATED TRIGGER BUTTON --- */}
-            <button
-                style={buttonContainerStyle}
-                onClick={() => setIsOpen(true)}
-                onMouseEnter={() => setIsTriggerHovered(true)}
-                onMouseLeave={() => setIsTriggerHovered(false)}
-            >
-                {/* The "Indicator" Layer */}
+            <button style={buttonContainerStyle} onClick={() => setIsOpen(true)} onMouseEnter={() => setIsTriggerHovered(true)} onMouseLeave={() => setIsTriggerHovered(false)}>
                 <div style={buttonIndicatorStyle} />
-                
-                {/* The Text Layer */}
                 <span style={buttonTextStyle}>Add Event</span>
             </button>
 
-            {/* --- MODAL --- */}
             {isOpen && (
                 <div style={modalOverlayStyle} onClick={handleCloseModal}>
                     <form style={modalContentStyle} onSubmit={handleCreateEvent} className={animationClass} onClick={(e) => e.stopPropagation()}>
@@ -256,6 +341,7 @@ export const AddEventForm = () => {
                             <div className="flex justify-between items-center flex-shrink-0">
                                 <h2 style={{ fontSize: 16, fontFamily: "geist", fontWeight: 450 }}>Add Event</h2>
                             </div>
+                            
                             <div className="flex justify-between items-center flex-shrink-0">
                                 <div className="flex gap-2 max-h-[40px] items-center">
                                     <label style={dateButtonStyle(validationError.eventDate)} className="hover:bg-gray-50 transition-colors">
@@ -266,10 +352,32 @@ export const AddEventForm = () => {
                                 </div>
                                 <button type="submit" disabled={isButtonDisabled} style={submitButtonStyle(isButtonDisabled)} className="transition-colors hover:bg-blue-700 shadow-md"><span>✓</span> Submit</button>
                             </div>
+
                             <div className="flex items-center gap-4 w-full flex-shrink-0">
                                 <label style={labelStyle(validationError.eventName)} className="w-[120px]">Event Name:</label>
-                                <input type="text" placeholder="e.g., Celebration Day!" style={{ ...inputStyle, border: validationError.eventName ? '1px solid red' : 'none' }} value={eventName} onChange={handleEventNameChange} />
+                                {isEditingName ? (
+                                    <input 
+                                        ref={nameInputRef}
+                                        type="text" 
+                                        placeholder="e.g., Celebration Day!" 
+                                        style={{ ...inputStyle, border: validationError.eventName ? '1px solid red' : 'none' }} 
+                                        value={eventName} 
+                                        onChange={handleEventNameChange} 
+                                        onBlur={handleNameBlur}
+                                    />
+                                ) : (
+                                    <div 
+                                        onClick={() => setIsEditingName(true)} 
+                                        className="w-full flex items-center justify-between cursor-pointer hover:bg-gray-100 rounded px-2 py-2 group"
+                                    >
+                                        <span style={{ fontSize: 18, fontWeight: 600, fontFamily: 'geist', color: '#111827' }}>
+                                            {eventName}
+                                        </span>
+                                        <Edit2 size={14} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
+                                )}
                             </div>
+
                             <div className="flex items-center gap-4 w-full flex-shrink-0">
                                 <label style={labelStyle(false)} className="w-[120px]">Color Tag:</label>
                                 <div className="flex gap-2">
@@ -280,15 +388,41 @@ export const AddEventForm = () => {
                                     ))}
                                 </div>
                             </div>
-                            <label style={labelStyle(validationError.departments)}>Select Department/s:</label>
-                            <div className='flex flex-col gap-3 border-gray-200 border-[1px] rounded-md flex-shrink-0' style={{ padding: 10 }}>
-                                <div className="flex flex-wrap gap-2.5">
-                                    {departments.map((dept, i) => (
-                                        <span key={i} style={departmentChipStyle(dept)} className="transition-colors hover:bg-gray-200" onClick={() => toggleDepartment(dept)}>{dept}</span>
-                                    ))}
-                                </div>
+
+                            {/* Department Selection */}
+                            <div 
+                                onMouseEnter={() => setIsDeptContainerHovered(true)} 
+                                onMouseLeave={() => setIsDeptContainerHovered(false)}
+                                className="flex flex-col gap-2 flex-shrink-0 transition-all duration-300 ease-in-out"
+                            >
+                                {!isDeptContainerHovered && selectedDepartments.length > 0 ? (
+                                    <div className="flex items-center gap-3 h-[45px]">
+                                        <label style={labelStyle(validationError.departments)}>Selected Department/s:</label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedDepartments.slice(0, 2).map((dept, i) => (
+                                                <span key={i} style={{...departmentChipStyle(dept), cursor: 'default'}}>{dept}</span>
+                                            ))}
+                                            {selectedDepartments.length > 2 && (
+                                                <span style={{ padding: '5px 10px', borderRadius: 12, fontSize: 12, backgroundColor: '#e5e7eb', color: '#374151', fontFamily: "geist", cursor: 'default' }}>
+                                                    +{selectedDepartments.length - 2}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <label style={labelStyle(validationError.departments)}>Select Department/s:</label>
+                                        <div className="flex flex-wrap gap-2.5 border-gray-200 border-[1px] rounded-md p-3 bg-white">
+                                            {departments.map((dept, i) => (
+                                                <span key={i} style={departmentChipStyle(dept)} className="transition-colors hover:bg-gray-200" onClick={() => toggleDepartment(dept)}>{dept}</span>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
                             </div>
-                            <div className="flex flex-col flex-grow min-h-0 h-[250px]">
+
+                            {/* Program Section */}
+                            <div className="flex flex-col flex-grow min-h-0">
                                 <div style={{ marginBottom: 5 }}><label style={labelStyle(validationError.programs)}>Select sections:</label></div>
                                 {selectedDepartments.length === 0 ? (
                                     <div className="flex items-center justify-center h-full" style={{ padding: 16, backgroundColor: '#fef3c7', borderRadius: 8, color: '#92400e', fontFamily: "geist", fontSize: 14, fontWeight: 450 }}>Please select a Department.</div>
@@ -304,20 +438,81 @@ export const AddEventForm = () => {
                                                 <label style={{ fontWeight: 450, fontSize: 12, fontFamily: "geist" }}>Select All</label>
                                             </div>
                                         </div>
-                                        <div className="bg-blue-50 rounded-lg p-4 flex flex-col flex-grow min-h-0 overflow-hidden">
+                                        
+                                        {/* 🟢 LIST CONTAINER: Now uses white background with simple border, similar to table */}
+                                        <div className="rounded-lg border border-gray-200 flex flex-col flex-grow min-h-0 overflow-hidden bg-white">
                                             <div className="overflow-y-auto flex-grow">
                                                 {programsToDisplay.map((program, idx) => (
-                                                    <div key={idx} style={{ padding: 10, backgroundColor: selectedPrograms.includes(program) ? '#bfdbfe' : 'transparent' }} className="flex items-center gap-3 py-2 px-2 transition-colors hover:bg-blue-100 rounded" onClick={() => handleProgramToggle(program)}>
-                                                        <input type="checkbox" className="accent-blue-600 w-4 h-4" checked={selectedPrograms.includes(program)} readOnly />
-                                                        <span style={{ fontWeight: 450, fontSize: 12, fontFamily: "geist" }}>{program}</span>
+                                                    <div 
+                                                        key={idx} 
+                                                        onClick={() => handleProgramToggle(program)}
+                                                        // 🟢 Applying cellStyle here + Hover/Active states
+                                                        style={{
+                                                            ...cellStyle,
+                                                            backgroundColor: selectedPrograms.includes(program) ? '#eff6ff' : 'transparent', // Matches table selected row
+                                                        }}
+                                                        className="hover:bg-gray-50"
+                                                    >
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', marginRight: '10px' }}>
+                                                            <input 
+                                                                type="checkbox" 
+                                                                className="accent-blue-600 w-4 h-4 cursor-pointer" 
+                                                                checked={selectedPrograms.includes(program)} 
+                                                                readOnly 
+                                                            />
+                                                        </div>
+                                                        <span style={{ fontWeight: 500, fontSize: 12, fontFamily: "geist", color: '#111827' }}>
+                                                            {program}
+                                                        </span>
                                                     </div>
                                                 ))}
                                             </div>
+                                            
+                                            {/* PAGINATION UI */}
                                             {allProgramsToDisplay.length > ITEMS_PER_PAGE && (
-                                                <div style={{ paddingTop: '10px', borderTop: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} className="flex-shrink-0">
-                                                    <button type="button" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} style={{ cursor: currentPage === 1 ? 'not-allowed' : 'pointer', border: 'none', background: 'transparent' }} className="text-gray-500 hover:text-gray-700">{'<'}</button>
-                                                    {[...Array(totalPages)].slice(0, 3).map((_, i) => <button key={i} type="button" onClick={() => handlePageChange(i + 1)} className={`${currentPage === i + 1 ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-200'}`} style={{ width: '24px', height: '24px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', fontFamily: "geist", fontSize: 11 }}>{i + 1}</button>)}
-                                                    <button type="button" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} style={{ cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', border: 'none', background: 'transparent' }} className="text-gray-500 hover:text-gray-700">{'>'}</button>
+                                                <div style={{ paddingTop: '10px', borderTop: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', paddingBottom: '10px' }} className="flex-shrink-0 bg-white">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handlePageChange(currentPage - 1)}
+                                                        disabled={currentPage === 1}
+                                                        className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        style={{ padding: '6px 10px', borderRadius: '6px', border: 'none', background: 'transparent' }}
+                                                    >
+                                                        <ChevronLeft size={14} /> Previous
+                                                    </button>
+
+                                                    {totalPages > 5 && visiblePages[0] > 1 && (
+                                                        <>
+                                                            <AnimatedPageButton page={1} isActive={currentPage === 1} onClick={handlePageChange} />
+                                                            <span className="text-gray-400 text-xs">...</span>
+                                                        </>
+                                                    )}
+
+                                                    {visiblePages.map((page) => (
+                                                        <AnimatedPageButton
+                                                            key={page}
+                                                            page={page}
+                                                            isActive={currentPage === page}
+                                                            onClick={handlePageChange}
+                                                        />
+                                                    ))}
+
+                                                    {totalPages > 5 && visiblePages[visiblePages.length - 1] < totalPages && (
+                                                        <>
+                                                            <span className="text-gray-400 text-xs">...</span>
+                                                            <AnimatedPageButton page={totalPages} isActive={currentPage === totalPages} onClick={handlePageChange} />
+                                                        </>
+                                                    )}
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handlePageChange(currentPage + 1)}
+                                                        disabled={currentPage === totalPages}
+                                                        className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        style={{ padding: '6px 10px', borderRadius: '6px', border: 'none', background: 'transparent' }}
+                                                    >
+                                                        Next <ChevronRight size={14} />
+                                                    </button>
                                                 </div>
                                             )}
                                         </div>
@@ -326,7 +521,7 @@ export const AddEventForm = () => {
                             </div>
                         </div>
 
-                        {/* RIGHT COLUMN */}
+                        {/* RIGHT COLUMN (Preview) */}
                         <div style={rightPanelStyle}>
                             <h3 style={{ fontFamily: 'geist', fontSize: 12, color: '#6b7280', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Preview Card</h3>
                             <div style={{ width: '280px', height: '380px', backgroundColor: selectedColor, borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', transition: 'background-color 0.3s ease', position: 'relative' }}>

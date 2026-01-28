@@ -35,7 +35,6 @@ function StatsCard({
             flexDirection: "column", 
             width: '100%', 
             justifyContent: "center", 
-            margin: 5,
             minHeight: "100px" // Ensure consistent height during loading
         }}>
             {isLoading ? (

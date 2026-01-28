@@ -3,49 +3,8 @@ import { AddEventForm } from './AddEventForm';
 import { ButtonGroup } from '../../../../components/global/ButtonGroup';
 import { EventDisplayer } from './EventDisplayer';
 import { EventDetailModal } from './EventDetailModal';
-
+import { useData } from '../../../../context/DataContext';
 import { motion } from 'framer-motion';
-
-// --- MOCK DATA ---
-// explicitly defined classification as requested
-const MOCK_ALL_EVENTS = [
-    {
-        id: 1,
-        eventName: "Christmas Party 2025",
-        eventDate: "2025-12-25",
-        classification: "upcoming", // Explicit Definition
-        selectedColor: "#dbeafe",
-        selectedDepartments: ["Preschool", "Primary Education"],
-        selectedPrograms: ["Kindergarten", "Grade 1", "Grade 2"]
-    },
-    {
-        id: 2,
-        eventName: "Annual Intramurals",
-        eventDate: "2023-10-01",
-        classification: "recent", // Explicit Definition
-        selectedColor: "#fee2e2",
-        selectedDepartments: ["Junior High School", "Senior High School"],
-        selectedPrograms: ["Grade 7", "Grade 11", "Grade 12"]
-    },
-    {
-        id: 3,
-        eventName: "Foundation Day Celebration",
-        eventDate: new Date().toLocaleDateString('en-CA'),
-        classification: "ongoing", // Explicit Definition
-        selectedColor: "#dcfce7",
-        selectedDepartments: ["Higher Education", "Senior High School"],
-        selectedPrograms: ["BSIT", "BSBA", "AB Psychology"]
-    },
-    {
-        id: 4,
-        eventName: "Parents Orientation",
-        eventDate: "2025-08-15",
-        classification: "upcoming", // Explicit Definition
-        selectedColor: "#fef9c3",
-        selectedDepartments: ["All"],
-        selectedPrograms: ["All Levels"]
-    }
-];
 
 const buttonListGroup = [
     { id: "ongoing", label: "Ongoing Events" },
@@ -54,17 +13,60 @@ const buttonListGroup = [
 ];
 
 export function EventDashboard() {
+    // 🟢 1. Consume Real Data
+    const { eventMealRequest = [] } = useData(); 
+
     const [activeTab, setActiveTab] = useState("ongoing");
 
     // --- MODAL STATE ---
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEventId, setSelectedEventId] = useState(null);
 
-    // --- FILTERING LOGIC ---
-    // Now simply checks the explicit classification
+    // --- 🟢 2. DATA PROCESSING & CLASSIFICATION ---
+    const processedEvents = useMemo(() => {
+        if (!eventMealRequest) return [];
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalize today to midnight
+
+        return eventMealRequest.map(event => {
+            // Parse Date from Backend (eventSpan is an array of dates)
+            const eventDateObj = new Date(event.eventSpan?.[0] || new Date());
+            const compareDate = new Date(eventDateObj);
+            compareDate.setHours(0, 0, 0, 0);
+
+            // Determine Classification
+            let classification = 'recent';
+            if (compareDate.getTime() === today.getTime()) {
+                classification = 'ongoing';
+            } else if (compareDate > today) {
+                classification = 'upcoming';
+            }
+
+            // Map Backend Model to UI Props
+            return {
+                id: event.eventID,
+                eventName: event.eventName,
+                eventDate: eventDateObj.toLocaleDateString('en-CA'), // Format YYYY-MM-DD
+                classification: classification,
+                
+                // Use the color saved in DB, or fallback
+                selectedColor: event.eventColor || "#dbeafe",
+                
+                // Map DB 'forEligibleSection' to UI 'selectedPrograms'
+                selectedPrograms: event.forEligibleSection || [],
+                
+                // Map DB 'eventScope' to UI 'selectedDepartments'
+                // You might want to refine this logic based on your actual data needs
+                selectedDepartments: event.eventScope === 'School-Wide' ? ['All'] : ['Departmental']
+            };
+        });
+    }, [eventMealRequest]);
+
+    // --- 🟢 3. FILTERING LOGIC ---
     const filteredEvents = useMemo(() => {
-        return MOCK_ALL_EVENTS.filter(event => event.classification === activeTab);
-    }, [activeTab]);
+        return processedEvents.filter(event => event.classification === activeTab);
+    }, [activeTab, processedEvents]);
 
     // --- HANDLERS ---
     const handleCardClick = (eventId) => {
@@ -93,15 +95,10 @@ export function EventDashboard() {
         <div className="w-full h-full relative">
 
             {/* THE MODAL */}
-            {/* We pass the FULL list (MOCK_ALL_EVENTS) if you want next/prev to work across categories, 
-                OR filteredEvents if you only want to scroll within the current category. 
-                Based on previous logic, usually better to pass filtered if context matters, 
-                but here let's pass filteredEvents so user stays in "Ongoing" when clicking next. 
-            */}
             <EventDetailModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
-                events={filteredEvents}
+                events={filteredEvents} // Or pass processedEvents if you want to navigate outside current category
                 initialEventId={selectedEventId}
             />
 
@@ -126,6 +123,8 @@ export function EventDashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ type: "spring", delay: 0.1 }}
                     className="flex-1 overflow-y-auto">
+                    
+                    {/* Render Real Data */}
                     <EventDisplayer
                         events={filteredEvents}
                         onEventClick={handleCardClick}

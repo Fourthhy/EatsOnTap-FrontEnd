@@ -33,10 +33,7 @@ export const programsList = getAllPrograms();
 
 // Existing mock data for other components (if needed, keep in this file)
 export const upcomingEventsData = [
-    { id: 1, name: "Teachers' Day", date: "October 5, 2025", count: 1532 },
-    { id: 2, name: "Presidents' Day", date: "November 28, 2025", count: 2343 },
-    { id: 3, name: "College Intramurals", date: "December 1-5, 2025", count: 423 },
-    { id: 3, name: "College Intramurals", date: "December 1-5, 2025", count: 423 },
+    { id: 1, name: "LVCC 27th Foundation Day", date: "January 15, 2026", count: 1823 },
 ];
 
 export const recentEventsData = [

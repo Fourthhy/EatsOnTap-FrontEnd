@@ -5,12 +5,12 @@ export const MOCK_DASHBOARD_DATA = {
     today: [
         {
             barChartData: [
-                { dayOfWeek: "Monday", dish1: "Shanghai", dish2: "Gulay", Claimed: 390, Unclaimed: 1250 },
-                { dayOfWeek: "Tuesday", dish1: "Burger Steak", dish2: "", Claimed: 420, Unclaimed: 1503 },
-                { dayOfWeek: "Wednesday", dish1: "Menudo", dish2: "Adobo", Claimed: 100, Unclaimed: 2175 },
-                { dayOfWeek: "Thursday", dish1: "Fried Chicken", dish2: "Ampalaya", Claimed: 200, Unclaimed: 1863 },
-                { dayOfWeek: "Friday", dish1: "Tortang Talong", dish2: "Ampalaya", Claimed: 632, Unclaimed: 1698 },
-                { dayOfWeek: "Saturday", dish1: "Hotdog", dish2: "Egg", Claimed: 0, Unclaimed: 423 },
+                { date: "January 28, 2026", dayOfWeek: "Monday", dish1: "Shanghai", dish2: "Gulay", Claimed: 390, Unclaimed: 1250 },
+                { date: "January 28, 2026", dayOfWeek: "Tuesday", dish1: "Burger Steak", dish2: "", Claimed: 420, Unclaimed: 1503 },
+                { date: "January 28, 2026", dayOfWeek: "Wednesday", dish1: "Menudo", dish2: "Adobo", Claimed: 100, Unclaimed: 2175 },
+                { date: "January 28, 2026", dayOfWeek: "Thursday", dish1: "Fried Chicken", dish2: "Ampalaya", Claimed: 200, Unclaimed: 1863 },
+                { date: "January 28, 2026", dayOfWeek: "Friday", dish1: "Tortang Talong", dish2: "Ampalaya", Claimed: 632, Unclaimed: 1698 },
+                { date: "January 28, 2026", dayOfWeek: "Saturday", dish1: "Hotdog", dish2: "Egg", Claimed: 0, Unclaimed: 423 },
             ]
         },
         {
@@ -177,8 +177,13 @@ export const MOCK_DASHBOARD_DATA = {
 };
 
 export const MOCK_EVENTS = [
-    { link: "#", color: "#dbeafe", title: "Teachers' Day", date: "Oct 5, 2025" },
-    { link: "#", color: "#fee2e2", title: "President' Day", date: "Nov 25, 2025" },
-    { link: "#", color: "#ffedd5", title: "College Intramurals", date: "Dec 15, 2025" },
-    { link: "#", color: "#f3e8ff", title: "ICT Week", date: "Jan 19, 2026" }
+    [
+        { link: "#", color: "#dbeafe", title: "Teachers' Day", date: "Oct 5, 2025" },
+        { link: "#", color: "#fee2e2", title: "President' Day", date: "Nov 25, 2025" },
+        { link: "#", color: "#ffedd5", title: "College Intramurals", date: "Dec 15, 2025" },
+        { link: "#", color: "#f3e8ff", title: "LVCC 27th Foundation Day", date: "Febuary 2026" }
+    ],
+    [
+        { link: "#", color: "#f3e8ff", title: "CL Week", date: "Jan 25 - 31, 2026" }
+    ]
 ];

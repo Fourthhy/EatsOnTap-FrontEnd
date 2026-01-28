@@ -15,7 +15,7 @@ export default function FreeMealClaim() {
     const [mealClaimData, setMealClaimData] = useState({})
     // 🟢 1. State for the input
     const [studentId, setStudentId] = useState("");
-    
+
     // 🟢 NEW STATE: Track System Status
     const [isSystemActive, setIsSystemActive] = useState(true);
     const [systemMessage, setSystemMessage] = useState("");
@@ -65,7 +65,8 @@ export default function FreeMealClaim() {
                 const status = await isSettingActive("STUDENT-CLAIM");
                 // Expected format: { response: boolean, message: string }
                 if (status) {
-                    setIsSystemActive(status.response);
+                    setIsSystemActive(status);
+
                     setSystemMessage(status.message);
                 }
             } catch (error) {
@@ -203,7 +204,7 @@ export default function FreeMealClaim() {
                                                 // Show system message as placeholder if inactive
                                                 placeholder={isSystemActive ? "Student ID" : systemMessage || "Claim Disabled at this time"}
                                             />
-                                            
+
                                             {/* Optional: Show message text below input if inactive */}
                                             {!isSystemActive && (
                                                 <p className="text-red-300 font-geist text-sm">{systemMessage}</p>
@@ -264,16 +265,16 @@ export default function FreeMealClaim() {
                 }}>
 
                     {/* <img src="/studentClaim/Eligible_Sinage.svg" alt="Eligible Sinage" style={{ width: "170px", height: "170px" }} />    */}
-                        {mealClaimData.temporaryClaimStatus[0] == "ELIGIBLE" ? (
-                            <img src="/studentClaim/Eligible_Sinage.svg" alt="Eligible Sinage" style={{ width: "170px", height: "170px" }} />
-                        ) : ""}
-                        {mealClaimData.temporaryClaimStatus[0] == "CLAIMED" ? (
-                            <img
-                                src="/studentClaim/ALREADY_CLAIMED.svg"
-                                alt="Background"
-                                style={{ width: "190px", height: "190px" }}
-                            />
-                        ) : ""}
+                    {mealClaimData.temporaryClaimStatus[0] == "ELIGIBLE" ? (
+                        <img src="/studentClaim/Eligible_Sinage.svg" alt="Eligible Sinage" style={{ width: "170px", height: "170px" }} />
+                    ) : ""}
+                    {mealClaimData.temporaryClaimStatus[0] == "CLAIMED" ? (
+                        <img
+                            src="/studentClaim/ALREADY_CLAIMED.svg"
+                            alt="Background"
+                            style={{ width: "190px", height: "190px" }}
+                        />
+                    ) : ""}
 
 
                     <div style={{ width: "100%", height: "55%", display: "flex", justifyContent: "center", alignItems: "start" }}>
@@ -314,7 +315,19 @@ export default function FreeMealClaim() {
                                         zIndex: 0
                                     }}
                                 />
-                            ) : ""}
+                            ) : <img
+                                src="/studentClaim/Card_Template_Basic_Ed.svg"
+                                alt="claim card"
+                                style={{
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "contain",
+                                    zIndex: 0
+                                }}
+                            />}
 
 
                             {/* 🟢 2. CONTENT LAYER (Absolute - Front) */}
@@ -362,7 +375,7 @@ export default function FreeMealClaim() {
 
                                                 ) : mealClaimData.section === 'BSIS' ? (
                                                     <img src="/studentClaim/logo-BSIS.svg" al t='bsis-logo' style={{ width: "170px", height: "170px", paddingBottom: "10px" }} />
-                                                ) : ""}
+                                                ) : <img src="lv-logo.svg" al t='bsis-logo' style={{ width: "170px", height: "170px", paddingBottom: "10px", paddingRight: "10px" }} />}
                                             </div>
                                         </div>
                                     </div>
