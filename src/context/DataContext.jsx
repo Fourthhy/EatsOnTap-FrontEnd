@@ -157,9 +157,10 @@ const DataProvider = ({ children }) => {
                 console.warn("⚠️ Section Program List Returned Empty");
             } else {
                 setSectionProgram(data)
+                console.log("raw section program data", data)
             }
         } catch (error) {
-            console.error('Error fetching section program list');
+            console.error('Error fetching section program list', error);
         }
     }, [])
 
@@ -211,6 +212,20 @@ const DataProvider = ({ children }) => {
             socket.disconnect();
         };
     }, [fetchUnifiedSchoolData]); // Add fetch function to dependency array
+
+    useEffect(() => {
+        const socket = io(import.meta.env.VITE_LOCALHOST);
+        socket.on('connect', () => {
+            console.log("✅ Socket Connected for Section Program Updates:", socket.id);
+        })
+        socket.on('update-section-program-register', (data)=> {
+            console.log("🔔 Section/Program Updated! Refreshing Data...", data);
+            fetchSectionProgramList();
+        });
+        return () => {
+            socket.disconnect();
+        }
+    }, [fetchSectionProgramList])
 
 
     return (

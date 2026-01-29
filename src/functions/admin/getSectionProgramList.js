@@ -2,8 +2,8 @@ const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 export async function getSectionProgramList() {
-    console.log("🌐 Fetching Overall Claim Record Data from:", targetUrl); 
-    const targetUrl = `${VITE_LOCALHOST}/api/fetch/getSectionProgramList`
+    const targetUrl = `${VITE_LOCALHOST}/api/fetch/getAllSectionProgramList`
+    console.log("🌐 Fetching Overall Section Program Data from:", targetUrl); 
 
     try {
         const response = await fetch(targetUrl);
@@ -12,6 +12,7 @@ export async function getSectionProgramList() {
         }
         const data = await response.json();
         console.log("📦 SectionProgram Data Received:", data);
+        return data;
     } catch (error) {
         throw new Error('Error fetching sectionprogram data', error);
     }

@@ -12,7 +12,7 @@ import { SwitcherButton } from './SwitcherButton';
 
 const StudentList = () => {
     // --- NAVIGATION STATE ---
-    const [viewMode, setViewMode] = useState('sections'); 
+    const [viewMode, setViewMode] = useState('students'); 
     
     // Holds the section object when clicking "View Students"
     const [drilldownContext, setDrilldownContext] = useState(null); 
@@ -31,12 +31,12 @@ const StudentList = () => {
     const viewSwitcher = (
         <div style={{ backgroundColor: '#f3f4f6', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
             <SwitcherButton 
-                mode="sections" currentMode={viewMode} icon={<School size={14} />} label="View Sections" 
-                onClick={() => { setViewMode('sections'); setDrilldownContext(null); }} 
-            />
-            <SwitcherButton 
                 mode="students" currentMode={viewMode} icon={<Users size={14} />} label="View Students" 
                 onClick={() => { setViewMode('students'); setDrilldownContext(null); }} 
+            />
+            <SwitcherButton 
+                mode="sections" currentMode={viewMode} icon={<School size={14} />} label="View Sections" 
+                onClick={() => { setViewMode('sections'); setDrilldownContext(null); }} 
             />
             <SwitcherButton 
                 mode="advisers" currentMode={viewMode} icon={<FaChalkboardTeacher size={14} />} label="View Advisers" 

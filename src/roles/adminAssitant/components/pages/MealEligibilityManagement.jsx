@@ -1,5 +1,6 @@
 import { HeaderBar } from "../../../../components/global/HeaderBar";
 import { EligibilityScheduler } from "../EligibilityScheduler";
+import { MealSchedulingManagement } from "../MealSchedulingManagement";
 
 export default function MealEligibilityManagement() {
     const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
@@ -14,7 +15,8 @@ export default function MealEligibilityManagement() {
                 <HeaderBar userAvatar={USER_AVATAR} headerTitle={"Voucher Management"} />
                 <div className="w-full h-full flex justify-center overflow-y-hidden" style={{ paddingTop: 30 }}>
                     <div className="w-[95%] h-[calc(100vh-120px)] flex items-center">
-                        <EligibilityScheduler />
+                        {/* <EligibilityScheduler /> */}
+                        <MealSchedulingManagement isOpen={true} onClose={false}/>
                     </div>
                 </div>
             </div>

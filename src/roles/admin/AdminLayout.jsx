@@ -71,8 +71,10 @@ const AdminLayoutContent = () => {
             <Sidebar
                 menuItems={menuItems}
                 menutItemsLabel={"Pages"}
+
                 quickActions={quickActions}
                 quickActionsLabel={"Quick Actions"}
+                
                 settingMenu={settingMenu}
             />
 

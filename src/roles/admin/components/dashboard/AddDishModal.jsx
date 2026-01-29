@@ -24,6 +24,7 @@ const AddDishModal = ({
                     // 🟢 1. Trigger close when clicking the background
                     onClick={onClose}
                     className="fixed inset-0 z-9000 flex items-center justify-center bg-black/20 backdrop-blur-sm"
+                    
                 >
                     <motion.div
                         initial={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -33,6 +34,7 @@ const AddDishModal = ({
                         // 🟢 2. Prevent clicks inside the modal from closing it
                         onClick={(e) => e.stopPropagation()}
                         className="bg-white rounded-xl shadow-xl w-[550px] h-auto p-8 relative"
+                        style={{ padding: 20 }}
                     >
 
                         {/* Header */}

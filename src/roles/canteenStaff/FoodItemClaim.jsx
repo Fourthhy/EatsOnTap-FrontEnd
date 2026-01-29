@@ -3,10 +3,15 @@ import { logout } from "../../functions/logoutAuth";
 import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { Loader2, LogOut } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-// 🟢 API FUNCTIONS (Ensure these match your actual file paths)
-import { claimFoodItem } from "../../functions/foodItem/claimFoodItem"; 
+// 🟢 IMPORTS
+// Removed claimFoodItem API import as requested
+import { fetchAllStudents } from "../../functions/foodServer/fetchAllStudents";
+import { isSettingActive } from "../../functions/isSettingActive";
+
+// --- COMPONENTS ---
 
 const Row = ({ label, value, valueColor }) => (
     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontFamily: "geist, sans-serif" }}>
@@ -15,7 +20,6 @@ const Row = ({ label, value, valueColor }) => (
     </div>
 );
 
-// 🟢 KEYPAD COMPONENT (Now accepts props)
 const Keypad = ({ onKeyPress, disabled }) => {
     const renderKey = (label, value, style = {}) => (
         <button
@@ -53,7 +57,7 @@ const Keypad = ({ onKeyPress, disabled }) => {
             {renderKey("7", "7")}
             {renderKey("8", "8")}
             {renderKey("9", "9")}
-            
+
             <button
                 onClick={() => onKeyPress("ENTER")}
                 disabled={disabled}
@@ -71,18 +75,13 @@ const Keypad = ({ onKeyPress, disabled }) => {
                 Enter
             </button>
 
-            {/* Row 4 (0 spans 3 cols) */}
+            {/* Row 4 */}
             <button
                 onClick={() => onKeyPress("0")}
                 disabled={disabled}
                 style={{
-                    gridColumn: "span 3",
-                    height: "60px",
-                    borderRadius: "8px",
-                    border: "none",
-                    background: disabled ? "#e5e5e5" : "#f5f5f5",
-                    fontSize: "18px",
-                    fontWeight: 600,
+                    gridColumn: "span 3", height: "60px", borderRadius: "8px", border: "none",
+                    background: disabled ? "#e5e5e5" : "#f5f5f5", fontSize: "18px", fontWeight: 600,
                     cursor: disabled ? "not-allowed" : "pointer"
                 }}
             >
@@ -92,246 +91,422 @@ const Keypad = ({ onKeyPress, disabled }) => {
     );
 };
 
+const SuccessModal = ({ isOpen, newBalance }) => {
+    if (!isOpen) return null;
+    return (
+        <div
+            style={{
+                position: "fixed",
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0,
+                zIndex: 9000,
+                backgroundColor: "rgba(0,0,0,0.6)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backdropFilter: "blur(4px)",
+            }}
+        >
+            <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                style={{
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: "16px", // rounded-2xl
+                    padding: "32px", // p-8
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)", // shadow-2xl
+                    width: "400px",
+                    textAlign: "center",
+                    fontFamily: "Geist, sans-serif",
+                }}
+            >
+                {/* Icon Circle */}
+                <div
+                    style={{
+                        width: "80px", // w-20
+                        height: "80px", // h-20
+                        backgroundColor: "#DCFCE7", // green-100
+                        borderRadius: "9999px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "16px", // mb-4
+                    }}
+                >
+                    <CheckCircle size={40} color="#16A34A" /> {/* green-600 */}
+                </div>
+
+                {/* Title */}
+                <h2
+                    style={{
+                        fontSize: "24px", // text-2xl
+                        fontWeight: "700",
+                        color: "#1F2937", // gray-800
+                        marginBottom: "8px", // mb-2
+                    }}
+                >
+                    Transaction Success!
+                </h2>
+
+                {/* Subtitle */}
+                <p
+                    style={{
+                        color: "#6B7280", // gray-500
+                        marginBottom: "24px", // mb-6
+                    }}
+                >
+                    The amount has been deducted.
+                </p>
+
+                {/* Balance Card */}
+                <div
+                    style={{
+                        backgroundColor: "#F9FAFB", // gray-50
+                        borderRadius: "8px", // rounded-lg
+                        padding: "16px", // p-4
+                        width: "100%",
+                        border: "1px solid #F3F4F6", // gray-100
+                    }}
+                >
+                    <p
+                        style={{
+                            fontSize: "12px", // text-sm
+                            color: "#6B7280", // gray-500
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em", // tracking-wider
+                            fontWeight: "600",
+                        }}
+                    >
+                        Remaining Balance
+                    </p>
+
+                    <p
+                        style={{
+                            fontSize: "30px", // text-3xl
+                            fontWeight: "700",
+                            marginTop: "4px", // mt-1
+                            color: newBalance < 0 ? "#DC2626" : "#111827", // red-600 : gray-900
+                        }}
+                    >
+                        ₱{newBalance.toFixed(2)}
+                    </p>
+                </div>
+            </motion.div>
+        </div>
+
+    );
+};
+
 export default function FoodItemClaim() {
     const navigate = useNavigate();
     const inputRef = useRef(null);
 
     // --- STATE ---
-    const [studentId, setStudentId] = useState("");
-    const [amount, setAmount] = useState(""); // String to handle inputs easily
-    const [studentData, setStudentData] = useState(null); // Stores fetched student info
-    
+    const [allStudents, setAllStudents] = useState([]); // 🟢 Local Data
+    const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+    const [inputVal, setInputVal] = useState(""); // Search Input
+    const [studentData, setStudentData] = useState(null); // Selected Student
+    const [amount, setAmount] = useState("");
+
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState("");
-    const [messageType, setMessageType] = useState("info"); // 'info', 'success', 'error'
+    const [isSuccessOpen, setIsSuccessOpen] = useState(false); // 🟢 Success Modal
+    const [isSystemActive, setIsSystemActive] = useState(true);
+    const [systemMessage, setSystemMessage] = useState("");
 
     // --- CALCULATIONS ---
     const currentBalance = studentData ? studentData.temporaryCreditBalance : 0;
     const totalCost = parseFloat(amount) || 0;
-    const remainingBalance = currentBalance - totalCost;
-    const isInsufficient = remainingBalance < 0;
+    const remainingBalance = currentBalance - totalCost; // 🟢 Allow negatives
 
-    // --- LOGOUT ---
+    // --- INITIAL DATA LOAD ---
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const students = await fetchAllStudents();
+                if (Array.isArray(students)) {
+                    setAllStudents(students);
+                    setIsDataLoaded(true);
+                }
+            } catch (error) {
+                console.error("Error fetching students:", error);
+            }
+        };
+
+        const checkSystemStatus = async () => {
+            try {
+                const status = await isSettingActive("STUDENT-CLAIM"); // Or FOOD-ITEM-CLAIM if you have separate settings
+                if (status) {
+                    setIsSystemActive(status);
+                    setSystemMessage(status.message);
+                }
+            } catch (error) {
+                console.error("Failed to check status:", error);
+            }
+        };
+
+        loadData();
+        checkSystemStatus();
+
+        if (inputRef.current && isSystemActive) inputRef.current.focus();
+    }, [isSystemActive]);
+
     const handleLogout = () => {
         logout();
-        navigate('/'); 
+        navigate('/');
     };
 
-    // --- 1. HANDLE STUDENT SEARCH (Scan/Enter ID) ---
-    const handleSearchStudent = async (e) => {
+    // --- 1. HANDLE LOCAL SEARCH ---
+    const handleSearchStudent = (e) => {
         if (e.key === 'Enter') {
-            if (!studentId.trim()) return;
-            
-            setLoading(true);
-            setMessage("");
-            setStudentData(null);
-            setAmount("");
+            const trimmedInput = inputVal.trim();
+            if (!trimmedInput) return;
 
-            try {
-                // Reuse your existing logic or the 'fakeMealClaim' GET endpoint
-                // We assume 'claimMeal' here fetches data. If it auto-claims, you need a different fetch function.
-                // Ideally: fetch(`${VITE_LOCALHOST}/api/claim/fakeMealClaim?studentInput=${studentId}`)
-                const data = await claimMeal(studentId); 
-                
-                setStudentData(data);
-                setMessage(`Student Found: ${data.first_name} ${data.last_name}`);
-                setMessageType("success");
-                
-                // Clear input for next scan if needed, or keep it visible
-                // setStudentId(""); 
-            } catch (error) {
-                console.error(error);
-                setMessage(error.message || "Student not found");
-                setMessageType("error");
-            } finally {
-                setLoading(false);
+            // Determine if RFID (digits only) or Student ID
+            const isRFID = /^\d+$/.test(trimmedInput);
+
+            // Find in local array
+            const foundStudent = allStudents.find(s => {
+                if (isRFID) return s.rfidTag === trimmedInput;
+                return s.studentID?.toLowerCase() === trimmedInput.toLowerCase();
+            });
+
+            if (foundStudent) {
+                setStudentData(foundStudent);
+                setInputVal(""); // Clear input
+                setAmount("");
+            } else {
+                alert("Student not found!");
+                setInputVal("");
             }
         }
     };
 
-    // --- 2. HANDLE KEYPAD INPUT ---
-    const handleKeypadPress = async (key) => {
-        if (!studentData) {
-            setMessage("Please scan a Student ID first.");
-            setMessageType("error");
-            return;
-        }
+    // --- 2. HANDLE KEYPAD ---
+    const handleKeypadPress = (key) => {
+        if (!studentData) return;
 
         if (key === "CANCEL") {
+            setStudentData(null); // Cancel Selection
             setAmount("");
-            setMessage("");
+            // Re-focus input for next scan
+            setTimeout(() => { if (inputRef.current) inputRef.current.focus() }, 100);
             return;
         }
-
         if (key === "DELETE") {
             setAmount((prev) => prev.slice(0, -1));
             return;
         }
-
         if (key === "ENTER") {
             handleTransactionSubmit();
             return;
         }
-
-        // Handle Numbers
-        // Prevent leading zeros or too many decimals if you add decimal logic later
-        if (amount.length > 5) return; // Limit length
+        if (amount.length > 5) return;
         setAmount((prev) => prev + key);
     };
 
-    // --- 3. SUBMIT TRANSACTION ---
+    // --- 3. SUBMIT TRANSACTION (LOCAL UPDATE) ---
     const handleTransactionSubmit = async () => {
         if (!amount || parseFloat(amount) <= 0) {
-            setMessage("Please enter a valid amount.");
-            setMessageType("error");
-            return;
-        }
-
-        if (isInsufficient) {
-            setMessage("Insufficient Balance!");
-            setMessageType("error");
+            alert("Please enter a valid amount.");
             return;
         }
 
         setLoading(true);
-        try {
-            // Call the POST API
-            const result = await claimFoodItem(studentData.studentID, parseFloat(amount));
-            
-            setMessage(`Success! New Balance: ₱${result.remainingBalance}`);
-            setMessageType("success");
-            
-            // Update local state to reflect new balance immediately
-            setStudentData(prev => ({
-                ...prev,
-                temporaryCreditBalance: result.remainingBalance
-            }));
-            setAmount(""); // Reset amount for next purchase
 
-            // Optional: Auto-reset after 3 seconds for next student
+        // 🟢 Simulate "Processing" time for UX
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        try {
+            const deductAmount = parseFloat(amount);
+            const newBal = studentData.temporaryCreditBalance - deductAmount;
+
+            // 🟢 Update Local Data Structure
+            const updatedList = allStudents.map(s => {
+                if (s.studentID === studentData.studentID) {
+                    return {
+                        ...s,
+                        temporaryCreditBalance: newBal,
+                        // Optionally mimic adding a record locally
+                        claimRecords: [
+                            ...(s.claimRecords || []),
+                            { date: new Date(), creditClaimed: deductAmount, remarks: ["CLAIMED"] }
+                        ]
+                    };
+                }
+                return s;
+            });
+
+            setAllStudents(updatedList);
+
+            // 🟢 Update Current View State
+            setStudentData(prev => ({ ...prev, temporaryCreditBalance: newBal }));
+
+            // 3. Show Success Modal
+            setIsSuccessOpen(true);
+
+            // 4. Auto Reset
             setTimeout(() => {
-                setStudentId("");
+                setIsSuccessOpen(false);
                 setStudentData(null);
-                setMessage("");
-                if(inputRef.current) inputRef.current.focus();
-            }, 3000);
+                setAmount("");
+                if (inputRef.current) inputRef.current.focus();
+            }, 3000); // 2 seconds display
 
         } catch (error) {
-            setMessage(error.message || "Transaction Failed");
-            setMessageType("error");
+            console.error(error);
+            alert("Transaction failed");
         } finally {
             setLoading(false);
         }
     };
 
-    // Auto-focus input on load
-    useEffect(() => {
-        if (inputRef.current) inputRef.current.focus();
-    }, []);
-
+    // Date Helpers
+    const currentDateTime = new Date();
+    const dateOnlyString = currentDateTime.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const timeString = currentDateTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     return (
         <>
             <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden", fontFamily: "geist, sans-serif" }}>
-                
-                {/* 🟢 LOGOUT BUTTON (Absolute Top Right) */}
-                {/* <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 50 }}>
-                     <Button variant="destructive" onClick={handleLogout} className="flex gap-2">
-                        <LogOut size={16} /> Logout
-                     </Button>
-                </div> */}
 
-                {/* 🟢 BACKGROUND */}
+                {/* SUCCESS MODAL */}
+                <SuccessModal isOpen={isSuccessOpen} newBalance={remainingBalance} />
+
+                {/* BACKGROUND */}
                 <img
                     src="/studentClaim/Canteen-Staff-BG.svg"
                     alt="Background"
-                    style={{
-                        position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
-                        objectFit: "cover", zIndex: 0, pointerEvents: "none"
-                    }}
+                    style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0, pointerEvents: "none" }}
                 />
 
-                <div style={{
-                    position: "relative", zIndex: 10, height: "100%", width: "100%",
-                    display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center"
-                }}>
+                <div style={{ position: "relative", zIndex: 10, height: "100%", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
+
                     <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "row" }}>
-                        
-                        {/* 🟢 LEFT SIDE: SCANNER & INFO */}
+
+                        {/* 🟢 LEFT SIDE: SCANNER OR CARD */}
                         <div style={{ width: "63%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                            <div
-                                style={{
+
+                            {!studentData ? (
+                                // 🟢 STATE A: ID SCANNER BOX
+                                <div style={{
                                     width: "65%", height: "50%",
-                                    border: `2px dashed ${messageType === 'error' ? '#ef4444' : messageType === 'success' ? '#22c55e' : '#6F4E37'}`,
-                                    background: "rgba(255, 255, 255, 0.85)", // increased opacity for readability
-                                    backdropFilter: "blur(10px)",
-                                    borderRadius: "16px",
-                                    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
+                                    background: "rgba(255, 255, 255, 0.85)", backdropFilter: "blur(10px)",
+                                    borderRadius: "16px", boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
                                     display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column",
-                                    gap: "20px", padding: "20px", transition: "all 0.3s"
-                                }}
-                            >
-                                <h2 className="text-2xl font-bold text-gray-800">
-                                    {studentData ? `Hi, ${studentData.first_name}!` : "Scan ID to Start"}
-                                </h2>
-
-                                <Input
-                                    ref={inputRef}
-                                    value={studentId}
-                                    onChange={(e) => setStudentId(e.target.value)}
-                                    onKeyDown={handleSearchStudent}
-                                    placeholder="Tap RFID or Type ID"
-                                    disabled={loading}
-                                    style={{
-                                        background: '#FFFFFF', width: '80%', height: '60px',
-                                        fontSize: '18px', textAlign: 'center', borderRadius: '12px',
-                                        border: '1px solid #d1d5db'
-                                    }}
-                                />
-
-                                {/* 🟢 STATUS MESSAGE AREA */}
-                                <div style={{ height: '30px', textAlign: 'center' }}>
-                                    {loading ? (
-                                        <div className="flex items-center gap-2 text-blue-600 font-semibold">
-                                            <Loader2 className="animate-spin" /> Processing...
-                                        </div>
-                                    ) : (
-                                        <p style={{ 
-                                            color: messageType === 'error' ? '#dc2626' : messageType === 'success' ? '#16a34a' : '#4b5563',
-                                            fontWeight: 600, fontSize: '16px'
-                                        }}>
-                                            {message || "Ready for transaction"}
-                                        </p>
-                                    )}
+                                    gap: "20px", padding: "20px"
+                                }}>
+                                    <h2 className="text-2xl font-bold text-gray-800">Scan ID to Start</h2>
+                                    <Input
+                                        ref={inputRef}
+                                        value={inputVal}
+                                        onChange={(e) => setInputVal(e.target.value)}
+                                        onKeyDown={handleSearchStudent}
+                                        placeholder={!isSystemActive ? "System Disabled" : !isDataLoaded ? "Loading Data..." : "Tap RFID or Type ID"}
+                                        disabled={!isSystemActive || !isDataLoaded}
+                                        autoFocus={true}
+                                        style={{
+                                            background: '#FFFFFF', width: '80%', height: '60px',
+                                            fontSize: '18px', textAlign: 'center', borderRadius: '12px', border: '1px solid #d1d5db'
+                                        }}
+                                    />
+                                    {loading && <div className="text-blue-600 font-semibold flex items-center gap-2"><Loader2 className="animate-spin" /> Processing...</div>}
                                 </div>
-                            </div>
+                            ) : (
+                                // 🟢 STATE B: VALIDITY CARD (Exact Structure)
+                                <div style={{ position: "relative", width: "65%", height: "50%" }}>
+                                    {/* Card Background Selection */}
+                                    {studentData.section === 'BSIS' ? (
+                                        <img src="/studentClaim/Card_Template_BSIS.svg" alt="card" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain", zIndex: 0 }} />
+                                    ) : studentData.section === 'ACT' ? (
+                                        <img src="/studentClaim/Card_Template_ACT.svg" alt="card" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain", zIndex: 0 }} />
+                                    ) : <img src="/studentClaim/Card_Template_Basic_Ed.svg" alt="card" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain", zIndex: 0 }} />}
+
+                                    {/* Card Content Overlay */}
+                                    <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 10, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                                        <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "start", padding: "5px" }}>
+
+                                            {/* Header Logo Row */}
+                                            <div className="w-[100%] h-[20%] flex flex-row" style={{ display: "flex", justifyContent: "start", alignItems: "center", marginTop: "10px" }}>
+                                                <img src="/lv-logo.svg" alt="lv-logo" style={{ height: "60px", width: "60px", margin: "5px 10px 5px 20px" }} />
+                                                <div className="h-[100%] flex items-center">
+                                                    <p style={{ fontWeight: 400 }} className="font-geist text-md text-white">Food Item Purchase</p>
+                                                </div>
+                                            </div>
+
+                                            {/* Body Info */}
+                                            <div className="w-[100%] h-[80%]" style={{ paddingTop: "20px" }}>
+                                                <div className="h-[100%] w-[100] flex items-center justify-between" style={{ marginLeft: "20px" }}>
+                                                    <div className="w-[100%] h-[100%] flex flex-row">
+                                                        {/* Picture & Time */}
+                                                        <div className="w-auto flex flex-col items-center gap-2">
+                                                            <img src="/studentClaim/Default_Picture.jpg" alt="default" style={{ width: "160px", height: "160px" }} />
+                                                            <p style={{ fontWeight: 400 }} className="font-geist text-[10px] text-white w-[160px]">
+                                                                {dateOnlyString.toUpperCase()}
+                                                            </p>
+                                                        </div>
+                                                        {/* Text Details */}
+                                                        <div style={{ marginLeft: "20px", display: "flex", flexDirection: "column", gap: 20 }} className="h-[100%] flex flex-column justify-start">
+                                                            <div>
+                                                                <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{studentData.last_name}, {studentData.first_name}</p>
+                                                                <p style={{ fontWeight: 350 }} className="font-geist text-xs text-[#999797]">Student Name</p>
+                                                            </div>
+                                                            <div>
+                                                                <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{studentData.section || studentData.program} - {studentData.year}</p>
+                                                                <p style={{ fontWeight: 350 }} className="font-geist text-xs text-[#999797]">Section / Year</p>
+                                                            </div>
+                                                            <div>
+                                                                <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{studentData.studentID}</p>
+                                                                <p style={{ fontWeight: 350 }} className="font-geist text-xs text-[#999797]">StudentID</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {/* Department Logo */}
+                                                    <div>
+                                                        {studentData.section === 'ACT' ? (
+                                                            <img src="/studentClaim/logo-ACT.svg" alt='logo' style={{ width: "170px", height: "170px", paddingBottom: "10px" }} />
+                                                        ) : studentData.section === 'BSIS' ? (
+                                                            <img src="/studentClaim/logo-BSIS.svg" alt='logo' style={{ width: "170px", height: "170px", paddingBottom: "50px" }} />
+                                                        ) : <img src="/lv-logo.svg" alt='logo' style={{ width: "170px", height: "170px", paddingBottom: "10px", paddingRight: "10px" }} />}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* 🟢 RIGHT SIDE: SUMMARY & KEYPAD */}
                         <div style={{ width: "37%" }}>
                             <div style={{ height: "45%", width: "100%", display: "flex", flexDirection: "column", justifyContent: "end" }}>
                                 <div className="flex justify-end flex-col w-[95%]" style={{ paddingLeft: "5%", paddingBottom: "25px" }}>
-                                    
+
                                     {/* SUMMARY CARD */}
                                     <div style={{
                                         background: "#f7f7f7", borderRadius: "10px", padding: "20px",
                                         marginBottom: "14px", width: "100%", boxShadow: "0 2px 10px rgba(0,0,0,0.05)"
                                     }}>
-                                        <Row label="Current Balance:" value={`₱${currentBalance}`} valueColor="#16a34a" />
-                                        <Row label="Item Cost:" value={`₱${totalCost}`} valueColor="#000" />
+                                        <Row label="Current Balance:" value={`₱${currentBalance.toFixed(2)}`} valueColor="#16a34a" />
+                                        <Row label="Item Cost:" value={`₱${totalCost.toFixed(2)}`} valueColor="#000" />
                                         <div style={{ width: '100%', height: '1px', background: '#e5e5e5', margin: '8px 0' }}></div>
-                                        <Row 
-                                            label="Remaining:" 
-                                            value={`₱${remainingBalance}`} 
-                                            valueColor={isInsufficient ? "#ef4444" : "#16a34a"} 
+                                        <Row
+                                            label="Remaining:"
+                                            value={`₱${remainingBalance.toFixed(2)}`}
+                                            valueColor={remainingBalance < 0 ? "#ef4444" : "#16a34a"} // Red if negative, green if positive
                                         />
                                     </div>
 
                                     {/* LARGE AMOUNT DISPLAY */}
                                     <div style={{
-                                        border: `2px solid ${isInsufficient ? '#fca5a5' : '#e5e7eb'}`,
+                                        border: `2px solid #e5e7eb`,
                                         borderRadius: "12px", padding: "16px",
-                                        background: isInsufficient ? "#fef2f2" : "#fff",
+                                        background: "#fff",
                                         width: "100%", textAlign: "right",
                                         display: "flex", justifyContent: "space-between", alignItems: "center"
                                     }}>
@@ -345,6 +520,7 @@ export default function FoodItemClaim() {
 
                             <div style={{ height: "55%", width: "100%" }}>
                                 <div className="h-[100%] w-[100%] flex items-center justify-center">
+                                    {/* Disable Keypad if no student is selected */}
                                     <Keypad onKeyPress={handleKeypadPress} disabled={!studentData || loading} />
                                 </div>
                             </div>

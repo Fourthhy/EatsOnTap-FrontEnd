@@ -4,7 +4,7 @@ const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 // 🟢 Updated to accept the formData object
 const createStudent = async (studentData) => {
 
-    const targetUrl = `${VITE_BASE_URL}/api/students/addNewStudent`;
+    const targetUrl = `${VITE_LOCALHOST}/api/students/addNewStudent`;
     console.log("🌐 Adding New Student:", targetUrl);
 
     try {

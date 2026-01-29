@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useRef, useMemo, useEffect, use } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { ChevronDown, Check, ChevronUp, ChevronLeft, Plus, Upload, FileText, X, User, Wifi, CheckCircle } from 'lucide-react';
-import { createStudent } from "../../../../functions/admin/createStudent";
-import { useData } from "../../../../context/DataContext";
+import { createStudent } from "../../../functions/admin/createStudent";
+import { useData } from "../../../context/DataContext";
 import { AnimatePresence, motion } from 'framer-motion';
-import { studentRFIDLinking } from "../../../../functions/admin/studentRFIDLinking";
+import { studentRFIDLinking } from "../../../functions/admin/studentRFIDLinking"
 
 // --- STYLES CONSTANTS ---
 const activeStyles = { background: 'linear-gradient(to right, #4268BD, #3F6AC9)', cursor: 'pointer', fontWeight: '600', color: 'white', border: 'none' };
@@ -37,7 +37,7 @@ const CustomDropdown = ({ label, value, options, onChange }) => {
                 {isOpen && (
                     <>
                         <div
-                            style={{ position: 'fixed', inset: 0, zIndex: 9000 }}
+                            style={{ position: 'fixed', inset: 0, zIndex: 40 }}
                             onClick={() => setIsOpen(false)}
                         />
                         <motion.div
@@ -49,7 +49,7 @@ const CustomDropdown = ({ label, value, options, onChange }) => {
                                 position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
                                 backgroundColor: 'white', borderRadius: '6px',
                                 boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
-                                border: '1px solid #f3f4f6', zIndex: 9000, maxHeight: '200px', overflowY: 'auto'
+                                border: '1px solid #f3f4f6', zIndex: 50, maxHeight: '200px', overflowY: 'auto'
                             }}
                         >
                             {options.map((opt) => (
@@ -78,27 +78,25 @@ const CustomDropdown = ({ label, value, options, onChange }) => {
     );
 };
 
-// --- MAIN FORM COMPONENT ---
+// --- MAIN FORM COMPONENT (Updated for Higher Ed Only) ---
 const ManualAddForm = ({ onClose }) => {
     const [isSuccess, setIsSuccess] = useState(false);
 
-    // 🟢 FORM STATE
+    // 🟢 FORM STATE (Removed Department, Section replaced with Program)
     const [formData, setFormData] = useState({
         lastName: '',
         firstName: '',
         middleName: '',
         studentId: '',
-        department: 'Basic Education', // Default
         type: 'Regular',
         yearLevel: '',
-        section: '' // Acts as generic field for Section OR Program
+        program: '' 
     });
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     };
 
-    // Helper to update dropdowns
     const handleDropdownChange = (key, value) => {
         setFormData({ ...formData, [key]: value });
     };
@@ -106,18 +104,13 @@ const ManualAddForm = ({ onClose }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // 🟢 PAYLOAD MAPPING
-        const isHigherEd = formData.department === 'Higher Education';
-
         const payload = {
             ...formData,
-            // Logic: If Higher Ed, send 'program'. If Basic Ed, send 'section'.
-            program: isHigherEd ? formData.section : undefined,
-            section: !isHigherEd ? formData.section : undefined,
+            department: "Higher Education", // 🟢 Hardcoded
+            // We ensure 'program' is sent directly
         };
 
         try {
-            console.log(payload)
             await createStudent(payload);
             setIsSuccess(true);
             setTimeout(() => { if (onClose) onClose(); }, 1500);
@@ -127,8 +120,7 @@ const ManualAddForm = ({ onClose }) => {
         }
     };
 
-    const isFormValid = formData.lastName && formData.firstName && formData.studentId && formData.yearLevel && formData.section;
-    const isHigherEd = formData.department === 'Higher Education';
+    const isFormValid = formData.lastName && formData.firstName && formData.studentId && formData.yearLevel && formData.program;
 
     // Styles
     const inputStyle = {
@@ -136,8 +128,6 @@ const ManualAddForm = ({ onClose }) => {
         borderRadius: '6px', border: '1px solid #d1d5db',
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', width: '100%', boxSizing: 'border-box', outline: 'none'
     };
-    const activeStyles = { background: 'linear-gradient(to right, #4268BD, #3F6AC9)', cursor: 'pointer', fontWeight: '600', color: 'white', border: 'none' };
-    const disabledStyles = { backgroundColor: '#cccccc', background: '#cccccc', cursor: 'not-allowed', fontWeight: '400', color: 'white', border: 'none' };
 
     // --- SUCCESS VIEW ---
     if (isSuccess) {
@@ -145,7 +135,7 @@ const ManualAddForm = ({ onClose }) => {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '400px', animation: 'fadeIn 0.5s ease-in-out' }}>
                 <div style={{ position: 'relative' }}>
                     <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#dcfce7', animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite' }} />
-                    <CheckCircle size={64} color="#16a34a" style={{ position: 'relative', zIndex: 9000 }} />
+                    <CheckCircle size={64} color="#16a34a" style={{ position: 'relative', zIndex: 10 }} />
                 </div>
                 <h3 style={{ marginTop: '24px', fontSize: '1.25rem', fontWeight: '600', color: '#16a34a' }}>Student Added!</h3>
                 <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '8px' }}>Closing window...</p>
@@ -174,29 +164,15 @@ const ManualAddForm = ({ onClose }) => {
                 </div>
             </div>
 
-            {/* 2. ID & Department */}
+            {/* 2. ID & Type (Reorganized layout) */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
                     <label htmlFor="studentId" style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>Student ID</label>
                     <input type="text" id="studentId" value={formData.studentId} onChange={handleChange} style={inputStyle} placeholder="e.g., 25-00001JAD" />
                 </div>
 
-                {/* 🟢 CUSTOM DROPDOWN: DEPARTMENT */}
+                {/* 🟢 MOVED TYPE HERE */}
                 <div style={{ zIndex: 30 }}>
-                    <CustomDropdown
-                        label="Department"
-                        value={formData.department}
-                        options={["Basic Education", "Higher Education"]}
-                        onChange={(val) => handleDropdownChange('department', val)}
-                    />
-                </div>
-            </div>
-
-            {/* 3. Type, Year, Section/Program */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-
-                {/* 🟢 CUSTOM DROPDOWN: TYPE */}
-                <div style={{ zIndex: 20 }}>
                     <CustomDropdown
                         label="Student Type"
                         value={formData.type}
@@ -204,10 +180,13 @@ const ManualAddForm = ({ onClose }) => {
                         onChange={(val) => handleDropdownChange('type', val)}
                     />
                 </div>
+            </div>
 
+            {/* 3. Year & Program */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
                     <label htmlFor="yearLevel" style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>
-                        {isHigherEd ? "Year Level" : "Grade Level"}
+                        Year Level
                     </label>
                     <input
                         type="text"
@@ -215,22 +194,21 @@ const ManualAddForm = ({ onClose }) => {
                         value={formData.yearLevel}
                         onChange={handleChange}
                         style={inputStyle}
-                        placeholder={isHigherEd ? "e.g., 1st Year" : "e.g., Grade 7"}
+                        placeholder="e.g., 1st Year"
                     />
                 </div>
 
                 <div>
-                    {/* 🟢 DYNAMIC LABEL & PLACEHOLDER */}
-                    <label htmlFor="section" style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>
-                        {isHigherEd ? "Program" : "Section"}
+                    <label htmlFor="program" style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151' }}>
+                        Program
                     </label>
                     <input
                         type="text"
-                        id="section"
-                        value={formData.section}
+                        id="program"
+                        value={formData.program}
                         onChange={handleChange}
                         style={inputStyle}
-                        placeholder={isHigherEd ? "e.g., BSIT" : "e.g., Rizal"}
+                        placeholder="e.g., BSIT"
                     />
                 </div>
             </div>
@@ -276,7 +254,7 @@ const UploadFromCSV = () => {
     );
 };
 
-// Main Modal Component (Unchanged structure)
+// Main Modal Component
 const AddStudentModal = ({ isOpen, onClose }) => {
     const [mode, setMode] = useState('initial');
     const [isClosing, setIsClosing] = useState(false);
@@ -328,7 +306,6 @@ const AddStudentModal = ({ isOpen, onClose }) => {
                         <button onClick={() => setMode('initial')} className="text-sm text-blue-600 hover:text-blue-800 flex items-center pt-4">
                             <ChevronLeft size={16} style={{ marginRight: '4px' }} /> Back to options
                         </button>
-                        {/* 🟢 PASS handleClose to Form */}
                         <ManualAddForm onClose={handleClose} />
                     </>
                 )}
@@ -347,11 +324,11 @@ const AddStudentModal = ({ isOpen, onClose }) => {
     );
 };
 
-// LinkIDModal unchanged...
+// LinkIDModal (Kept Exactly as requested)
 const LinkIDModal = ({ isOpen, onClose, student }) => {
     const [isClosing, setIsClosing] = useState(false);
     const [rfidTag, setRfidTag] = useState('');
-    const [isLoading, setIsLoading] = useState(false); // Optional: Add loading state
+    const [isLoading, setIsLoading] = useState(false);
     const { fetchUnifiedSchoolData } = useData();
 
     const handleClose = useCallback(() => {
@@ -366,7 +343,6 @@ const LinkIDModal = ({ isOpen, onClose, student }) => {
     if (!isOpen && !isClosing) return null;
 
     const handleLinkAccept = async () => {
-        // 1. Basic Validation
         if (!rfidTag.trim()) {
             alert('Please scan or enter an RFID tag.');
             return;
@@ -375,7 +351,6 @@ const LinkIDModal = ({ isOpen, onClose, student }) => {
         setIsLoading(true);
 
         try {
-            // 2. Call the API
             await studentRFIDLinking(student.studentId, rfidTag);
 
             setTimeout(async () => {
@@ -385,7 +360,6 @@ const LinkIDModal = ({ isOpen, onClose, student }) => {
             handleClose();
 
         } catch (error) {
-            // 4. Error Feedback (e.g. "This RFID tag is already linked")
             console.error(error);
             alert(error.message);
         } finally {
@@ -395,10 +369,9 @@ const LinkIDModal = ({ isOpen, onClose, student }) => {
 
     const animationClass = isClosing ? 'animate-out fade-out slide-out-to-top-3' : 'animate-in fade-in slide-in-from-top-3';
 
-    // Base style object for the main input/select fields
     const inputBaseStyle = {
         padding: '10px 12px', border: '1px solid #d1d5db',
-        borderRadius: '6px', // 🟢 6px
+        borderRadius: '6px',
         fontSize: '1rem', width: '100%', outline: 'none', backgroundColor: '#F9FAFB'
     };
 
@@ -415,7 +388,7 @@ const LinkIDModal = ({ isOpen, onClose, student }) => {
                 className={`bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 transform ${animationClass}`}
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                    borderRadius: '6px', // 🟢 6px
+                    borderRadius: '6px',
                     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
                     padding: '24px', position: 'relative', width: '100%', maxWidth: '400px',
                     backgroundColor: 'white', fontFamily: "inherit"
@@ -434,7 +407,7 @@ const LinkIDModal = ({ isOpen, onClose, student }) => {
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: '12px', padding: '12px',
                         backgroundColor: '#eff6ff',
-                        borderRadius: '6px', // 🟢 6px
+                        borderRadius: '6px',
                         border: '1px solid #bfdbfe'
                     }}>
                         <User size={18} style={{ color: '#2563eb' }} />
@@ -465,7 +438,7 @@ const LinkIDModal = ({ isOpen, onClose, student }) => {
                         onClick={handleClose}
                         style={{
                             padding: '8px 16px',
-                            borderRadius: '6px', // 🟢 6px
+                            borderRadius: '6px',
                             fontSize: '0.875rem', fontWeight: '500',
                             color: '#374151', backgroundColor: '#e5e7eb', border: 'none', cursor: 'pointer'
                         }}
@@ -477,10 +450,9 @@ const LinkIDModal = ({ isOpen, onClose, student }) => {
                         disabled={!rfidTag.trim()}
                         style={{
                             padding: '8px 16px',
-                            borderRadius: '6px', // 🟢 6px
+                            borderRadius: '6px',
                             fontSize: '0.875rem',
                             transition: 'background-color 0.2s',
-                            // 🟢 DYNAMIC STYLES
                             ...(rfidTag.trim() ? activeStyles : disabledStyles)
                         }}
                     >

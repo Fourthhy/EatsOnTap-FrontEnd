@@ -1,5 +1,6 @@
 import React from 'react';
-// IMPORT SKELETON (Adjust path as needed)
+import { motion } from "framer-motion"; // 🟢 1. Import Framer Motion
+// IMPORT SKELETON
 import { Skeleton } from "../../../../components/global/Skeleton";
 
 function OngoingEvents({ events = [], isHyerlink = true, isLoading = false }) {
@@ -21,9 +22,13 @@ function OngoingEvents({ events = [], isHyerlink = true, isLoading = false }) {
         {isLoading ? (
           <Skeleton className="h-4 w-32 rounded" />
         ) : (
-          <h2 style={{ fontFamily: "geist", fontWeight: "500", fontSize: 12, color: "#000" }}>
+          <motion.h2
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ fontFamily: "geist", fontWeight: "500", fontSize: 12, color: "#000" }}
+          >
             {events.length > 1 ? "Ongoing Events" : "Ongoing Event"}
-          </h2>
+          </motion.h2>
         )}
       </div>
 
@@ -48,10 +53,13 @@ function OngoingEvents({ events = [], isHyerlink = true, isLoading = false }) {
             </div>
           ))
         ) : (
-          // --- REAL DATA STATE ---
+          // --- REAL DATA STATE (Animated) ---
           events.map((event, idx) => (
-            <div
+            <motion.div
               key={event.title || idx}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: idx * 0.1 }} // Stagger effect
               style={{
                 padding: "15px 15px",
                 marginBottom: 8,
@@ -102,7 +110,7 @@ function OngoingEvents({ events = [], isHyerlink = true, isLoading = false }) {
               ) : (
                 ""
               )}
-            </div>
+            </motion.div>
           ))
         )}
       </div>

@@ -138,7 +138,7 @@ export default function AdminDashboard() {
                                     className="col-span-4"
                                 >
                                     <StatsCardGroup
-                                        cardGroupTitle={"Meal Eligibilty List Count"}
+                                        cardGroupTitle={"Student Meal Eligibilty Count"}
                                         urgentNotification={0}
                                         isDualPager={true}
                                         dualPageTitles={["View Student Counts", "View Request Rates"]}
@@ -256,7 +256,7 @@ export default function AdminDashboard() {
                                                 >
                                                     <div className="w-[30%] h-auto flex items-center justify-center" style={{ padding: 10 }}>
                                                         <CustomStatsCard 
-                                                            title={`Unclaim Count ${getMetricName(selectedTab)}`} value={100} 
+                                                            title={`Unclaimed Meal Count ${getMetricName(selectedTab)}`} value={100} 
                                                             isLoading={isLoading}
                                                             hoverText={"The total number of dish that haven't claimed today"}
                                                         />

@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronDown, Check, Info, RefreshCw, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useData } from "../../../../../context/DataContext";
+import { addClassAdviser } from '../../../../../functions/admin/addClassAdviser';
 
 // Reusable Dropdown
 const ModalDropdown = ({ label, value, options, onChange, placeholder = "Select..." }) => {
@@ -15,7 +16,7 @@ const ModalDropdown = ({ label, value, options, onChange, placeholder = "Select.
                     onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
                     style={{
                         width: '100%', padding: '10px 12px', fontSize: '13px', textAlign: 'left',
-                        backgroundColor: 'white', border: '1px solid #d1d5db', 
+                        backgroundColor: 'white', border: '1px solid #d1d5db',
                         borderRadius: '6px',
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                         cursor: 'pointer', color: value ? '#111827' : '#9ca3af'
@@ -71,20 +72,20 @@ const AddAdviserModal = ({ isOpen, onClose, onAdd }) => {
     const [step, setStep] = useState(1);
     const [idMode, setIdMode] = useState('automatic');
     const [manualIdConfirmed, setManualIdConfirmed] = useState(false);
-    
+
     const [formData, setFormData] = useState({
         honorific: '', firstName: '', middleName: '', lastName: '', department: '', assignment: '', manualUserId: ''
     });
 
     // Reset on close
-    useEffect(() => { if(!isOpen) { setStep(1); setFormData({ honorific: '', firstName: '', middleName: '', lastName: '', department: '', assignment: '', manualUserId: '' }); }}, [isOpen]);
+    useEffect(() => { if (!isOpen) { setStep(1); setFormData({ honorific: '', firstName: '', middleName: '', lastName: '', department: '', assignment: '', manualUserId: '' }); } }, [isOpen]);
 
     // --- ID GENERATION LOGIC ---
     const generatedId = useMemo(() => {
         if (!isOpen) return '';
         let maxSeq = 0;
         const currentYearPrefix = new Date().getFullYear().toString().slice(-2);
-        
+
         if (classAdvisers && classAdvisers.length > 0) {
             classAdvisers.forEach(adv => {
                 const parts = adv.userID.split('-');
@@ -97,9 +98,9 @@ const AddAdviserModal = ({ isOpen, onClose, onAdd }) => {
                 }
             });
         }
-        
+
         const nextSeq = (maxSeq + 1).toString().padStart(3, '0');
-        
+
         let suffix = 'XXX';
         const fName = formData.firstName.trim();
         const mName = formData.middleName.trim();
@@ -122,7 +123,7 @@ const AddAdviserModal = ({ isOpen, onClose, onAdd }) => {
 
     const handleNext = () => { if (isFormValid) setStep(2); };
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         const finalUserID = idMode === 'automatic' ? generatedId : formData.manualUserId;
         const email = `${formData.firstName.replace(/\s+/g, '').toLowerCase()}.${formData.lastName.replace(/\s+/g, '').toLowerCase()}@laverdad.edu.ph`;
 
@@ -139,7 +140,13 @@ const AddAdviserModal = ({ isOpen, onClose, onAdd }) => {
             role: 'CLASS-ADVISER'
         };
 
-        onAdd(payload);
+        try {
+            await addClassAdviser(payload);
+            alert("Success!");
+            onClose();
+        } catch (error) {
+            alert(error.message);
+        }
         onClose();
     };
 
@@ -155,9 +162,9 @@ const AddAdviserModal = ({ isOpen, onClose, onAdd }) => {
     return (
         <AnimatePresence>
             {isOpen && (
-                <motion.div variants={overlayVariants} initial="hidden" animate="visible" exit="exit" onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}>
+                <motion.div variants={overlayVariants} initial="hidden" animate="visible" exit="exit" onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}>
                     <motion.div variants={modalVariants} onClick={(e) => e.stopPropagation()} style={{ backgroundColor: 'white', borderRadius: '6px', padding: '24px', width: '450px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)', position: 'relative', zIndex: 110 }}>
-                        
+
                         {/* HEADER */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                             <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#111827', margin: 0 }}>
@@ -172,21 +179,21 @@ const AddAdviserModal = ({ isOpen, onClose, onAdd }) => {
                                 {/* Name Row */}
                                 <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
                                     <div style={{ flex: '0 0 80px' }}>
-                                        <ModalDropdown label="Title" value={formData.honorific} options={honorificOptions} onChange={(val) => setFormData({...formData, honorific: val})} placeholder="Title" />
+                                        <ModalDropdown label="Title" value={formData.honorific} options={honorificOptions} onChange={(val) => setFormData({ ...formData, honorific: val })} placeholder="Title" />
                                     </div>
                                     <div style={{ flex: 1 }}>
                                         <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>First Name <span className="text-red-500">*</span></label>
-                                        <input type="text" placeholder="e.g. Jose Marie" value={formData.firstName} onChange={(e) => setFormData({...formData, firstName: e.target.value})} style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
+                                        <input type="text" placeholder="e.g. Jose Marie" value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
                                     <div style={{ flex: 1 }}>
                                         <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Middle Name</label>
-                                        <input type="text" placeholder="e.g. Borja" value={formData.middleName} onChange={(e) => setFormData({...formData, middleName: e.target.value})} style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
+                                        <input type="text" placeholder="e.g. Borja" value={formData.middleName} onChange={(e) => setFormData({ ...formData, middleName: e.target.value })} style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
                                     </div>
                                     <div style={{ flex: 1 }}>
                                         <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Last Name <span className="text-red-500">*</span></label>
-                                        <input type="text" placeholder="e.g. Chan" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})} style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
+                                        <input type="text" placeholder="e.g. Chan" value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
                                     </div>
                                 </div>
 
@@ -206,17 +213,17 @@ const AddAdviserModal = ({ isOpen, onClose, onAdd }) => {
                                         </div>
                                     ) : (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                            <input type="text" placeholder="e.g. 25-001ABC" value={formData.manualUserId} onChange={(e) => setFormData({...formData, manualUserId: e.target.value})} style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
-                                            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '11px', color: '#4b5563', cursor: 'pointer' }}><input type="checkbox" checked={manualIdConfirmed} onChange={(e) => setManualIdConfirmed(e.target.checked)} style={{ marginTop: '2px' }}/> I confirm this ID is correct.</label>
+                                            <input type="text" placeholder="e.g. 25-001ABC" value={formData.manualUserId} onChange={(e) => setFormData({ ...formData, manualUserId: e.target.value })} style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
+                                            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '11px', color: '#4b5563', cursor: 'pointer' }}><input type="checkbox" checked={manualIdConfirmed} onChange={(e) => setManualIdConfirmed(e.target.checked)} style={{ marginTop: '2px' }} /> I confirm this ID is correct.</label>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Assignment */}
-                                <div style={{ marginBottom: '16px' }}><ModalDropdown label="Department (Optional)" value={formData.department} options={departmentOptions} onChange={(val) => setFormData({...formData, department: val})} /></div>
+                                <div style={{ marginBottom: '16px' }}><ModalDropdown label="Department (Optional)" value={formData.department} options={departmentOptions} onChange={(val) => setFormData({ ...formData, department: val })} /></div>
                                 <div style={{ marginBottom: '16px' }}>
                                     <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: '#374151', marginBottom: '6px' }}>Current Assignment (Optional)</label>
-                                    <input type="text" placeholder="e.g. Grade 1 Adviser" value={formData.assignment} onChange={(e) => setFormData({...formData, assignment: e.target.value})} style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
+                                    <input type="text" placeholder="e.g. Grade 1 Adviser" value={formData.assignment} onChange={(e) => setFormData({ ...formData, assignment: e.target.value })} style={{ width: '100%', padding: '10px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
                                 </div>
 
                                 {/* Step 1 Actions */}
@@ -253,7 +260,7 @@ const AddAdviserModal = ({ isOpen, onClose, onAdd }) => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <p style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center', marginBottom: '20px', fontStyle: 'italic' }}>
                                     The user will be prompted to change this password upon their first login.
                                 </p>
