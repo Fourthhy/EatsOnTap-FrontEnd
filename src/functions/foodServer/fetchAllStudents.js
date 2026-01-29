@@ -6,7 +6,7 @@ export async function fetchAllStudents() {
     
     // ⚠️ CHECK ROUTE: Ensure this matches your backend route definition
     // Example: router.get('/getAllStudents', studentController.getAllStudents)
-    const targetUrl = `${VITE_LOCALHOST}/api/students/getAllStudents`;
+    const targetUrl = `${VITE_BASE_URL}/api/students/getAllStudents`;
 
     console.log("🌐 Fetching All Students from:", targetUrl);
 
