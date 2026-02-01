@@ -29,6 +29,21 @@ export const APP_INITIALIZATION_MANIFEST = {
             id: 'fetch_overall_claim_record',
             label: 'Getting Overal Claim Records',
             weight: 10
+        },
+        {
+            id: 'fetch_meal_value',
+            label: 'Getting the meal value!',
+            weight: 10
+        },
+        {
+            id: 'fetch_settings',
+            label: 'Getting settings',
+            weight: 10
+        },
+        {
+            id: 'fetch_programSchedule',
+            label: 'Fetching Program Schedule..',
+            weight: 10
         }
     ],
     secondary: [
