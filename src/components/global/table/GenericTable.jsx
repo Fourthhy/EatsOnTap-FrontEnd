@@ -246,7 +246,7 @@ const GenericTable = ({
                                         {isLoading ? (
                                             <Skeleton className="inline-block h-5 w-16 rounded ml-2 align-middle" />
                                         ) : (
-                                            <span className="font-geist font-bold text-lg" style={{ color: metric.color || '#000000' }}>{metric.value}</span>
+                                            <span className="font-geist font-bold text-sm" style={{ color: metric.color || '#000000' }}>{metric.value}</span>
                                         )}
                                     </div>
                                 ))}
@@ -291,8 +291,8 @@ const GenericTable = ({
                                         <Skeleton className="h-8 w-32 rounded-md" />
                                     ) : (
                                         <button className="text-sm font-medium text-gray-600 flex items-center justify-center w-full md:w-auto hover:bg-gray-200 transition-colors"
-                                            style={{ padding: '8px 12px', backgroundColor: '#f3f4f6', borderRadius: '6px', fontSize: 12, gap: '8px' }}>
-                                            {getFormattedDate()} <Calendar size={12} />
+                                            style={{ padding: '8px 12px', backgroundColor: 'transparent', borderRadius: '6px', fontSize: 12, gap: '8px' }}>
+                                            {getFormattedDate()}
                                         </button>
                                     )}
                                 </div>

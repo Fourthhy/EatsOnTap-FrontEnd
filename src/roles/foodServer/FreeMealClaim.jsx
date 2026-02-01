@@ -1,29 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
-
-// UI Components
 import { Button } from "../../components/ui/button";
 import { Input } from "@/components/ui/input";
-
-// Functions
 import { logout } from "../../functions/logoutAuth";
 import { fetchAllStudents } from "../../functions/foodServer/fetchAllStudents";
 import { isSettingActive } from "../../functions/isSettingActive";
-// 🟢 IMPORT THE API FUNCTION
 import { claimMeal } from "../../functions/foodServer/claimMeal";
 
 export default function FreeMealClaim() {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
-    const [pageDislay, setPageDisplay] = useState("Tap"); 
+    const [pageDislay, setPageDisplay] = useState("Tap");
     const [mealClaimData, setMealClaimData] = useState({});
-    
+
     const [allStudents, setAllStudents] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
 
     // This state acts as the "Search Term" (can be ID or RFID)
     const [inputVal, setInputVal] = useState("");
-    
+
     const [isSystemActive, setIsSystemActive] = useState(true);
     const [systemMessage, setSystemMessage] = useState("");
 
@@ -35,7 +30,6 @@ export default function FreeMealClaim() {
         navigate('/');
     };
 
-    // 🟢 3. UPDATED SCAN LOGIC
     const handleScan = async (e) => {
         if (!isSystemActive) return;
 
@@ -45,11 +39,8 @@ export default function FreeMealClaim() {
             const trimmedInput = inputVal.trim();
             if (!trimmedInput) return;
 
-            // 🟢 A. DETERMINE SEARCH TYPE
-            // If input contains ONLY numbers, treat as RFID. Otherwise, Student ID.
             const isRFID = /^\d+$/.test(trimmedInput);
 
-            // 🟢 B. FIND STUDENT IN LOCAL DATA
             const foundIndex = allStudents.findIndex(s => {
                 if (isRFID) {
                     return s.rfidTag === trimmedInput;
@@ -59,36 +50,27 @@ export default function FreeMealClaim() {
             });
 
             if (foundIndex !== -1) {
-                // 🟢 C. TRIGGER API CALL (Fire and Forget / Optimistic)
-                // We call this immediately. We don't await it to block the UI 
-                // because you mentioned the local state handles the display.
                 await claimMeal(trimmedInput).catch((err) => {
                     console.error("Background API Claim Error:", err);
-                    // Optional: Add logic here if you want to show a toaster error 
-                    // if the server rejects it despite local data saying it's okay.
                 });
 
-                // 🟢 D. UPDATE LOCAL STATE (Optimistic UI Update)
                 const updatedStudentList = [...allStudents];
                 const targetStudent = { ...updatedStudentList[foundIndex] };
 
-                // Get status to decide which screen to show
                 const currentStatus = targetStudent.temporaryClaimStatus && targetStudent.temporaryClaimStatus[0];
-                
-                // Set data for display
-                setMealClaimData(targetStudent); 
 
-                // Only update to CLAIMED locally if they are currently ELIGIBLE
+                setMealClaimData(targetStudent);
+
                 if (currentStatus === "ELIGIBLE") {
                     targetStudent.temporaryClaimStatus = ["CLAIMED"];
                     updatedStudentList[foundIndex] = targetStudent;
-                    setAllStudents(updatedStudentList); 
+                    setAllStudents(updatedStudentList);
                 }
 
                 // Reset UI
-                setInputVal(""); 
-                setPageDisplay(""); 
-                
+                setInputVal("");
+                setPageDisplay("");
+
                 setTimeout(() => {
                     setPageDisplay("Tap");
                 }, 5000);
@@ -216,8 +198,8 @@ export default function FreeMealClaim() {
                                                 type="text"
                                                 placeholder={
                                                     !isSystemActive ? (systemMessage || "Claim Disabled") :
-                                                    !isDataLoaded ? "Loading Data..." : 
-                                                    "Student ID or RFID"
+                                                        !isDataLoaded ? "Loading Data..." :
+                                                            "Student ID or RFID"
                                                 }
                                             />
 
@@ -242,11 +224,8 @@ export default function FreeMealClaim() {
                                 <img src="/studentClaim/Food-Background.svg" alt="free lunch label" />
                             </div>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
 
         ) : (
@@ -262,7 +241,7 @@ export default function FreeMealClaim() {
                     {mealClaimData.temporaryClaimStatus[0] === "ELIGIBLE" ? (
                         <img src="/studentClaim/Eligible_Sinage.svg" alt="Eligible Sinage" style={{ width: "170px", height: "170px" }} />
                     ) : null}
-                    
+
                     {mealClaimData.temporaryClaimStatus[0] === "CLAIMED" ? (
                         <img src="/studentClaim/ALREADY_CLAIMED.svg" alt="Background" style={{ width: "190px", height: "190px" }} />
                     ) : null}
