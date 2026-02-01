@@ -19,10 +19,10 @@ const GenericTable = ({
     columns = [],
     renderRow,
     metrics,
-    
+
     // 🟢 New Prop for Customization
     emptyMessage = "No records found",
-    emptyMessageIcon = <FileQuestion size={30} strokeWidth={1.5}/>,
+    emptyMessageIcon = <FileQuestion size={30} strokeWidth={1.5} />,
 
     // Header & Navigation Props
     tabs = [],
@@ -76,7 +76,7 @@ const GenericTable = ({
     // --- DETECT MOBILE ---
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
-        checkMobile(); 
+        checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
@@ -181,7 +181,9 @@ const GenericTable = ({
                         </>
                     ) : (
                         <>
-                            {customActions}
+                            <div style={{ marginRight: "10px" }}>
+                                {customActions}
+                            </div>
                             {primaryActionLabel && primaryActionIcon && (
                                 <PrimaryActionButton
                                     label={primaryActionLabel}
@@ -364,8 +366,8 @@ const GenericTable = ({
                             ) : currentData.length === 0 ? (
                                 // 🟢 3. EMPTY STATE ROW
                                 <tr>
-                                    <td colSpan={columns.length + (selectable ? 1 : 1) + 20} className="text-center" style={{ paddingTop: "20px"}}>
-                                        <motion.div 
+                                    <td colSpan={columns.length + (selectable ? 1 : 1) + 20} className="text-center" style={{ paddingTop: "20px" }}>
+                                        <motion.div
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             className="flex flex-col items-center justify-center text-gray-400"
