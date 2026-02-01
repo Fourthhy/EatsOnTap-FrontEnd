@@ -8,7 +8,7 @@ import { LoaderProvider } from './context/LoaderContext'
 createRoot(document.getElementById('root')).render(
     <DataProvider>
         <LoaderProvider>
-            <Routers />
+            <Routers /> 
         </LoaderProvider>
     </DataProvider>
 )

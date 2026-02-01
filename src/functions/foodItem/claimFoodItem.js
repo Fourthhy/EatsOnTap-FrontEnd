@@ -8,7 +8,7 @@ const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
  */
 export async function claimFoodItem(studentInput, amount) {
     // Construct the URL (adjust the path '/api/claim/' to match your actual route prefix)
-    const targetUrl = `${VITE_LOCALHOST}/api/claim/fakeFoodItemClaim`;
+    const targetUrl = `${VITE_BASE_URL}/api/claim/fakeFoodItemClaim`;
 
     console.log(`🌐 Deducting ${amount} from student:`, studentInput);
 

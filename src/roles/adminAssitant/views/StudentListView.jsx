@@ -155,11 +155,6 @@ const StudentListView = ({switcher}) => {
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
 
-                // 🟢 PRIMARY ACTION: ADD STUDENT
-                primaryActionLabel="Add Student"
-                primaryActionIcon={<Plus size={16} />}
-                onPrimaryAction={() => setIsAddModalOpen(true)}
-
                 // Config
                 selectable={false}
                 minItems={6}

@@ -7,7 +7,6 @@ import { Loader2, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // 🟢 IMPORTS
-// Removed claimFoodItem API import as requested
 import { fetchAllStudents } from "../../functions/foodServer/fetchAllStudents";
 import { isSettingActive } from "../../functions/isSettingActive";
 
@@ -114,12 +113,12 @@ const SuccessModal = ({ isOpen, newBalance }) => {
                 animate={{ scale: 1, opacity: 1 }}
                 style={{
                     backgroundColor: "#FFFFFF",
-                    borderRadius: "16px", // rounded-2xl
-                    padding: "32px", // p-8
+                    borderRadius: "16px",
+                    padding: "32px",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)", // shadow-2xl
+                    boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
                     width: "400px",
                     textAlign: "center",
                     fontFamily: "Geist, sans-serif",
@@ -128,26 +127,26 @@ const SuccessModal = ({ isOpen, newBalance }) => {
                 {/* Icon Circle */}
                 <div
                     style={{
-                        width: "80px", // w-20
-                        height: "80px", // h-20
-                        backgroundColor: "#DCFCE7", // green-100
+                        width: "80px",
+                        height: "80px",
+                        backgroundColor: "#DCFCE7",
                         borderRadius: "9999px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        marginBottom: "16px", // mb-4
+                        marginBottom: "16px",
                     }}
                 >
-                    <CheckCircle size={40} color="#16A34A" /> {/* green-600 */}
+                    <CheckCircle size={40} color="#16A34A" />
                 </div>
 
                 {/* Title */}
                 <h2
                     style={{
-                        fontSize: "24px", // text-2xl
+                        fontSize: "24px",
                         fontWeight: "700",
-                        color: "#1F2937", // gray-800
-                        marginBottom: "8px", // mb-2
+                        color: "#1F2937",
+                        marginBottom: "8px",
                     }}
                 >
                     Transaction Success!
@@ -156,8 +155,8 @@ const SuccessModal = ({ isOpen, newBalance }) => {
                 {/* Subtitle */}
                 <p
                     style={{
-                        color: "#6B7280", // gray-500
-                        marginBottom: "24px", // mb-6
+                        color: "#6B7280",
+                        marginBottom: "24px",
                     }}
                 >
                     The amount has been deducted.
@@ -166,19 +165,19 @@ const SuccessModal = ({ isOpen, newBalance }) => {
                 {/* Balance Card */}
                 <div
                     style={{
-                        backgroundColor: "#F9FAFB", // gray-50
-                        borderRadius: "8px", // rounded-lg
-                        padding: "16px", // p-4
+                        backgroundColor: "#F9FAFB",
+                        borderRadius: "8px",
+                        padding: "16px",
                         width: "100%",
-                        border: "1px solid #F3F4F6", // gray-100
+                        border: "1px solid #F3F4F6",
                     }}
                 >
                     <p
                         style={{
-                            fontSize: "12px", // text-sm
-                            color: "#6B7280", // gray-500
+                            fontSize: "12px",
+                            color: "#6B7280",
                             textTransform: "uppercase",
-                            letterSpacing: "0.05em", // tracking-wider
+                            letterSpacing: "0.05em",
                             fontWeight: "600",
                         }}
                     >
@@ -187,10 +186,10 @@ const SuccessModal = ({ isOpen, newBalance }) => {
 
                     <p
                         style={{
-                            fontSize: "30px", // text-3xl
+                            fontSize: "30px",
                             fontWeight: "700",
-                            marginTop: "4px", // mt-1
-                            color: newBalance < 0 ? "#DC2626" : "#111827", // red-600 : gray-900
+                            marginTop: "4px",
+                            color: newBalance < 0 ? "#DC2626" : "#111827",
                         }}
                     >
                         ₱{newBalance.toFixed(2)}
@@ -207,22 +206,25 @@ export default function FoodItemClaim() {
     const inputRef = useRef(null);
 
     // --- STATE ---
-    const [allStudents, setAllStudents] = useState([]); // 🟢 Local Data
+    const [allStudents, setAllStudents] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-    const [inputVal, setInputVal] = useState(""); // Search Input
-    const [studentData, setStudentData] = useState(null); // Selected Student
+    const [inputVal, setInputVal] = useState("");
+    const [studentData, setStudentData] = useState(null);
     const [amount, setAmount] = useState("");
 
     const [loading, setLoading] = useState(false);
-    const [isSuccessOpen, setIsSuccessOpen] = useState(false); // 🟢 Success Modal
+    const [isSuccessOpen, setIsSuccessOpen] = useState(false);
     const [isSystemActive, setIsSystemActive] = useState(true);
     const [systemMessage, setSystemMessage] = useState("");
 
-    // --- CALCULATIONS ---
+    // 🟢 NEW: State to hold the final balance for the modal
+    const [successBalance, setSuccessBalance] = useState(0);
+
+    // --- CALCULATIONS (For live display only) ---
     const currentBalance = studentData ? studentData.temporaryCreditBalance : 0;
     const totalCost = parseFloat(amount) || 0;
-    const remainingBalance = currentBalance - totalCost; // 🟢 Allow negatives
+    const remainingBalance = currentBalance - totalCost;
 
     // --- INITIAL DATA LOAD ---
     useEffect(() => {
@@ -240,7 +242,7 @@ export default function FoodItemClaim() {
 
         const checkSystemStatus = async () => {
             try {
-                const status = await isSettingActive("STUDENT-CLAIM"); // Or FOOD-ITEM-CLAIM if you have separate settings
+                const status = await isSettingActive("STUDENT-CLAIM");
                 if (status) {
                     setIsSystemActive(status);
                     setSystemMessage(status.message);
@@ -267,10 +269,8 @@ export default function FoodItemClaim() {
             const trimmedInput = inputVal.trim();
             if (!trimmedInput) return;
 
-            // Determine if RFID (digits only) or Student ID
             const isRFID = /^\d+$/.test(trimmedInput);
 
-            // Find in local array
             const foundStudent = allStudents.find(s => {
                 if (isRFID) return s.rfidTag === trimmedInput;
                 return s.studentID?.toLowerCase() === trimmedInput.toLowerCase();
@@ -278,7 +278,7 @@ export default function FoodItemClaim() {
 
             if (foundStudent) {
                 setStudentData(foundStudent);
-                setInputVal(""); // Clear input
+                setInputVal("");
                 setAmount("");
             } else {
                 alert("Student not found!");
@@ -292,9 +292,8 @@ export default function FoodItemClaim() {
         if (!studentData) return;
 
         if (key === "CANCEL") {
-            setStudentData(null); // Cancel Selection
+            setStudentData(null);
             setAmount("");
-            // Re-focus input for next scan
             setTimeout(() => { if (inputRef.current) inputRef.current.focus() }, 100);
             return;
         }
@@ -319,20 +318,21 @@ export default function FoodItemClaim() {
 
         setLoading(true);
 
-        // 🟢 Simulate "Processing" time for UX
         await new Promise(resolve => setTimeout(resolve, 500));
 
         try {
             const deductAmount = parseFloat(amount);
             const newBal = studentData.temporaryCreditBalance - deductAmount;
 
-            // 🟢 Update Local Data Structure
+            // 🟢 FIX: Set the success balance state BEFORE updating the studentData
+            setSuccessBalance(newBal);
+
+            // Update Local Data Structure
             const updatedList = allStudents.map(s => {
                 if (s.studentID === studentData.studentID) {
                     return {
                         ...s,
                         temporaryCreditBalance: newBal,
-                        // Optionally mimic adding a record locally
                         claimRecords: [
                             ...(s.claimRecords || []),
                             { date: new Date(), creditClaimed: deductAmount, remarks: ["CLAIMED"] }
@@ -343,20 +343,16 @@ export default function FoodItemClaim() {
             });
 
             setAllStudents(updatedList);
-
-            // 🟢 Update Current View State
             setStudentData(prev => ({ ...prev, temporaryCreditBalance: newBal }));
 
-            // 3. Show Success Modal
             setIsSuccessOpen(true);
 
-            // 4. Auto Reset
             setTimeout(() => {
                 setIsSuccessOpen(false);
                 setStudentData(null);
                 setAmount("");
                 if (inputRef.current) inputRef.current.focus();
-            }, 3000); // 2 seconds display
+            }, 3000);
 
         } catch (error) {
             console.error(error);
@@ -366,17 +362,15 @@ export default function FoodItemClaim() {
         }
     };
 
-    // Date Helpers
     const currentDateTime = new Date();
     const dateOnlyString = currentDateTime.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    const timeString = currentDateTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     return (
         <>
             <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden", fontFamily: "geist, sans-serif" }}>
 
-                {/* SUCCESS MODAL */}
-                <SuccessModal isOpen={isSuccessOpen} newBalance={remainingBalance} />
+                {/* 🟢 PASS THE FIXED STATE TO MODAL */}
+                <SuccessModal isOpen={isSuccessOpen} newBalance={successBalance} />
 
                 {/* BACKGROUND */}
                 <img
@@ -495,10 +489,11 @@ export default function FoodItemClaim() {
                                         <Row label="Current Balance:" value={`₱${currentBalance.toFixed(2)}`} valueColor="#16a34a" />
                                         <Row label="Item Cost:" value={`₱${totalCost.toFixed(2)}`} valueColor="#000" />
                                         <div style={{ width: '100%', height: '1px', background: '#e5e5e5', margin: '8px 0' }}></div>
+                                        {/* Use derived state here for live updates */}
                                         <Row
                                             label="Remaining:"
                                             value={`₱${remainingBalance.toFixed(2)}`}
-                                            valueColor={remainingBalance < 0 ? "#ef4444" : "#16a34a"} // Red if negative, green if positive
+                                            valueColor={remainingBalance < 0 ? "#ef4444" : "#16a34a"}
                                         />
                                     </div>
 

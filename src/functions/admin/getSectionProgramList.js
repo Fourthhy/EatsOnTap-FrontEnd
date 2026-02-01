@@ -2,7 +2,7 @@ const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 export async function getSectionProgramList() {
-    const targetUrl = `${VITE_LOCALHOST}/api/fetch/getAllSectionProgramList`
+    const targetUrl = `${VITE_BASE_URL}/api/fetch/getAllSectionProgramList`
     console.log("🌐 Fetching Overall Section Program Data from:", targetUrl); 
 
     try {

@@ -1,22 +1,51 @@
 import React, { useState } from 'react';
-import { Power, CheckCircle2, Lock } from 'lucide-react';
+import { Power, CheckCircle2, Lock, ChevronDown, ChevronUp } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// 🟢 IMPORTS
 import { PasswordConfirmationModal } from './PasswordConfirmationModal';
 import { DeactivationWarningModal } from './DeactivationWarningModal';
-import { ExportReportModal } from '../dashboard/ExportReportModal'; // Ensure this path is correct
+import { ExportReportModal } from '../dashboard/ExportReportModal'; 
+import { ReasonInputModal } from './ReasonInputModal'; // 🟢 New Import
 
 const SystemActivationControl = ({ systemStatus, setSystemStatus }) => {
     const isSystemActive = systemStatus === 'active';
 
     // --- STATE MANAGEMENT ---
-    const [pendingAction, setPendingAction] = useState(null); // 'activate', 'deactivate', 'scheduled'
+    const [isControlsUnlocked, setIsControlsUnlocked] = useState(false); // Controls Accordion
+    const [unlockReason, setUnlockReason] = useState(null); // Store log reason
+
+    const [pendingAction, setPendingAction] = useState(null); 
     const [tempReactivationDate, setTempReactivationDate] = useState(null);
 
     // Modal Visibilities
+    const [showReasonModal, setShowReasonModal] = useState(false);
     const [showWarningModal, setShowWarningModal] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
     const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-    // --- STEP 1: INITIAL CLICKS ---
+    // --- HANDLERS ---
+
+    // 1. Trigger the Unlock Process
+    const handleExpandRequest = () => {
+        if (isControlsUnlocked) {
+            // If already open, just close it
+            setIsControlsUnlocked(false);
+        } else {
+            // If closed, require reason
+            setShowReasonModal(true);
+        }
+    };
+
+    // 2. Reason Confirmed -> Unlock Controls
+    const handleReasonConfirmed = (reason) => {
+        console.log("Controls Unlocked. Reason:", reason);
+        setUnlockReason(reason); // You can use this later for logs
+        setShowReasonModal(false);
+        setIsControlsUnlocked(true); // 🟢 Open Accordion
+    };
+
+    // --- EXISTING ACTIONS (Hidden inside accordion) ---
     const handleDeactivateClick = () => {
         setPendingAction('deactivate');
         setShowWarningModal(true);
@@ -29,33 +58,25 @@ const SystemActivationControl = ({ systemStatus, setSystemStatus }) => {
 
     const handleActivateClick = () => {
         setPendingAction('activate');
-        setShowPasswordModal(true); // No warning needed for activation, straight to password
+        setShowPasswordModal(true); 
     };
 
-    // --- STEP 2: WARNING MODAL INTERACTIONS ---
-    const handleExportTrigger = () => {
-        setShowExportModal(true);
-        // Note: We keep Warning Modal open behind it, or we could close it. 
-        // Keeping it open maintains context.
-    };
+    // --- WARNING FLOW ---
+    const handleExportTrigger = () => setShowExportModal(true);
 
     const handleProceedFromWarning = (date) => {
-        if (pendingAction === 'scheduled') {
-            setTempReactivationDate(date);
-        }
+        if (pendingAction === 'scheduled') setTempReactivationDate(date);
         setShowWarningModal(false);
-        // Small delay to make transition smoother
         setTimeout(() => setShowPasswordModal(true), 200);
     };
 
-    // --- STEP 3: FINAL PASSWORD CONFIRMATION ---
+    // --- PASSWORD FLOW ---
     const handlePasswordConfirmed = (password) => {
-        console.log(`Action: ${pendingAction} confirmed. Password: ${password}`);
+        // Log the unlock reason along with the action
+        console.log(`Action: ${pendingAction} | Reason: ${unlockReason} | Password Verified`);
         
         if (pendingAction === 'scheduled') {
-            console.log(`System scheduled to reactivate on: ${tempReactivationDate}`);
             setSystemStatus('inactive');
-            // Add API logic to save the date
         } else if (pendingAction === 'deactivate') {
             setSystemStatus('inactive');
         } else if (pendingAction === 'activate') {
@@ -63,8 +84,8 @@ const SystemActivationControl = ({ systemStatus, setSystemStatus }) => {
         }
 
         setShowPasswordModal(false);
+        setIsControlsUnlocked(false); // Auto-collapse after success
         setPendingAction(null);
-        setTempReactivationDate(null);
     };
 
     // --- STYLES ---
@@ -73,7 +94,7 @@ const SystemActivationControl = ({ systemStatus, setSystemStatus }) => {
         colors: {
             white: '#FFFFFF', textMain: '#111827', textSec: '#6B7280',
             dangerBg: '#FEF2F2', dangerBorder: '#FCA5A5', dangerText: '#991B1B',
-            success: '#16A34A', buttonText: '#FFFFFF'
+            success: '#16A34A'
         },
         radius: { lg: '12px', md: '8px' },
         shadows: { sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }
@@ -85,11 +106,11 @@ const SystemActivationControl = ({ systemStatus, setSystemStatus }) => {
             borderRadius: theme.radius.lg,
             boxShadow: theme.shadows.sm,
             border: `1px solid ${isSystemActive ? '#E5E7EB' : theme.colors.dangerBorder}`,
-            padding: '32px', transition: 'all 0.3s ease',
+            padding: '24px', transition: 'all 0.3s ease',
             fontFamily: theme.fonts.main, position: 'relative', overflow: 'hidden'
         },
         headerText: {
-            fontSize: '20px', fontWeight: '700', marginBottom: '8px',
+            fontSize: '18px', fontWeight: '700', marginBottom: '4px',
             color: isSystemActive ? theme.colors.textMain : theme.colors.dangerText
         },
         subText: {
@@ -97,83 +118,104 @@ const SystemActivationControl = ({ systemStatus, setSystemStatus }) => {
             color: isSystemActive ? theme.colors.textSec : '#B91C1C'
         },
         iconBox: {
-            width: '48px', height: '48px', borderRadius: '50%',
+            width: '40px', height: '40px', borderRadius: '50%',
             backgroundColor: isSystemActive ? '#F3F4F6' : '#FEE2E2',
             color: isSystemActive ? '#374151' : '#DC2626',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px'
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
         },
-        activateButton: {
-            width: '100%', maxWidth: '240px', padding: '12px 24px',
-            backgroundColor: theme.colors.success, color: 'white', border: 'none',
-            borderRadius: theme.radius.md, fontSize: '15px', fontWeight: '600', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-            boxShadow: '0 4px 6px -1px rgba(22, 163, 74, 0.2)', fontFamily: theme.fonts.main
-        },
-        deactivateButton: {
-            padding: '10px 20px', backgroundColor: '#DC2626', color: 'white', border: 'none',
-            borderRadius: theme.radius.md, fontSize: '14px', fontWeight: '500', cursor: 'pointer',
+        // Buttons hidden inside accordion
+        actionButton: {
+            padding: '10px 20px', borderRadius: theme.radius.md, fontSize: '14px', fontWeight: '500', 
+            cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', gap: '8px',
             fontFamily: theme.fonts.main
         }
     };
 
-    const getPasswordTitle = () => {
-        if (pendingAction === 'activate') return 'System Reactivation';
-        if (pendingAction === 'scheduled') return 'Confirm Scheduled Pause';
-        return 'Confirm System Deactivation';
-    };
-
     return (
         <section style={styles.card}>
-            {/* Visual Indicator Strip */}
+            {/* Strip Indicator */}
             {!isSystemActive && (
                 <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '6px', backgroundColor: '#DC2626' }} />
             )}
 
-            <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
+            {/* --- HEADER (CLICK TO UNLOCK) --- */}
+            <div 
+                style={{ display: 'flex', gap: '16px', alignItems: 'center', cursor: 'pointer' }}
+                onClick={handleExpandRequest}
+            >
                 <div style={styles.iconBox}>
-                    {isSystemActive ? <Power size={24} /> : <Lock size={24} />}
+                    {isSystemActive ? <Power size={20} /> : <Lock size={20} />}
                 </div>
 
                 <div style={{ flex: 1 }}>
                     <h2 style={styles.headerText}>
                         {isSystemActive ? 'System Activation Control' : 'System is Deactivated'}
                     </h2>
-                    
                     <p style={styles.subText}>
                         {isSystemActive 
-                            ? "The system is currently running. Deactivating it will prevent all students and staff from accessing the meal claiming features."
-                            : "The system is currently locked. No claims or requests can be processed. You must provide an administrator password to reactivate the system."}
+                            ? "Manage system availability and access controls." 
+                            : "System requires reactivation to resume services."}
                     </p>
+                </div>
 
-                    <div style={{ marginTop: '24px' }}>
-                        {isSystemActive ? (
-                            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                                <button 
-                                    onClick={handleDeactivateClick}
-                                    style={styles.deactivateButton}
-                                >
-                                    Deactivate System
-                                </button>
-                                <button 
-                                    onClick={handleScheduledClick}
-                                    style={{ 
-                                        ...styles.deactivateButton, 
-                                        backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FCD34D' 
-                                    }}
-                                >
-                                    Scheduled Deactivation
-                                </button>
-                            </div>
-                        ) : (
-                            <button onClick={handleActivateClick} style={styles.activateButton}>
-                                <CheckCircle2 size={18} /> Reactivate System
-                            </button>
-                        )}
-                    </div>
+                {/* Chevron Indicator */}
+                <div style={{ color: theme.colors.textSec }}>
+                    {isControlsUnlocked ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </div>
             </div>
 
-            {/* --- 1. WARNING MODAL (Pre-check) --- */}
+            {/* --- ACCORDION CONTENT (HIDDEN CONTROLS) --- */}
+            <AnimatePresence>
+                {isControlsUnlocked && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0, marginTop: 0 }}
+                        animate={{ height: 'auto', opacity: 1, marginTop: 24 }}
+                        exit={{ height: 0, opacity: 0, marginTop: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        style={{ overflow: 'hidden' }}
+                    >
+                        <div style={{ 
+                            paddingTop: '16px', borderTop: `1px dashed ${isSystemActive ? '#E5E7EB' : '#FCA5A5'}`,
+                            display: 'flex', gap: '12px', flexWrap: 'wrap' 
+                        }}>
+                            {isSystemActive ? (
+                                <>
+                                    <button 
+                                        onClick={handleDeactivateClick}
+                                        style={{ ...styles.actionButton, backgroundColor: '#DC2626', color: 'white' }}
+                                    >
+                                        <Power size={16} /> Deactivate Now
+                                    </button>
+                                    <button 
+                                        onClick={handleScheduledClick}
+                                        style={{ 
+                                            ...styles.actionButton, 
+                                            backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FCD34D' 
+                                        }}
+                                    >
+                                        <Lock size={16} /> Scheduled Deactivation
+                                    </button>
+                                </>
+                            ) : (
+                                <button 
+                                    onClick={handleActivateClick} 
+                                    style={{ ...styles.actionButton, backgroundColor: theme.colors.success, color: 'white' }}
+                                >
+                                    <CheckCircle2 size={16} /> Reactivate System
+                                </button>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* --- MODALS --- */}
+            <ReasonInputModal 
+                isOpen={showReasonModal}
+                onClose={() => setShowReasonModal(false)}
+                onConfirm={handleReasonConfirmed}
+            />
+
             <DeactivationWarningModal 
                 isOpen={showWarningModal}
                 onClose={() => setShowWarningModal(false)}
@@ -182,18 +224,16 @@ const SystemActivationControl = ({ systemStatus, setSystemStatus }) => {
                 onProceed={handleProceedFromWarning}
             />
 
-            {/* --- 2. EXPORT MODAL (Triggered by Warning Modal) --- */}
             <ExportReportModal 
                 isOpen={showExportModal}
                 onClose={() => setShowExportModal(false)}
             />
 
-            {/* --- 3. PASSWORD MODAL (Final Check) --- */}
             <PasswordConfirmationModal 
                 isOpen={showPasswordModal}
                 onClose={() => setShowPasswordModal(false)}
                 onConfirm={handlePasswordConfirmed}
-                actionTitle={getPasswordTitle()}
+                actionTitle={pendingAction === 'activate' ? 'System Reactivation' : 'Confirm System Change'}
             />
         </section>
     );

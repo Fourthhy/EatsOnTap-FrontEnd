@@ -1,12 +1,17 @@
-import { logout } from "../../functions/logoutAuth";
-import { Button } from "../../components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from "react-router-dom";
 import { FaCheckCircle } from "react-icons/fa";
 
+// UI Components
+import { Button } from "../../components/ui/button";
+import { Input } from "@/components/ui/input";
+
+// Functions
+import { logout } from "../../functions/logoutAuth";
 import { fetchAllStudents } from "../../functions/foodServer/fetchAllStudents";
 import { isSettingActive } from "../../functions/isSettingActive";
+// 🟢 IMPORT THE API FUNCTION
+import { claimMeal } from "../../functions/foodServer/claimMeal";
 
 export default function FreeMealClaim() {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -44,18 +49,26 @@ export default function FreeMealClaim() {
             // If input contains ONLY numbers, treat as RFID. Otherwise, Student ID.
             const isRFID = /^\d+$/.test(trimmedInput);
 
-            // 🟢 B. FIND STUDENT
+            // 🟢 B. FIND STUDENT IN LOCAL DATA
             const foundIndex = allStudents.findIndex(s => {
                 if (isRFID) {
-                    // Match RFID Tag
                     return s.rfidTag === trimmedInput;
                 } else {
-                    // Match Student ID (Case insensitive safe check)
                     return s.studentID?.toLowerCase() === trimmedInput.toLowerCase();
                 }
             });
 
             if (foundIndex !== -1) {
+                // 🟢 C. TRIGGER API CALL (Fire and Forget / Optimistic)
+                // We call this immediately. We don't await it to block the UI 
+                // because you mentioned the local state handles the display.
+                await claimMeal(trimmedInput).catch((err) => {
+                    console.error("Background API Claim Error:", err);
+                    // Optional: Add logic here if you want to show a toaster error 
+                    // if the server rejects it despite local data saying it's okay.
+                });
+
+                // 🟢 D. UPDATE LOCAL STATE (Optimistic UI Update)
                 const updatedStudentList = [...allStudents];
                 const targetStudent = { ...updatedStudentList[foundIndex] };
 
@@ -65,8 +78,7 @@ export default function FreeMealClaim() {
                 // Set data for display
                 setMealClaimData(targetStudent); 
 
-                // 🟢 C. UPDATE LOCAL STATUS
-                // Only update to CLAIMED if they are currently ELIGIBLE
+                // Only update to CLAIMED locally if they are currently ELIGIBLE
                 if (currentStatus === "ELIGIBLE") {
                     targetStudent.temporaryClaimStatus = ["CLAIMED"];
                     updatedStudentList[foundIndex] = targetStudent;

@@ -1,77 +1,87 @@
 import React from 'react';
 
-function ProgramsList() {
-    // Mock Data based on your requirements
-    const courses = [
-        "Bachelor of Science in Information Systems 3",
-        "Bachelor of Science in Social Work 1",
-        "Bachelor of Science in Social Work 3",
-        "Bachelor of Science in Social Work 3",
-        "Bachelor of Arts in Broadcasting 4",
-        "Bachelor of Science in Information Systems 2",
-        "Bachelor of Science in Social Work 2",
-        "Bachelor of Science in Social Work 2",
-        "Bachelor of Science in Social Work 2",
-        "Bachelor of Science in Accounting Information Systems 1", // Added to test Yellow
-        "Associate in Computer Technology 1", // Added to test Orange
+function ProgramsList({ data = [], selectedTab }) {
+    
+    // 1. Map index to the exact strings in your 'dayOfWeek' array
+    // User specified: 1 is MONDAY, 2 is TUESDAY.
+    // This implies standard JS mapping: 0=SUNDAY, 1=MONDAY, etc.
+    const dayMapping = [
+        "SUNDAY",    // 0
+        "MONDAY",    // 1
+        "TUESDAY",   // 2
+        "WEDNESDAY", // 3
+        "THURSDAY",  // 4
+        "FRIDAY",    // 5
+        "SATURDAY"   // 6
     ];
 
-    // Helper function to assign colors based on program keywords
-    const getCourseColor = (courseName) => {
-        const name = courseName.toLowerCase();
+    const targetDay = dayMapping[selectedTab];
 
-        if (name.includes("information systems")) return "bg-red-400 shadow-red-100";
-        if (name.includes("computer technology")) return "bg-orange-400 shadow-orange-100";
-        if (name.includes("broadcasting")) return "bg-blue-400 shadow-blue-100";
-        if (name.includes("social work")) return "bg-fuchsia-400 shadow-fuchsia-100"; // Violet/Purple
-        if (name.includes("accounting")) return "bg-yellow-400 shadow-yellow-100"; // Covers both Accounting & AIS
+    // 2. Filter the parent array directly
+    // We check if the 'dayOfWeek' array includes the target day string
+    const filteredPrograms = data.filter((program) => {
+        const output = program.dayOfWeek && program.dayOfWeek.includes(targetDay);
+        console.log('Filtering output', output);
+        return output;
+    });
 
-        return "bg-gray-300 shadow-gray-100"; // Default fallback
+    // Helper: Color logic based on programName acronyms
+    const getProgramColor = (name) => {
+        const code = (name || '').toUpperCase();
+        if (code.includes("BSIS")) return "bg-red-400 shadow-red-100";
+        if (code.includes("ACT")) return "bg-orange-400 shadow-orange-100";
+        if (code.includes("BAB") || code.includes("AB")) return "bg-blue-400 shadow-blue-100";
+        if (code.includes("BSSW")) return "bg-fuchsia-400 shadow-fuchsia-100"; 
+        if (code.includes("BSA") || code.includes("AIS")) return "bg-yellow-400 shadow-yellow-100"; 
+        return "bg-gray-300 shadow-gray-100"; 
     };
 
     return (
         <div className="w-[100%] p-6 flex justify-center" style={{ marginTop: 10 }}>
-            {/* grid-cols-1 for mobile, 
-         md:grid-cols-2 splits it into two columns on larger screens.
-         The grid naturally handles the 'odd number starts left' logic.
-      */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ marginTop: 10 }}>
-                {courses.map((course, index) => {
-                    const colorClass = getCourseColor(course);
+            {filteredPrograms.length === 0 ? (
+                <div className="text-sm text-gray-400 italic mt-4">
+                    No programs scheduled for {targetDay ? targetDay.toLowerCase() : 'this day'}.
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full" style={{ marginTop: 10 }}>
+                    {filteredPrograms.map((program) => {
+                        // Accessing properties directly from the object structure you provided
+                        const colorClass = getProgramColor(program.programName);
+                        const displayText = `${program.programName} ${program.year}`;
 
-                    return (
-                        <div
-                            key={index}
+                        return (
+                            <div
+                                key={program._id} // Using _id from model
+                                className="group relative flex items-center w-full h-10 bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                                style={{ margin: 10 }}
+                            >
+                                {/* Color Strip */}
+                                <div className={`w-1.5 h-full ${colorClass.split(' ')[0]}`} />
 
-                            className="group relative flex items-center w-full h-10 bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                        >
-                            {/* The Colored Strip 
-                  w-1.5 creates that thin line. 
-                  The parent's 'rounded-xl' + 'overflow-hidden' curves the top and bottom of this strip automatically.
-              */}
-                            <div className={`w-1.5 h-full ${colorClass.split(' ')[0]}`} />
+                                {/* Gradient Glow */}
+                                <div className={`absolute left-0 top-0 bottom-0 w-4 opacity-20 bg-gradient-to-r from-current to-transparent pointer-events-none ${colorClass.replace('bg-', 'text-')}`} />
 
-                            {/* Optional: A subtle gradient fade from the strip to make it glow slightly 
-                  like the image reference (Notice the soft color bleed in your screenshot)
-              */}
-                            <div className={`absolute left-0 top-0 bottom-0 w-4 opacity-20 bg-gradient-to-r from-current to-transparent pointer-events-none ${colorClass.replace('bg-', 'text-')}`} />
-
-                            <span className="ml-4 text-sm font-medium text-gray-700 font-geist truncate pr-4" style={{
-                                fontWeight: "450",
-                                fontSize: 12,
-                                color: "#272727ff",
-                                fontFamily: "geist",
-                                width: "fit-content",
-                                height: "fit-content",
-                                paddingLeft: 10,
-                                paddingRight: 10
-                            }}>
-                                {course}
-                            </span>
-                        </div>
-                    );
-                })}
-            </div>
+                                {/* Program Name & Year */}
+                                <span 
+                                    className="ml-4 text-sm font-medium text-gray-700 font-geist truncate pr-4" 
+                                    style={{
+                                        fontWeight: "450",
+                                        fontSize: 12,
+                                        color: "#272727ff",
+                                        fontFamily: "geist",
+                                        width: "fit-content",
+                                        height: "fit-content",
+                                        paddingLeft: 10,
+                                        paddingRight: 10
+                                    }}
+                                >
+                                    {displayText}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 };

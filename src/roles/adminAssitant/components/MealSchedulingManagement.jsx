@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, X, ChevronDown, Check, Loader2, FileText, ListFilter, Users, School } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, ChevronDown, Check, Loader2, FileText, ListFilter, Calendar } from 'lucide-react';
 import { fetchProgramCodes } from "../../../functions/adminAssistant/fetchProgramCodes";
-
 
 // --- CUSTOM DROPDOWN COMPONENT ---
 const CustomDropdown = ({ label, value, options, onChange }) => {
@@ -88,7 +87,7 @@ function SubmissionTypeDropdown({ selectedSubmissionType, setSelectedSubmissionT
     ];
 
     return (
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center' }}>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', padding: "7px" }}>
             <h1 style={{ fontFamily: 'geist', fontSize: '0.90rem', fontWeight: 400, paddingBottom: 10, color: '#374151' }}>
                 Submission Type
             </h1>
@@ -102,6 +101,277 @@ function SubmissionTypeDropdown({ selectedSubmissionType, setSelectedSubmissionT
         </div>
     );
 }
+
+// --- STEP 1 ---
+const Step1 = ({
+    submissionType,
+    setSubmissionType,
+    selectedDays,
+    setSelectedDays,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+    isStep1Valid,
+    paginate
+}) => {
+    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    const toggleDay = (day) => {
+        if (selectedDays.includes(day)) {
+            setSelectedDays(selectedDays.filter(d => d !== day));
+        } else {
+            setSelectedDays([...selectedDays, day]);
+        }
+    };
+
+    return (
+        <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center min-h-[630px]">
+            {/* Header Circle */}
+            <div style={{ marginBottom: "10px" }} className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
+                <span className="text-2xl font-bold text-blue-600 font-geist">1</span>
+            </div>
+
+            <h3 className="text-xl font-bold text-gray-800 font-geist">Configuration</h3>
+            <p style={{ marginBottom: "20px" }} className="text-gray-500 font-geist text-sm">
+                Select request type and schedule.
+            </p>
+
+            <div className="w-full max-w-md mx-auto flex flex-col gap-6">
+
+                {/* 1. Submission Type Dropdown */}
+                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <SubmissionTypeDropdown
+                        selectedSubmissionType={submissionType}
+                        setSelectedSubmissionType={setSubmissionType}
+                    />
+                </div>
+
+                {/* 2. DYNAMIC CONTENT AREA */}
+                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 animate-in fade-in slide-in-from-top-2 duration-300" style={{ padding: "15px" }}>
+
+                    {submissionType === 'mealEligibility' ? (
+                        // --- MEAL ELIGIBILITY: DAY GRID ---
+                        <>
+                            <div style={{ marginBottom: '8px', textAlign: 'left' }}>
+                                <label style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151', fontFamily: 'geist' }}>
+                                    Select Days
+                                </label>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3">
+                                {daysOfWeek.map((day, idx) => {
+                                    const isSelected = selectedDays.includes(day);
+                                    return (
+                                        <div
+                                            key={idx}
+                                            onClick={() => toggleDay(day)}
+                                            className={`flex items-center p-2 rounded-md cursor-pointer border transition-all duration-200
+                                            ${isSelected
+                                                    ? 'bg-blue-50 border-blue-200 shadow-sm'
+                                                    : 'bg-white border-gray-100 hover:border-gray-300 hover:bg-gray-50'
+                                                }`}
+                                            style={{ height: '40px' }}
+                                        >
+                                            <div className="flex items-center justify-center w-8 shrink-0 mr-2">
+                                                <input
+                                                    type="checkbox"
+                                                    className="accent-blue-600 w-4 h-4 cursor-pointer"
+                                                    checked={isSelected}
+                                                    readOnly
+                                                />
+                                            </div>
+                                            <span
+                                                className="truncate"
+                                                style={{
+                                                    fontWeight: 500, fontSize: 12, fontFamily: "geist",
+                                                    color: isSelected ? '#1e40af' : '#111827'
+                                                }}
+                                                title={day}
+                                            >
+                                                {day}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
+                    ) : (
+                        // --- EVENT MEAL: DATE RANGE PICKER ---
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "16px", // gap-4
+                                textAlign: "left",
+                            }}
+                        >
+                            {/* Start Date */}
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "4px", // gap-1
+                                }}
+                            >
+                                <label
+                                    style={{
+                                        fontSize: "0.875rem",
+                                        fontWeight: 500,
+                                        color: "#374151", // gray-700
+                                        fontFamily: "Geist, sans-serif",
+                                    }}
+                                >
+                                    Start Date
+                                </label>
+
+                                <div style={{ position: "relative" }}>
+                                    <Calendar
+                                        size={16}
+                                        style={{
+                                            position: "absolute",
+                                            left: "12px", // left-3
+                                            top: "50%",
+                                            transform: "translateY(-50%)",
+                                            color: "#9CA3AF", // gray-400
+                                            pointerEvents: "none",
+                                        }}
+                                    />
+
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                        style={{
+                                            width: "100%",
+                                            paddingLeft: "40px", // pl-10
+                                            paddingRight: "12px", // pr-3
+                                            paddingTop: "8px", // py-2
+                                            paddingBottom: "8px",
+                                            border: "1px solid #D1D5DB", // gray-300
+                                            borderRadius: "6px", // rounded-md
+                                            outline: "none",
+                                            fontSize: "14px", // text-sm
+                                            fontFamily: "Geist, sans-serif",
+                                            color: "#374151", // gray-700
+                                        }}
+                                        onFocus={(e) => {
+                                            e.target.style.border = "2px solid #3B82F6"; // blue-500
+                                        }}
+                                        onBlur={(e) => {
+                                            e.target.style.border = "1px solid #D1D5DB";
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* End Date */}
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "4px",
+                                }}
+                            >
+                                <label
+                                    style={{
+                                        fontSize: "0.875rem",
+                                        fontWeight: 500,
+                                        color: "#374151",
+                                        fontFamily: "Geist, sans-serif",
+                                    }}
+                                >
+                                    End Date{" "}
+                                    <span
+                                        style={{
+                                            color: "#9CA3AF", // gray-400
+                                            fontWeight: 400,
+                                        }}
+                                    >
+                                        (Optional)
+                                    </span>
+                                </label>
+
+                                <div style={{ position: "relative" }}>
+                                    <Calendar
+                                        size={16}
+                                        style={{
+                                            position: "absolute",
+                                            left: "12px",
+                                            top: "50%",
+                                            transform: "translateY(-50%)",
+                                            color: "#9CA3AF",
+                                            pointerEvents: "none",
+                                        }}
+                                    />
+
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                        min={startDate}
+                                        style={{
+                                            width: "100%",
+                                            paddingLeft: "40px",
+                                            paddingRight: "12px",
+                                            paddingTop: "8px",
+                                            paddingBottom: "8px",
+                                            border: "1px solid #D1D5DB",
+                                            borderRadius: "6px",
+                                            outline: "none",
+                                            fontSize: "14px",
+                                            fontFamily: "Geist, sans-serif",
+                                            color: "#374151",
+                                        }}
+                                        onFocus={(e) => {
+                                            e.target.style.border = "2px solid #3B82F6";
+                                        }}
+                                        onBlur={(e) => {
+                                            e.target.style.border = "1px solid #D1D5DB";
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Info Box */}
+                            <div
+                                style={{
+                                    backgroundColor: "#EFF6FF", // blue-50
+                                    border: "1px solid #DBEAFE", // blue-100
+                                    borderRadius: "6px",
+                                    padding: "12px", // p-3
+                                }}
+                            >
+                                <p
+                                    style={{
+                                        fontSize: "12px", // text-xs
+                                        color: "#1D4ED8", // blue-700
+                                        fontFamily: "Geist, sans-serif",
+                                        lineHeight: "1.6", // leading-relaxed
+                                    }}
+                                >
+                                    Leaving the end date blank implies the event is only for the start date.
+                                </p>
+                            </div>
+                        </div>
+
+                    )}
+                </div>
+            </div>
+
+            {/* Next Button Only (Step 1 has no previous) */}
+            <div
+                className={`max-w-sm mx-auto rounded-lg shadow-sm w-[20%] transition-colors border border-gray-200 
+                ${!isStep1Valid() ? 'bg-gray-100 cursor-not-allowed opacity-50' : 'bg-white cursor-pointer hover:bg-gray-50'}`}
+                style={{ padding: "10px", marginTop: "30px" }}
+                onClick={() => !isStep1Valid() ? null : paginate(1)}
+            >
+                <span className={`text-sm font-medium font-geist ${!isStep1Valid() ? 'text-gray-400' : 'text-gray-700'}`}>
+                    Next
+                </span>
+            </div>
+        </div>
+    );
+};
 
 // --- ELIGIBLE PROGRAMS FORM ---
 const EligibleProgramsForm = ({ checkedPrograms, handleCheckboxChange, toggleSelectAll, isAllSelected, programCodes }) => {
@@ -130,7 +400,7 @@ const EligibleProgramsForm = ({ checkedPrograms, handleCheckboxChange, toggleSel
     };
 
     return (
-        <div style={{ ...globalStyle, padding: "20px", borderRadius: "8px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", width: "100%", height: "100%" }} className="font-geist">
+        <div style={{ ...globalStyle, padding: "20px", borderRadius: "8px", width: "100%", height: "100%" }} className="font-geist">
             <div style={{ marginBottom: "1rem", display: "flex", alignItems: "center", justifyContent: 'space-between' }}>
                 <h1 style={{ color: "#232323", fontFamily: 'geist', fontSize: '0.90rem', fontWeight: 600 }}>Eligible Programs</h1>
             </div>
@@ -140,7 +410,7 @@ const EligibleProgramsForm = ({ checkedPrograms, handleCheckboxChange, toggleSel
                     <Loader2 className="animate-spin text-blue-500" size={24} />
                 </div>
             ) : (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "2rem" }} className="font-geist">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "2rem", }} className="font-geist">
                     {programs.map((program) => (
                         <div key={program} style={{ display: "flex", flexDirection: "column" }}>
                             {years.map((year) => renderCheckbox(program, year))}
@@ -172,6 +442,10 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
 
     // --- DATA STATE ---
     const [submissionType, setSubmissionType] = useState('mealEligibility');
+    const [selectedDays, setSelectedDays] = useState([]);
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+
     const [checkedPrograms, setCheckedPrograms] = useState({});
     const [programCodes, setProgramCodes] = useState([]);
 
@@ -220,10 +494,21 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
         }
     };
 
-    // 🟢 VALIDATION FOR STEP 2
+    // Validation
     const hasSelectedPrograms = useMemo(() => {
         return Object.values(checkedPrograms).some(isChecked => isChecked);
     }, [checkedPrograms]);
+
+    const isStep1Valid = () => {
+        if (!submissionType) return false;
+        if (submissionType === 'mealEligibility') {
+            return selectedDays.length > 0;
+        } else {
+            return startDate !== "";
+        }
+    };
+
+    const isNextDisabled = (step === 1 && !isStep1Valid()) || (step === 2 && !hasSelectedPrograms) || step === TOTAL_STEPS;
 
     // --- VISIBILITY & NAV ---
     useEffect(() => {
@@ -238,7 +523,6 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
         isClose();
         setIsVisible(false);
     }
-
 
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -256,36 +540,9 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
         }
     };
 
-    const isNextDisabled = (step === 1 && !submissionType) || (step === 2 && !hasSelectedPrograms) || step === TOTAL_STEPS;
-
-    // --- INTERNAL STEPS ---
-    const Step1 = ({ submissionType, setSubmissionType }) => (
-        <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center min-h-[350px]">
-            <div style={{ marginBottom: "10px" }} className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
-                <span className="text-2xl font-bold text-blue-600 font-geist">1</span>
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 font-geist">Submission Type</h3>
-            <p style={{ marginBottom: "20px" }} className="text-gray-500 font-geist text-sm">Select the type of request you want to create.</p>
-
-            <div style={{ padding: "20px" }} className="w-full max-w-sm mx-auto bg-white p-4 rounded-lg shadow-sm">
-                <SubmissionTypeDropdown
-                    selectedSubmissionType={submissionType}
-                    setSelectedSubmissionType={setSubmissionType}
-                />
-            </div>
-
-            <div
-                className={`max-w-sm mx-auto rounded-lg shadow-sm w-[20%] transition-colors border border-gray-200 ${!submissionType ? 'bg-gray-100 cursor-not-allowed opacity-50' : 'bg-white cursor-pointer hover:bg-gray-50'}`}
-                style={{ padding: "10px", marginTop: "20px" }}
-                onClick={() => !submissionType ? null : paginate(1)}
-            >
-                <span className={`text-sm font-medium font-geist ${!submissionType ? 'text-gray-400' : 'text-gray-700'}`}>Next</span>
-            </div>
-        </div>
-    );
-
     const Step2 = () => (
-        <div className="w-full h-full flex flex-col items-center justify-start text-center min-h-[350px]" style={{ padding: "15px" }}>
+        <div className="w-full h-full flex flex-col items-center justify-evenly text-center min-h-[650px]">
+
             <div className="flex flex-col items-center mb-6">
                 <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4">
                     <span className="text-2xl font-bold text-blue-600 font-geist">2</span>
@@ -294,7 +551,7 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                 <p className="text-gray-500 mt-1 font-geist text-sm">Select the programs eligible for this meal request.</p>
             </div>
 
-            <div className="w-full max-w-2xl mx-auto flex-1 overflow-y-auto">
+            <div className="w-[90%] max-w-2xl mx-auto overflow-y-auto flex flex-col justify-center">
                 <EligibleProgramsForm
                     checkedPrograms={checkedPrograms}
                     handleCheckboxChange={handleCheckboxChange}
@@ -304,12 +561,25 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                 />
             </div>
 
-            <div
-                className={`max-w-sm mx-auto rounded-lg shadow-sm w-[20%] transition-colors border border-gray-200 ${!hasSelectedPrograms ? 'bg-gray-100 cursor-not-allowed opacity-50' : 'bg-white cursor-pointer hover:bg-gray-50'}`}
-                style={{ padding: "10px", marginTop: "20px" }}
-                onClick={() => !hasSelectedPrograms ? null : paginate(1)}
-            >
-                <span className={`text-sm font-medium font-geist ${!hasSelectedPrograms ? 'text-gray-400' : 'text-gray-700'}`}>Next</span>
+            {/* 🟢 STEP 2 NAVIGATION: PREVIOUS + NEXT */}
+            <div className="flex gap-4 w-full max-w-sm mx-auto mt-5">
+                {/* PREVIOUS BUTTON */}
+                <div
+                    className="flex-1 rounded-lg shadow-sm transition-colors border border-gray-200 bg-white cursor-pointer hover:bg-gray-50"
+                    style={{ padding: "10px" }}
+                    onClick={() => paginate(-1)}
+                >
+                    <span className="text-sm font-medium font-geist text-gray-700">Previous</span>
+                </div>
+
+                {/* NEXT BUTTON */}
+                <div
+                    className={`flex-1 rounded-lg shadow-sm transition-colors border border-gray-200 ${!hasSelectedPrograms ? 'bg-gray-100 cursor-not-allowed opacity-50' : 'bg-white cursor-pointer hover:bg-gray-50'}`}
+                    style={{ padding: "10px" }}
+                    onClick={() => !hasSelectedPrograms ? null : paginate(1)}
+                >
+                    <span className={`text-sm font-medium font-geist ${!hasSelectedPrograms ? 'text-gray-400' : 'text-gray-700'}`}>Next</span>
+                </div>
             </div>
         </div>
     );
@@ -321,13 +591,12 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
             .filter(([_, isChecked]) => isChecked)
             .map(([id]) => id);
 
-        const typeLabel =
-            submissionType === "mealEligibility"
-                ? "Meal Eligibility Request"
-                : "Event Meal Request";
+        const typeLabel = submissionType === "mealEligibility"
+            ? "Meal Eligibility Request"
+            : "Event Meal Request";
 
         return (
-            <div style={{ width: "100%", height: "100%", minHeight: "350px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", textAlign: "center", padding: "20px" }}>
+            <div style={{ width: "100%", height: "100%", minHeight: "650px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "20px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "24px" }}>
                     <div style={{ width: "64px", height: "64px", backgroundColor: "#EFF6FF", borderRadius: "9999px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
                         <span style={{ fontSize: "24px", fontWeight: "700", color: "#2563EB", fontFamily: "Geist, sans-serif" }}>3</span>
@@ -338,6 +607,7 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                 </div>
 
                 <div style={{ width: "100%", maxWidth: "512px", margin: "0 auto", backgroundColor: "#F9FAFB", borderRadius: "12px", border: "1px solid #E5E7EB", padding: "24px", display: "flex", flexDirection: "column", gap: "16px", textAlign: "left", overflow: "hidden" }}>
+                    {/* Submission Type */}
                     <div style={{ borderBottom: "1px solid #E5E7EB", paddingBottom: "12px" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
                             <FileText size={16} style={{ color: "#2563EB" }} />
@@ -346,6 +616,24 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                         <p style={{ color: "#1F2933", fontWeight: "500", paddingLeft: "24px", fontFamily: "Geist, sans-serif" }}>{typeLabel}</p>
                     </div>
 
+                    {/* Schedule / Date Info */}
+                    <div style={{ borderBottom: "1px solid #E5E7EB", paddingBottom: "12px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                            <Calendar size={16} style={{ color: "#2563EB" }} />
+                            <span style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6B7280", fontFamily: "Geist, sans-serif" }}>Schedule</span>
+                        </div>
+                        <div style={{ paddingLeft: "24px", fontFamily: "Geist, sans-serif", fontSize: "14px", color: "#374151" }}>
+                            {submissionType === 'mealEligibility' ? (
+                                selectedDays.length > 0 ? selectedDays.join(", ") : "No days selected"
+                            ) : (
+                                <span>
+                                    {startDate} {endDate ? ` to ${endDate}` : "(Single Day)"}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Selected Programs */}
                     <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -369,13 +657,26 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                     </div>
                 </div>
 
-                <div
-                    onMouseEnter={() => setIsHover(true)}
-                    onMouseLeave={() => setIsHover(false)}
-                    onClick={() => alert("Submitted!")}
-                    style={{ maxWidth: "384px", margin: "20px auto 0", width: "30%", backgroundColor: isHover ? "#1D4ED8" : "#2563EB", color: "#FFFFFF", borderRadius: "8px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", padding: "12px", cursor: "pointer", transition: "background-color 0.2s ease", textAlign: "center" }}
-                >
-                    <span style={{ fontSize: "14px", fontWeight: "700", fontFamily: "Geist, sans-serif" }}>Confirm & Submit</span>
+                {/* 🟢 STEP 3 NAVIGATION: PREVIOUS + SUBMIT */}
+                <div className="flex gap-4 w-full max-w-sm mx-auto mt-5 justify-center" style={{ marginTop: 15 }}>
+                    {/* PREVIOUS BUTTON */}
+                    <div
+                        className="rounded-lg shadow-sm transition-colors border border-gray-200 bg-white cursor-pointer hover:bg-gray-50 flex-1 text-center"
+                        style={{ padding: "12px" }}
+                        onClick={() => paginate(-1)}
+                    >
+                        <span className="text-sm font-medium font-geist text-gray-700">Previous</span>
+                    </div>
+
+                    {/* SUBMIT BUTTON */}
+                    <div
+                        onMouseEnter={() => setIsHover(true)}
+                        onMouseLeave={() => setIsHover(false)}
+                        onClick={() => alert("Submitted!")}
+                        style={{ flex: 1, backgroundColor: isHover ? "#1D4ED8" : "#2563EB", color: "#FFFFFF", borderRadius: "8px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", padding: "12px", cursor: "pointer", transition: "background-color 0.2s ease" }}
+                    >
+                        <span style={{ fontSize: "14px", fontWeight: "700", fontFamily: "Geist, sans-serif" }}>Confirm & Submit</span>
+                    </div>
                 </div>
             </div>
         );
@@ -387,8 +688,6 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
         exit: (direction) => ({ zIndex: 0, x: direction < 0 ? '100%' : '-100%', opacity: 0, scale: 0.95, position: 'absolute', transition: { x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } } })
     };
 
-
-
     return (
         <AnimatePresence>
             {isVisible && (
@@ -399,47 +698,15 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0, transition: { duration: 0.2, ease: "easeInOut" } }}
                 >
-                    {/* Backdrop */}
                     <motion.div
                         className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
                         onClick={handleClose}
                     />
 
-                    {/* Main Content Wrapper */}
                     <div className="relative z-10 flex flex-col items-center gap-6 w-full h-full justify-center pointer-events-none p-4">
-
-                        {/* Title Section (Animated Entry/Exit) */}
-                        <motion.div
-                            initial={{ y: -20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: -20, opacity: 0, transition: { duration: 0.2 } }}
-
-                            className="text-center pointer-events-auto flex-shrink-0"
-                        >
-                            <div className="flex items-center justify-center gap-2 mt-3" style={{ paddingTop: "50px" }}>
-                                {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-                                    <div key={i + 1} className={`h-2 rounded-full transition-all duration-300 shadow-sm ${step === i + 1 ? "w-8 bg-[#4268BD]" : (step > i + 1 ? "w-2 bg-blue-300/80" : "w-2 bg-white/30")}`} />
-                                ))}
-                                <span className="text-white/90 text-xs font-medium font-geist ml-3 uppercase tracking-widest">Step {step} / {TOTAL_STEPS}</span>
-                            </div>
-                        </motion.div>
-
                         <div className="flex items-center gap-4 md:gap-8 w-full justify-center flex-1 min-h-0">
-                            {/* Prev Button */}
-                            <motion.button
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
-                                onClick={() => paginate(-1)}
-                                disabled={step === 1}
-                                className={`pointer-events-auto p-4 rounded-full backdrop-blur-md transition-all duration-300 flex-shrink-0 ${step === 1 ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-white/10 text-white hover:bg-white/20 hover:scale-110 shadow-lg'}`}
-                            >
-                                <ChevronLeft size={32} />
-                            </motion.button>
+                            {/* 🟢 REMOVED SIDE BUTTONS (< AND >) */}
 
-
-
-                            {/* Center Card (Animated Entry/Exit) */}
                             <motion.div
                                 onClick={(e) => e.stopPropagation()}
                                 initial={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -453,25 +720,27 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                                 <div className="flex-1 relative flex items-center justify-center overflow-hidden">
                                     <AnimatePresence initial={false} custom={direction} mode="popLayout">
                                         <motion.div key={step} custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" className="w-full h-full flex flex-col">
-                                            {step === 1 && <Step1 submissionType={submissionType} setSubmissionType={setSubmissionType} />}
+                                            {/* 🟢 STEP 1 PROPS */}
+                                            {step === 1 && (
+                                                <Step1
+                                                    submissionType={submissionType}
+                                                    setSubmissionType={setSubmissionType}
+                                                    selectedDays={selectedDays}
+                                                    setSelectedDays={setSelectedDays}
+                                                    startDate={startDate}
+                                                    setStartDate={setStartDate}
+                                                    endDate={endDate}
+                                                    setEndDate={setEndDate}
+                                                    isStep1Valid={isStep1Valid}
+                                                    paginate={paginate}
+                                                />
+                                            )}
                                             {step === 2 && <Step2 />}
                                             {step === 3 && <Step3 />}
                                         </motion.div>
                                     </AnimatePresence>
                                 </div>
                             </motion.div>
-
-                            {/* Next Button */}
-                            <motion.button
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 20, transition: { duration: 0.2 } }}
-                                onClick={() => paginate(1)}
-                                disabled={isNextDisabled}
-                                className={`pointer-events-auto p-4 rounded-full backdrop-blur-md transition-all duration-300 flex-shrink-0 ${isNextDisabled ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-white/10 text-white hover:bg-white/20 hover:scale-110 shadow-lg'}`}
-                            >
-                                <ChevronRight size={32} />
-                            </motion.button>
                         </div>
                     </div>
                 </motion.div>

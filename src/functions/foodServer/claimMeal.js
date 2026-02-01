@@ -2,31 +2,36 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export async function claimMeal(studentInput) {
-    // 🟢 CHANGE 1: Append data to URL as a query parameter
-    // We use encodeURIComponent to ensure special characters (like spaces) don't break the URL
-    const targetUrl = `${VITE_LOCALHOST}/api/claim/fakeMealClaim?studentInput=${encodeURIComponent(studentInput)}`;
-    
-    console.log("🌐 Fetching Student Data from:", targetUrl);
+    // ⚠️ CHECK ROUTE: Matches /api/claim/claim-meal
+    const targetUrl = `${VITE_BASE_URL}/api/claim/claim-meal`;
+
+    console.log("🍛 Processing Claim for:", studentInput);
 
     try {
         const response = await fetch(targetUrl, {
-            method: 'GET', // 🟢 CHANGE 2: Method is GET
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            // 🟢 CHANGE 3: Remove 'body' entirely. GET requests cannot have a body.
+            body: JSON.stringify({ studentInput }),
+            // credentials: 'include' // Uncomment if you need to log *who* processed the claim (the admin/staff)
         });
 
-        const data = await response.json();
+        const result = await response.json();
 
+        // Handle Specific Status Codes from Controller
         if (!response.ok) {
-            throw new Error(data.message || `Failed to fetch: ${response.status}`);
+            // 404: Student not found / No daily record
+            // 400: Not in eligible list / Insufficient balance
+            // 409: Already claimed
+            throw new Error(result.message || `Claim failed: ${response.status}`);
         }
 
-        console.log("Student Found!", data);
-        return data;
+        console.log("✅ Claim Successful:", result);
+        return result; // Returns { message, data: { studentID, name, ... } }
+
     } catch (error) {
-        console.error(error);
-        throw error;
+        console.error("Error processing claim:", error);
+        throw error; // Re-throw to display specific message in UI
     }
 }

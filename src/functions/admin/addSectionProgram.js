@@ -6,7 +6,7 @@ const addSectionProgram = async (sectionData) => {
 
     // ⚠️ IMPORTANT: Ensure this matches your actual Route definition in backend
     // Example: router.post('/add', addSectionProgram) inside /api/sectionProgram routes
-    const targetUrl = `${VITE_LOCALHOST}/api/sectionprogram/addSectionProgram`;
+    const targetUrl = `${VITE_BASE_URL}/api/sectionprogram/addSectionProgram`;
 
     console.log("🌐 Attempting submit to:", targetUrl);
 

@@ -1,22 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Save } from 'lucide-react';
-import { PasswordConfirmationModal } from './PasswordConfirmationModal'; // Import the modal
+import { PasswordConfirmationModal } from './PasswordConfirmationModal'; 
+import { useData } from '../../../../context/DataContext';
 
 const VirtualCreditConfiguration = () => {
     // --- STATE ---
-    const [creditValue, setCreditValue] = useState(50);
+    const { mealValue } = useData();
+    
+    // Initialize with empty string to prevent "uncontrolled input" warning
+    const [creditValue, setCreditValue] = useState(mealValue || ''); 
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+
+    // 🟢 SYNC: Update local state when context data loads
+    useEffect(() => {
+        if (mealValue !== undefined && mealValue !== null) {
+            setCreditValue(mealValue);
+        }
+    }, [mealValue]);
+
+    // 🟢 CHECK: Has the value changed?
+    // Convert both to string to ensure safe comparison (input is string, data might be number)
+    const hasChanges = creditValue !== '' && String(creditValue) !== String(mealValue);
 
     // --- HANDLERS ---
     const handleSaveClick = () => {
+        if (!hasChanges) return; // Double check
         setIsPasswordModalOpen(true);
     };
 
     const handlePasswordConfirmed = (password) => {
-        // Here you would make an API call to verify password and save settings
         console.log(`Saving Credit Value: ${creditValue} with password: ${password}`);
-        
-        // Simulating success
         setIsPasswordModalOpen(false);
         alert("Settings Saved Successfully!");
     };
@@ -31,9 +44,9 @@ const VirtualCreditConfiguration = () => {
             textSec: '#6B7280',
             border: '#E5E7EB',
             inputBg: '#F9FAFB',
+            disabled: '#9CA3AF', // Grey for disabled state
         },
         fonts: { main: "'Geist', sans-serif" },
-        // UPDATED: Changed all radius values to 6px
         radius: { md: '6px', lg: '6px' },
         shadows: { sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }
     };
@@ -55,12 +68,20 @@ const VirtualCreditConfiguration = () => {
             border: `1px solid ${theme.colors.border}`, borderRadius: theme.radius.md,
             fontSize: '14px', color: theme.colors.textMain, outline: 'none', fontFamily: theme.fonts.main
         },
+        // 🟢 UPDATED BUTTON STYLE
         button: {
-            backgroundColor: theme.colors.primary, color: theme.colors.whiteText, border: 'none',
-            borderRadius: theme.radius.md, padding: '10px 20px', fontSize: '14px',
-            fontWeight: '500', cursor: 'pointer', fontFamily: theme.fonts.main
+            backgroundColor: hasChanges ? theme.colors.primary : theme.colors.inputBg, // Blue if active, Light Grey if disabled
+            color: hasChanges ? theme.colors.whiteText : theme.colors.disabled,        // White if active, Grey text if disabled
+            border: hasChanges ? 'none' : `1px solid ${theme.colors.border}`,
+            borderRadius: theme.radius.md, 
+            padding: '10px 20px', 
+            fontSize: '14px',
+            fontWeight: '500', 
+            cursor: hasChanges ? 'pointer' : 'not-allowed', 
+            fontFamily: theme.fonts.main,
+            transition: 'all 0.2s ease',
+            opacity: hasChanges ? 1 : 0.8
         },
-        // UPDATED: Changed borderRadius to 6px
         iconBox: { padding: '8px', backgroundColor: '#EFF6FF', color: theme.colors.primary, borderRadius: '6px' }
     };
 
@@ -83,10 +104,15 @@ const VirtualCreditConfiguration = () => {
                         type="number" 
                         style={styles.input} 
                         value={creditValue}
+                        placeholder={mealValue ? `Current: ${mealValue}` : "Loading..."}
                         onChange={(e) => setCreditValue(e.target.value)}
                     />
                 </div>
-                <button style={styles.button} onClick={handleSaveClick}>
+                <button 
+                    style={styles.button} 
+                    onClick={handleSaveClick}
+                    disabled={!hasChanges} // 🟢 Disable button logic
+                >
                     Save Changes
                 </button>
             </div>

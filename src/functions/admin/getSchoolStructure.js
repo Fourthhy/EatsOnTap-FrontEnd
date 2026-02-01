@@ -6,7 +6,7 @@ export async function getSchoolStructure() {
     
     // ⚠️ CHECK ROUTE: Ensure this matches your server.js mount point
     // Example: router.get('/getSchoolStructure', studentController.getSchoolStructure)
-    const targetUrl = `${VITE_LOCALHOST}/api/fetch/getSchoolStructure`;
+    const targetUrl = `${VITE_BASE_URL}/api/fetch/getSchoolStructure`;
     
     console.log("🌐 Fetching School Structure from:", targetUrl);
 

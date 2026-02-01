@@ -38,7 +38,7 @@ const itemVariants = {
 };
 
 export default function AdminAssistantDashboard() {
-    const { events } = useData();
+    const { events, programSchedule } = useData();
     const [isLoading, setIsLoading] = useState(true);
 
     // 🟢 TRIGGER LOADING ONLY ONCE ON MOUNT
@@ -139,7 +139,7 @@ export default function AdminAssistantDashboard() {
                                     </div>
                                 ) : (
                                     <motion.div variants={itemVariants}>
-                                        <ProgramsList />
+                                        <ProgramsList data={programSchedule} selectedTab={selectedTab}/>
                                     </motion.div>
                                 )}
                             </ScheduleTabs>

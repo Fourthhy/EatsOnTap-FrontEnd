@@ -63,6 +63,7 @@ export default function Routers() {
                         <Route path="settings" element={<SystemSettings />} />
 
                     </Route>
+
                     <Route path="/adminAssistant" element={
                         <ProtectedRoute>
                             <AdminAssistantLayout />
@@ -94,11 +95,13 @@ export default function Routers() {
                     }>
                         <Route path="submitMealList" element={<SubmitMealList />} />
                     </Route>
+
                     <Route path="/foodServer" element={
                         <ProtectedRoute>
                             <FreeMealClaim />
                         </ProtectedRoute>
                     } />
+
                     <Route path="/superAdmin" element={
                         <ProtectedRoute>
                             <SuperAdminLayout />

@@ -3,7 +3,7 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 export async function getStudentsWithProgramOnly() {
     // 🟢 Ensure the path matches your backend route prefix (e.g., /api/fetch/...)
-    const targetUrl = `${VITE_LOCALHOST}/api/fetch/getStudentsWithProgramOnly`;
+    const targetUrl = `${VITE_BASE_URL}/api/fetch/getStudentsWithProgramOnly`;
     
     console.log("🌐 Fetching Students with Program Only from:", targetUrl);
 

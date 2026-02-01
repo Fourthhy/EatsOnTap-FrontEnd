@@ -5,7 +5,7 @@ const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 export async function fetchProgramCodes() {
     
     // ⚠️ CHECK PREFIX: Ensure '/api/students' matches your server.js mount point
-    const targetUrl = `${VITE_LOCALHOST}/api/students/fetchProgramCodes`;
+    const targetUrl = `${VITE_BASE_URL}/api/students/fetchProgramCodes`;
     
     console.log("🌐 Fetching Program Codes from:", targetUrl);
 

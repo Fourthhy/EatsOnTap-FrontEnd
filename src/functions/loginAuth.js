@@ -1,4 +1,5 @@
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
+const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST
 
 export async function loginApi(email, password) {
   // Helper to fetch all users and check for email
@@ -34,10 +35,14 @@ export async function loginApi(email, password) {
 
   // Login with correct endpoint
   const endpoint = isUser ? '/api/auth/login' : '/api/auth/loginClassAdviser';
+  
   const loginRes = await fetch(`${VITE_BASE_URL}${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
+    
+    // 🟢 CRITICAL FIX: This allows the browser to save the cookie
+    credentials: 'include' 
   });
 
   const loginData = await loginRes.json();
@@ -46,7 +51,9 @@ export async function loginApi(email, password) {
     throw new Error(loginData.message || 'Login failed');
   }
 
+  // Save token for Frontend UI use (Sidebar logic), 
+  // but the Cookie is now safely stored for Backend use (Logout logic).
   if (loginData.token) localStorage.setItem('authToken', loginData.token);
 
   return loginData;
-}
+} 

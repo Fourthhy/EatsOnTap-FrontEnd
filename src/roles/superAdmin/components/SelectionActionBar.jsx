@@ -1,10 +1,14 @@
+// components/SelectionActionBar.jsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X, Archive, ChevronDown, Eye, Edit, Save, UserPlus, CheckCircle, CalendarClock } from 'lucide-react';
+import { 
+    X, Archive, ChevronDown, Eye, Edit, Save, 
+    UserPlus, CheckCircle, CalendarClock, RotateCcw 
+} from 'lucide-react';
 
 export const SelectionActionBar = ({ 
     selectedItem, 
-    variant = 'section', // Added 'program' support
+    variant = 'section', // Options: 'section', 'student', 'promotion', 'graduation', 'program', 'user'
     isEditing = false,
     
     // Common
@@ -15,6 +19,10 @@ export const SelectionActionBar = ({
 
     // Program Specific
     onEditSchedule,
+
+    // User Management Specific (🟢 NEW)
+    onEditUser,
+    onResetPassword,
 
     // Student Specific (Edit Mode)
     activeDropdown, 
@@ -77,7 +85,21 @@ export const SelectionActionBar = ({
     };
 
     const renderActions = () => {
-        // --- 1. PROGRAM MODE (New) ---
+        // --- 🟢 USER MODE ---
+        if (variant === 'user') {
+            return (
+                <>
+                    <button onClick={onEditUser} style={styles.primaryButton}>
+                        <Edit size={16} /> Edit
+                    </button>
+                    <button onClick={onResetPassword} style={styles.primaryButton}>
+                        <RotateCcw size={16} /> Reset Password
+                    </button>
+                </>
+            );
+        }
+
+        // --- PROGRAM MODE ---
         if (variant === 'program') {
             return (
                 <button onClick={onEditSchedule} style={styles.primaryButton}>
@@ -86,7 +108,7 @@ export const SelectionActionBar = ({
             );
         }
 
-        // --- 2. EDIT MODE ---
+        // --- EDIT MODE ---
         if (isEditing) {
             return (
                 <>
@@ -100,7 +122,7 @@ export const SelectionActionBar = ({
             );
         }
 
-        // --- 3. PROMOTION MODE ---
+        // --- PROMOTION MODE ---
         if (variant === 'promotion') {
             return (
                 <>
@@ -117,7 +139,7 @@ export const SelectionActionBar = ({
             );
         }
 
-        // --- 4. GRADUATION MODE ---
+        // --- GRADUATION MODE ---
         if (variant === 'graduation') {
             return (
                 <>
@@ -145,7 +167,7 @@ export const SelectionActionBar = ({
             );
         }
 
-        // --- 5. SECTION VIEW ---
+        // --- SECTION VIEW ---
         if (variant === 'section') {
             return (
                 <button onClick={onViewStudents} style={styles.primaryButton}>
@@ -154,7 +176,7 @@ export const SelectionActionBar = ({
             );
         }
 
-        // --- 6. STUDENT VIEW ---
+        // --- STUDENT VIEW ---
         if (variant === 'student') {
             return (
                 <>
@@ -187,9 +209,10 @@ export const SelectionActionBar = ({
     const getLabel = () => {
         if (variant === 'promotion' || variant === 'graduation') return `${selectedCount} Students Selected`;
         if (variant === 'section') return `${selectedItem?.level || ''} - ${selectedItem?.sectionName || ''}`;
-        
-        // 🟢 Added program label support
         if (variant === 'program') return `${selectedItem?.programName} (${selectedItem?.year} Year)`;
+        
+        // 🟢 User Label
+        if (variant === 'user') return `${selectedItem?.first_name} ${selectedItem?.last_name}`;
         
         if (variant === 'student') return selectedItem?.name || 'Student';
         return 'Item Selected';
