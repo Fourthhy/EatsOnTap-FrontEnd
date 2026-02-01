@@ -6,7 +6,7 @@ const addClassAdviser = async (adviserData) => {
 
     // ⚠️ IMPORTANT: Check your server.js/app.js to see what the prefix is.
     // Usually it is: app.use('/api/classAdviser', classAdviserRoutes)
-    const targetUrl = `${VITE_LOCALHOST}/api/classAdviser/addClassAdviser`;
+    const targetUrl = `${VITE_BASE_URL}/api/classAdviser/addClassAdviser`;
 
     console.log("🌐 Adding Class Adviser to:", targetUrl);
 
