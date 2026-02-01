@@ -22,6 +22,9 @@ export const LoaderProvider = ({ children }) => {
         fetchTodayClaimRecord,
         fetchOverallClaimRecord,
         fetchSectionProgramList,
+        fetchMealValue,
+        fetchAllSettings,
+        fetchAllProgramSchedule,
         
         setDashboardData,
         setEvents
@@ -51,6 +54,18 @@ export const LoaderProvider = ({ children }) => {
                 // 2. Class Advisers
                 if (task.id === "fetch_class_advisers") {
                     await fetchAllClassAdvisers();
+                }
+
+                if (task.id === 'fetch_meal_value') {
+                    await fetchMealValue();
+                }
+
+                if (task.id === 'fetch_settings') {
+                    await fetchAllSettings();
+                }
+
+                if (task.id === 'fetch_programSchedule') {
+                    await fetchAllProgramSchedule();
                 }
 
                 // 3. Meal Requests (Grouped)
