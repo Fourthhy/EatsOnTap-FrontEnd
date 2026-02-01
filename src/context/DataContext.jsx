@@ -10,6 +10,9 @@ import { getAllEvents } from '../functions/admin/getAllEvents';
 import { getTodayClaimRecord } from '../functions/admin/getTodayClaimRecord';
 import { getOverallClaimRecord } from '../functions/admin/getOverallClaimRecord';
 import { getSectionProgramList } from '../functions/admin/getSectionProgramList';
+import { getMealValue } from '../functions/admin/getMealValue';
+import { getAllSettings } from '../functions/admin/getAllSettings';
+import { getAllProgramSchedule } from '../functions/adminAssistant/getAllProgramSchedule';
 
 
 const DataContext = createContext();
@@ -33,8 +36,11 @@ const DataProvider = ({ children }) => {
     const [todaysMenu, setTodaysMenu] = useState([]);
     const [todayClaimRecord, setTodayClaimRecord] = useState([]);
     const [overallClaimRecord, setOverallClaimRecord] = useState([]);
+    const [sectionProgram, setSectionProgram] = useState([]);
+    const [mealValue, setMealValue] = useState()
+    const [setting, setSetting] = useState([]);
 
-    const [sectionProgram, setSectionProgram] = useState([])
+    const [programSchedule, setProgramSchedule] = useState([])
 
     // --- 🟢 WRAPPER FUNCTIONS (Wrapped in useCallback for Socket) ---
 
@@ -153,7 +159,7 @@ const DataProvider = ({ children }) => {
         try {
             if (typeof getSectionProgramList !== 'function') throw new Error('getSectionProgramList import missing!');
             const data = await getSectionProgramList();
-            if (data && data.length === 0 ) {
+            if (data && data.length === 0) {
                 console.warn("⚠️ Section Program List Returned Empty");
             } else {
                 setSectionProgram(data)
@@ -163,6 +169,37 @@ const DataProvider = ({ children }) => {
             console.error('Error fetching section program list', error);
         }
     }, [])
+
+    const fetchMealValue = useCallback(async () => {
+        try {
+            if (typeof getMealValue !== 'function') throw new Error('getMealValue import missing!');
+            const data = await getMealValue();
+            setMealValue(data)
+            console.log("Meal Value in Data Context", data)
+        } catch (error) {
+            console.error('Error Fetching Meal Value', error);
+        }
+    })
+
+    const fetchAllSettings = useCallback(async () => {
+        try {
+            if (typeof getAllSettings !== 'function') throw new Error('getAllSettings import missing!');
+            const data = await getAllSettings();
+            setSetting(data);
+        } catch (error) {
+            console.error('Error fetching settings', error)
+        }
+    });
+
+    const fetchAllProgramSchedule = useCallback(async () => {
+        try {
+            if (typeof getAllProgramSchedule !== 'function') throw new Error('getAllProgramSchedule import missing!');
+            const data = await getAllProgramSchedule()
+            setProgramSchedule(data);
+        } catch (error) {
+            console.error('Error fetching program schedule');
+        }
+    })
 
     useEffect(() => {
         // Initial fetch on load
@@ -214,11 +251,11 @@ const DataProvider = ({ children }) => {
     }, [fetchUnifiedSchoolData]); // Add fetch function to dependency array
 
     useEffect(() => {
-        const socket = io(import.meta.env.VITE_LOCALHOST);
+        const socket = io(import.meta.env.VITE_BASE_URL);
         socket.on('connect', () => {
             console.log("✅ Socket Connected for Section Program Updates:", socket.id);
         })
-        socket.on('update-section-program-register', (data)=> {
+        socket.on('update-section-program-register', (data) => {
             console.log("🔔 Section/Program Updated! Refreshing Data...", data);
             fetchSectionProgramList();
         });
@@ -246,6 +283,9 @@ const DataProvider = ({ children }) => {
             todayClaimRecord,
             overallClaimRecord,
             sectionProgram,
+            mealValue,
+            setting,
+            programSchedule,
 
             // Fetch Functions (For Loader or Manual Refresh)
             fetchUnifiedSchoolData,
@@ -255,7 +295,10 @@ const DataProvider = ({ children }) => {
             fetchAllEvents,
             fetchTodayClaimRecord,
             fetchOverallClaimRecord,
-            fetchSectionProgramList
+            fetchSectionProgramList,
+            fetchMealValue,
+            fetchAllSettings,
+            fetchAllProgramSchedule
         }}>
             {children}
         </DataContext.Provider>
