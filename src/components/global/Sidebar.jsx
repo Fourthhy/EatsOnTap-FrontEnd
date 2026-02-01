@@ -1,7 +1,7 @@
 import { logout } from "../../functions/logoutAuth";
 import { useState, useRef, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react"; // 🟢 Added Loader2
 import { useBreakpoint } from "use-breakpoint";
 import logo from "/lv-logo.svg";
 import { SidebarItem } from "./SidebarItem";
@@ -13,6 +13,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
 
     // --- STATE ---
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false); // 🟢 New Loading State
     const containerRef = useRef(null);
 
     // --- HELPER: Determine if a path is active ---
@@ -31,9 +32,21 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
         document.title = `${pageTitle} - Eat's on Tap`;
     }, [location.pathname, menuItems, quickActions, settingMenu]);
 
-    const handleLogout = () => {
-        logout();
-        navigate('/');
+    // 🟢 UPDATED: Async Logout Handler with Loader
+    const handleLogout = async () => {
+        if (isLoggingOut) return; // Prevent double clicks
+
+        setIsLoggingOut(true); // Start Loader
+
+        try {
+            await logout(); // Wait for the API call to finish
+        } catch (error) {
+            console.error("Logout process encountered an error:", error);
+        } finally {
+            // Navigate regardless of success or failure to ensure user isn't stuck
+            navigate('/');
+            // No need to set false, component will unmount
+        }
     };
 
     const handleItemClick = (path) => {
@@ -46,14 +59,13 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
     };
 
     const { breakpoint } = useBreakpoint(BREAKPOINTS, 'mobile-md');
-    
+
     // This controls the SIDEBAR width (Dynamic)
     const sidebarWidth = isExpanded ? "288px" : "80px";
-    
-    // 🟢 This controls the CONTENT margin (Static)
-    // We ALWAYS keep this at 80px so the content never gets squeezed.
-    const contentMargin = "80px"; 
-    
+
+    // This controls the CONTENT margin (Static)
+    const contentMargin = "80px";
+
     // Shared transition for sync
     const springTransition = {
         type: "spring",
@@ -78,9 +90,9 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                     position: "fixed",
                     top: 0,
                     left: 0,
-                    zIndex: 9000, // Stays above content
+                    zIndex: 9000,
                     overflow: "hidden",
-                    boxShadow: isExpanded ? "4px 0 24px rgba(0,0,0,0.25)" : "none" // Add shadow when open
+                    boxShadow: isExpanded ? "4px 0 24px rgba(0,0,0,0.25)" : "none"
                 }}
                 transition={springTransition}
                 onMouseEnter={() => setIsExpanded(true)}
@@ -88,33 +100,33 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
             >
                 <div>
                     {/* --- LOGO AREA (ANIMATED) --- */}
-                    <div style={{ 
-                        display: "flex", 
-                        alignItems: "center", 
-                        marginTop: "1rem", 
-                        marginBottom: "1.5rem", 
+                    <div style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginTop: "1rem",
+                        marginBottom: "1.5rem",
                         minHeight: "3.5rem",
-                        paddingLeft: "20px", 
+                        paddingLeft: "20px",
                         overflow: "hidden"
                     }}>
                         {/* Stationary Logo Image */}
-                        <motion.img 
-                            src={logo} 
-                            alt="Logo" 
+                        <motion.img
+                            src={logo}
+                            alt="Logo"
                             initial={false}
-                            animate={{ 
-                                width: isExpanded ? "3.5rem" : "2.5rem", 
-                                height: isExpanded ? "3.5rem" : "2.5rem" 
+                            animate={{
+                                width: isExpanded ? "3.5rem" : "2.5rem",
+                                height: isExpanded ? "3.5rem" : "2.5rem"
                             }}
-                            style={{ 
+                            style={{
                                 flexShrink: 0,
-                                objectFit: "contain", 
-                                zIndex: 10, 
-                                position: "relative" 
+                                objectFit: "contain",
+                                zIndex: 10,
+                                position: "relative"
                             }}
                             transition={springTransition}
                         />
-                        
+
                         {/* Sliding Text */}
                         <AnimatePresence>
                             {isExpanded && (
@@ -123,17 +135,17 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -20 }}
                                     transition={{ duration: 0.2, ease: "easeOut" }}
-                                    style={{ 
-                                        marginLeft: '10px', 
-                                        display: "flex", 
-                                        flexDirection: "column", 
+                                    style={{
+                                        marginLeft: '10px',
+                                        display: "flex",
+                                        flexDirection: "column",
                                         justifyContent: "center",
                                         zIndex: 5,
                                         whiteSpace: "nowrap"
                                     }}
                                 >
-                                    <p style={{ fontWeight: "bold" }} className="font-geist text-[2.3vh] h-auto flex items-end">Eat's on Tap</p>
-                                    <p style={{ fontWeight: 'regular' }} className="font-tolkien text-[1.5vh] h-auto flex items-start">LA VERDAD CHRISTIAN COLLEGE</p>
+                                    <p style={{ fontWeight: "bold" }} className="font-geist text-[13px] h-auto flex items-end">Eat's on Tap</p>
+                                    <p style={{ fontWeight: 'regular' }} className="font-tolkien text-[11px] h-auto flex items-start">LA VERDAD CHRISTIAN COLLEGE</p>
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -198,25 +210,26 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                             />
                         ))}
                     </div>
-                    
+
                     {/* --- LOGOUT BUTTON --- */}
                     <div style={{ padding: "0px 1rem 1rem 1rem" }}>
                         <motion.button
                             onClick={handleLogout}
+                            disabled={isLoggingOut} // Disable while loading
                             initial={false}
                             animate={{
-                                width: "100%", 
-                                justifyContent: "flex-start", 
-                                backgroundColor: "rgba(255, 255, 255, 0.3)",
-                                paddingLeft: "12px", 
+                                width: "100%",
+                                justifyContent: "flex-start",
+                                backgroundColor: isLoggingOut ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.3)",
+                                paddingLeft: "12px",
+                                cursor: isLoggingOut ? "wait" : "pointer"
                             }}
-                            whileHover={{ backgroundColor: "#52728F" }}
+                            whileHover={!isLoggingOut ? { backgroundColor: "#52728F" } : {}}
                             style={{
                                 display: "flex",
                                 alignItems: "center",
-                                height: "50px", 
+                                height: "50px",
                                 borderRadius: "0.5rem",
-                                cursor: "pointer",
                                 border: "none",
                                 color: "white",
                                 position: "relative",
@@ -224,15 +237,25 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                             }}
                             transition={springTransition}
                         >
-                            <div style={{ 
-                                position: 'relative', 
-                                zIndex: 10, 
-                                display: 'flex', 
-                                alignItems: 'center', 
+                            <div style={{
+                                position: 'relative',
+                                zIndex: 10,
+                                display: 'flex',
+                                alignItems: 'center',
                                 justifyContent: 'center',
-                                minWidth: '24px' 
+                                minWidth: '24px'
                             }}>
-                                <LogOut size={20} />
+                                {/* 🟢 Swap Icon for Loader when loading */}
+                                {isLoggingOut ? (
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                    >
+                                        <Loader2 size={20} />
+                                    </motion.div>
+                                ) : (
+                                    <LogOut size={20} />
+                                )}
                             </div>
 
                             <AnimatePresence>
@@ -242,14 +265,14 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -20 }}
                                         transition={{ duration: 0.2, ease: "easeOut" }}
-                                        style={{ 
-                                            fontSize: "0.875rem", 
-                                            marginLeft: "12px", 
+                                        style={{
+                                            fontSize: "0.875rem",
+                                            marginLeft: "12px",
                                             whiteSpace: "nowrap",
                                             zIndex: 5
                                         }}
                                     >
-                                        Logout
+                                        {isLoggingOut ? "Logging out..." : "Logout"}
                                     </motion.span>
                                 )}
                             </AnimatePresence>
@@ -259,14 +282,13 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
             </motion.div>
 
             {/* 2. Main Content Area */}
-            {/* 🟢 FIX: We do NOT animate marginLeft anymore. It stays fixed at 80px. */}
             <div
                 style={{
                     marginLeft: contentMargin, // Fixed at 80px
                     width: `calc(100% - ${contentMargin})`, // Fixed width
                     backgroundColor: "#f9fafb",
                     minHeight: "100vh",
-                    transition: "all 0.3s ease" // Optional smooth transition if window resizes
+                    transition: "all 0.3s ease"
                 }}
             >
                 <Outlet context={{ isSidebarOpen: isExpanded, handleToggleSidebar: () => setIsExpanded(!isExpanded) }} />
