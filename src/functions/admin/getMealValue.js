@@ -18,9 +18,6 @@ export async function getMealValue() {
         }
 
         const data = await response.json();
-        console.log('MEAL VALUE RECEIVED', data.mealValue)
-        
-        // Return just the number value for easier use in components
         return data.mealValue; 
 
     } catch (error) {

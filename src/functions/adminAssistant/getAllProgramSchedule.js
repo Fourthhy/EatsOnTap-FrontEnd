@@ -7,9 +7,6 @@ export async function getAllProgramSchedule() {
     // ⚠️ CHECK ROUTE: Ensure '/api/schedule' matches your server.js mount point
     // Example: router.get('/fetchAllProgramSchedule', ...)
     const targetUrl = `${VITE_BASE_URL}/api/programschedule/fetchAllProgramSchedule`;
-    
-    console.log("📅 Fetching All Schedules from:", targetUrl);
-
     try {
         const response = await fetch(targetUrl, {
             method: 'GET',
@@ -23,10 +20,6 @@ export async function getAllProgramSchedule() {
         }
 
         const data = await response.json();
-
-        // Log to verify the array of schedules
-        console.log("📦 Program Schedules Received:", data);
-
         return data;
     } catch (error) {
         console.error('Error Fetching Schedules:', error);

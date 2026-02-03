@@ -6,8 +6,6 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST
 export async function generateEligibilityList(section, forEligibleStudentIds) {
     const targetUrl = `${VITE_BASE_URL}/api/admin/generateEligibilityList`;
     
-    console.log(`🌐 Submitting Eligibility List for Section: ${section}`);
-    
     try {
         // The backend expects "section" and "forEligibleStudentIds" in the body
         const response = await axios.post(targetUrl, {

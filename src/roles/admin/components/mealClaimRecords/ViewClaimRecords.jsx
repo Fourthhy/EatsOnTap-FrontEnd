@@ -5,14 +5,24 @@ import { motion, AnimatePresence } from "framer-motion";
 // IMPORTS 
 import { DailyClaimRecord } from "./pages/DailyClaimRecord";
 import { OverallClaimRecord } from "./pages/OverallClaimRecord";
-import { EligibleSections } from "./pages/EligibleSections"; 
+import { EligibleSections } from "./pages/EligibleSections";
+
+import { useData } from "../../../../context/DataContext"
 
 function ViewClaimRecords() {
+    const { userInformation } = useData();
     const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
-    
+    // Safe User Info
+    const userEmail = userInformation?.email || "No Email";
+    const userName = (userInformation?.last_name && userInformation?.first_name)
+        ? `${userInformation.last_name}, ${userInformation.first_name}`
+        : "Admin User";
+    const userRole = userInformation?.role || "Guest";
+
+
     // Options: 'eligible', 'daily' (detail view), 'overall'
-    const [view, setView] = useState("eligible"); 
-    
+    const [view, setView] = useState("eligible");
+
     // 🟢 New State: Store the section data when drilling down
     const [selectedSection, setSelectedSection] = useState(null);
 
@@ -44,34 +54,40 @@ function ViewClaimRecords() {
                     marginBottom: "30px",
                 }}
                 className="w-full h-auto flex flex-col justify-start">
-                <HeaderBar headerTitle="Records" userAvatar={USER_AVATAR} />
+                <HeaderBar
+                    userAvatar={USER_AVATAR}
+                    headerTitle={"Meal Records Management"}
+                    userEmail={userEmail}
+                    userName={userName}
+                    userRole={userRole}
+                />
                 <div className="w-full flex justify-center">
                     <div className="w-[98%]">
-                        
+
                         <AnimatePresence mode="wait">
                             {/* MASTER VIEW: List of Sections */}
                             {view === "eligible" && (
-                                <motion.div 
+                                <motion.div
                                     key="eligible"
                                     {...pageVariants}
                                     style={{ width: '100%' }}
                                 >
-                                    <EligibleSections 
-                                        currentView={view} 
-                                        switchView={switchView} 
+                                    <EligibleSections
+                                        currentView={view}
+                                        switchView={switchView}
                                     />
                                 </motion.div>
                             )}
 
                             {/* DETAIL VIEW: Specific Section Record */}
                             {view === "daily" && (
-                                <motion.div 
+                                <motion.div
                                     key="daily"
                                     {...pageVariants}
                                     style={{ width: '100%' }}
                                 >
-                                    <DailyClaimRecord 
-                                        currentView={view} 
+                                    <DailyClaimRecord
+                                        currentView={view}
                                         switchView={switchView}
                                         // 🟢 Pass the selected data down
                                         sectionData={selectedSection}
@@ -81,14 +97,14 @@ function ViewClaimRecords() {
 
                             {/* ANALYTICS VIEW */}
                             {view === "overall" && (
-                                <motion.div 
+                                <motion.div
                                     key="overall"
                                     {...pageVariants}
                                     style={{ width: '100%' }}
                                 >
-                                    <OverallClaimRecord 
-                                        currentView={view} 
-                                        switchView={switchView} 
+                                    <OverallClaimRecord
+                                        currentView={view}
+                                        switchView={switchView}
                                     />
                                 </motion.div>
                             )}

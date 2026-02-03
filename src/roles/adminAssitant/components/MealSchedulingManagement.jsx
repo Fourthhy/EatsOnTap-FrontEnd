@@ -2,8 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X, ChevronDown, Check, Loader2, FileText, ListFilter, Calendar } from 'lucide-react';
 import { fetchProgramCodes } from "../../../functions/adminAssistant/fetchProgramCodes";
+// 🟢 Import the API Caller
+import { addProgramSchedule } from "../../../functions/adminAssistant/addProgramSchedule";
 
-// --- CUSTOM DROPDOWN COMPONENT ---
+// --- CUSTOM DROPDOWN COMPONENT (Unchanged) ---
 const CustomDropdown = ({ label, value, options, onChange }) => {
     const [isOpen, setIsOpen] = useState(false);
     const getLabel = (opt) => (typeof opt === 'object' ? opt.label : opt);
@@ -79,7 +81,7 @@ const CustomDropdown = ({ label, value, options, onChange }) => {
     );
 };
 
-// --- SUBMISSION TYPE DROPDOWN ---
+// --- SUBMISSION TYPE DROPDOWN (Unchanged) ---
 function SubmissionTypeDropdown({ selectedSubmissionType, setSelectedSubmissionType }) {
     const options = [
         { label: 'Meal Eligibility Request', value: 'mealEligibility' },
@@ -102,7 +104,7 @@ function SubmissionTypeDropdown({ selectedSubmissionType, setSelectedSubmissionT
     );
 }
 
-// --- STEP 1 ---
+// --- STEP 1 (Unchanged) ---
 const Step1 = ({
     submissionType,
     setSubmissionType,
@@ -166,7 +168,7 @@ const Step1 = ({
                                             key={idx}
                                             onClick={() => toggleDay(day)}
                                             className={`flex items-center p-2 rounded-md cursor-pointer border transition-all duration-200
-                                            ${isSelected
+                                    ${isSelected
                                                     ? 'bg-blue-50 border-blue-200 shadow-sm'
                                                     : 'bg-white border-gray-100 hover:border-gray-300 hover:bg-gray-50'
                                                 }`}
@@ -373,7 +375,7 @@ const Step1 = ({
     );
 };
 
-// --- ELIGIBLE PROGRAMS FORM ---
+// --- ELIGIBLE PROGRAMS FORM (Unchanged) ---
 const EligibleProgramsForm = ({ checkedPrograms, handleCheckboxChange, toggleSelectAll, isAllSelected, programCodes }) => {
     const programs = ["BSSW", "BSA", "BSAIS", "BAB", "BSIS", "ACT"];
     const years = [1, 2, 3, 4];
@@ -438,6 +440,7 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
     const [isVisible, setIsVisible] = useState(isOpen);
     const [step, setStep] = useState(1);
     const [direction, setDirection] = useState(0);
+    const [isSubmitting, setIsSubmitting] = useState(false); // 🟢 Loading State
     const TOTAL_STEPS = 3;
 
     // --- DATA STATE ---
@@ -524,6 +527,59 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
         setIsVisible(false);
     }
 
+    // 🟢 SUBMIT HANDLER INTEGRATION
+    const handleFinalSubmit = async () => {
+        // Prevent submission if type is eventMeal (since we're using the schedule API)
+        // Or handle it differently if your backend supports it. 
+        // For now, we focus on the mealEligibility logic as requested.
+        
+        setIsSubmitting(true);
+        try {
+            // 1. Get List of Selected Programs (e.g., ["BSIS - 1", "BSA - 2"])
+            const selectedProgramKeys = Object.entries(checkedPrograms)
+                .filter(([_, isChecked]) => isChecked)
+                .map(([key]) => key);
+
+            if (selectedProgramKeys.length === 0) {
+                alert("Please select at least one program.");
+                setIsSubmitting(false);
+                return;
+            }
+
+            // 2. Prepare Days Array (Convert to Uppercase for Backend Enum)
+            const daysPayload = selectedDays.map(d => d.toUpperCase());
+
+            // 3. Send API Request for EACH selected program
+            // We iterate and fire multiple calls to addProgramSchedule
+            const promises = selectedProgramKeys.map(key => {
+                // Split "BSIS - 1" into "BSIS" and "1"
+                const [programName, year] = key.split(" - ");
+                
+                return addProgramSchedule({
+                    programName: programName.trim(),
+                    year: year.trim(),
+                    dayOfWeek: daysPayload
+                });
+            });
+
+            // Wait for all to finish
+            await Promise.all(promises);
+
+            // 4. Success Feedback
+            // You can replace this alert with a toast notification
+            alert(`Successfully updated schedules for ${selectedProgramKeys.length} programs!`);
+            
+            // Close modal
+            handleClose();
+
+        } catch (error) {
+            console.error("Submission Error:", error);
+            alert("Failed to save schedules. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (isVisible && e.key === 'Escape') handleClose();
@@ -561,7 +617,7 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                 />
             </div>
 
-            {/* 🟢 STEP 2 NAVIGATION: PREVIOUS + NEXT */}
+            {/* STEP 2 NAVIGATION: PREVIOUS + NEXT */}
             <div className="flex gap-4 w-full max-w-sm mx-auto mt-5">
                 {/* PREVIOUS BUTTON */}
                 <div
@@ -663,7 +719,7 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                     <div
                         className="rounded-lg shadow-sm transition-colors border border-gray-200 bg-white cursor-pointer hover:bg-gray-50 flex-1 text-center"
                         style={{ padding: "12px" }}
-                        onClick={() => paginate(-1)}
+                        onClick={() => isSubmitting ? null : paginate(-1)}
                     >
                         <span className="text-sm font-medium font-geist text-gray-700">Previous</span>
                     </div>
@@ -672,10 +728,27 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                     <div
                         onMouseEnter={() => setIsHover(true)}
                         onMouseLeave={() => setIsHover(false)}
-                        onClick={() => alert("Submitted!")}
-                        style={{ flex: 1, backgroundColor: isHover ? "#1D4ED8" : "#2563EB", color: "#FFFFFF", borderRadius: "8px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", padding: "12px", cursor: "pointer", transition: "background-color 0.2s ease" }}
+                        // 🟢 Connect Handler here
+                        onClick={isSubmitting ? null : handleFinalSubmit}
+                        style={{ 
+                            flex: 1, 
+                            backgroundColor: isSubmitting ? "#93C5FD" : (isHover ? "#1D4ED8" : "#2563EB"), 
+                            color: "#FFFFFF", 
+                            borderRadius: "8px", 
+                            boxShadow: "0 4px 6px rgba(0,0,0,0.1)", 
+                            padding: "12px", 
+                            cursor: isSubmitting ? "wait" : "pointer", 
+                            transition: "background-color 0.2s ease",
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px'
+                        }}
                     >
-                        <span style={{ fontSize: "14px", fontWeight: "700", fontFamily: "Geist, sans-serif" }}>Confirm & Submit</span>
+                        {isSubmitting && <Loader2 className="animate-spin" size={16} />}
+                        <span style={{ fontSize: "14px", fontWeight: "700", fontFamily: "Geist, sans-serif" }}>
+                            {isSubmitting ? "Submitting..." : "Confirm & Submit"}
+                        </span>
                     </div>
                 </div>
             </div>

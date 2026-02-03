@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // 🟢 Import useEffect
 import { LayoutDashboard, Ticket, CalendarDays, ShoppingBag, BookOpen, Utensils, Settings } from "lucide-react";
 
 // --- IMPORTS ---
@@ -12,16 +12,59 @@ import { DataProvider } from "../../context/DataContext";
 import { LoaderProvider } from "../../context/LoaderContext";
 import { GlobalLoader } from "../../components/global/GlobalLoader";
 
-// This Inner Component contains your original logic
+// 🟢 Import API to check existing menu
+import { viewDishes } from "../../functions/admin/viewDishes";
+
 const AdminLayoutContent = () => {
     // --- MODAL & MEAL STATE LOGIC ---
     const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    // 🟢 State to track if menu exists for today
     const [addedTodaysDish, setAddedTodaysDish] = useState(false);
-    const [meals, setMeals] = useState(["", ""]);
+    
+    // 🟢 State for the input fields
+    const [meals, setMeals] = useState(["", ""]); 
+    
+    // 🟢 State to store the "Original/Saved" menu for comparison
     const [todaysMenu, setTodaysMenu] = useState([]);
 
-    // Change Detection Logic
+    // 🟢 1. FETCH & CHECK MENU ON MOUNT
+    const checkTodaysMenu = async () => {
+        try {
+            const today = new Date();
+            const data = await viewDishes(today);
+
+            if (data && data.dishes && data.dishes.length > 0) {
+                // ✅ Found existing menu
+                setAddedTodaysDish(true);
+                setMeals(data.dishes);      // Pre-fill modal
+                setTodaysMenu(data.dishes); // Set "Original" for comparison
+            } else {
+                // ❌ No menu found
+                setAddedTodaysDish(false);
+                setMeals(["", ""]);
+                setTodaysMenu([]);
+            }
+        } catch (error) {
+            // Error usually means 404 (No report yet), so treat as empty
+            setAddedTodaysDish(false);
+            setMeals(["", ""]);
+            setTodaysMenu([]);
+        }
+    };
+
+    useEffect(() => {
+        checkTodaysMenu();
+    }, []);
+
+    // Change Detection Logic (Compare 'meals' inputs vs 'todaysMenu' saved state)
+    // If they match, disable save. If they differ, enable save.
     const hasChanges = JSON.stringify(meals) !== JSON.stringify(todaysMenu);
+    
+    // Logic: 
+    // - If it's a NEW entry (!addedTodaysDish), always enable save (unless empty).
+    // - If it's an EDIT (addedTodaysDish), only enable save if there are changes.
+    // - We'll handle the "empty check" inside the Modal component itself or via disabled prop.
     const isSaveDisabled = addedTodaysDish && !hasChanges;
 
     // Handlers passed to the Modal
@@ -33,11 +76,12 @@ const AdminLayoutContent = () => {
 
     const addMealField = () => setMeals([...meals, ""]);
 
+    // 🟢 2. REFRESH DATA AFTER SUBMIT
     const handleSubmitMeals = () => {
-        setTodaysMenu(meals);
-        setAddedTodaysDish(true);
+        // Close modal immediately
         setIsModalOpen(false);
-        console.log("Saved Menu:", meals);
+        // Refresh the data to confirm it was saved and update UI state
+        checkTodaysMenu();
     };
 
     const menuItems = [
@@ -55,9 +99,14 @@ const AdminLayoutContent = () => {
     const quickActions = [
         {
             icon: <Utensils size={20} />,
-            text: "Add Dish",
+            text: addedTodaysDish ? "View Menu" : "Add Dish", // 🟢 Dynamic Text
             onClickAction: () => {
-                if (todaysMenu.length > 0) setMeals([...todaysMenu]);
+                // If we have a saved menu, revert inputs to that saved state (undo unsaved changes)
+                if (todaysMenu.length > 0) {
+                    setMeals([...todaysMenu]);
+                } else {
+                    setMeals(["", ""]);
+                }
                 setIsModalOpen(true);
             }
         },
@@ -84,16 +133,15 @@ const AdminLayoutContent = () => {
                 meals={meals}
                 onMealChange={handleMealChange}
                 onAddMealField={addMealField}
-                onSubmit={handleSubmitMeals}
+                onSubmit={handleSubmitMeals} // 🟢 Pass the refresh handler
                 isSaveDisabled={isSaveDisabled}
-                addedTodaysDish={addedTodaysDish}
+                addedTodaysDish={addedTodaysDish} // 🟢 Pass the checker state
             />
         </>
     );
 };
 
 // --- MAIN EXPORT ---
-// Wraps the content in the necessary Providers
 export default function AdminLayout() {
     return (
         <AdminProvider>

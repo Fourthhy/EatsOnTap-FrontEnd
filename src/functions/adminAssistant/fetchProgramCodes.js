@@ -6,9 +6,6 @@ export async function fetchProgramCodes() {
     
     // ⚠️ CHECK PREFIX: Ensure '/api/students' matches your server.js mount point
     const targetUrl = `${VITE_BASE_URL}/api/students/fetchProgramCodes`;
-    
-    console.log("🌐 Fetching Program Codes from:", targetUrl);
-
     try {
         const response = await fetch(targetUrl, {
             method: 'GET',
@@ -22,8 +19,6 @@ export async function fetchProgramCodes() {
         if (!response.ok) {
             throw new Error(data.message || `Failed to fetch program codes: ${response.status}`);
         }
-
-        console.log("📦 Program Codes Received:", data.data);
         return data.data; // Returns the array ["ACT - 1", "BSIT - 2", ...]
 
     } catch (error) {

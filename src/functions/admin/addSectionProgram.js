@@ -8,8 +8,6 @@ const addSectionProgram = async (sectionData) => {
     // Example: router.post('/add', addSectionProgram) inside /api/sectionProgram routes
     const targetUrl = `${VITE_BASE_URL}/api/sectionprogram/addSectionProgram`;
 
-    console.log("🌐 Attempting submit to:", targetUrl);
-
     try {
         const response = await fetch(targetUrl, {
             method: 'POST',

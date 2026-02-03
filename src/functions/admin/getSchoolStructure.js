@@ -7,9 +7,6 @@ export async function getSchoolStructure() {
     // ⚠️ CHECK ROUTE: Ensure this matches your server.js mount point
     // Example: router.get('/getSchoolStructure', studentController.getSchoolStructure)
     const targetUrl = `${VITE_BASE_URL}/api/fetch/getSchoolStructure`;
-    
-    console.log("🌐 Fetching School Structure from:", targetUrl);
-
     try {
         const response = await fetch(targetUrl, {
             method: 'GET',
@@ -23,10 +20,6 @@ export async function getSchoolStructure() {
         }
 
         const data = await response.json();
-
-        // Log to verify hierarchy (Category -> Levels -> Sections)
-        console.log("📦 School Structure Received:", data);
-
         return data;
     } catch (error) {
         console.error('Error Fetching School Structure:', error);

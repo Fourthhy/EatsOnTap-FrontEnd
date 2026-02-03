@@ -3,8 +3,6 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 export async function getAllClassAdvisers() {
     const targetUrl = `${VITE_BASE_URL}/api/fetch/getAllClassAdvisers`;
-    console.log("🌐 Fetching Unified Data from:", targetUrl);
-
     try {
         const response = await fetch(targetUrl);
 
@@ -13,10 +11,6 @@ export async function getAllClassAdvisers() {
         }
 
         const data = await response.json();
-
-        // Log the data to verify the structure (Category -> Levels -> Sections)
-        console.log("📦 Class Advisers Received:", data);
-
         return data;
 
     } catch (error) {

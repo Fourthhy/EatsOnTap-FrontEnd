@@ -4,9 +4,6 @@ const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 export async function addProgramSchedule(scheduleData) {
     // ⚠️ CHECK ROUTE: Matches /api/programSchedule/addProgramSchedule
     const targetUrl = `${VITE_BASE_URL}/api/programSchedule/addProgramSchedule`;
-
-    console.log("📅 Updating Schedule...", scheduleData);
-
     try {
         const response = await fetch(targetUrl, {
             method: 'POST',
@@ -22,8 +19,6 @@ export async function addProgramSchedule(scheduleData) {
         if (!response.ok) {
             throw new Error(result.message || `Failed to set schedule: ${response.status}`);
         }
-
-        console.log("✅ Schedule Set:", result);
         return result;
 
     } catch (error) {

@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { X, FileSpreadsheet, FileText, Table, Download, CheckSquare, Square } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, FileText, Download, CheckSquare, Square } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ExportReportModal = ({ isOpen, onClose }) => {
     // --- STATE ---
-    const [selectedFormats, setSelectedFormats] = useState('csv'); // Single Select
-    const [selectedReports, setSelectedReports] = useState([]);    // Multi Select
-    const [selectedScopes, setSelectedScopes] = useState([]);      // Multi Select
+    // 🟢 Hardcoded to 'pdf' and auto-selected IDs for the demo
+    const [selectedFormats, setSelectedFormats] = useState('pdf'); 
+    const [selectedReports, setSelectedReports] = useState(['bar_chart', 'line_chart', 'banded_tadmc', 'banded_cur', 'banded_ocf', 'individual_claims']);
+    const [selectedScopes, setSelectedScopes] = useState(['daily', 'weekly', 'monthly']);
 
     // --- OPTIONS DATA ---
     const reportOptions = [
@@ -24,47 +25,36 @@ const ExportReportModal = ({ isOpen, onClose }) => {
         { id: 'monthly', label: 'All past data in monthly format' },
     ];
 
-    // --- HANDLERS ---
-    const toggleReport = (id) => {
-        setSelectedReports(prev => 
-            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-        );
-    };
-
-    const toggleScope = (id) => {
-        setSelectedScopes(prev => 
-            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-        );
-    };
-
+    // --- THE "FAKE" EXPORT LOGIC ---
     const handleExport = () => {
-        console.log("Exporting:", {
-            reports: selectedReports,
-            scope: selectedScopes,
-            format: selectedFormats
-        });
-        onClose();
+        console.log("Simulating Export...");
+
+        // 🟢 SIMULATED DOWNLOAD LOGIC
+        // This looks for a file in your 'public' folder named 'Report_Demo.pdf'
+        const link = document.createElement('a');
+        link.href = '/eot_pdf_report.pdf'; // Path to your fake file in public folder
+        link.download = `System_Report_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Close after a tiny delay so it feels like it "processed"
+        setTimeout(() => {
+            onClose();
+        }, 500);
     };
 
-    // --- STYLES (Cleaned of manual transitions) ---
+    // --- STYLES ---
     const overlayStyle = {
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-        backdropFilter: 'blur(3px)',
-        zIndex: 9999,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(3px)',
+        zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
     };
 
     const modalStyle = {
-        backgroundColor: 'white',
-        width: '600px',
-        maxHeight: '98vh',
-        overflowY: 'auto',
-        borderRadius: '12px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        padding: '24px',
-        fontFamily: 'geist',
-        position: 'relative',
+        backgroundColor: 'white', width: '600px', maxHeight: '98vh',
+        overflowY: 'auto', borderRadius: '12px', padding: '24px',
+        fontFamily: 'geist', position: 'relative',
     };
 
     const sectionTitleStyle = {
@@ -74,148 +64,89 @@ const ExportReportModal = ({ isOpen, onClose }) => {
 
     const checkboxRowStyle = (isSelected) => ({
         display: 'flex', alignItems: 'center', gap: '10px',
-        padding: '8px 12px',
-        borderRadius: '6px',
-        cursor: 'pointer',
+        padding: '8px 12px', borderRadius: '6px', cursor: 'pointer',
         backgroundColor: isSelected ? '#eff6ff' : 'transparent',
         border: isSelected ? '1px solid #bfdbfe' : '1px solid transparent',
         transition: 'all 0.15s ease'
     });
 
-    const formatCardStyle = (id) => ({
-        flex: 1,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-        padding: '12px',
-        border: selectedFormats === id ? '2px solid #4268BD' : '1px solid #e5e7eb',
-        borderRadius: '8px',
-        cursor: 'pointer',
-        backgroundColor: selectedFormats === id ? '#eff6ff' : 'white',
-        transition: 'all 0.2s ease',
-        textAlign: 'center'
-    });
-
     return (
         <AnimatePresence>
             {isOpen && (
-                <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    style={overlayStyle} 
-                    onClick={onClose}
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={overlayStyle} onClick={onClose}>
                     <motion.div 
-                        initial={{ scale: 0.95, opacity: 0, y: 10 }}
-                        animate={{ scale: 1, opacity: 1, y: 0 }}
-                        exit={{ scale: 0.95, opacity: 0, y: 10 }}
-                        transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+                        initial={{ scale: 0.95, opacity: 0, y: 10 }} 
+                        animate={{ scale: 1, opacity: 1, y: 0 }} 
+                        exit={{ scale: 0.95, opacity: 0, y: 10 }} 
                         style={modalStyle} 
                         onClick={e => e.stopPropagation()}
                     >
-                        
                         {/* Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '24px' }}>
                             <div>
-                                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#111827', margin: 0 }}>Export Report</h2>
-                                <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0 0' }}>Configure the data and format you wish to export.</p>
+                                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#111827', margin: 0 }}>Export System Report</h2>
+                                <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0 0' }}>All system analytics are pre-selected for full export.</p>
                             </div>
-                            <button 
-                                onClick={onClose} 
-                                style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#9ca3af' }}
-                            >
-                                <X size={20} />
-                            </button>
+                            <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#9ca3af' }}><X size={20} /></button>
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                            
-                            {/* SECTION 1: REPORT TYPES */}
+                            {/* SECTION 1: REPORTS */}
                             <div>
-                                <div style={sectionTitleStyle}>1. Select Reports</div>
+                                <div style={sectionTitleStyle}>1. Analytics Included</div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
-                                    {reportOptions.map((opt) => {
-                                        const isSelected = selectedReports.includes(opt.id);
-                                        return (
-                                            <div key={opt.id} style={checkboxRowStyle(isSelected)} onClick={() => toggleReport(opt.id)}>
-                                                <div style={{ color: isSelected ? '#4268BD' : '#d1d5db', display: 'flex' }}>
-                                                    {isSelected ? <CheckSquare size={18} /> : <Square size={18} />}
-                                                </div>
-                                                <span style={{ fontSize: '13px', color: isSelected ? '#1f2937' : '#4b5563', fontWeight: 500 }}>
-                                                    {opt.label}
-                                                </span>
-                                            </div>
-                                        );
-                                    })}
+                                    {reportOptions.map((opt) => (
+                                        <div key={opt.id} style={checkboxRowStyle(true)}>
+                                            <CheckSquare size={18} color="#4268BD" />
+                                            <span style={{ fontSize: '13px', fontWeight: 500 }}>{opt.label}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
                             {/* SECTION 2: SCOPE */}
                             <div>
-                                <div style={sectionTitleStyle}>2. Select Scope</div>
+                                <div style={sectionTitleStyle}>2. Data Scope</div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                    {scopeOptions.map((opt) => {
-                                        const isSelected = selectedScopes.includes(opt.id);
-                                        return (
-                                            <div key={opt.id} style={checkboxRowStyle(isSelected)} onClick={() => toggleScope(opt.id)}>
-                                                <div style={{ color: isSelected ? '#4268BD' : '#d1d5db', display: 'flex' }}>
-                                                    {isSelected ? <CheckSquare size={18} /> : <Square size={18} />}
-                                                </div>
-                                                <span style={{ fontSize: '13px', color: isSelected ? '#1f2937' : '#4b5563', fontWeight: 500 }}>
-                                                    {opt.label}
-                                                </span>
-                                            </div>
-                                        );
-                                    })}
+                                    {scopeOptions.map((opt) => (
+                                        <div key={opt.id} style={checkboxRowStyle(true)}>
+                                            <CheckSquare size={18} color="#4268BD" />
+                                            <span style={{ fontSize: '13px', fontWeight: 500 }}>{opt.label}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
-                            {/* SECTION 3: FILE FORMAT */}
+                            {/* SECTION 3: FORMAT */}
                             <div>
-                                <div style={sectionTitleStyle}>3. File Format</div>
-                                <div style={{ display: 'flex', gap: '12px' }}>
-                                    <div style={formatCardStyle('csv')} onClick={() => setSelectedFormats('csv')}>
-                                        <div style={{ color: selectedFormats === 'csv' ? '#4268BD' : '#6b7280' }}><Table size={24} /></div>
-                                        <span style={{ fontSize: '12px', fontWeight: 500, color: '#374151' }}>CSV</span>
-                                    </div>
-                                    <div style={formatCardStyle('excel')} onClick={() => setSelectedFormats('excel')}>
-                                        <div style={{ color: selectedFormats === 'excel' ? '#166534' : '#6b7280' }}><FileSpreadsheet size={24} /></div>
-                                        <span style={{ fontSize: '12px', fontWeight: 500, color: '#374151' }}>Excel</span>
-                                    </div>
-                                    <div style={formatCardStyle('pdf')} onClick={() => setSelectedFormats('pdf')}>
-                                        <div style={{ color: selectedFormats === 'pdf' ? '#b91c1c' : '#6b7280' }}><FileText size={24} /></div>
-                                        <span style={{ fontSize: '12px', fontWeight: 500, color: '#374151' }}>PDF</span>
+                                <div style={sectionTitleStyle}>3. Export Format</div>
+                                <div style={{ 
+                                    padding: '16px', border: '2px solid #4268BD', borderRadius: '8px', 
+                                    backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', gap: '12px' 
+                                }}>
+                                    <FileText size={32} color="#b91c1c" />
+                                    <div>
+                                        <p style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>PDF Document</p>
+                                        <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>Optimized for presentation and printing.</p>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
 
                         {/* Footer */}
-                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '24px', marginTop: '24px', borderTop: '1px solid #f3f4f6' }}>
-                            <button 
-                                onClick={onClose}
-                                style={{ 
-                                    padding: '8px 16px', borderRadius: '6px', border: '1px solid #e5e7eb', 
-                                    backgroundColor: 'white', color: '#374151', fontSize: '13px', fontWeight: 500, cursor: 'pointer' 
-                                }}
-                            >
-                                Cancel
-                            </button>
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '32px', borderTop: '1px solid #f3f4f6', paddingTop: '20px' }}>
+                            <button onClick={onClose} style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #e5e7eb', background: 'white', cursor: 'pointer' }}>Cancel</button>
                             <button 
                                 onClick={handleExport}
                                 style={{ 
                                     padding: '8px 24px', borderRadius: '6px', border: 'none', 
                                     background: 'linear-gradient(to right, #4268BD, #3F6AC9)', 
-                                    color: 'white', fontSize: '13px', fontWeight: 500, 
-                                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
-                                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                                    color: 'white', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
                                 }}
                             >
-                                <Download size={16} /> Export Data
+                                <Download size={18} /> Generate PDF
                             </button>
                         </div>
-
                     </motion.div>
                 </motion.div>
             )}

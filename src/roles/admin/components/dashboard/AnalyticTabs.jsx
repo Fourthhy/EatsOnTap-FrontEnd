@@ -169,7 +169,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                         ></div>
                     </div>
 
-                    <button
+                    {/* <button
                         style={{
                             borderTopLeftRadius: 6, borderTopRightRadius: 6, padding: "10px 0",
                             cursor: "pointer", fontFamily: "geist", fontSize: 12, fontWeight: 500,
@@ -188,7 +188,7 @@ function AnalyticTabs({ children, selectedTab, onTabChange }) {
                                 borderBottomLeftRadius: selectedTab === 5 ? 10 : 0,
                             }}
                         ></div>
-                    </div>
+                    </div> */}
 
                     {/* --- EXPORT BUTTON --- */}
                     <Tooltip

@@ -24,15 +24,11 @@ export async function logout() {
             if (payload.role === 'CLASS-ADVISER') {
                 endpoint = '/api/auth/logoutClassAdviser';
             }
-            
-            console.log(`👤 Detected Role: ${payload.role}. Calling: ${endpoint}`);
 
         } catch (error) {
             console.warn("⚠️ Could not decode token role. Defaulting to User logout.");
         }
     }
-
-    console.log("🚪 Attempting to log out...");
 
     try {
         // 3. Call the Backend API

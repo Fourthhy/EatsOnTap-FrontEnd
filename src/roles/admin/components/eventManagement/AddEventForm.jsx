@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Calendar, Search, X, Check, Tag, Edit2, ChevronLeft, ChevronRight, Plus, Loader2 } from 'lucide-react';
+import { Calendar, Search, X, Check, Tag, Edit2, ChevronLeft, ChevronRight, Plus, Loader2, ArrowRight } from 'lucide-react';
 import { getSchoolStructure } from '../../../../functions/admin/getSchoolStructure';
-import { addEvent } from "../../../../functions/admin/addEvent"; // 🟢 Imported
+import { addEvent } from "../../../../functions/admin/addEvent"; 
 
 // --- PRIMARY ACTION BUTTON COMPONENT ---
 const PrimaryActionButton = ({ label, icon, onClick, style, className }) => {
@@ -114,7 +114,7 @@ export const AddEventForm = () => {
     // --- DATA STATE ---
     const [structureData, setStructureData] = useState([]);
     const [isLoadingData, setIsLoadingData] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false); // 🟢 1. Loading state for submit
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // --- UI INTERACTION STATE ---
     const [isEditingName, setIsEditingName] = useState(true);
@@ -122,10 +122,12 @@ export const AddEventForm = () => {
 
     // --- FORM STATE ---
     const [eventName, setEventName] = useState('');
-    const [eventDate, setEventDate] = useState('');
+    const [eventDate, setEventDate] = useState('');     // Start Date
+    const [eventEndDate, setEventEndDate] = useState(''); // End Date
     const [selectedColor, setSelectedColor] = useState(EVENT_COLORS[0].value);
     const [selectedDepartments, setSelectedDepartments] = useState([]);
-    const [selectedPrograms, setSelectedPrograms] = useState([]);
+    
+    const [selectedPrograms, setSelectedPrograms] = useState([]); 
     const [validationError, setValidationError] = useState({});
 
     const nameInputRef = useRef(null);
@@ -173,11 +175,39 @@ export const AddEventForm = () => {
             );
         }
 
-        const flattenedSections = relevantCategories.flatMap(cat => 
-            cat.levels.flatMap(level => level.sections)
+        // 🟢 FLATTEN AND TAG DATA (Fixed Logic Here)
+        const flattened = relevantCategories.flatMap(cat => 
+            cat.levels.flatMap(level => 
+                level.sections.map(section => {
+                    const secName = section.section || section.name || section;
+                    const yearLevel = level.levelName || level.gradeLevel || "N/A";
+                    
+                    // Determine Type based on Category Name
+                    const lowerCat = cat.category.toLowerCase();
+                    const isHigherEd = lowerCat.includes("college") || lowerCat.includes("higher") || lowerCat.includes("tertiary");
+
+                    return {
+                        id: `${yearLevel}-${secName}`, // Unique ID for selection
+                        section: secName, // Basic Ed: Section Name, Higher Ed: Program Name
+                        year: yearLevel,
+                        display: `${yearLevel} - ${secName}`, // For display in grid
+                        type: isHigherEd ? 'HIGHER_ED' : 'BASIC_ED' // 🟢 Tag Added
+                    };
+                })
+            )
         );
 
-        return [...new Set(flattenedSections)].sort();
+        // Remove duplicates based on ID
+        const unique = [];
+        const map = new Map();
+        for (const item of flattened) {
+            if(!map.has(item.id)){
+                map.set(item.id, true);
+                unique.push(item);
+            }
+        }
+
+        return unique.sort((a, b) => a.display.localeCompare(b.display));
     }, [selectedDepartments, isOpen, structureData]);
 
     const totalPages = Math.ceil(allProgramsToDisplay.length / ITEMS_PER_PAGE);
@@ -210,6 +240,7 @@ export const AddEventForm = () => {
     const resetForm = () => {
         setEventName('');
         setEventDate('');
+        setEventEndDate(''); 
         setSelectedDepartments([]);
         setSelectedPrograms([]);
         setValidationError({});
@@ -249,7 +280,14 @@ export const AddEventForm = () => {
     const handleEventDateChange = (e) => {
         const value = e.target.value;
         setEventDate(value);
+        if(eventEndDate && new Date(value) > new Date(eventEndDate)) {
+            setEventEndDate("");
+        }
         if (validationError.eventDate && value) setValidationError(prev => ({ ...prev, eventDate: false }));
+    };
+
+    const handleEventEndDateChange = (e) => {
+        setEventEndDate(e.target.value);
     };
 
     const toggleDepartment = (dept) => {
@@ -280,10 +318,16 @@ export const AddEventForm = () => {
         setSelectedPrograms([]);
     };
 
-    const handleProgramToggle = (program) => {
+    const handleProgramToggle = (programObj) => {
         setSelectedPrograms(prevPrograms => {
-            const isSelected = prevPrograms.includes(program);
-            let nextPrograms = isSelected ? prevPrograms.filter(p => p !== program) : [...prevPrograms, program];
+            const isSelected = prevPrograms.some(p => p.id === programObj.id);
+            let nextPrograms;
+            if (isSelected) {
+                nextPrograms = prevPrograms.filter(p => p.id !== programObj.id);
+            } else {
+                nextPrograms = [...prevPrograms, programObj];
+            }
+            
             if (validationError.programs && nextPrograms.length > 0) setValidationError(prev => ({ ...prev, programs: false }));
             return nextPrograms;
         });
@@ -293,7 +337,7 @@ export const AddEventForm = () => {
         if (pageNumber >= 1 && pageNumber <= totalPages) setCurrentPage(pageNumber);
     };
 
-    // --- 🟢 2. CONFIGURED SUBMIT HANDLER ---
+    // --- 🟢 UPDATED CREATE EVENT HANDLER ---
     const handleCreateEvent = async (e) => {
         e.preventDefault();
 
@@ -307,17 +351,24 @@ export const AddEventForm = () => {
         setValidationError(errors);
 
         if (Object.keys(errors).length === 0) {
-            setIsSubmitting(true); // Start loading
+            setIsSubmitting(true);
             
             try {
-                // Prepare Payload
-                const dateObj = new Date(eventDate);
-                const startDay = String(dateObj.getDate()).padStart(2, '0');
-                const endDay = String(dateObj.getDate()).padStart(2, '0');
-                const startMonth = dateObj.toLocaleString('default', { month: 'long' });
-                const endMonth = dateObj.toLocaleString('default', { month: 'long' });
+                // 1. Calculate Date Components
+                const startDateObj = new Date(eventDate);
+                const endDateObj = eventEndDate ? new Date(eventEndDate) : startDateObj;
 
+                const startDay = startDateObj.getDate();
+                const endDay = endDateObj.getDate();
+                const startMonth = startDateObj.toLocaleString('default', { month: 'long' });
+                const endMonth = endDateObj.toLocaleString('default', { month: 'long' });
+
+                // 2. Determine Scope
                 const eventScope = selectedDepartments.includes('All') ? 'School-Wide' : 'Departmental';
+
+                // 3. 🟢 SPLIT PAYLOAD (Fixes the Backend Issue)
+                const basicEdSelections = selectedPrograms.filter(p => p.type !== 'HIGHER_ED');
+                const higherEdSelections = selectedPrograms.filter(p => p.type === 'HIGHER_ED');
 
                 const payload = {
                     eventName: eventName,
@@ -327,12 +378,28 @@ export const AddEventForm = () => {
                     startMonth: startMonth,
                     endMonth: endMonth,
                     eventColor: selectedColor,
-                    forEligibleSection: selectedPrograms,
-                    forEligibleProgramsAndYear: [],
-                    forTemporarilyWaived: []
+                    
+                    // Basic Ed Array
+                    forEligibleSection: basicEdSelections.map(p => ({
+                        section: p.section,
+                        year: p.year,
+                        totalEligibleCount: 0,
+                        totalClaimedCount: 0
+                    })),
+
+                    // Higher Ed Array (Mapped to 'program')
+                    forEligibleProgramsAndYear: higherEdSelections.map(p => ({
+                        program: p.section, // Frontend 'section' holds the program name here
+                        year: p.year,
+                        totalEligibleCount: 0,
+                        totalClaimedCount: 0
+                    })),
+
+                    submissionStatus: 'APPROVED', 
+                    scheduleStatus: 'ONGOING' 
                 };
 
-                // Call the Imported API function
+                // 4. API Call
                 await addEvent(payload);
 
                 handleCloseModal();
@@ -340,7 +407,7 @@ export const AddEventForm = () => {
             } catch (error) {
                 console.error("Failed to create event:", error);
             } finally {
-                setIsSubmitting(false); // Stop loading
+                setIsSubmitting(false);
             }
         }
     };
@@ -348,7 +415,6 @@ export const AddEventForm = () => {
     const isFormComplete = eventName.trim() && eventDate && selectedDepartments.length > 0 &&
         (allProgramsToDisplay.length === 0 || selectedPrograms.length > 0);
     
-    // Disable if invalid OR if currently submitting
     const isButtonDisabled = !isFormComplete || Object.keys(validationError).length > 0 || isSubmitting;
 
     // --- STYLES ---
@@ -368,7 +434,6 @@ export const AddEventForm = () => {
     const colorSwatchStyle = (color, isSelected) => ({ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: color, cursor: 'pointer', border: isSelected ? '2px solid #3b82f6' : '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.1s ease', transform: isSelected ? 'scale(1.1)' : 'scale(1)', boxShadow: isSelected ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' });
     const dateButtonStyle = (isError) => ({ position: 'relative', padding: "5px 10px", fontSize: 12, fontFamily: "geist", fontWeight: 450, borderRadius: 8, border: isError ? '1px solid red' : '1px solid #e5e7eb', backgroundColor: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: isError ? 'red' : (eventDate ? '#374151' : '#4b5563') });
     
-    // 🟢 3. UPDATE SUBMIT BUTTON STYLE
     const submitButtonStyle = (isDisabled) => {
         const activeStyles = { background: 'linear-gradient(to right, #4268BD, #3F6AC9)', cursor: 'pointer', fontWeight: '600' };
         const disabledStyles = { backgroundColor: '#cccccc', background: '#cccccc', cursor: 'not-allowed', fontWeight: '400' };
@@ -376,6 +441,15 @@ export const AddEventForm = () => {
     };
 
     const currentColorObj = EVENT_COLORS.find(c => c.value === selectedColor) || EVENT_COLORS[0];
+
+    // Helper to display date range
+    const displayDateRange = () => {
+        if (!eventDate) return 'Date';
+        const start = new Date(eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        if (!eventEndDate) return start;
+        const end = new Date(eventEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `${start} - ${end}`;
+    };
 
     return (
         <>
@@ -398,13 +472,25 @@ export const AddEventForm = () => {
                             {/* Date & Submit */}
                             <div className="flex justify-between items-center flex-shrink-0">
                                 <div className="flex gap-2 max-h-[40px] items-center">
+                                    {/* Start Date */}
                                     <label style={dateButtonStyle(validationError.eventDate)} className="hover:bg-gray-50 transition-colors">
-                                        <span style={{ color: validationError.eventDate ? 'red' : (eventDate ? '#374151' : 'inherit'), fontWeight: eventDate ? 500 : 450 }}>{eventDate ? new Date(eventDate).toLocaleDateString('en-US') : 'Pick a date'}</span>
+                                        <span style={{ color: validationError.eventDate ? 'red' : (eventDate ? '#374151' : 'inherit'), fontWeight: eventDate ? 500 : 450 }}>{eventDate ? new Date(eventDate).toLocaleDateString('en-US') : 'Start Date'}</span>
                                         <Calendar size={12} style={{ color: validationError.eventDate ? 'red' : '#4b5563' }} />
                                         <input type="date" value={eventDate} onChange={handleEventDateChange} onClick={(e) => { try { if (e.target.showPicker) e.target.showPicker(); } catch (error) { } }} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} />
                                     </label>
+                                    
+                                    {/* End Date */}
+                                    {eventDate && (
+                                        <>
+                                            <span className="text-gray-400 text-xs">to</span>
+                                            <label style={dateButtonStyle(false)} className="hover:bg-gray-50 transition-colors">
+                                                <span style={{ color: eventEndDate ? '#374151' : 'inherit', fontWeight: eventEndDate ? 500 : 450 }}>{eventEndDate ? new Date(eventEndDate).toLocaleDateString('en-US') : 'End Date (Optional)'}</span>
+                                                <Calendar size={12} style={{ color: '#4b5563' }} />
+                                                <input type="date" min={eventDate} value={eventEndDate} onChange={handleEventEndDateChange} onClick={(e) => { try { if (e.target.showPicker) e.target.showPicker(); } catch (error) { } }} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} />
+                                            </label>
+                                        </>
+                                    )}
                                 </div>
-                                {/* 🟢 4. BUTTON WITH LOADING STATE */}
                                 <button type="submit" disabled={isButtonDisabled} style={submitButtonStyle(isButtonDisabled)} className="transition-colors hover:bg-blue-700 shadow-md">
                                     {isSubmitting ? (
                                         <>
@@ -456,7 +542,7 @@ export const AddEventForm = () => {
                                 </div>
                             </div>
 
-                            {/* Department Selection (Dynamic) */}
+                            {/* Department Selection */}
                             <div
                                 onMouseEnter={() => setIsDeptContainerHovered(true)}
                                 onMouseLeave={() => setIsDeptContainerHovered(false)}
@@ -484,7 +570,6 @@ export const AddEventForm = () => {
                                     <>
                                         <label style={labelStyle(validationError.departments)}>Select Department/s:</label>
                                         <div className="flex flex-wrap gap-2.5 border-gray-200 border-[1px] rounded-md p-3 bg-white" style={{ padding: "5px" }}>
-                                            {/* Render 'All' Chip */}
                                             <span 
                                                 style={departmentChipStyle('All')} 
                                                 className="transition-colors hover:bg-gray-200" 
@@ -492,7 +577,6 @@ export const AddEventForm = () => {
                                             >
                                                 All Departments
                                             </span>
-                                            {/* Render Dynamic Department Chips */}
                                             {availableDepartments.map((dept, i) => (
                                                 <span key={i} style={departmentChipStyle(dept)} className="transition-colors hover:bg-gray-200" onClick={() => toggleDepartment(dept)}>{dept}</span>
                                             ))}
@@ -524,16 +608,16 @@ export const AddEventForm = () => {
                                             <div className="overflow-y-auto flex-grow">
                                                 <div className="grid grid-cols-3 gap-3" style={{ padding: "10px" }}>
                                                     {programsToDisplay.map((program, idx) => {
-                                                        const isSelected = selectedPrograms.includes(program);
+                                                        const isSelected = selectedPrograms.some(p => p.id === program.id);
                                                         return (
                                                             <div
                                                                 key={idx}
                                                                 onClick={() => handleProgramToggle(program)}
                                                                 className={`flex items-center p-2 rounded-md cursor-pointer border transition-all duration-200
-                                                                    ${isSelected
-                                                                        ? 'bg-blue-50 border-blue-200 shadow-sm'
-                                                                        : 'bg-white border-gray-100 hover:border-gray-300 hover:bg-gray-50'
-                                                                    }`}
+                                                                ${isSelected
+                                                                    ? 'bg-blue-50 border-blue-200 shadow-sm'
+                                                                    : 'bg-white border-gray-100 hover:border-gray-300 hover:bg-gray-50'
+                                                                }`}
                                                                 style={{ height: '40px' }}
                                                             >
                                                                 <div className="flex items-center justify-center w-8 shrink-0 mr-2">
@@ -550,9 +634,9 @@ export const AddEventForm = () => {
                                                                         fontWeight: 500, fontSize: 12, fontFamily: "geist",
                                                                         color: isSelected ? '#1e40af' : '#111827'
                                                                     }}
-                                                                    title={program}
+                                                                    title={program.display}
                                                                 >
-                                                                    {program}
+                                                                    {program.display}
                                                                 </span>
                                                             </div>
                                                         );
@@ -586,7 +670,7 @@ export const AddEventForm = () => {
                             <div style={{ width: '280px', height: '380px', backgroundColor: selectedColor, borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', transition: 'background-color 0.3s ease', position: 'relative' }}>
                                 <div style={{ backgroundColor: 'rgba(255,255,255,0.6)', padding: '4px 10px', borderRadius: '8px', alignSelf: 'flex-start', marginBottom: '20px', fontSize: 12, fontWeight: 600, fontFamily: 'geist', color: currentColorObj.text, display: 'flex', alignItems: 'center', gap: 6 }}>
                                     <Calendar size={12} />
-                                    {eventDate ? new Date(eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Date'}
+                                    {displayDateRange()}
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <h3 style={{ fontFamily: 'geist', fontSize: 24, fontWeight: 600, color: currentColorObj.text, lineHeight: 1.2, wordBreak: 'break-word' }}>{eventName || "Event Title Goes Here"}</h3>

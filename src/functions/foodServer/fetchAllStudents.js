@@ -7,9 +7,6 @@ export async function fetchAllStudents() {
     // ⚠️ CHECK ROUTE: Ensure this matches your backend route definition
     // Example: router.get('/getAllStudents', studentController.getAllStudents)
     const targetUrl = `${VITE_BASE_URL}/api/students/getAllStudents`;
-
-    console.log("🌐 Fetching All Students from:", targetUrl);
-
     try {
         const response = await fetch(targetUrl, {
             method: 'GET',
@@ -23,9 +20,6 @@ export async function fetchAllStudents() {
         }
 
         const data = await response.json();
-
-        console.log(`📦 Received ${data.length} Students`);
-
         return data;
     } catch (error) {
         console.error('Error Fetching All Students:', error);

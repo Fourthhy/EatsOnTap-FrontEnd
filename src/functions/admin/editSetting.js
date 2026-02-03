@@ -5,8 +5,6 @@ export async function editSetting(updateData) {
     // ⚠️ CHECK ROUTE: Matches /api/setting/editSetting
     const targetUrl = `${VITE_BASE_URL}/api/setting/editSetting`;
 
-    console.log(`⚙️ Updating Setting '${updateData.settingName}'...`, updateData);
-
     try {
         const response = await fetch(targetUrl, {
             method: 'PUT',
@@ -23,7 +21,6 @@ export async function editSetting(updateData) {
             throw new Error(result.message || `Failed to update setting: ${response.status}`);
         }
 
-        console.log("✅ Setting Updated:", result);
         return result;
 
     } catch (error) {

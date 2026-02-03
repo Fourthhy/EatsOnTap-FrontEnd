@@ -8,7 +8,6 @@ const addClassAdviser = async (adviserData) => {
     // Usually it is: app.use('/api/classAdviser', classAdviserRoutes)
     const targetUrl = `${VITE_BASE_URL}/api/classAdviser/addClassAdviser`;
 
-    console.log("🌐 Adding Class Adviser to:", targetUrl);
 
     try {
         const response = await fetch(targetUrl, {
@@ -27,7 +26,6 @@ const addClassAdviser = async (adviserData) => {
         try {
             result = JSON.parse(responseText);
         } catch (jsonError) {
-            console.error("❌ CRITICAL ERROR: Server returned HTML instead of JSON.");
             console.error("Response Body:", responseText);
             throw new Error(`Server returned invalid format (HTML). Check your API URL: ${targetUrl}`);
         }

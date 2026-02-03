@@ -5,9 +5,6 @@ export async function getAllUsers() {
     // Note: Adjust '/api/user' if your route is mounted differently in server.js
     // e.g., if app.use('/api/fetch', userRoutes), then use /api/fetch/getAllUsers
     const targetUrl = `${VITE_BASE_URL}/api/users/getAllUsers`; 
-    
-    console.log("🌐 Fetching All Users from:", targetUrl);
-
     try {
         const response = await fetch(targetUrl);
 

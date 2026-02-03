@@ -3,8 +3,6 @@ const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export async function studentRFIDLinking(studentID, rfidTag) {
     const targetUrl = `${VITE_BASE_URL}/api/students/rfidLink/${encodeURIComponent(studentID)}`;
-    console.log("🌐 Linking Student to RFID at:", targetUrl);
-
     try {
         const response = await fetch(targetUrl, {
             method: 'PUT',
@@ -20,8 +18,6 @@ export async function studentRFIDLinking(studentID, rfidTag) {
             // Throw the specific error message from the backend (e.g. "RFID already linked")
             throw new Error(data.message || `Failed to link: ${response.status}`);
         }
-
-        console.log("📦 RFID Linked!", data);
         return data;
 
     } catch (error) {

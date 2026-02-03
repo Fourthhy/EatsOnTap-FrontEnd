@@ -3,8 +3,6 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST
 
 export async function getTodayClaimRecord() {
     const targetUrl = `${VITE_BASE_URL}/api/fetch/getTodayClaimRecord`
-    console.log("🌐 Fetching Claim Record Data from:", targetUrl);
-
     try {
         const response = await fetch(targetUrl);
 
@@ -13,10 +11,6 @@ export async function getTodayClaimRecord() {
         }
 
         const data = await response.json();
-
-        // Log the data to verify the structure (Category -> Levels -> Sections)
-        console.log("📦 Claim Record Data Received:", data);
-
         return data;
     } catch (error) {
         console.error('Error Fetching Claim Record Data:', error);

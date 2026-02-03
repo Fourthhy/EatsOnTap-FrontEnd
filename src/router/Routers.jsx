@@ -35,6 +35,8 @@ import Playground from "../Playground";
 import ClassAdviserLayout from "../roles/classAdviser/ClassAdviserLayout";
 import SubmitMealList from "../roles/classAdviser/SubmitMealList";
 
+import LoginRegistration from "../LoginRegistration";
+
 
 
 export default function Routers() {
@@ -48,6 +50,8 @@ export default function Routers() {
                     <Route path="/sample" element={<SidebarLayout />} />
 
                     <Route path="/playground" element={<Playground />} />
+
+                    <Route path="/loginRegistration/:token/:userEmail" element={<LoginRegistration />} />
 
                     <Route path="/admin" element={
                         <ProtectedRoute>

@@ -7,7 +7,7 @@ import { SectionListView } from './views/SectionListView';
 import { StudentListView } from './views/StudentListView';
 import { AdviserListView } from './views/AdviserListView';
 
-// --- SHARED COMPONENTS ---
+// --- SHARED COMPONENTS ---a
 import { SwitcherButton } from './SwitcherButton';
 
 const StudentList = () => {

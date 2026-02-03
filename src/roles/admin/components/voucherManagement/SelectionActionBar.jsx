@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Archive, ChevronDown, Eye, Edit, Save, UserPlus, CheckCircle, CalendarClock } from 'lucide-react';
 
-export const SelectionActionBar = ({ 
-    selectedItem, 
-    variant = 'section', // Added 'program' support
+export const SelectionActionBar = ({
+    selectedItem,
+    variant = 'section',
     isEditing = false,
-    
+
     // Common
-    onClearSelection, 
-    
+    onClearSelection,
+
     // Section Specific
     onViewStudents,
 
@@ -17,7 +17,7 @@ export const SelectionActionBar = ({
     onEditSchedule,
 
     // Student Specific (Edit Mode)
-    activeDropdown, 
+    activeDropdown,
     onToggleDropdown,
     onEditStudent,
     onSaveStudent,
@@ -26,17 +26,32 @@ export const SelectionActionBar = ({
 
     // Promotion / Graduation Specific
     selectedCount = 0,
-    onAssignStudents, 
-    onSavePromotion,  
-    onCancelPromotion 
+    onAssignStudents,
+    onSavePromotion,
+    onCancelPromotion
 }) => {
+    // 🟢 LOCAL STATE: Fallback if parent doesn't control dropdowns
+    const [internalDropdown, setInternalDropdown] = useState(null);
+
+    // Helper to determine which state to use
+    const isControlled = activeDropdown !== undefined;
+    const currentDropdown = isControlled ? activeDropdown : internalDropdown;
+
+    const handleToggle = (menu) => {
+        if (isControlled && onToggleDropdown) {
+            onToggleDropdown(menu);
+        } else {
+            setInternalDropdown(prev => prev === menu ? null : menu);
+        }
+    };
+
     const styles = {
         actionBarContainer: {
             height: '100%', width: '100%', backgroundColor: '#4268BD', color: 'white',
             padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             fontFamily: 'geist, sans-serif',
-            zIndex: 8000, 
-            position: 'relative' 
+            zIndex: 8000,
+            position: 'relative'
         },
         ghostButton: {
             backgroundColor: 'rgba(255, 255, 255, 0.1)', color: 'white', padding: '8px 16px',
@@ -45,6 +60,11 @@ export const SelectionActionBar = ({
         },
         primaryButton: {
             backgroundColor: 'white', color: '#4268BD', padding: '8px 16px',
+            borderRadius: '8px', fontSize: '13px', fontWeight: 600, border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+        },
+        whiteButton: {
+            backgroundColor: 'white', color: '#EF4444', padding: '8px 16px',
             borderRadius: '8px', fontSize: '13px', fontWeight: 600, border: 'none', cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
         },
@@ -58,14 +78,23 @@ export const SelectionActionBar = ({
             borderRadius: '8px', fontSize: '13px', fontWeight: 600, border: 'none', cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
         },
+        // 🟢 UPDATED: Aligns dropdown below the button
         dropdownMenu: {
-            position: 'absolute', right: 0, marginTop: '8px', backgroundColor: 'white',
-            borderRadius: '8px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-            overflow: 'hidden', zIndex: 8001,
-            color: '#1f2937', padding: '4px 0', minWidth: '160px'
+            position: 'absolute',
+            right: 0,
+            top: '100%', // Positions top edge of menu at bottom edge of button
+            marginTop: '8px', // Adds spacing between button and menu
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            overflow: 'hidden',
+            zIndex: 8001,
+            color: '#1f2937',
+            padding: '4px 0',
+            minWidth: '160px'
         },
         dropdownItem: {
-            width: '100%', textAlign: 'left', padding: '8px 16px', fontSize: '14px',
+            width: '100%', textAlign: 'left', padding: '10px 16px', fontSize: '13px',
             backgroundColor: 'transparent', border: 'none', cursor: 'pointer', color: '#374151',
             transition: 'background-color 0.15s'
         },
@@ -76,8 +105,39 @@ export const SelectionActionBar = ({
         }
     };
 
+    // Shared Archive Dropdown JSX
+    const renderArchiveDropdown = () => (
+        <div style={{ position: 'relative' }}>
+            <button
+                onClick={(e) => { e.stopPropagation(); handleToggle('archive'); }}
+                style={styles.whiteButton}
+            >
+                <Archive size={16} /> Archive <ChevronDown size={14} />
+            </button>
+            {currentDropdown === 'archive' && (
+                <div style={styles.dropdownMenu}>
+                    {['Graduate', 'Transfer', 'Drop'].map(opt => (
+                        <button
+                            key={opt}
+                            style={styles.dropdownItem}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (onArchiveOption) onArchiveOption(opt);
+                                handleToggle(null); // Close after click
+                            }}
+                            onMouseEnter={(e) => e.target.style.backgroundColor = '#F3F4F6'}
+                            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                        >
+                            {opt}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+
     const renderActions = () => {
-        // --- 1. PROGRAM MODE (New) ---
+        // --- 1. PROGRAM MODE ---
         if (variant === 'program') {
             return (
                 <button onClick={onEditSchedule} style={styles.primaryButton}>
@@ -104,8 +164,8 @@ export const SelectionActionBar = ({
         if (variant === 'promotion') {
             return (
                 <>
-                    <button 
-                        style={selectedCount === 0 ? styles.disabledButton : styles.primaryButton} 
+                    <button
+                        style={selectedCount === 0 ? styles.disabledButton : styles.primaryButton}
                         onClick={selectedCount > 0 ? onAssignStudents : undefined}
                     >
                         <UserPlus size={16} /> Assign
@@ -121,23 +181,7 @@ export const SelectionActionBar = ({
         if (variant === 'graduation') {
             return (
                 <>
-                    <div style={{ position: 'relative' }}>
-                        <button 
-                            onClick={(e) => { e.stopPropagation(); onToggleDropdown('archive'); }}
-                            style={styles.ghostButton}
-                        >
-                            <Archive size={16} /> Archive <ChevronDown size={14} />
-                        </button>
-                        {activeDropdown === 'archive' && (
-                            <div style={styles.dropdownMenu}>
-                                {['Graduate', 'Transfer', 'Drop'].map(opt => (
-                                    <button key={opt} style={styles.dropdownItem} onClick={() => onArchiveOption(opt)}>
-                                        {opt}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                    {renderArchiveDropdown()}
                     <button style={styles.cancelButton} onClick={onCancelPromotion}>
                         <X size={16} /> Cancel
                     </button>
@@ -145,12 +189,18 @@ export const SelectionActionBar = ({
             );
         }
 
-        // --- 5. SECTION VIEW ---
-        if (variant === 'section') {
+        // --- 5. SECTION & ADVISER VIEW ---
+        if (variant === 'section' || variant === 'adviser') {
             return (
-                <button onClick={onViewStudents} style={styles.primaryButton}>
-                    <Eye size={16} /> View Students
-                </button>
+                <>
+                    {renderArchiveDropdown()}
+
+                    {variant === 'section' && (
+                        <button onClick={onViewStudents} style={styles.primaryButton}>
+                            <Eye size={16} /> View Students
+                        </button>
+                    )}
+                </>
             );
         }
 
@@ -158,24 +208,13 @@ export const SelectionActionBar = ({
         if (variant === 'student') {
             return (
                 <>
-                    <div style={{ position: 'relative' }}>
-                        <button 
-                            onClick={(e) => { e.stopPropagation(); onToggleDropdown('archive'); }}
-                            style={styles.ghostButton}
-                        >
-                            <Archive size={16} /> Archive <ChevronDown size={14} />
-                        </button>
-                        {activeDropdown === 'archive' && (
-                            <div style={styles.dropdownMenu}>
-                                {['Graduate', 'Transfer', 'Drop'].map(opt => (
-                                    <button key={opt} style={styles.dropdownItem} onClick={() => onArchiveOption(opt)}>
-                                        {opt}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
+                    {/* {renderArchiveDropdown()} */}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); handleToggle('archive'); }}
+                        style={styles.whiteButton}
+                    >
+                        <Archive size={16} /> Archive
+                    </button>
                     <button onClick={onEditStudent} style={styles.primaryButton}>
                         <Edit size={16} /> Edit
                     </button>
@@ -187,11 +226,9 @@ export const SelectionActionBar = ({
     const getLabel = () => {
         if (variant === 'promotion' || variant === 'graduation') return `${selectedCount} Students Selected`;
         if (variant === 'section') return `${selectedItem?.level || ''} - ${selectedItem?.sectionName || ''}`;
-        
-        // 🟢 Added program label support
         if (variant === 'program') return `${selectedItem?.programName} (${selectedItem?.year} Year)`;
-        
         if (variant === 'student') return selectedItem?.name || 'Student';
+        if (variant === 'adviser') return selectedItem?.name || 'Adviser';
         return 'Item Selected';
     };
 

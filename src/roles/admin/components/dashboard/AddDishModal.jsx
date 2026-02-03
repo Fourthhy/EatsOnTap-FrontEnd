@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Utensils, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { addDishes } from "../../../../functions/admin/addDish";
+import { viewDishes } from "../../../../functions/admin/viewDishes";
 
 const AddDishModal = ({
     isOpen,
@@ -8,10 +10,49 @@ const AddDishModal = ({
     meals,
     onMealChange,
     onAddMealField,
-    onSubmit,
+    onSubmit, // 🟢 Acts as "onSuccess/Refresh" callback
     isSaveDisabled,
     addedTodaysDish
 }) => {
+    // 🟢 Local loading state for better UX
+    const [isLoading, setIsLoading] = useState(false);
+
+    // 🟢 LOGIC IMPLEMENTATION
+    const handleSubmit = async () => {
+        try {
+            setIsLoading(true);
+
+            // 1. Clean inputs (remove empty strings)
+            // Ensure meals is an array before filtering
+            const currentMeals = Array.isArray(meals) ? meals : [];
+            const validMeals = currentMeals.filter(m => m && m.trim() !== "");
+            
+            if (validMeals.length === 0) {
+                console.warn("No valid meals to submit");
+                setIsLoading(false);
+                return;
+            }
+
+            // 2. Prepare Payload
+            const payload = {
+                dishes: validMeals,
+                date: new Date() // Uses current date
+            };
+
+            // 3. Call API
+            // Note: This API uses $addToSet, so it appends new dishes.
+            await addDishes(payload);
+
+            // 4. Success: Close modal & Refresh Parent
+            setIsLoading(false);
+            onSubmit(); 
+
+        } catch (error) {
+            console.error("Error submitting dishes:", error);
+            setIsLoading(false);
+            // Optional: Add toast notification here
+        }
+    };
 
     return (
         <AnimatePresence>
@@ -24,7 +65,6 @@ const AddDishModal = ({
                     // 🟢 1. Trigger close when clicking the background
                     onClick={onClose}
                     className="fixed inset-0 z-9000 flex items-center justify-center bg-black/20 backdrop-blur-sm"
-                    
                 >
                     <motion.div
                         initial={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -56,7 +96,8 @@ const AddDishModal = ({
 
                         {/* Form Inputs */}
                         <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 flex flex-col items-center" style={{ marginTop: 15 }}>
-                            {meals.map((meal, index) => (
+                            {/* Safe check for meals map */}
+                            {(meals || []).map((meal, index) => (
                                 <div key={index} className="w-[92%] flex items-center" style={{ marginBottom: 15 }}>
                                     <label className="text-sm font-medium text-gray-700 font-geist w-[25%] shrink-0">
                                         Meal Number {index + 1}:
@@ -95,15 +136,16 @@ const AddDishModal = ({
                             </button>
 
                             <button
-                                onClick={onSubmit}
-                                disabled={isSaveDisabled}
-                                className={`px-8 py-2.5 rounded-md text-sm transition-colors ${isSaveDisabled
+                                // 🟢 3. Connect the submit logic
+                                onClick={handleSubmit}
+                                disabled={isSaveDisabled || isLoading}
+                                className={`px-8 py-2.5 rounded-md text-sm transition-colors ${isSaveDisabled || isLoading
                                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                                         : "bg-[#3B65CA] hover:bg-[#3052a6] text-white"
                                     }`}
                                 style={{ paddingRight: 30, paddingLeft: 30, paddingTop: 15, paddingBottom: 15 }}
                             >
-                                {addedTodaysDish ? "Save Changes" : "Submit"}
+                                {isLoading ? "Saving..." : (addedTodaysDish ? "Save Changes" : "Submit")}
                             </button>
                         </div>
                     </motion.div>

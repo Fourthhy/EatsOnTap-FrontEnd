@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { io } from 'socket.io-client'; // 🟢 1. Import Socket Client
+import { io } from 'socket.io-client'; 
 
 // API Imports
 import { getUnifiedSchoolData } from '../functions/admin/getUnifiedSchoolData';
@@ -13,6 +13,7 @@ import { getSectionProgramList } from '../functions/admin/getSectionProgramList'
 import { getMealValue } from '../functions/admin/getMealValue';
 import { getAllSettings } from '../functions/admin/getAllSettings';
 import { getAllProgramSchedule } from '../functions/adminAssistant/getAllProgramSchedule';
+import { getDashboardData } from '../functions/admin/getDashboardData';
 
 
 const DataContext = createContext();
@@ -39,22 +40,37 @@ const DataProvider = ({ children }) => {
     const [sectionProgram, setSectionProgram] = useState([]);
     const [mealValue, setMealValue] = useState()
     const [setting, setSetting] = useState([]);
+    
+    // 🟢 FIX: Initialize from LocalStorage (Persistence)
+    // This prevents "undefined" errors on the Dashboard when refreshing the page.
+    const [userInformation, setUserInformation] = useState(() => {
+        try {
+            const savedUser = localStorage.getItem("userInformation");
+            return savedUser ? JSON.parse(savedUser) : {};
+        } catch (error) {
+            console.error("Error parsing user info from storage", error);
+            return {};
+        }
+    });
+
+    // 🟢 FIX: Update LocalStorage whenever state changes
+    useEffect(() => {
+        localStorage.setItem("userInformation", JSON.stringify(userInformation));
+    }, [userInformation]);
+
 
     const [programSchedule, setProgramSchedule] = useState([])
 
-    // --- 🟢 WRAPPER FUNCTIONS (Wrapped in useCallback for Socket) ---
+    // --- WRAPPER FUNCTIONS ---
 
     const fetchUnifiedSchoolData = useCallback(async () => {
         try {
             if (typeof getUnifiedSchoolData !== 'function') throw new Error("getUnifiedSchoolData import missing!");
-
             const data = await getUnifiedSchoolData();
-
-            // 🟢 FIX: Used === instead of =
             if (data && data.length === 0) {
                 console.warn("⚠️ Unified School Returned No Record");
             } else {
-                setSchoolData(data); // Update State
+                setSchoolData(data); 
             }
         } catch (error) {
             console.error('Error Fetching Unified School Data', error);
@@ -64,9 +80,7 @@ const DataProvider = ({ children }) => {
     const fetchAllClassAdvisers = useCallback(async () => {
         try {
             if (typeof getAllClassAdvisers !== 'function') throw new Error('getAllClassAdvisers import missing!');
-
             const data = await getAllClassAdvisers();
-
             if (data && data.length === 0) {
                 console.warn("⚠️ Class Adviser Data Returned No Record");
             } else {
@@ -80,10 +94,7 @@ const DataProvider = ({ children }) => {
     const fetchAllBasicEducationMealRequest = useCallback(async () => {
         try {
             if (typeof getAllBasicEducationMealRequest !== 'function') throw new Error('getAllBasicEducationMealRequest import missing!');
-
-            // 🟢 FIX: Added missing 't' in function call
             const data = await getAllBasicEducationMealRequest();
-
             if (data && data.length === 0) {
                 console.warn("⚠️ Basic Ed Meal Requests Returned No Record");
             } else {
@@ -97,9 +108,7 @@ const DataProvider = ({ children }) => {
     const fetchAllHigherEducationMealRequest = useCallback(async () => {
         try {
             if (typeof getAllHigherEducationMealRequest !== 'function') throw new Error('getAllHigherEducationMealRequest import missing!');
-
             const data = await getAllHigherEducationMealRequest();
-
             if (data && data.length === 0) {
                 console.warn("⚠️ Higher Ed Meal Requests Returned No Record");
             } else {
@@ -113,9 +122,7 @@ const DataProvider = ({ children }) => {
     const fetchAllEvents = useCallback(async () => {
         try {
             if (typeof getAllEvents !== 'function') throw new Error('getAllEvents import missing!');
-
             const data = await getAllEvents();
-
             if (data && data.length === 0) {
                 console.warn("⚠️ Event Requests Returned No Record");
             } else {
@@ -199,6 +206,16 @@ const DataProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching program schedule');
         }
+    });
+
+    const fetchDashboardData = useCallback(async () => {
+        try {
+            if (typeof getDashboardData !== 'function') throw new Error('getDashboardData import missing!');
+            const data = await getDashboardData();
+            setDashboardData(data);
+        } catch (error) {
+            console.error('Error fetching dashboard data', error)
+        }
     })
 
     useEffect(() => {
@@ -236,19 +253,13 @@ const DataProvider = ({ children }) => {
         // 🟢 LISTEN for the specific event from your backend
         socket.on('update-student-register', (data) => {
             console.log("🔔 New Student Added! Refreshing Data...", data);
-
-            // 🟢 TRIGGER REFRESH
-            // Reload the main data source that populates your tables/forms
             fetchUnifiedSchoolData();
-
-            // If you have a separate list for just students, fetch that too
-            // fetchAllStudents(); 
         });
 
         return () => {
             socket.disconnect();
         };
-    }, [fetchUnifiedSchoolData]); // Add fetch function to dependency array
+    }, [fetchUnifiedSchoolData]); 
 
     useEffect(() => {
         const socket = io(import.meta.env.VITE_BASE_URL);
@@ -267,13 +278,14 @@ const DataProvider = ({ children }) => {
 
     return (
         <DataContext.Provider value={{
-            // States & Setters (Expose Setters just in case Loader needs them)
+            // States & Setters
             dashboardData, setDashboardData,
             students, setStudents,
             events, setEvents,
             mealOrders, setMealOrders,
             claimRecords, setClaimRecords,
             todaysMenu, setTodaysMenu,
+            userInformation, setUserInformation,
 
             schoolData,
             classAdvisers,
@@ -287,7 +299,7 @@ const DataProvider = ({ children }) => {
             setting,
             programSchedule,
 
-            // Fetch Functions (For Loader or Manual Refresh)
+            // Fetch Functions
             fetchUnifiedSchoolData,
             fetchAllClassAdvisers,
             fetchAllBasicEducationMealRequest,
@@ -298,7 +310,8 @@ const DataProvider = ({ children }) => {
             fetchSectionProgramList,
             fetchMealValue,
             fetchAllSettings,
-            fetchAllProgramSchedule
+            fetchAllProgramSchedule,
+            fetchDashboardData
         }}>
             {children}
         </DataContext.Provider>

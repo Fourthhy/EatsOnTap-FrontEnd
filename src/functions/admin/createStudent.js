@@ -5,7 +5,6 @@ const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 const createStudent = async (studentData) => {
 
     const targetUrl = `${VITE_BASE_URL}/api/students/addNewStudent`;
-    console.log("🌐 Adding New Student:", targetUrl);
 
     try {
         const payload = {

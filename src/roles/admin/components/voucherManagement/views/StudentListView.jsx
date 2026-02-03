@@ -1,12 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, ArrowLeft, GraduationCap, User } from 'lucide-react';
+import { Plus, ArrowLeft, User } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 
 import { GenericTable } from '../../../../../components/global/table/GenericTable';
 import { SelectionActionBar } from '../SelectionActionBar';
 import { useData } from "../../../../../context/DataContext";
 import { AddStudentModal } from '../AddStudentModal';
-import { PromotionModal, AssignmentModal } from '../components/PromotionModals';
 import { CustomEditDropdown } from '../components/CustomEditDropdown';
 import { LinkStatusBadge } from '../LinkStatusBadge';
 
@@ -22,18 +21,14 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
     // Selection & Actions
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedIds, setSelectedIds] = useState([]);
-    const [activeActionDropdown, setActiveActionDropdown] = useState(null);
     const [headerVisible, setHeaderVisible] = useState(false);
 
-    // Edit & Promote Mode
+    // Edit Mode
     const [isEditing, setIsEditing] = useState(false);
     const [editFormData, setEditFormData] = useState({});
-    const [promotionMode, setPromotionMode] = useState(null);
-    const [isPromotionModalOpen, setIsPromotionModalOpen] = useState(false);
-    const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
 
     // --- EFFECT: HEADER VISIBILITY ---
-    const shouldShowActions = selectedIds.length > 0 || selectedItem !== null || promotionMode !== null;
+    const shouldShowActions = selectedIds.length > 0 || selectedItem !== null;
     useEffect(() => {
         if (shouldShowActions) setHeaderVisible(true);
         else {
@@ -49,8 +44,7 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
         return "Section";
     };
 
-    // --- 🟢 HELPER: FLATTEN MASTER TREE (For Tabs) ---
-    // This replaces the old 'allStudents' dependency
+    // --- 🟢 HELPER: FLATTEN MASTER TREE ---
     const allStudentsFlat = useMemo(() => {
         if (!schoolData || schoolData.length === 0) return [];
         const students = [];
@@ -64,7 +58,6 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
                                 sec.students.forEach(s => {
                                     students.push({
                                         ...s,
-                                        // Standardize keys for the table
                                         gradeLevel: s.gradeLevel || lvl.levelName,
                                         program: s.program || s.section || sec.section,
                                         category: cat.category,
@@ -79,22 +72,10 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
         return students;
     }, [schoolData]);
 
-    // --- 🟢 HELPER: GET NEXT SECTIONS (For Promotion) ---
-    // (Simplified logic for now - allows promoting to next index in flattened list)
-    const getNextLevelSections = (currentLevelName) => {
-        // Implementation can be restored if needed, simplified for display
-        return []; 
-    };
-
     // --- 🟢 UNIFIED FILTERING LOGIC ---
     const filteredStudents = useMemo(() => {
-        // CASE 1: DRILLDOWN MODE (The Fix)
         if (drilldownContext) {
-            // 🚀 DIRECT ACCESS: Use the array passed from SectionListView.
-            // No matching required. 100% accuracy.
             let list = drilldownContext.students || [];
-
-            // Optional: Local search within this section
             if (searchTerm) {
                 const lower = searchTerm.toLowerCase();
                 list = list.filter(s => 
@@ -102,8 +83,6 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
                     (s.studentId || "").toLowerCase().includes(lower)
                 );
             }
-            
-            // Map to ensure keys exist
             return list.map(s => ({
                 ...s,
                 gradeLevel: s.gradeLevel || drilldownContext.level,
@@ -111,15 +90,11 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
             }));
         }
 
-        // CASE 2: GLOBAL MASTER LIST
         return allStudentsFlat.filter(student => {
             let matchesTab = true;
-            
-            // Tab Logic
             if (activeTab !== 'all') {
                 if (student.category !== activeTab) matchesTab = false;
             }
-
             if (searchTerm && matchesTab) {
                 const searchString = `${student.name} ${student.studentId} ${student.gradeLevel} ${student.program}`.toLowerCase();
                 matchesTab = searchString.includes(searchTerm.toLowerCase());
@@ -129,51 +104,80 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
 
     }, [allStudentsFlat, drilldownContext, activeTab, searchTerm]);
 
-    // --- HANDLERS (Standard) ---
-    const handlePromoteClick = () => {
-        if (!drilldownContext) return;
-        setIsPromotionModalOpen(true);
-    };
-    const handleBulkPromote = () => setIsPromotionModalOpen(false);
-    const handleIndividualAssign = () => { setIsAssignmentModalOpen(false); setSelectedIds([]); };
-    const exitPromotion = () => { setPromotionMode(null); setSelectedIds([]); };
+    // --- HANDLERS ---
     const handleEditSave = () => { setSelectedItem(editFormData); setIsEditing(false); };
+    
     const handleStudentClick = (student) => {
-        if (isEditing || promotionMode) return;
+        if (isEditing) return;
         if (selectedItem?.id === student.id) setSelectedItem(null);
         else setSelectedItem(student);
     };
 
     // --- RENDER ROW ---
     const cellStyle = { fontSize: '12px', color: '#4b5563', borderBottom: '1px solid #f3f4f6', height: '44px', verticalAlign: 'middle' };
+    
+    // 🟢 NEW: Inline styles for Edit Inputs
+    const inputStyle = {
+        width: '100%',
+        padding: '6px',
+        border: '1px solid #e5e7eb', // gray-200
+        borderRadius: '4px',
+        fontSize: '12px',
+        color: '#111827',
+        fontFamily: 'inherit'
+    };
 
     const renderRow = (student, index, startIndex) => {
         if (isEditing && selectedItem?.id === student.id) {
             return (
                 <tr key={student.id} style={{ backgroundColor: '#eff6ff' }}>
-                    <td style={cellStyle}><div className="w-1.5 h-1.5 rounded-full bg-blue-500 mx-auto" /></td>
-                    <td style={cellStyle}><input className="w-full p-1.5 border rounded text-xs" value={editFormData.name} onChange={e => setEditFormData({ ...editFormData, name: e.target.value })} /></td>
-                    <td style={cellStyle}><input className="w-full p-1.5 border rounded text-xs" value={editFormData.studentId} onChange={e => setEditFormData({ ...editFormData, studentId: e.target.value })} /></td>
-                    <td style={cellStyle}><CustomEditDropdown value={editFormData.type} options={['Regular', 'Irregular']} onChange={v => setEditFormData({ ...editFormData, type: v })} /></td>
-                    <td style={cellStyle}><span className="text-gray-500 text-xs">{student.gradeLevel}</span></td>
-                    <td style={cellStyle}><input className="w-full p-1.5 border rounded text-xs" value={editFormData.program} onChange={e => setEditFormData({ ...editFormData, program: e.target.value })} /></td>
-                    <td style={cellStyle}><span className="text-gray-400 italic">Editing...</span></td>
+                    <td style={cellStyle}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#3b82f6', margin: '0 auto' }} />
+                    </td>
+                    <td style={cellStyle}>
+                        <input 
+                            style={inputStyle} 
+                            value={editFormData.name} 
+                            onChange={e => setEditFormData({ ...editFormData, name: e.target.value })} 
+                        />
+                    </td>
+                    <td style={cellStyle}>
+                        <input 
+                            style={inputStyle} 
+                            value={editFormData.studentId} 
+                            onChange={e => setEditFormData({ ...editFormData, studentId: e.target.value })} 
+                        />
+                    </td>
+                    <td style={cellStyle}>
+                        <CustomEditDropdown 
+                            value={editFormData.type} 
+                            options={['Regular', 'Irregular']} 
+                            onChange={v => setEditFormData({ ...editFormData, type: v })} 
+                        />
+                    </td>
+                    <td style={cellStyle}>
+                        <span style={{ color: '#6b7280', fontSize: '12px' }}>{student.gradeLevel}</span>
+                    </td>
+                    <td style={cellStyle}>
+                        <input 
+                            style={inputStyle} 
+                            value={editFormData.program} 
+                            onChange={e => setEditFormData({ ...editFormData, program: e.target.value })} 
+                        />
+                    </td>
+                    <td style={cellStyle}>
+                        <span style={{ color: '#9ca3af', fontStyle: 'italic', fontSize: '12px' }}>Editing...</span>
+                    </td>
                 </tr>
             );
         }
 
         const isSelected = selectedItem?.id === student.id;
-        const isChecked = selectedIds.includes(student.id);
-        const showCheckbox = !!promotionMode;
-
+        
         return (
             <tr key={student.id} onClick={() => handleStudentClick(student)} className="hover:bg-gray-50 transition-colors cursor-pointer" style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}>
                 <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }} onClick={e => e.stopPropagation()}>
-                    {showCheckbox ? (
-                        <div style={{ display: 'flex', justifyContent: 'center', zIndex: 50, position: 'relative' }}>
-                            <input type="checkbox" checked={isChecked} onChange={(e) => { e.stopPropagation(); if (isChecked) setSelectedIds(prev => prev.filter(id => id !== student.id)); else setSelectedIds(prev => [...prev, student.id]); }} style={{ cursor: 'pointer', width: '16px', height: '16px' }} />
-                        </div>
-                    ) : (startIndex + index + 1)}
+                    {startIndex + index + 1}
                 </td>
                 <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
                     <div className="flex items-center gap-3">
@@ -193,19 +197,19 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
     };
 
     // --- ACTION BAR ---
-    let variant = 'student';
-    if (promotionMode === 'individual') variant = 'promotion';
-    if (promotionMode === 'graduation') variant = 'graduation';
-
     const actionBar = (
         <AnimatePresence>
             {shouldShowActions && (
                 <SelectionActionBar
-                    key="bar" variant={variant} selectedItem={selectedItem}
-                    onClearSelection={() => { if (promotionMode) exitPromotion(); else { setSelectedItem(null); setIsEditing(false); } }}
-                    isEditing={isEditing} onEditStudent={() => { setEditFormData({ ...selectedItem }); setIsEditing(true); }} onSaveStudent={handleEditSave} onCancelEdit={() => { setIsEditing(false); setEditFormData({}); }}
-                    activeDropdown={activeActionDropdown} onToggleDropdown={t => setActiveActionDropdown(prev => prev === t ? null : t)} onArchiveOption={opt => console.log(opt)}
-                    selectedCount={selectedIds.length} onAssignStudents={() => setIsAssignmentModalOpen(true)} onSavePromotion={() => { onGoBack(); }} onCancelPromotion={exitPromotion}
+                    key="bar" 
+                    variant="student"
+                    selectedItem={selectedItem}
+                    onClearSelection={() => { setSelectedItem(null); setIsEditing(false); }}
+                    isEditing={isEditing} 
+                    onEditStudent={() => { setEditFormData({ ...selectedItem }); setIsEditing(true); }} 
+                    onSaveStudent={handleEditSave} 
+                    onCancelEdit={() => { setIsEditing(false); setEditFormData({}); }}
+                    selectedCount={selectedIds.length} 
                 />
             )}
         </AnimatePresence>
@@ -214,30 +218,30 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
     return (
         <>
             <AddStudentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
-            <PromotionModal isOpen={isPromotionModalOpen} onClose={() => setIsPromotionModalOpen(false)} nextSections={[]} onBulkPromote={handleBulkPromote} onSelectType={t => { setIsPromotionModalOpen(false); if (t === 'individual') { setPromotionMode('individual'); } }} />
-            <AssignmentModal isOpen={isAssignmentModalOpen} onClose={() => setIsAssignmentModalOpen(false)} nextSections={[]} onConfirm={handleIndividualAssign} />
-
+            
             <GenericTable
                 title={drilldownContext ? `Students in ${drilldownContext.level} - ${drilldownContext.sectionName}` : "Student Master List"}
                 subtitle={drilldownContext ? "Manage students in this section" : "Manage all student records"}
                 
-                // Hide tabs in drilldown mode
                 tabs={!drilldownContext ? [
                     { label: 'All', id: 'all' }, { label: 'Preschool', id: 'preschool' }, { label: 'Primary Education', id: 'primaryEducation' },
                     { label: 'Intermediate', id: 'intermediate' }, { label: 'Junior High School', id: 'juniorHighSchool' }, { label: 'Senior High School', id: 'seniorHighSchool' }, { label: 'Higher Education', id: 'higherEducation' }
                 ] : []}
                 
                 activeTab={activeTab} onTabChange={setActiveTab} 
-                searchTerm={searchTerm} onSearchChange={setSearchTerm} customActions={switcher}
+                searchTerm={searchTerm} onSearchChange={setSearchTerm} 
+                
+                customActions={drilldownContext ? null : switcher}
+                
                 overrideHeader={headerVisible ? actionBar : null}
                 
                 onPrimaryAction={() => drilldownContext ? onGoBack() : setIsAddModalOpen(true)}
                 primaryActionLabel={drilldownContext ? "Go Back" : "Add Student"} 
                 primaryActionIcon={drilldownContext ? <ArrowLeft size={16} /> : <Plus size={16} />}
                 
-                onSecondaryAction={handlePromoteClick} 
-                secondaryActionLabel={drilldownContext && !promotionMode ? "Promote Students" : null} 
-                secondaryActionIcon={drilldownContext && !promotionMode ? <GraduationCap size={16} /> : null}
+                onSecondaryAction={null} 
+                secondaryActionLabel={null} 
+                secondaryActionIcon={null}
                 
                 columns={['Student Name', 'Student ID', 'Type', 'Grade Level', getSectionLabel(), 'RFID Link']}
                 data={filteredStudents} 

@@ -1,6 +1,5 @@
 import React from 'react';
-import { motion } from "framer-motion"; // 🟢 1. Import Framer Motion
-// IMPORT SKELETON
+import { motion } from "framer-motion"; 
 import { Skeleton } from "../../../../components/global/Skeleton";
 
 function OngoingEvents({ events = [], isHyerlink = true, isLoading = false }) {
@@ -35,14 +34,13 @@ function OngoingEvents({ events = [], isHyerlink = true, isLoading = false }) {
       <div className="flex flex-col">
         {isLoading ? (
           // --- SKELETON LOADING STATE ---
-          // Render 2 dummy cards while loading
           [1, 2].map((i) => (
             <div
               key={i}
               style={{
                 padding: "15px 15px",
                 marginBottom: 8,
-                background: "#f9fafb" // Neutral gray background for skeleton container
+                background: "#f9fafb" 
               }}
               className="rounded-lg flex justify-between items-center"
             >
@@ -52,6 +50,25 @@ function OngoingEvents({ events = [], isHyerlink = true, isLoading = false }) {
               </div>
             </div>
           ))
+        ) : events.length === 0 ? (
+          // 🟢 2. EMPTY STATE (Centered Text)
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              height: '100px',
+              color: '#9CA3AF', // Gray-400
+              fontFamily: 'geist',
+              fontSize: '13px',
+              fontWeight: 500,
+              fontStyle: 'italic'
+            }}
+          >
+            No ongoing events
+          </motion.div>
         ) : (
           // --- REAL DATA STATE (Animated) ---
           events.map((event, idx) => (
@@ -59,7 +76,7 @@ function OngoingEvents({ events = [], isHyerlink = true, isLoading = false }) {
               key={event.title || idx}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: idx * 0.1 }} // Stagger effect
+              transition={{ duration: 0.3, delay: idx * 0.1 }} 
               style={{
                 padding: "15px 15px",
                 marginBottom: 8,

@@ -1,49 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, ChevronLeft, ChevronRight, CheckCircle, XCircle, Clock, BookOpen } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventPreviewCard } from './EventPreviewCard';
 import { GenericTable } from '../../../../components/global/table/GenericTable';
 
-// --- MOCK DATA GENERATOR ---
-const generateMockParticipants = (eventId, programs = []) => {
-    if (!programs || programs.length === 0) return [];
-    const statuses = ['Registered', 'Attended', 'Absent'];
-    const dummyNames = ['Alice Johnson', 'Bob Smith', 'Charlie Brown', 'Diana Prince', 'Evan Wright', 'Fiona Gallagher'];
-
-    let data = [];
-    programs.forEach(prog => {
-        for (let i = 0; i < 12; i++) {
-            const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-            data.push({
-                id: `${eventId}-${prog}-${i}`,
-                name: dummyNames[i % dummyNames.length] || `Student ${i + 1}`,
-                studentId: `2023-${1000 + (i * 5) + Math.floor(Math.random() * 100)}`,
-                program: prog,
-                status: randomStatus,
-                creditValue: '3.0 Units'
-            });
-        }
-    });
-    return data;
-};
-
 const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
 
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [activeTab, setActiveTab] = useState('Sections/Programs');
+    const [activeTab, setActiveTab] = useState('All'); 
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Sync index when modal opens
     useEffect(() => {
         if (isOpen && events.length > 0) {
-            const index = events.findIndex(e => e.id === initialEventId);
+            // Support finding by mongo _id OR custom eventID
+            const index = events.findIndex(e => e._id === initialEventId || e.id === initialEventId);
             setCurrentIndex(index >= 0 ? index : 0);
         }
     }, [isOpen, initialEventId, events]);
 
-    // Reset tab/search when switching events
     useEffect(() => {
-        setActiveTab('Sections/Programs');
         setSearchTerm('');
     }, [currentIndex]);
 
@@ -59,157 +34,149 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
 
     const currentEvent = events[currentIndex];
 
-    // Logic Flag: True if Ongoing or Recent
-    const isNotUpcoming = currentEvent && currentEvent.classification !== 'upcoming';
+    // --- DEPARTMENT CLASSIFICATION ---
+    const getDepartment = (item) => {
+        // If explicitly tagged as Higher Ed / Program
+        if (item.categoryType === 'PROGRAM' || item.type === 'Higher Ed') return 'Higher Education';
 
-    // --- DATA MEMOIZATION ---
-    const rawTableData = useMemo(() => {
-        return currentEvent ? generateMockParticipants(currentEvent.id, currentEvent.selectedPrograms) : [];
+        const y = parseInt(item.year, 10);
+        if (isNaN(y)) return 'Other';
+
+        if (y >= 1 && y <= 6) return 'Primary Education';    
+        if (y >= 7 && y <= 10) return 'Junior High School';  
+        if (y >= 11 && y <= 12) return 'Senior High School'; 
+        
+        return 'Higher Education'; 
+    };
+
+    // --- 🟢 DATA PREPARATION (FIXED) ---
+    const allEligibleGroups = useMemo(() => {
+        if (!currentEvent) return [];
+
+        // CASE 1: Data comes from processed Dashboard (Standardized)
+        if (currentEvent.selectedPrograms) {
+            return currentEvent.selectedPrograms.map(item => ({
+                ...item,
+                displayName: item.display || `${item.year} - ${item.section || item.program}`,
+                categoryType: (item.type === 'Basic Ed' || item.categoryType === 'SECTION') ? 'SECTION' : 'PROGRAM',
+                totalEligibleCount: item.totalEligibleCount || 0,
+                totalClaimedCount: item.totalClaimedCount || 0
+            }));
+        }
+        
+        // CASE 2: Fallback (If raw backend data is passed)
+        const sections = (currentEvent.forEligibleSection || []).map(s => ({
+            ...s, 
+            displayName: `${s.year} - ${s.section}`, 
+            categoryType: 'SECTION' 
+        }));
+
+        const programs = (currentEvent.forEligibleProgramsAndYear || []).map(p => ({
+            ...p, 
+            displayName: `${p.year} - ${p.program}`,
+            categoryType: 'PROGRAM' 
+        }));
+
+        return [...sections, ...programs];
     }, [currentEvent]);
 
+    // --- TABS CONFIGURATION ---
     const tabs = useMemo(() => {
         if (!currentEvent) return [];
-        return [
-            { id: 'Sections/Programs', label: 'Sections/Programs' },
-            { id: 'All', label: 'All Students' },
-            ...(currentEvent.selectedPrograms || []).map(p => ({ id: p, label: p }))
-        ];
-    }, [currentEvent]);
+        
+        const baseTabs = [{ id: 'All', label: 'All Departments' }];
+        const depts = new Set();
+
+        allEligibleGroups.forEach(group => {
+            depts.add(getDepartment(group));
+        });
+
+        if (depts.has('Primary Education')) baseTabs.push({ id: 'Primary Education', label: 'Primary Education' });
+        if (depts.has('Junior High School')) baseTabs.push({ id: 'Junior High School', label: 'Junior High School' });
+        if (depts.has('Senior High School')) baseTabs.push({ id: 'Senior High School', label: 'Senior High School' });
+        if (depts.has('Higher Education')) baseTabs.push({ id: 'Higher Education', label: 'Higher Education' });
+
+        return baseTabs;
+    }, [allEligibleGroups, currentEvent]);
+
 
     // --- DYNAMIC DATA PROCESSING ---
     const processedData = useMemo(() => {
         if (!currentEvent) return [];
 
-        // CASE A: SECTIONS/PROGRAMS VIEW
-        if (activeTab === 'Sections/Programs') {
-            const summary = (currentEvent.selectedPrograms || []).map(prog => {
-                const count = rawTableData.filter(d => d.program === prog).length;
-                return {
-                    id: `summary-${prog}`,
-                    programName: prog,
-                    studentCount: count,
-                    sectionStatus: count > 10 ? 'Full' : 'Open',
-                    creditValue: '3.0 Units'
-                };
-            });
+        let filteredGroups = allEligibleGroups;
 
-            if (searchTerm) {
-                return summary.filter(s => s.programName.toLowerCase().includes(searchTerm.toLowerCase()));
-            }
-            return summary;
-        }
-
-        // CASE B: STUDENT LISTS VIEW
-        let data = rawTableData;
+        // 1. Filter by Department
         if (activeTab !== 'All') {
-            data = data.filter(item => item.program === activeTab);
+            filteredGroups = allEligibleGroups.filter(g => getDepartment(g) === activeTab);
         }
+
+        // 2. Search Logic
         if (searchTerm) {
-            const lowerTerm = searchTerm.toLowerCase();
-            data = data.filter(item =>
-                item.name.toLowerCase().includes(lowerTerm) ||
-                item.studentId.toLowerCase().includes(lowerTerm)
+            filteredGroups = filteredGroups.filter(g => 
+                (g.displayName || '').toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
-        return data;
 
-    }, [rawTableData, activeTab, searchTerm, currentEvent]);
+        // 3. Format for Table
+        return filteredGroups.map(g => ({
+            id: g._id || Math.random(), // Fallback ID
+            name: g.displayName, 
+            year: g.year,
+            totalEligible: g.totalEligibleCount,
+            totalClaimed: g.totalClaimedCount,
+            percentage: g.totalEligibleCount > 0 
+                ? Math.round((g.totalClaimedCount / g.totalEligibleCount) * 100) 
+                : 0
+        }));
+
+    }, [allEligibleGroups, activeTab, searchTerm, currentEvent]);
 
 
-    // --- DYNAMIC COLUMN CONFIGURATION ---
-    const columns = useMemo(() => {
-        if (activeTab === 'Sections/Programs') {
-            const cols = ['Section/Program Name', 'Number of Students'];
-            if (isNotUpcoming) cols.push('Status', 'Credit Value');
-            return cols;
-        }
-
-        const cols = ['Name', 'ID', 'Section'];
-        if (isNotUpcoming) cols.push('Status', 'Credit Value');
-
-        return cols;
-    }, [activeTab, isNotUpcoming]);
-
+    // --- COLUMN CONFIGURATION ---
+    const columns = ['Section / Program', 'Year Level', 'Eligible Students', 'Claimed Meals', 'Status'];
 
     // --- ROW RENDERER ---
     const renderRow = (item, index, startIndex) => {
         const cellStyle = {
-            fontFamily: 'geist, sans-serif',
-            fontSize: '12px',
-            color: '#4b5563',
-            padding: '12px 24px 12px 0px',
-            borderBottom: '1px solid #f3f4f6'
+            fontFamily: 'geist, sans-serif', fontSize: '12px', color: '#4b5563',
+            padding: '12px 24px 12px 0px', borderBottom: '1px solid #f3f4f6'
         };
-
-        // RENDERER A: SECTIONS/PROGRAMS
-        if (activeTab === 'Sections/Programs') {
-            return (
-                <tr key={item.id} className="row-hover">
-                    <td style={{ ...cellStyle, textAlign: "center" }}>{startIndex + index + 1}</td>
-                    <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
-                        <div className="flex items-center gap-2">
-                            <BookOpen size={14} className="text-blue-500" /> {item.programName}
-                        </div>
-                    </td>
-                    <td style={cellStyle}>{item.studentCount} Students</td>
-
-                    {isNotUpcoming && (
-                        <>
-                            <td style={cellStyle}>
-                                <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs font-medium border border-blue-100">
-                                    {item.sectionStatus}
-                                </span>
-                            </td>
-                            <td style={cellStyle}>{item.creditValue}</td>
-                        </>
-                    )}
-                </tr>
-            );
-        }
-
-        // RENDERER B: STUDENT LISTS
-        const getStatusStyle = (s) => {
-            switch (s) {
-                case 'Attended': return { bg: '#dcfce7', text: '#166534', icon: CheckCircle };
-                case 'Absent': return { bg: '#fee2e2', text: '#991b1b', icon: XCircle };
-                default: return { bg: '#f3f4f6', text: '#4b5563', icon: Clock };
-            }
-        };
-        const style = getStatusStyle(item.status);
-        const Icon = style.icon;
 
         return (
             <tr key={item.id} className="row-hover">
                 <td style={{ ...cellStyle, textAlign: "center" }}>{startIndex + index + 1}</td>
-                <td style={{ ...cellStyle, color: '#111827', fontWeight: 500 }}>{item.name}</td>
-                <td style={cellStyle}>{item.studentId}</td>
-                <td style={cellStyle}>{item.program}</td>
-
-                {isNotUpcoming && (
-                    <>
-                        <td style={cellStyle}>
-                            <span style={{
-                                display: 'inline-flex', alignItems: 'center', gap: '6px',
-                                padding: '4px 8px', borderRadius: '999px',
-                                backgroundColor: style.bg, color: style.text,
-                                fontSize: '11px', fontWeight: 500
-                            }}>
-                                {Icon && <Icon size={12} />} {item.status}
-                            </span>
-                        </td>
-                        <td style={cellStyle}>{item.creditValue}</td>
-                    </>
-                )}
+                <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>
+                    <div className="flex items-center gap-2">
+                        <Users size={14} className="text-blue-500" /> {item.name}
+                    </div>
+                </td>
+                <td style={cellStyle}>Year {item.year}</td>
+                <td style={cellStyle}>{item.totalEligible} Students</td>
+                <td style={cellStyle}>
+                    <span style={{ fontWeight: 600, color: item.totalClaimed > 0 ? '#15803d' : '#6b7280' }}>
+                        {item.totalClaimed}
+                    </span>
+                    <span className="text-xs text-gray-400 ml-1">({item.percentage}%)</span>
+                </td>
+                <td style={cellStyle}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
+                        item.percentage === 100 ? 'bg-green-50 text-green-700 border-green-100' 
+                        : item.percentage > 0 ? 'bg-blue-50 text-blue-700 border-blue-100'
+                        : 'bg-gray-50 text-gray-500 border-gray-100'
+                    }`}>
+                        {item.percentage === 100 ? 'Completed' : item.percentage > 0 ? 'In Progress' : 'No Claims'}
+                    </span>
+                </td>
             </tr>
         );
     };
 
-    // --- STYLES (Cleaned of transition logic) ---
+    // --- STYLES ---
     const s = {
         backdrop: {
-            position: 'fixed', inset: 0, zIndex: 3000,
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            backdropFilter: 'blur(4px)',
+            position: 'fixed', inset: 0, zIndex: 9500,
+            backgroundColor: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(4px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', paddingRight: '16px'
         },
         container: {
@@ -263,17 +230,19 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
                         style={s.container}
                         onClick={e => e.stopPropagation()}
                     >
+                        {/* NAV BUTTONS */}
                         {events.length > 1 && (
-                            <button onClick={handlePrev} disabled={currentIndex === 0} style={{ ...s.navBtn, left: '-56px' }} className="nav-btn">
-                                <ChevronLeft size={20} />
-                            </button>
-                        )}
-                        {events.length > 1 && (
-                            <button onClick={handleNext} disabled={currentIndex === events.length - 1} style={{ ...s.navBtn, right: '-56px' }} className="nav-btn">
-                                <ChevronRight size={20} />
-                            </button>
+                            <>
+                                <button onClick={handlePrev} disabled={currentIndex === 0} style={{ ...s.navBtn, left: '-56px' }} className="nav-btn">
+                                    <ChevronLeft size={20} />
+                                </button>
+                                <button onClick={handleNext} disabled={currentIndex === events.length - 1} style={{ ...s.navBtn, right: '-56px' }} className="nav-btn">
+                                    <ChevronRight size={20} />
+                                </button>
+                            </>
                         )}
 
+                        {/* LEFT: CARD PREVIEW */}
                         <div style={s.cardPanel}>
                             <div style={{ width: '100%', transition: 'transform 0.3s' }}
                                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.02)'}
@@ -281,14 +250,18 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
                             >
                                 <EventPreviewCard
                                     eventName={currentEvent.eventName}
-                                    eventDate={currentEvent.eventDate}
-                                    selectedColor={currentEvent.selectedColor}
-                                    selectedDepartments={currentEvent.selectedDepartments}
-                                    selectedPrograms={currentEvent.selectedPrograms}
+                                    eventDate={currentEvent.eventDate || `${currentEvent.startMonth} ${currentEvent.startDay}`} 
+                                    selectedColor={currentEvent.selectedColor || currentEvent.eventColor}
+                                    selectedDepartments={
+                                        currentEvent.selectedDepartments 
+                                        || (currentEvent.eventScope === 'School-Wide' ? ['All'] : ['Departmental'])
+                                    }
+                                    selectedPrograms={allEligibleGroups.map(g => g.displayName)}
                                 />
                             </div>
                         </div>
 
+                        {/* RIGHT: TABLE */}
                         <div style={s.tablePanel}>
                             <button onClick={onClose} style={s.closeBtn} className="close-btn">
                                 <X size={18} />
@@ -297,7 +270,7 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
                             <div style={s.tableWrapper}>
                                 <GenericTable
                                     title={currentEvent.eventName}
-                                    subtitle={activeTab === 'Sections/Programs' ? 'Program Overview' : 'Participant List'}
+                                    subtitle="Participation Overview"
                                     tabs={tabs}
                                     activeTab={activeTab}
                                     onTabChange={setActiveTab}
@@ -307,14 +280,15 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
                                     data={processedData}
                                     renderRow={renderRow}
                                     metrics={[
-                                        { label: 'Total Students', value: rawTableData.length },
-                                        ...(isNotUpcoming ? [{
-                                            label: 'Present',
-                                            value: rawTableData.filter(x => x.status === 'Attended').length,
+                                        { label: 'Total Groups', value: processedData.length },
+                                        { label: 'Eligible', value: processedData.reduce((acc, curr) => acc + curr.totalEligible, 0) },
+                                        { 
+                                            label: 'Claimed', 
+                                            value: processedData.reduce((acc, curr) => acc + curr.totalClaimed, 0),
                                             color: '#166534'
-                                        }] : [])
+                                        }
                                     ]}
-                                    maxItems={5}
+                                    maxItems={7}
                                 />
                             </div>
                         </div>

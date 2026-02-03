@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useRef, useMemo, useEffect, use } from 'react';
-import { ChevronDown, Check, ChevronUp, ChevronLeft, Plus, Upload, FileText, X, User, Wifi, CheckCircle } from 'lucide-react';
+import { ChevronDown, Check, ChevronUp, ChevronLeft, Plus, Upload, FileText, X, User, Wifi, CheckCircle, Loader } from 'lucide-react';
 import { createStudent } from "../../../../functions/admin/createStudent";
 import { useData } from "../../../../context/DataContext";
 import { AnimatePresence, motion } from 'framer-motion';
 import { studentRFIDLinking } from "../../../../functions/admin/studentRFIDLinking";
+import { uploadStudentCSV } from "../../../../functions/admin/addStudentUsingCSV";
 
 // --- STYLES CONSTANTS ---
 const activeStyles = { background: 'linear-gradient(to right, #4268BD, #3F6AC9)', cursor: 'pointer', fontWeight: '600', color: 'white', border: 'none' };
@@ -49,7 +50,7 @@ const CustomDropdown = ({ label, value, options, onChange }) => {
                                 position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
                                 backgroundColor: 'white', borderRadius: '6px',
                                 boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
-                                border: '1px solid #f3f4f6', zIndex: 9000, maxHeight: '200px', overflowY: 'auto'
+                                border: '1px solid #f3f4f6', zIndex: 9800, maxHeight: '200px', overflowY: 'auto'
                             }}
                         >
                             {options.map((opt) => (
@@ -136,9 +137,7 @@ const ManualAddForm = ({ onClose }) => {
         borderRadius: '6px', border: '1px solid #d1d5db',
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', width: '100%', boxSizing: 'border-box', outline: 'none'
     };
-    const activeStyles = { background: 'linear-gradient(to right, #4268BD, #3F6AC9)', cursor: 'pointer', fontWeight: '600', color: 'white', border: 'none' };
-    const disabledStyles = { backgroundColor: '#cccccc', background: '#cccccc', cursor: 'not-allowed', fontWeight: '400', color: 'white', border: 'none' };
-
+    
     // --- SUCCESS VIEW ---
     if (isSuccess) {
         return (
@@ -254,29 +253,114 @@ const ManualAddForm = ({ onClose }) => {
     );
 };
 
-// ... UploadFromCSV Component (Unchanged) ...
+// --- UPLOAD FROM CSV COMPONENT (Updated with API & Loading) ---
 const UploadFromCSV = () => {
     const fileInputRef = useRef(null);
-    const handleButtonClick = () => { if (fileInputRef.current) fileInputRef.current.click(); };
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleButtonClick = () => {
+        if (fileInputRef.current && !isLoading) {
+            fileInputRef.current.click();
+        }
+    };
+
+    // 🟢 Shared function to process the file (Input + Drop)
+    const processFile = async (file) => {
+        if (!file) return;
+
+        // Validation
+        if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+            alert("Please upload a valid CSV file.");
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            console.log(`Uploading: ${file.name}`);
+            const response = await uploadStudentCSV(file);
+            alert(response.message); // "Successfully Created X students"
+        } catch (error) {
+            console.error(error);
+            alert(error.message || "An error occurred during upload.");
+        } finally {
+            setIsLoading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
     const handleFileChange = (event) => {
         const file = event.target.files[0];
-        if (file) console.log(`File selected: ${file.name}`);
+        processFile(file);
     };
+
+    // 🟢 Drag and Drop Handlers
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        if (isLoading) return;
+        const file = e.dataTransfer.files[0];
+        processFile(file);
+    };
+
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '16px', textAlign: 'center' }}>
-            <div className="hover:bg-gray-50" style={{ padding: '32px', border: '2px dashed #d1d5db', borderRadius: '6px', backgroundColor: '#f9fafb' }}>
+            <div 
+                className="hover:bg-gray-50" 
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                style={{ 
+                    padding: '32px', 
+                    border: '2px dashed #d1d5db', 
+                    borderRadius: '6px', 
+                    backgroundColor: isLoading ? '#f3f4f6' : '#f9fafb',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    transition: 'background-color 0.2s'
+                }}
+            >
                 <FileText style={{ height: '40px', width: '40px', color: '#9ca3af', margin: '0 auto', marginBottom: '8px' }} />
-                <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>Drag and drop your CSV file here, or click to select.</p>
-                <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".csv" style={{ display: 'none' }} />
+                <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>
+                    {isLoading ? "Uploading and syncing schedules..." : "Drag and drop your CSV file here, or click to select."}
+                </p>
+                <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handleFileChange} 
+                    accept=".csv" 
+                    style={{ display: 'none' }} 
+                    disabled={isLoading}
+                />
             </div>
-            <button onClick={handleButtonClick} style={{ padding: '10px 16px', border: '1px solid #d1d5db', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', fontSize: '0.875rem', fontWeight: '500', borderRadius: '6px', color: '#374151', backgroundColor: 'white', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                <Upload size={16} style={{ marginRight: '8px' }} /> Browse Files
+            <button 
+                onClick={handleButtonClick} 
+                disabled={isLoading}
+                style={{ 
+                    padding: '10px 16px', 
+                    border: '1px solid #d1d5db', 
+                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', 
+                    fontSize: '0.875rem', fontWeight: '500', 
+                    borderRadius: '6px', 
+                    color: isLoading ? '#9ca3af' : '#374151', 
+                    backgroundColor: 'white', 
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', 
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    opacity: isLoading ? 0.7 : 1
+                }}
+            >
+                {isLoading ? (
+                    <><Loader className="animate-spin" size={16} style={{ marginRight: '8px' }} /> Processing...</>
+                ) : (
+                    <><Upload size={16} style={{ marginRight: '8px' }} /> Browse Files</>
+                )}
             </button>
         </div>
     );
 };
 
-// Main Modal Component (Unchanged structure)
+// Main Modal Component
 const AddStudentModal = ({ isOpen, onClose }) => {
     const [mode, setMode] = useState('initial');
     const [isClosing, setIsClosing] = useState(false);
@@ -295,7 +379,7 @@ const AddStudentModal = ({ isOpen, onClose }) => {
     const animationClass = isClosing ? 'animate-out fade-out slide-out-to-top-3' : 'animate-in fade-in slide-in-from-top-3';
 
     return (
-        <div className={`fixed inset-0 flex items-center justify-center transition-opacity ${isClosing ? 'opacity-0' : 'opacity-100'} backdrop-blur-sm bg-black/50`} style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', zIndex: 2000 }} onClick={handleClose}>
+        <div className={`fixed inset-0 flex items-center justify-center transition-opacity ${isClosing ? 'opacity-0' : 'opacity-100'} backdrop-blur-sm bg-black/50`} style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', zIndex: 9500 }} onClick={handleClose}>
             <div className={`bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 transform ${animationClass}`} onClick={(e) => e.stopPropagation()} style={{ borderRadius: '6px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', padding: '24px', position: 'relative', width: '100%', maxWidth: '512px', fontFamily: "inherit" }}>
 
                 {/* Header */}
@@ -347,11 +431,11 @@ const AddStudentModal = ({ isOpen, onClose }) => {
     );
 };
 
-// LinkIDModal unchanged...
+// LinkIDModal
 const LinkIDModal = ({ isOpen, onClose, student }) => {
     const [isClosing, setIsClosing] = useState(false);
     const [rfidTag, setRfidTag] = useState('');
-    const [isLoading, setIsLoading] = useState(false); // Optional: Add loading state
+    const [isLoading, setIsLoading] = useState(false);
     const { fetchUnifiedSchoolData } = useData();
 
     const handleClose = useCallback(() => {

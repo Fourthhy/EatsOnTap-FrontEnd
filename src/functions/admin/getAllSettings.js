@@ -3,9 +3,6 @@ const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export async function getAllSettings() {
     const targetUrl = `${VITE_BASE_URL}/api/setting/fetchAllSettings`;
-
-    console.log("⚙️ Fetching System Settings...", targetUrl);
-
     try {
         const response = await fetch(targetUrl, {
             method: 'GET',
@@ -20,10 +17,6 @@ export async function getAllSettings() {
         }
 
         const data = await response.json();
-        
-        // Log for debugging
-        console.log("✅ Settings Received:", data);
-        
         return data; // Returns the array of settings directly
 
     } catch (error) {

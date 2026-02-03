@@ -1,40 +1,28 @@
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
-
-/**
- * Claims a food item and deducts balance from the student.
- * @param {string} studentInput - The Student ID or RFID Tag.
- * @param {number} amount - The cost of the item to deduct.
- */
-export async function claimFoodItem(studentInput, amount) {
-    // Construct the URL (adjust the path '/api/claim/' to match your actual route prefix)
-    const targetUrl = `${VITE_BASE_URL}/api/claim/fakeFoodItemClaim`;
-
-    console.log(`🌐 Deducting ${amount} from student:`, studentInput);
+export async function claimFoodItem(studentID, creditTaken) {
+    const targetUrl = `${VITE_BASE_URL}/api/claim/${encodeURIComponent(studentID)}/claim-foodItem`;
 
     try {
         const response = await fetch(targetUrl, {
-            method: 'POST', // POST because we are modifying the balance
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                studentInput: studentInput,
-                amount: Number(amount) // Ensure it's a number
-            })
+            body: JSON.stringify({ creditTaken }),
+            credentials: 'include' // Important for cookies/sessions if used
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || `Transaction failed: ${response.status}`);
+            // Throw an error with the message from the backend (e.g., "Insufficient balance")
+            throw new Error(data.message || `Error: ${response.status}`);
         }
 
-        console.log("✅ Transaction Successful:", data);
-        return data; // Returns { message, remainingBalance, etc. }
-
+        return data; // Returns the updated balance and payment breakdown
     } catch (error) {
-        console.error("❌ Claim Error:", error);
-        throw error;
+        console.error("❌ Error claiming food item:", error);
+        throw error; // Re-throw so the UI (FoodItemClaim.jsx) can catch and alert
     }
 }

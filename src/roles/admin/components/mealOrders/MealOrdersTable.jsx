@@ -429,7 +429,7 @@ const MealOrdersTable = () => {
                 columns={columns}
                 renderRow={renderRow}
 
-                tabs={orderType === 'Unsubmitted Sections' ? [] : [{ id: 'All', label: 'All' }, { id: 'Basic Education', label: 'Basic Education' }, { id: 'Higher Education', label: 'Higher Education' }]}
+                // tabs={orderType === 'Unsubmitted Sections' ? [] : [{ id: 'All', label: 'All' }, { id: 'Basic Education', label: 'Basic Education' }, { id: 'Higher Education', label: 'Higher Education' }]}
                 activeTab={activeTab}
                 onTabChange={(id) => { setActiveTab(id); setSelectedIds([]); }}
 

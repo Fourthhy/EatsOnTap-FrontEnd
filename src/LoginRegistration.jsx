@@ -1,77 +1,56 @@
-import { useEffect, useState } from "react";
-import { useBreakpoint } from "use-breakpoint"
-import { Input } from "@/components/ui/input"
+import { useEffect } from "react";
+import { useBreakpoint } from "use-breakpoint";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
 import { Button } from "./components/ui/button";
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/label";
 import { FaEyeSlash } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-import { loginApi } from "./functions/loginAuth"
-import { resetPassword } from "./functions/admin/resetPassword";
-import { useData } from "./context/DataContext";
+import { useNavigate, useParams } from "react-router-dom";
+import { loginApi } from "./functions/loginAuth";
+import { resetUserPasswordToDefault } from "./functions/admin/resetUserPasswordToDefault";
 
-export default function Login() {
-    const [email, setEmail] = useState('');
+export default function LoginRegistration() {
+    const { userEmail } = useParams();
+    const [email, setEmail] = useState(userEmail || '');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [errorPassword, setErrorPassword] = useState('')
-    const [success, setSuccess] = useState('');
+    const [errorPassword, setErrorPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const { setUserInformation } = useData();
+    const loginHeader = "Registration - Eat's on Tap";
 
-    const loginHeader = "Login - Eat's on Tap";
-
+    // 🟢 UPDATED: Set Loading State during Reset
     useEffect(() => {
         document.title = loginHeader;
-    }, []);
 
-    // 🟢 FORGOT PASSWORD HANDLER
-    const handleForgotPassword = async () => {
-        setError('');
-        setErrorPassword('');
-        setSuccess('');
+        const initializeRegistration = async () => {
+            if (userEmail) {
+                setLoading(true); // 🟢 Lock UI immediately
+                try {
+                    await resetUserPasswordToDefault(userEmail);
+                    console.log(`Password reset to default for ${userEmail}`);
+                } catch (err) {
+                    console.error("Failed to initialize registration:", err);
+                    setError("Failed to initialize registration. Please try the link again.");
+                } finally {
+                    setLoading(false); // 🟢 Unlock UI when done
+                }
+            }
+        };
 
-        const trimmedEmail = email.trim();
+        initializeRegistration();
+    }, [userEmail]);
 
-        // 1. Validate Email Presence
-        if (!trimmedEmail) {
-            setError('Please enter your email address above to reset your password.');
-            return;
-        }
-
-        // 🔴 REMOVED REGEX VALIDATION FOR NOW
-        // const laverdadEmailRegex = /^[a-zA-Z0-9._%+-]+@laverdad\.edu\.ph$/;
-        // if (!laverdadEmailRegex.test(trimmedEmail)) { ... }
-
-        setLoading(true);
-
-        try {
-            // 2. Call API
-            const response = await resetPassword(trimmedEmail);
-
-            // 3. Show Success
-            setSuccess(response.message || "An email has been sent to your account.");
-
-        } catch (err) {
-            // 4. Handle Error
-            setError(err.message || "Failed to send reset link.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // 🟢 LOGIN HANDLER
     const handleSubmit = async () => {
         setError('');
         setErrorPassword('');
-        setSuccess('');
         setLoading(true);
 
         const trimmedEmail = email.trim();
         const trimmedPassword = password.trim();
 
-        // Empty field validation
+        // 1. Validation (UI Check)
         if (!trimmedEmail) {
             setError('Email is required.');
             setLoading(false);
@@ -84,31 +63,19 @@ export default function Login() {
             return;
         }
 
-        // 🔴 REMOVED REGEX VALIDATION FOR NOW
-        /*
-        const laverdadEmailRegex = /^[a-zA-Z0-9._%+-]+@laverdad\.edu\.ph$/;
-        if (!laverdadEmailRegex.test(trimmedEmail)) {
-            setError('Email must end with @laverdad.edu.ph');
-            setLoading(false);
-            return;
-        }
-        */
+        // 🟢 REMOVED DOMAIN VALIDATION AS REQUESTED
 
         try {
-            const data = await loginApi(trimmedEmail, trimmedPassword);
+            // 2. Extract Name from Email to use as temporary "Password"
+            const extractedNameAsPassword = trimmedEmail.split('@')[0];
 
-            setUserInformation(data);
-            console.log('INFORMATION RECIEVED!', data);
+            // 3. Login
+            const data = await loginApi(trimmedEmail, extractedNameAsPassword);
 
             if (data.section) {
                 navigate(`/classAdviser/${data.section}/${data.userID}/submitMealList`);
             }
 
-            if (data.isRequiredChangePassword) {
-                // Handle password change redirect if needed
-                // navigate('/change-password'); 
-            }
-            
             switch (data.role) {
                 case 'ADMIN':
                     navigate('/admin/dashboard');
@@ -129,13 +96,10 @@ export default function Login() {
                     navigate('/superAdmin');
                     break;
                 default:
-                    // Optional fallback
                     setError('Unknown user role.');
                     setLoading(false);
                     return;
             }
-
-
 
         } catch (error) {
             setError(error.message || 'Network Error');
@@ -143,7 +107,7 @@ export default function Login() {
             setTimeout(() => {
                 setError('');
                 setLoading(false);
-                setEmail('');
+                setEmail(userEmail || '');
                 setPassword('');
             }, 3000);
         }
@@ -178,43 +142,11 @@ export default function Login() {
         breakpoint === 'laptop-md' || breakpoint === 'laptop-lg' ? "laptop" :
             breakpoint === 'mobile-md' || breakpoint === 'mobile-lg' || breakpoint === "tablet" ? "handheld" : "";
 
-    const FeedbackMessage = () => (
-        <>
-            {error !== "" && (
-                <Label>
-                    <p style={{
-                        fontFamily: 'geist',
-                        font: 'regular',
-                        color: '#D13B3B',
-                        paddingTop: '3px',
-                        paddingLeft: '5px'
-                    }} className="text-xs">
-                        {error}
-                    </p>
-                </Label>
-            )}
-            {success !== "" && (
-                <Label>
-                    <p style={{
-                        fontFamily: 'geist',
-                        font: 'regular',
-                        color: '#4BB543',
-                        paddingTop: '3px',
-                        paddingLeft: '5px'
-                    }} className="text-xs">
-                        {success}
-                    </p>
-                </Label>
-            )}
-        </>
-    );
-
     return (
         <>
             {screenType === "laptop" ?
                 <>
-                    <div
-                        className="h-[100vh] w-[100vw]">
+                    <div className="h-[100vh] w-[100vw]">
                         <div
                             className="h-[100vh] w-[100vw]"
                             style={{
@@ -258,7 +190,7 @@ export default function Login() {
                                                         height: inputBoxHeight,
                                                         paddingLeft: '5px',
                                                         font: 'geist',
-                                                        border: error !== "" ? "red 1px solid" : success !== "" ? "#4BB543 1px solid" : ""
+                                                        border: `${error == "" ? "" : "red 1px solid"}`
                                                     }}
                                                     type="email"
                                                     placeholder="example@laverdad.edu.ph"
@@ -266,11 +198,27 @@ export default function Login() {
                                                     onChange={(e) => setEmail(e.target.value)}
                                                     disabled={loading}
                                                 />
-                                                <FeedbackMessage />
+                                                {error === "" ? "" :
+                                                    <>
+                                                        <Label>
+                                                            <p style={{
+                                                                fontFamily: 'geist',
+                                                                font: 'regular',
+                                                                color: '#D13B3B',
+                                                                paddingTop: '3px',
+                                                                paddingLeft: '5px'
+                                                            }}
+                                                                className="text-xs"
+                                                            >
+                                                                {error}
+                                                            </p>
+                                                        </Label>
+                                                    </>
+                                                }
                                             </div>
                                             <div style={{ position: 'relative' }}>
                                                 <div style={{ color: "#FFF", fontFamily: "geist", paddingBottom: "5px", }}>
-                                                    <Label style={{ fontWeight: 400 }} >Password</Label>
+                                                    <Label style={{ fontWeight: 400 }} >New Password</Label>
                                                 </div>
                                                 <Input
                                                     style={{
@@ -303,15 +251,8 @@ export default function Login() {
                                                     }}
                                                 />
                                             </div>
-
-                                            <p
-                                                onClick={handleForgotPassword}
-                                                className="w-[23vw] text-right font-geist text-white text-[.97vw] hover:underline hover:cursor-pointer"
-                                            >
-                                                Forgot Password?
-                                            </p>
+                                            
                                             <div>
-
                                                 <Button
                                                     className="hover:cursor-pointer"
                                                     style={{
@@ -320,8 +261,9 @@ export default function Login() {
                                                         backgroundColor: '#254280',
                                                     }}
                                                     onClick={handleSubmit}
+                                                    disabled={loading}
                                                 >
-                                                    {loading ? "Loading..." : "Login"}
+                                                    {loading ? "Processing..." : "Set Password"}
                                                 </Button>
                                             </div>
 
@@ -443,7 +385,7 @@ export default function Login() {
                                                         height: inputBoxHeight,
                                                         paddingLeft: '5px',
                                                         font: 'geist',
-                                                        border: error !== "" ? "red 1px solid" : success !== "" ? "#4BB543 1px solid" : ""
+                                                        border: `${error == "" ? "" : "red 1px solid"}`
                                                     }}
                                                     type="email"
                                                     placeholder="Email"
@@ -451,27 +393,7 @@ export default function Login() {
                                                     onChange={(e) => setEmail(e.target.value)}
                                                     disabled={loading}
                                                 />
-                                                <FeedbackMessage />
-                                            </div>
-                                            <div style={{ position: 'relative' }}>
-                                                <Input
-                                                    style={{
-                                                        background: '#FFFFFF',
-                                                        width: '80vw',
-                                                        height: inputBoxHeight,
-                                                        paddingLeft: '5px',
-                                                        paddingRight: '30px',
-                                                        fontFamily: 'geist',
-                                                        boxSizing: 'border-box',
-                                                        border: `${error == "" ? "" : "red 1px solid"}`
-                                                    }}
-                                                    type="password"
-                                                    placeholder="Password"
-                                                    disabled={loading}
-                                                    value={password}
-                                                    onChange={(e) => setPassword(e.target.value)}
-                                                />
-                                                {errorPassword === "" ? "" :
+                                                {error === "" ? "" :
                                                     <>
                                                         <Label>
                                                             <p style={{
@@ -482,7 +404,7 @@ export default function Login() {
                                                             }}
                                                                 className="text-[1.5vh]"
                                                             >
-                                                                {errorPassword}
+                                                                {error}
                                                             </p>
                                                         </Label>
                                                     </>
@@ -500,14 +422,55 @@ export default function Login() {
                                                     }}
                                                 />
                                             </div>
-
-                                            <p
-                                                onClick={handleForgotPassword}
-                                                className="w-[80vw] text-right font-geist text-white text-[3.4vw] hover:underline hover:cursor-pointer">
-                                                Forgot Password?
-                                            </p>
+                                            <div style={{ position: 'relative' }}>
+                                                <Input
+                                                    style={{
+                                                        background: '#FFFFFF',
+                                                        width: '80vw',
+                                                        height: inputBoxHeight,
+                                                        paddingLeft: '5px',
+                                                        paddingRight: '30px',
+                                                        fontFamily: 'geist',
+                                                        boxSizing: 'border-box',
+                                                        border: `${error == "" ? "" : "red 1px solid"}`
+                                                    }}
+                                                    type="password"
+                                                    placeholder="New Password"
+                                                    disabled={loading}
+                                                    value={password}
+                                                    onChange={(e) => setPassword(e.target.value)}
+                                                />
+                                                {error === "" ? "" :
+                                                    <>
+                                                        <Label>
+                                                            <p style={{
+                                                                fontFamily: 'geist',
+                                                                font: 'regular',
+                                                                color: '#D13B3B',
+                                                                paddingTop: '2px'
+                                                            }}
+                                                                className="text-[1.5vh]"
+                                                            >
+                                                                {error}
+                                                            </p>
+                                                        </Label>
+                                                    </>
+                                                }
+                                                <FaEyeSlash
+                                                    color="#C0C0C0"
+                                                    style={{
+                                                        width: '10vw',
+                                                        position: 'absolute',
+                                                        right: '5px',
+                                                        top: '50%',
+                                                        transform: 'translateY(-50%)',
+                                                        cursor: 'pointer',
+                                                        pointerEvents: 'auto',
+                                                    }}
+                                                />
+                                            </div>
+                                            
                                             <div>
-
                                                 <Button
                                                     className="hover:cursor-pointer"
                                                     style={{
@@ -516,8 +479,9 @@ export default function Login() {
                                                         backgroundColor: '#254280',
                                                     }}
                                                     onClick={handleSubmit}
+                                                    disabled={loading}
                                                 >
-                                                    {loading ? "Loading..." : "Login"}
+                                                    {loading ? "Processing..." : "Set Password"}
                                                 </Button>
                                             </div>
 

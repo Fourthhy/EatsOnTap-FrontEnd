@@ -26,38 +26,54 @@ export function EventDashboard() {
     const processedEvents = useMemo(() => {
         if (!eventMealRequest) return [];
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Normalize today to midnight
+        const currentYear = new Date().getFullYear();
 
         return eventMealRequest.map(event => {
-            // Parse Date from Backend (eventSpan is an array of dates)
-            const eventDateObj = new Date(event.eventSpan?.[0] || new Date());
-            const compareDate = new Date(eventDateObj);
-            compareDate.setHours(0, 0, 0, 0);
+            // 🛠️ FIX 1: Construct Date Object from new fields
+            // The backend gives us "February", "15". We need to make that a date.
+            const dateString = `${event.startMonth} ${event.startDay}, ${currentYear}`;
+            const eventDateObj = new Date(dateString);
+            
+            // Handle End Date for Display (e.g., "Feb 15 - Feb 17")
+            const endDateString = `${event.endMonth} ${event.endDay}, ${currentYear}`;
+            const formattedDate = event.startDay === event.endDay 
+                ? eventDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : `${eventDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(endDateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
-            // Determine Classification
-            let classification = 'recent';
-            if (compareDate.getTime() === today.getTime()) {
-                classification = 'ongoing';
-            } else if (compareDate > today) {
-                classification = 'upcoming';
-            }
+            // 🛠️ FIX 2: Use Backend Status
+            // Your backend calculates "ONGOING", "UPCOMING", "RECENT". We just convert to lowercase to match tabs.
+            // Fallback to 'recent' if undefined.
+            const classification = event.scheduleStatus ? event.scheduleStatus.toLowerCase() : 'recent';
 
-            // Map Backend Model to UI Props
+            // 🛠️ FIX 3: Merge Basic Ed and Higher Ed arrays for display
+            // The UI expects a single list of "selectedPrograms"
+            const mergedEligible = [
+                ...(event.forEligibleSection || []).map(item => ({
+                    ...item,
+                    display: `${item.year} - ${item.section}`, // Standardization for UI
+                    type: 'Basic Ed'
+                })),
+                ...(event.forEligibleProgramsAndYear || []).map(item => ({
+                    ...item,
+                    display: `${item.year} - ${item.program}`, // Standardization for UI
+                    type: 'Higher Ed'
+                }))
+            ];
+
             return {
                 id: event.eventID,
+                mongoId: event._id, // Keep reference to real ID if needed
                 eventName: event.eventName,
-                eventDate: eventDateObj.toLocaleDateString('en-CA'), // Format YYYY-MM-DD
+                eventDate: formattedDate, 
                 classification: classification,
                 
                 // Use the color saved in DB, or fallback
                 selectedColor: event.eventColor || "#dbeafe",
                 
-                // Map DB 'forEligibleSection' to UI 'selectedPrograms'
-                selectedPrograms: event.forEligibleSection || [],
+                // Map merged list to UI
+                selectedPrograms: mergedEligible,
                 
                 // Map DB 'eventScope' to UI 'selectedDepartments'
-                // You might want to refine this logic based on your actual data needs
                 selectedDepartments: event.eventScope === 'School-Wide' ? ['All'] : ['Departmental']
             };
         });
@@ -98,7 +114,7 @@ export function EventDashboard() {
             <EventDetailModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
-                events={filteredEvents} // Or pass processedEvents if you want to navigate outside current category
+                events={processedEvents} // Pass all events so modal can find by ID even if tab changes
                 initialEventId={selectedEventId}
             />
 

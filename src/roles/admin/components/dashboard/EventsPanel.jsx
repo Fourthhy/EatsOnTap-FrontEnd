@@ -1,9 +1,7 @@
-import { motion } from "framer-motion"; // 🟢 1. Import Framer Motion
-// IMPORT SKELETON
+import { motion } from "framer-motion"; 
 import { Skeleton } from "../../../../components/global/Skeleton";
 
-function EventsPanel({ events, isHyerlink = true, canViewAll = true, isLoading = false}) {
-
+function EventsPanel({ events = [], isHyerlink = true, canViewAll = true, isLoading = false}) {
 
   return (
     <div
@@ -32,8 +30,8 @@ function EventsPanel({ events, isHyerlink = true, canViewAll = true, isLoading =
           </motion.h2>
         )}
 
-        {/* HIDE 'View All' LINK WHILE LOADING */}
-        {!isLoading && canViewAll && (
+        {/* HIDE 'View All' LINK WHILE LOADING OR IF NO EVENTS */}
+        {!isLoading && canViewAll && events.length > 0 && (
           <motion.a
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -55,14 +53,13 @@ function EventsPanel({ events, isHyerlink = true, canViewAll = true, isLoading =
       <div className="flex flex-col">
         {isLoading ? (
           // --- SKELETON LOADING STATE ---
-          // Render 3 dummy rows
           [1, 2, 3].map((i) => (
             <div
               key={i}
               style={{
                 padding: "15px 15px",
                 marginBottom: 8,
-                background: "#f9fafb" // Neutral gray
+                background: "#f9fafb" 
               }}
               className="rounded-lg flex justify-between items-center border border-transparent"
             >
@@ -72,6 +69,25 @@ function EventsPanel({ events, isHyerlink = true, canViewAll = true, isLoading =
               </div>
             </div>
           ))
+        ) : events.length === 0 ? (
+          // 🟢 EMPTY STATE (Centered Text)
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              height: '150px', // Slightly taller for panel look
+              color: '#9CA3AF', // Gray-400
+              fontFamily: 'geist',
+              fontSize: '13px',
+              fontWeight: 500,
+              fontStyle: 'italic'
+            }}
+          >
+            No upcoming events
+          </motion.div>
         ) : (
           // --- REAL DATA STATE (Animated) ---
           events.map((event, idx) => (
@@ -79,7 +95,7 @@ function EventsPanel({ events, isHyerlink = true, canViewAll = true, isLoading =
               key={event.title || idx}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: idx * 0.1 }} // Stagger effect
+              transition={{ duration: 0.3, delay: idx * 0.1 }} 
               style={{
                 padding: "15px 15px",
                 marginBottom: 8,

@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
-import { FaCheckCircle } from "react-icons/fa";
 import { Button } from "../../components/ui/button";
 import { Input } from "@/components/ui/input";
 import { logout } from "../../functions/logoutAuth";
-import { fetchAllStudents } from "../../functions/foodServer/fetchAllStudents";
 import { isSettingActive } from "../../functions/isSettingActive";
 import { claimMeal } from "../../functions/foodServer/claimMeal";
+import { fetchApprovedStudents } from "../../functions/foodServer/fetchApprovedStudents";
 
 export default function FreeMealClaim() {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -50,30 +49,43 @@ export default function FreeMealClaim() {
             });
 
             if (foundIndex !== -1) {
+                // Trigger API call in background
                 await claimMeal(trimmedInput).catch((err) => {
                     console.error("Background API Claim Error:", err);
                 });
 
                 const updatedStudentList = [...allStudents];
-                const targetStudent = { ...updatedStudentList[foundIndex] };
+                
+                // 🟢 FIX START: Create a specific snapshot for DISPLAY vs LIST UPDATE
+                
+                // 1. Get the student as they exist RIGHT NOW (e.g. ELIGIBLE)
+                const originalStudentData = updatedStudentList[foundIndex]; 
+                
+                // 2. Set the display data immediately using a COPY of the original
+                setMealClaimData({ ...originalStudentData }); 
+                setPageDisplay(""); 
 
-                const currentStatus = targetStudent.temporaryClaimStatus && targetStudent.temporaryClaimStatus[0];
-
-                setMealClaimData(targetStudent);
+                // 3. Now handle the Logic Update for the next scan
+                const currentStatus = originalStudentData.temporaryClaimStatus;
 
                 if (currentStatus === "ELIGIBLE") {
-                    targetStudent.temporaryClaimStatus = ["CLAIMED"];
-                    updatedStudentList[foundIndex] = targetStudent;
+                    // Create a NEW object for the list update to avoid mutating the display data
+                    const updatedStudent = { 
+                        ...originalStudentData, 
+                        temporaryClaimStatus: "CLAIMED" 
+                    };
+                    
+                    updatedStudentList[foundIndex] = updatedStudent;
                     setAllStudents(updatedStudentList);
                 }
+                // 🟢 FIX END
 
                 // Reset UI
                 setInputVal("");
-                setPageDisplay("");
 
                 setTimeout(() => {
                     setPageDisplay("Tap");
-                }, 5000);
+                }, 3000);
 
             } else {
                 alert(isRFID ? "RFID Tag not recognized." : "Student ID not found.");
@@ -85,7 +97,7 @@ export default function FreeMealClaim() {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const students = await fetchAllStudents();
+                const students = await fetchApprovedStudents();
                 if (Array.isArray(students)) {
                     setAllStudents(students);
                     setIsDataLoaded(true);
@@ -238,14 +250,16 @@ export default function FreeMealClaim() {
 
                 <div style={{ position: "relative", zIndex: 10, height: "100%", width: "100%", display: "flex", flexDirection: "column", justifyContent: "start", alignItems: "center" }}>
 
-                    {mealClaimData.temporaryClaimStatus[0] === "ELIGIBLE" ? (
+                    {/* 🟢 FIX: Checking String directly */}
+                    {mealClaimData.temporaryClaimStatus === "ELIGIBLE" ? (
                         <img src="/studentClaim/Eligible_Sinage.svg" alt="Eligible Sinage" style={{ width: "170px", height: "170px" }} />
-                    ) : null}
-
-                    {mealClaimData.temporaryClaimStatus[0] === "CLAIMED" ? (
+                    ) : ""}
+                    {mealClaimData.temporaryClaimStatus === "CLAIMED" ? (
                         <img src="/studentClaim/ALREADY_CLAIMED.svg" alt="Background" style={{ width: "190px", height: "190px" }} />
-                    ) : null}
-
+                    ) : ""}
+                    {mealClaimData.temporaryClaimStatus === "INELGIBLE" ? (
+                        <img src="/studentClaim/INELIGIBLE_SINAGE.svg" alt="ineligible sinage" style={{ width: "190px", height: "190px" }} />
+                    ) : ""}
 
                     <div style={{ width: "100%", height: "55%", display: "flex", justifyContent: "center", alignItems: "start" }}>
 

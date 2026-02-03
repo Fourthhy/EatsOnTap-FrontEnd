@@ -115,7 +115,7 @@ function HeaderBar({
     };
 
     const isNotified = hasNotification || isSimulating;
-    const avatarSrc = "/should_i_call_you_mister.png"; 
+    const avatarSrc = "/default_image.png"; 
 
     return (
         <div style={{ height: '60px', width: '100%' }}>
@@ -145,7 +145,7 @@ function HeaderBar({
                 userAvatar={avatarSrc}
             />
 
-            {/* --- 2. SIMULATION TRIGGER --- */}
+            {/* --- 2. SIMULATION TRIGGER ---
             <div 
                 onClick={handleSimulationToggle} 
                 className="hover:bg-gray-100"
@@ -160,7 +160,7 @@ function HeaderBar({
                 title="Toggle Notification Simulation"
             >
                 <RotateCcw size={16} color={"#F68A3A"} />
-            </div>
+            </div> */}
 
             {/* --- 3. FLOATING AVATAR (SCENARIO B - Scrolled) --- */}
             <div 
@@ -188,7 +188,7 @@ function HeaderBar({
                                     width: '40px', height: '40px', 
                                     borderRadius: '12px',
                                     objectFit: 'cover',
-                                    border: '2px solid white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                    border: '2px solid white', boxShadow: '0 4px 12px rgba(255,255,255,0.1)',
                                     animation: triggerShake 
                                         ? 'shake 0.4s ease-in-out' 
                                         : (isNotified && isScrolled) ? 'bounceProfile 2s infinite' : 'none'

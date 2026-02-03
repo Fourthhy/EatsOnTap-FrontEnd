@@ -4,9 +4,6 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 export async function createNewUser(userData) {
     // ⚠️ CHECK ROUTE: Matches /api/users/addUser
     const targetUrl = `${VITE_BASE_URL}/api/users/addUser`;
-
-    console.log("👤 Adding new user...", targetUrl);
-
     try {
         const response = await fetch(targetUrl, {
             method: 'POST',
@@ -25,8 +22,6 @@ export async function createNewUser(userData) {
             // Throw the specific error message from the backend (e.g., "User ID already exists")
             throw new Error(result.message || `Failed to add user: ${response.status}`);
         }
-
-        console.log("✅ User created successfully:", result);
         return result;
 
     } catch (error) {

@@ -3,9 +3,6 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 export async function createNewClassAdviser(adviserData) {
     const targetUrl = `${VITE_BASE_URL}/api/classAdviser/addClassAdviser`;
-
-    console.log("👨‍🏫 Adding Class Adviser...", targetUrl);
-
     try {
         const response = await fetch(targetUrl, {
             method: 'POST',
@@ -22,8 +19,6 @@ export async function createNewClassAdviser(adviserData) {
             // Throw specific backend error (e.g., "Duplicate detected")
             throw new Error(result.message || `Failed to add adviser: ${response.status}`);
         }
-
-        console.log("✅ Adviser created:", result);
         return result; // Contains { message, data: { initialPassword, email, ... } }
 
     } catch (error) {

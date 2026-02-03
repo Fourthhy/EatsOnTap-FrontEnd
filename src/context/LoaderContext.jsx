@@ -25,6 +25,7 @@ export const LoaderProvider = ({ children }) => {
         fetchMealValue,
         fetchAllSettings,
         fetchAllProgramSchedule,
+        fetchDashboardData,
         
         setDashboardData,
         setEvents
@@ -93,7 +94,7 @@ export const LoaderProvider = ({ children }) => {
 
                 // 4. Dashboard Charts (Still Mock for now)
                 if (task.id === 'dash_chart_daily') {
-                     // Logic handled in Data Injection phase below
+                     await fetchDashboardData()
                 }
 
                 currentProgress += task.weight;
@@ -119,12 +120,12 @@ export const LoaderProvider = ({ children }) => {
             }
 
             // --- DATA INJECTION (MOCKS) ---
-            setDashboardData({
-                daily: MOCK_DASHBOARD_DATA.today,
-                weekly: MOCK_DASHBOARD_DATA.weekly,
-                monthly: MOCK_DASHBOARD_DATA.monthly,
-                overall: MOCK_DASHBOARD_DATA.overall
-            });
+            // setDashboardData({
+            //     daily: MOCK_DASHBOARD_DATA.today,
+            //     weekly: MOCK_DASHBOARD_DATA.weekly,
+            //     monthly: MOCK_DASHBOARD_DATA.monthly,
+            //     overall: MOCK_DASHBOARD_DATA.overall
+            // });
             setEvents(MOCK_EVENTS);
 
             await mockApiCall(500);

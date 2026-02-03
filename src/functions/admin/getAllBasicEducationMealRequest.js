@@ -3,8 +3,6 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 export async function getAllBasicEducationMealRequest() {
     const targetUrl = `${VITE_BASE_URL}/api/fetch/getAllBasicEducationMealRequest`;
-    console.log("🌐 Fetching Meal Request for Basic Education from:", targetUrl);
-
     try {
         const response = await fetch(targetUrl);
 
@@ -12,7 +10,6 @@ export async function getAllBasicEducationMealRequest() {
             throw new Error(`Failed to Fetch Meal Request for Basic Education: ${response.status} ${response.statusText}`);
         }
         const data = await response.json();
-        console.log("📦 Meal Request for Basic Education Received:", data);
         return data;
     } catch (error) {
         console.error('Error Fetching Meal Request for Basic Education:', error);

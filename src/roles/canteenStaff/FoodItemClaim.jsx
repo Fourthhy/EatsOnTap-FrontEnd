@@ -7,7 +7,8 @@ import { Loader2, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // 🟢 IMPORTS
-import { fetchAllStudents } from "../../functions/foodServer/fetchAllStudents";
+import { claimFoodItem } from "../../functions/foodItem/claimFoodItem";
+import { fetchApprovedStudents } from "../../functions/foodServer/fetchApprovedStudents";
 import { isSettingActive } from "../../functions/isSettingActive";
 
 // --- COMPONENTS ---
@@ -124,80 +125,17 @@ const SuccessModal = ({ isOpen, newBalance }) => {
                     fontFamily: "Geist, sans-serif",
                 }}
             >
-                {/* Icon Circle */}
-                <div
-                    style={{
-                        width: "80px",
-                        height: "80px",
-                        backgroundColor: "#DCFCE7",
-                        borderRadius: "9999px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: "16px",
-                    }}
-                >
+                <div style={{ width: "80px", height: "80px", backgroundColor: "#DCFCE7", borderRadius: "9999px", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
                     <CheckCircle size={40} color="#16A34A" />
                 </div>
-
-                {/* Title */}
-                <h2
-                    style={{
-                        fontSize: "24px",
-                        fontWeight: "700",
-                        color: "#1F2937",
-                        marginBottom: "8px",
-                    }}
-                >
-                    Transaction Success!
-                </h2>
-
-                {/* Subtitle */}
-                <p
-                    style={{
-                        color: "#6B7280",
-                        marginBottom: "24px",
-                    }}
-                >
-                    The amount has been deducted.
-                </p>
-
-                {/* Balance Card */}
-                <div
-                    style={{
-                        backgroundColor: "#F9FAFB",
-                        borderRadius: "8px",
-                        padding: "16px",
-                        width: "100%",
-                        border: "1px solid #F3F4F6",
-                    }}
-                >
-                    <p
-                        style={{
-                            fontSize: "12px",
-                            color: "#6B7280",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.05em",
-                            fontWeight: "600",
-                        }}
-                    >
-                        Remaining Balance
-                    </p>
-
-                    <p
-                        style={{
-                            fontSize: "30px",
-                            fontWeight: "700",
-                            marginTop: "4px",
-                            color: newBalance < 0 ? "#DC2626" : "#111827",
-                        }}
-                    >
-                        ₱{newBalance.toFixed(2)}
-                    </p>
+                <h2 style={{ fontSize: "24px", fontWeight: "700", color: "#1F2937", marginBottom: "8px" }}>Transaction Success!</h2>
+                <p style={{ color: "#6B7280", marginBottom: "24px" }}>The amount has been deducted.</p>
+                <div style={{ backgroundColor: "#F9FAFB", borderRadius: "8px", padding: "16px", width: "100%", border: "1px solid #F3F4F6" }}>
+                    <p style={{ fontSize: "12px", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: "600" }}>Remaining Balance</p>
+                    <p style={{ fontSize: "30px", fontWeight: "700", marginTop: "4px", color: newBalance < 0 ? "#DC2626" : "#111827" }}>₱{newBalance.toFixed(2)}</p>
                 </div>
             </motion.div>
         </div>
-
     );
 };
 
@@ -213,24 +151,29 @@ export default function FoodItemClaim() {
     const [studentData, setStudentData] = useState(null);
     const [amount, setAmount] = useState("");
 
+    // Local UI Status to handle "Zero Balance" overriding "Eligible"
+    const [uiStatus, setUiStatus] = useState("ELIGIBLE");
+
     const [loading, setLoading] = useState(false);
     const [isSuccessOpen, setIsSuccessOpen] = useState(false);
     const [isSystemActive, setIsSystemActive] = useState(true);
     const [systemMessage, setSystemMessage] = useState("");
-
-    // 🟢 NEW: State to hold the final balance for the modal
     const [successBalance, setSuccessBalance] = useState(0);
 
-    // --- CALCULATIONS (For live display only) ---
+    // --- CALCULATIONS ---
     const currentBalance = studentData ? studentData.temporaryCreditBalance : 0;
     const totalCost = parseFloat(amount) || 0;
     const remainingBalance = currentBalance - totalCost;
+
+    const currentDateTime = new Date();
+    const dateOnlyString = currentDateTime.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const timeString = currentDateTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
     // --- INITIAL DATA LOAD ---
     useEffect(() => {
         const loadData = async () => {
             try {
-                const students = await fetchAllStudents();
+                const students = await fetchApprovedStudents();
                 if (Array.isArray(students)) {
                     setAllStudents(students);
                     setIsDataLoaded(true);
@@ -280,6 +223,24 @@ export default function FoodItemClaim() {
                 setStudentData(foundStudent);
                 setInputVal("");
                 setAmount("");
+
+                // Logic: If eligible but balance is 0 or less, treat as NO_BALANCE
+                let finalStatus = foundStudent.temporaryClaimStatus;
+                if (foundStudent.temporaryCreditBalance <= 0) {
+                    finalStatus = "NO_BALANCE";
+                }
+
+                setUiStatus(finalStatus);
+
+                // If NOT eligible OR No Balance, block workflow
+                if (finalStatus !== "ELIGIBLE") {
+                    setTimeout(() => {
+                        setStudentData(null);
+                        setAmount("");
+                        if (inputRef.current) inputRef.current.focus();
+                    }, 3000);
+                }
+
             } else {
                 alert("Student not found!");
                 setInputVal("");
@@ -290,6 +251,7 @@ export default function FoodItemClaim() {
     // --- 2. HANDLE KEYPAD ---
     const handleKeypadPress = (key) => {
         if (!studentData) return;
+        if (uiStatus !== "ELIGIBLE") return;
 
         if (key === "CANCEL") {
             setStudentData(null);
@@ -309,7 +271,7 @@ export default function FoodItemClaim() {
         setAmount((prev) => prev + key);
     };
 
-    // --- 3. SUBMIT TRANSACTION (LOCAL UPDATE) ---
+    // --- 3. SUBMIT TRANSACTION (USING API) ---
     const handleTransactionSubmit = async () => {
         if (!amount || parseFloat(amount) <= 0) {
             alert("Please enter a valid amount.");
@@ -318,32 +280,33 @@ export default function FoodItemClaim() {
 
         setLoading(true);
 
-        await new Promise(resolve => setTimeout(resolve, 500));
-
         try {
             const deductAmount = parseFloat(amount);
-            const newBal = studentData.temporaryCreditBalance - deductAmount;
 
-            // 🟢 FIX: Set the success balance state BEFORE updating the studentData
-            setSuccessBalance(newBal);
+            // 🟢 CALL API
+            const result = await claimFoodItem(studentData.studentID, deductAmount);
 
-            // Update Local Data Structure
+            // Update Success Balance for Modal
+            setSuccessBalance(result.remainingBalance);
+
+            // Update Local Data (Optimistic or Response-based)
             const updatedList = allStudents.map(s => {
                 if (s.studentID === studentData.studentID) {
                     return {
                         ...s,
-                        temporaryCreditBalance: newBal,
-                        claimRecords: [
-                            ...(s.claimRecords || []),
-                            { date: new Date(), creditClaimed: deductAmount, remarks: ["CLAIMED"] }
-                        ]
+                        temporaryCreditBalance: result.remainingBalance,
+                        temporaryClaimStatus: result.status // Update status if it changed to CLAIMED
                     };
                 }
                 return s;
             });
 
             setAllStudents(updatedList);
-            setStudentData(prev => ({ ...prev, temporaryCreditBalance: newBal }));
+            setStudentData(prev => ({ 
+                ...prev, 
+                temporaryCreditBalance: result.remainingBalance,
+                temporaryClaimStatus: result.status 
+            }));
 
             setIsSuccessOpen(true);
 
@@ -356,23 +319,18 @@ export default function FoodItemClaim() {
 
         } catch (error) {
             console.error(error);
-            alert("Transaction failed");
+            alert(error.message || "Transaction failed");
         } finally {
             setLoading(false);
         }
     };
 
-    const currentDateTime = new Date();
-    const dateOnlyString = currentDateTime.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-
     return (
         <>
             <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden", fontFamily: "geist, sans-serif" }}>
 
-                {/* 🟢 PASS THE FIXED STATE TO MODAL */}
                 <SuccessModal isOpen={isSuccessOpen} newBalance={successBalance} />
 
-                {/* BACKGROUND */}
                 <img
                     src="/studentClaim/Canteen-Staff-BG.svg"
                     alt="Background"
@@ -383,11 +341,11 @@ export default function FoodItemClaim() {
 
                     <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "row" }}>
 
-                        {/* 🟢 LEFT SIDE: SCANNER OR CARD */}
+                        {/* 🟢 LEFT SIDE: SCANNER / ERROR IMAGE / CARD */}
                         <div style={{ width: "63%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}>
 
                             {!studentData ? (
-                                // 🟢 STATE A: ID SCANNER BOX
+                                // 1. NO DATA: SHOW SCANNER
                                 <div style={{
                                     width: "65%", height: "50%",
                                     background: "rgba(255, 255, 255, 0.85)", backdropFilter: "blur(10px)",
@@ -397,6 +355,7 @@ export default function FoodItemClaim() {
                                 }}>
                                     <h2 className="text-2xl font-bold text-gray-800">Scan ID to Start</h2>
                                     <Input
+                                        type="password" // 🟢 Asterisk Mask
                                         ref={inputRef}
                                         value={inputVal}
                                         onChange={(e) => setInputVal(e.target.value)}
@@ -411,8 +370,25 @@ export default function FoodItemClaim() {
                                     />
                                     {loading && <div className="text-blue-600 font-semibold flex items-center gap-2"><Loader2 className="animate-spin" /> Processing...</div>}
                                 </div>
+                            ) : uiStatus !== "ELIGIBLE" ? (
+                                // 2. ERROR STATE
+                                <div className="flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300">
+                                    {uiStatus === "CLAIMED" ? (
+                                        <img src="/studentClaim/ALREADY_CLAIMED.svg" alt="Claimed" style={{ width: "250px", height: "250px" }} />
+                                    ) : (
+                                        <img src="/studentClaim/INELIGIBLE_SINAGE.svg" alt="Ineligible" style={{ width: "250px", height: "250px" }} />
+                                    )}
+                                    <div style={{ marginTop: "1rem", padding: "1rem", backgroundColor: "rgba(255, 255, 255, 0.9)", borderRadius: "0.75rem", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", textAlign: "center" }}>
+                                        <p style={{ fontSize: "1.25rem", fontWeight: "700", color: "#1f2937" }}>
+                                            {studentData.last_name}, {studentData.first_name}
+                                        </p>
+                                        <p style={{ fontSize: "1rem", fontWeight: "700", color: "#ef4444", marginTop: "0.25rem" }}>
+                                            {uiStatus === "NO_BALANCE" ? "Insufficient Balance (₱0.00)" : `Status: ${uiStatus}`}
+                                        </p>
+                                    </div>
+                                </div>
                             ) : (
-                                // 🟢 STATE B: VALIDITY CARD (Exact Structure)
+                                // 3. ELIGIBLE STATE: SHOW CARD
                                 <div style={{ position: "relative", width: "65%", height: "50%" }}>
                                     {/* Card Background Selection */}
                                     {studentData.section === 'BSIS' ? (
@@ -425,7 +401,6 @@ export default function FoodItemClaim() {
                                     <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", zIndex: 10, display: "flex", justifyContent: "center", alignItems: "center" }}>
                                         <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "start", padding: "5px" }}>
 
-                                            {/* Header Logo Row */}
                                             <div className="w-[100%] h-[20%] flex flex-row" style={{ display: "flex", justifyContent: "start", alignItems: "center", marginTop: "10px" }}>
                                                 <img src="/lv-logo.svg" alt="lv-logo" style={{ height: "60px", width: "60px", margin: "5px 10px 5px 20px" }} />
                                                 <div className="h-[100%] flex items-center">
@@ -433,18 +408,15 @@ export default function FoodItemClaim() {
                                                 </div>
                                             </div>
 
-                                            {/* Body Info */}
                                             <div className="w-[100%] h-[80%]" style={{ paddingTop: "20px" }}>
                                                 <div className="h-[100%] w-[100] flex items-center justify-between" style={{ marginLeft: "20px" }}>
                                                     <div className="w-[100%] h-[100%] flex flex-row">
-                                                        {/* Picture & Time */}
                                                         <div className="w-auto flex flex-col items-center gap-2">
                                                             <img src="/studentClaim/Default_Picture.jpg" alt="default" style={{ width: "160px", height: "160px" }} />
                                                             <p style={{ fontWeight: 400 }} className="font-geist text-[10px] text-white w-[160px]">
                                                                 {dateOnlyString.toUpperCase()}
                                                             </p>
                                                         </div>
-                                                        {/* Text Details */}
                                                         <div style={{ marginLeft: "20px", display: "flex", flexDirection: "column", gap: 20 }} className="h-[100%] flex flex-column justify-start">
                                                             <div>
                                                                 <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{studentData.last_name}, {studentData.first_name}</p>
@@ -460,7 +432,6 @@ export default function FoodItemClaim() {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    {/* Department Logo */}
                                                     <div>
                                                         {studentData.section === 'ACT' ? (
                                                             <img src="/studentClaim/logo-ACT.svg" alt='logo' style={{ width: "170px", height: "170px", paddingBottom: "10px" }} />
@@ -481,7 +452,6 @@ export default function FoodItemClaim() {
                             <div style={{ height: "45%", width: "100%", display: "flex", flexDirection: "column", justifyContent: "end" }}>
                                 <div className="flex justify-end flex-col w-[95%]" style={{ paddingLeft: "5%", paddingBottom: "25px" }}>
 
-                                    {/* SUMMARY CARD */}
                                     <div style={{
                                         background: "#f7f7f7", borderRadius: "10px", padding: "20px",
                                         marginBottom: "14px", width: "100%", boxShadow: "0 2px 10px rgba(0,0,0,0.05)"
@@ -489,7 +459,6 @@ export default function FoodItemClaim() {
                                         <Row label="Current Balance:" value={`₱${currentBalance.toFixed(2)}`} valueColor="#16a34a" />
                                         <Row label="Item Cost:" value={`₱${totalCost.toFixed(2)}`} valueColor="#000" />
                                         <div style={{ width: '100%', height: '1px', background: '#e5e5e5', margin: '8px 0' }}></div>
-                                        {/* Use derived state here for live updates */}
                                         <Row
                                             label="Remaining:"
                                             value={`₱${remainingBalance.toFixed(2)}`}
@@ -497,7 +466,6 @@ export default function FoodItemClaim() {
                                         />
                                     </div>
 
-                                    {/* LARGE AMOUNT DISPLAY */}
                                     <div style={{
                                         border: `2px solid #e5e7eb`,
                                         borderRadius: "12px", padding: "16px",
@@ -515,8 +483,10 @@ export default function FoodItemClaim() {
 
                             <div style={{ height: "55%", width: "100%" }}>
                                 <div className="h-[100%] w-[100%] flex items-center justify-center">
-                                    {/* Disable Keypad if no student is selected */}
-                                    <Keypad onKeyPress={handleKeypadPress} disabled={!studentData || loading} />
+                                    <Keypad 
+                                        onKeyPress={handleKeypadPress} 
+                                        disabled={!studentData || loading || uiStatus !== "ELIGIBLE"} 
+                                    />
                                 </div>
                             </div>
                         </div>
