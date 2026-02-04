@@ -1,17 +1,16 @@
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
-const VITE_BASE_URL = import.meta.env.VITE_BASE_URL
+const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export async function logout() {
-    // 1. Get the token from storage to identify WHO is logged in
+    // 1. Get the token to identify the Role before wiping
     const token = localStorage.getItem('authToken');
     
-    // Default endpoint (Regular User)
+    // Default endpoint
     let endpoint = '/api/auth/logout'; 
 
-    // 2. Decode the token to check the Role
     if (token) {
         try {
-            // Simple JWT decode (Header.Payload.Signature)
+            // Decode the token to check the Role
             const base64Url = token.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
             const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
@@ -20,39 +19,42 @@ export async function logout() {
 
             const payload = JSON.parse(jsonPayload);
 
-            // 🟢 CHECK ROLE: If it's a Class Adviser, switch the endpoint
+            // Role Routing: Ensure the backend hits the right collection
             if (payload.role === 'CLASS-ADVISER') {
                 endpoint = '/api/auth/logoutClassAdviser';
             }
 
         } catch (error) {
-            console.warn("⚠️ Could not decode token role. Defaulting to User logout.");
+            console.warn("⚠️ Could not decode token role. Defaulting to standard logout.");
         }
     }
 
     try {
-        // 3. Call the Backend API
-        // ⚠️ CRITICAL: credentials: 'include' ensures the HTTP-Only Cookie is sent to the backend
+        // 2. Call the Backend API
+        // credentials: 'include' ensures the HTTP-Only Cookie is sent for wiping
         const response = await fetch(`${VITE_BASE_URL}${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include' 
         });
 
-        if (!response.ok) {
-            console.warn("Server returned error during logout, but proceeding to clear client session.");
-        } else {
-            console.log("✅ Database status updated to Inactive.");
+        if (response.ok) {
+            console.log("✅ Backend session wiped and status set to Inactive.");
         }
 
     } catch (error) {
         console.error("❌ Network error during logout:", error);
     } finally {
-        // 4. ALWAYS Clean up the Frontend (even if server fails)
+        // =========================================================
+        // 🟢 THE FRONTEND WIPE & HISTORY KILLER
+        // =========================================================
+        
+        // 1. Clear all authentication artifacts
         localStorage.removeItem('authToken');
         sessionStorage.removeItem('authToken');
         
-        // Optional: Force reload to clear any React state
-        window.location.reload();
+        // 2. Clear any other cached user data
+        localStorage.clear();
+        sessionStorage.clear();
     }
 }

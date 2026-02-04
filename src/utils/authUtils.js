@@ -1,6 +1,6 @@
 // utils/authChecker.js
 
-const getAuthData = () => {
+export const getAuthData = () => {
     const token = localStorage.getItem('authToken');
     const lastActivity = localStorage.getItem('lastActivity');
     
@@ -40,7 +40,3 @@ const getAuthData = () => {
         return null;
     }
 };
-
-export {
-  getAuthData
-}

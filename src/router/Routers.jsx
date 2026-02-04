@@ -54,7 +54,7 @@ export default function Routers() {
                     <Route path="/loginRegistration/:token/:userEmail" element={<LoginRegistration />} />
 
                     <Route path="/admin" element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={['ADMIN']}>
                             <AdminLayout />
                         </ProtectedRoute>
                     }>
@@ -69,7 +69,7 @@ export default function Routers() {
                     </Route>
 
                     <Route path="/adminAssistant" element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={['ADMIN-ASSISTANT']}>
                             <AdminAssistantLayout />
                         </ProtectedRoute>
                     }>
@@ -78,13 +78,14 @@ export default function Routers() {
                         <Route path="student" element={<HEStudentManagement />} />
                         <Route path="meal" element={<MealEligibilityManagement />} />
                     </Route>
+
                     <Route path="/canteenStaff" element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={['CANTEEN-STAFF']}>
                             <FoodItemClaim />
                         </ProtectedRoute>
                     } />
                     <Route path="/chancellor" element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={['CHANCELLOR']}>
                             <ChancellorLanding />
                         </ProtectedRoute>
                     }>
@@ -93,7 +94,7 @@ export default function Routers() {
 
                     </Route>
                     <Route path="/classAdviser/:section/:userID" element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={['CLASS-ADVISER']}>
                             <ClassAdviserLayout />
                         </ProtectedRoute>
                     }>
@@ -101,13 +102,13 @@ export default function Routers() {
                     </Route>
 
                     <Route path="/foodServer" element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={['FOOD-SERVER']}>
                             <FreeMealClaim />
                         </ProtectedRoute>
                     } />
 
                     <Route path="/superAdmin" element={
-                        <ProtectedRoute>
+                        <ProtectedRoute allowedRoles={['SUPER-ADMIN']}>
                             <SuperAdminLayout />
                         </ProtectedRoute>
                     }>
