@@ -39,7 +39,6 @@ export const LoaderProvider = ({ children }) => {
 
         try {
             const runTask = async (task) => {
-                console.log("⚡ Processing Task:", task.id);
                 setCurrentLabel(task.label);
 
                 const delay = isRefreshed ? 0 : (Math.floor(Math.random() * 400) + 400);
@@ -79,7 +78,6 @@ export const LoaderProvider = ({ children }) => {
                         fetchAllHigherEducationMealRequest(),
                         fetchAllEvents()
                     ]);
-                    console.log("✅ All Meal Request Data Synced");
                 }
 
                 if (task.id === "fetch_today_claim_record") {

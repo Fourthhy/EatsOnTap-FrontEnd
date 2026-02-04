@@ -68,7 +68,6 @@ const DataProvider = ({ children }) => {
             if (typeof getUnifiedSchoolData !== 'function') throw new Error("getUnifiedSchoolData import missing!");
             const data = await getUnifiedSchoolData();
             if (data && data.length === 0) {
-                console.warn("⚠️ Unified School Returned No Record");
             } else {
                 setSchoolData(data); 
             }
@@ -82,7 +81,6 @@ const DataProvider = ({ children }) => {
             if (typeof getAllClassAdvisers !== 'function') throw new Error('getAllClassAdvisers import missing!');
             const data = await getAllClassAdvisers();
             if (data && data.length === 0) {
-                console.warn("⚠️ Class Adviser Data Returned No Record");
             } else {
                 setClassAdvisers(data);
             }
@@ -96,7 +94,6 @@ const DataProvider = ({ children }) => {
             if (typeof getAllBasicEducationMealRequest !== 'function') throw new Error('getAllBasicEducationMealRequest import missing!');
             const data = await getAllBasicEducationMealRequest();
             if (data && data.length === 0) {
-                console.warn("⚠️ Basic Ed Meal Requests Returned No Record");
             } else {
                 setBasicEducationMealRequest(data);
             }
@@ -110,7 +107,6 @@ const DataProvider = ({ children }) => {
             if (typeof getAllHigherEducationMealRequest !== 'function') throw new Error('getAllHigherEducationMealRequest import missing!');
             const data = await getAllHigherEducationMealRequest();
             if (data && data.length === 0) {
-                console.warn("⚠️ Higher Ed Meal Requests Returned No Record");
             } else {
                 setHigherEducationMealRequest(data);
             }
@@ -124,7 +120,6 @@ const DataProvider = ({ children }) => {
             if (typeof getAllEvents !== 'function') throw new Error('getAllEvents import missing!');
             const data = await getAllEvents();
             if (data && data.length === 0) {
-                console.warn("⚠️ Event Requests Returned No Record");
             } else {
                 setEventMealRequest(data);
             }
@@ -138,11 +133,9 @@ const DataProvider = ({ children }) => {
             if (typeof getTodayClaimRecord !== 'function') throw new Error('getTodayClaimRecord import missnig!');
             const data = await getTodayClaimRecord();
             if (data && data.length === 0) {
-                console.warn("⚠️ Today Claim Record Returned empty");
             } else {
                 setTodayClaimRecord(data);
             }
-            console.log(data);
         } catch (error) {
             console.error('Error fetching claim record data', error)
         }
@@ -153,7 +146,6 @@ const DataProvider = ({ children }) => {
             if (typeof getOverallClaimRecord !== 'function') throw new Error('getOverallClaimRecord import missing!');
             const data = await getOverallClaimRecord();
             if (data && data.length === 0) {
-                console.warn("⚠️ Overall Claim Record Returned empty")
             } else {
                 setOverallClaimRecord(data);
             }
@@ -167,10 +159,8 @@ const DataProvider = ({ children }) => {
             if (typeof getSectionProgramList !== 'function') throw new Error('getSectionProgramList import missing!');
             const data = await getSectionProgramList();
             if (data && data.length === 0) {
-                console.warn("⚠️ Section Program List Returned Empty");
             } else {
                 setSectionProgram(data)
-                console.log("raw section program data", data)
             }
         } catch (error) {
             console.error('Error fetching section program list', error);
@@ -182,7 +172,6 @@ const DataProvider = ({ children }) => {
             if (typeof getMealValue !== 'function') throw new Error('getMealValue import missing!');
             const data = await getMealValue();
             setMealValue(data)
-            console.log("Meal Value in Data Context", data)
         } catch (error) {
             console.error('Error Fetching Meal Value', error);
         }
@@ -223,12 +212,9 @@ const DataProvider = ({ children }) => {
 
         const socket = io(import.meta.env.VITE_BASE_URL);
 
-        socket.on('connect', () => {
-            console.log("✅ Socket Connected:", socket.id);
-        });
+        socket.on('connect', () => {});
 
         socket.on('meal-request-submit', (data) => {
-            console.log("🔔 Real-time Update Received:", data);
             // 1. Refresh the List of Requests (The Pending Table)
             if (data.type === 'Basic Education') {
                 fetchAllBasicEducationMealRequest();
@@ -246,13 +232,10 @@ const DataProvider = ({ children }) => {
         // Connect to Socket
         const socket = io(import.meta.env.VITE_BASE_URL);
 
-        socket.on('connect', () => {
-            console.log("✅ Socket Connected for Student Updates:", socket.id);
-        });
+        socket.on('connect', () => {});
 
         // 🟢 LISTEN for the specific event from your backend
         socket.on('update-student-register', (data) => {
-            console.log("🔔 New Student Added! Refreshing Data...", data);
             fetchUnifiedSchoolData();
         });
 
@@ -263,11 +246,8 @@ const DataProvider = ({ children }) => {
 
     useEffect(() => {
         const socket = io(import.meta.env.VITE_BASE_URL);
-        socket.on('connect', () => {
-            console.log("✅ Socket Connected for Section Program Updates:", socket.id);
-        })
+        socket.on('connect', () => {});
         socket.on('update-section-program-register', (data) => {
-            console.log("🔔 Section/Program Updated! Refreshing Data...", data);
             fetchSectionProgramList();
         });
         return () => {
