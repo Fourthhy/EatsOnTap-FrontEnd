@@ -13,10 +13,6 @@ export async function getAllUsers() {
         }
 
         const data = await response.json();
-
-        // Log the data to verify the structure matches the Schema
-        console.log("📦 Users Received:", data);
-
         return data;
 
     } catch (error) {

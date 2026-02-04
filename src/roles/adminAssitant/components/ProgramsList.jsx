@@ -21,7 +21,6 @@ function ProgramsList({ data = [], selectedTab }) {
     // We check if the 'dayOfWeek' array includes the target day string
     const filteredPrograms = data.filter((program) => {
         const output = program.dayOfWeek && program.dayOfWeek.includes(targetDay);
-        console.log('Filtering output', output);
         return output;
     });
 

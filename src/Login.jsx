@@ -3,7 +3,7 @@ import { useBreakpoint } from "use-breakpoint"
 import { Input } from "@/components/ui/input"
 import { Button } from "./components/ui/button";
 import { Label } from "@/components/ui/label"
-import { FaEyeSlash } from "react-icons/fa";
+import { FaEyeSlash, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { loginApi } from "./functions/loginAuth"
 import { resetPassword } from "./functions/admin/resetPassword";
@@ -16,11 +16,15 @@ export default function Login() {
     const [errorPassword, setErrorPassword] = useState('')
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
 
+    const navigate = useNavigate();
     const { setUserInformation } = useData();
 
     const loginHeader = "Login - Eat's on Tap";
+
+    // 🟢 LOGIC: Button is disabled if loading OR email is empty OR password is empty
+    const isSubmitDisabled = loading || !email || !password;
 
     // 🟢 LOGIN GUARD: Check for existing token on mount
     useEffect(() => {
@@ -29,8 +33,6 @@ export default function Login() {
         const token = localStorage.getItem('authToken');
 
         if (token) {
-            // If token exists, redirect them away from login immediately
-            // You can refine this to check the role and redirect to specific dashboards
             navigate('/admin/dashboard', { replace: true });
         }
     }, [navigate]);
@@ -60,6 +62,9 @@ export default function Login() {
 
     // 🟢 LOGIN HANDLER
     const handleSubmit = async () => {
+        // Double check in case the button was somehow forced
+        if (isSubmitDisabled) return;
+
         setError('');
         setErrorPassword('');
         setSuccess('');
@@ -67,18 +72,6 @@ export default function Login() {
 
         const trimmedEmail = email.trim();
         const trimmedPassword = password.trim();
-
-        if (!trimmedEmail) {
-            setError('Email is required.');
-            setLoading(false);
-            return;
-        }
-
-        if (!trimmedPassword) {
-            setErrorPassword('Password is required.');
-            setLoading(false);
-            return;
-        }
 
         try {
             const data = await loginApi(trimmedEmail, trimmedPassword);
@@ -106,9 +99,6 @@ export default function Login() {
                 }
             }
 
-            // 🟢 THE WIPE FIX: 
-            // Use window.location.replace to kill the history stack for the login page.
-            // This prevents the user from clicking "Back" into a logged-out state.
             window.location.replace(targetPath);
 
         } catch (error) {
@@ -116,8 +106,9 @@ export default function Login() {
             setTimeout(() => {
                 setError('');
                 setLoading(false);
-                setEmail('');
-                setPassword('');
+                // Optional: Clear fields on error if desired, or keep them for correction
+                // setEmail(''); 
+                // setPassword('');
             }, 3000);
         }
     };
@@ -185,14 +176,27 @@ export default function Login() {
                                             <div style={{ color: "#FFF", fontFamily: "geist", paddingBottom: "5px" }}> <Label style={{ fontWeight: 400 }}>Password</Label> </div>
                                             <Input
                                                 style={{ background: '#FFFFFF', width: '23vw', height: inputBoxHeight, paddingLeft: '5px', paddingRight: '30px', fontFamily: 'geist', boxSizing: 'border-box', border: errorPassword === "" ? "" : "red 1px solid" }}
-                                                type="password" placeholder="Password" disabled={loading} value={password} onChange={(e) => setPassword(e.target.value)}
+                                                type={showPassword ? "text" : "password"}
+                                                placeholder="Password" disabled={loading} value={password} onChange={(e) => setPassword(e.target.value)}
                                             />
-                                            <FaEyeSlash color="#C0C0C0" style={{ width: '2vw', position: 'absolute', right: '10px', top: '67%', transform: 'translateY(-50%)', cursor: 'pointer' }} />
+                                            {showPassword ?
+                                                <FaEye onClick={() => setShowPassword(false)} color="#C0C0C0" style={{ width: '2vw', position: 'absolute', right: '10px', top: '67%', transform: 'translateY(-50%)', cursor: 'pointer' }} />
+                                                :
+                                                <FaEyeSlash onClick={() => setShowPassword(true)} color="#C0C0C0" style={{ width: '2vw', position: 'absolute', right: '10px', top: '67%', transform: 'translateY(-50%)', cursor: 'pointer' }} />
+                                            }
                                         </div>
                                         <p onClick={handleForgotPassword} className="w-[23vw] text-right font-geist text-white text-[.97vw] hover:underline hover:cursor-pointer"> Forgot Password? </p>
-                                        <Button className="hover:cursor-pointer" style={{ width: '23vw', height: buttonHeight, backgroundColor: '#254280' }} onClick={handleSubmit}>
+                                        
+                                        {/* 🟢 Laptop Login Button */}
+                                        <Button
+                                            disabled={isSubmitDisabled}
+                                            className={isSubmitDisabled ? "cursor-not-allowed opacity-50" : "hover:cursor-pointer"}
+                                            style={{ width: '23vw', height: buttonHeight, backgroundColor: '#254280' }}
+                                            onClick={handleSubmit}
+                                        >
                                             {loading ? "Loading..." : "Login"}
                                         </Button>
+
                                         <div style={{ width: '23vw', height: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <div style={{ width: '35%', height: '1px', backgroundColor: 'white', marginRight: '16px' }} />
                                             <span style={{ color: 'white', margin: '8px', fontSize: '1vw', fontFamily: 'sans-serif' }}>or</span>
@@ -232,14 +236,27 @@ export default function Login() {
                                         <div style={{ position: 'relative' }}>
                                             <Input
                                                 style={{ background: '#FFFFFF', width: '80vw', height: inputBoxHeight, paddingLeft: '5px', paddingRight: '30px', fontFamily: 'geist', boxSizing: 'border-box', border: error === "" ? "" : "red 1px solid" }}
-                                                type="password" placeholder="Password" disabled={loading} value={password} onChange={(e) => setPassword(e.target.value)}
+                                                type={showPassword ? "text" : "password"}
+                                                placeholder="Password" disabled={loading} value={password} onChange={(e) => setPassword(e.target.value)}
                                             />
-                                            <FaEyeSlash color="#C0C0C0" style={{ width: '10vw', position: 'absolute', right: '5px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer' }} />
+                                            {showPassword ?
+                                                <FaEye onClick={() => setShowPassword(false)} color="#C0C0C0" style={{ width: '10vw', position: 'absolute', right: '5px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer' }} />
+                                                :
+                                                <FaEyeSlash onClick={() => setShowPassword(true)} color="#C0C0C0" style={{ width: '10vw', position: 'absolute', right: '5px', top: '50%', transform: 'translateY(-50%)', cursor: 'pointer' }} />
+                                            }
                                         </div>
                                         <p onClick={handleForgotPassword} className="w-[80vw] text-right font-geist text-white text-[3.4vw] hover:underline hover:cursor-pointer"> Forgot Password? </p>
-                                        <Button className="hover:cursor-pointer" style={{ width: '80vw', height: buttonHeight, backgroundColor: '#254280' }} onClick={handleSubmit}>
+                                        
+                                        {/* 🟢 Handheld Login Button */}
+                                        <Button
+                                            disabled={isSubmitDisabled}
+                                            className={isSubmitDisabled ? "cursor-not-allowed opacity-50" : "hover:cursor-pointer"}
+                                            style={{ width: '80vw', height: buttonHeight, backgroundColor: '#254280' }}
+                                            onClick={handleSubmit}
+                                        >
                                             {loading ? "Loading..." : "Login"}
                                         </Button>
+
                                         <div style={{ width: '90vw', height: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <div style={{ width: '35%', height: '1px', backgroundColor: 'white', marginRight: '16px' }} />
                                             <span style={{ color: 'white', margin: '8px', fontSize: '1.5vh', fontFamily: 'sans-serif' }}>or</span>

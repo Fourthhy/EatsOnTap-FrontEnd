@@ -38,10 +38,6 @@ export async function logout() {
             credentials: 'include' 
         });
 
-        if (response.ok) {
-            console.log("✅ Backend session wiped and status set to Inactive.");
-        }
-
     } catch (error) {
         console.error("❌ Network error during logout:", error);
     } finally {

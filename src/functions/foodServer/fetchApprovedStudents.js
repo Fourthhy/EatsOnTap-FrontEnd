@@ -16,7 +16,6 @@ export async function fetchApprovedStudents() {
         }
 
         const data = await response.json();
-        console.log(data);
         return data; // Returns the bare array of student objects
 
     } catch (error) {

@@ -101,7 +101,6 @@ export default function FreeMealClaim() {
                 if (Array.isArray(students)) {
                     setAllStudents(students);
                     setIsDataLoaded(true);
-                    console.log(`Loaded ${students.length} students.`);
                 }
             } catch (error) {
                 console.error("Error fetching students:", error);

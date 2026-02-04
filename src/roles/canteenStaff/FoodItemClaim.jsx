@@ -494,6 +494,7 @@ export default function FoodItemClaim() {
                     </div>
                 </div>
             </div>
+            <Button onClick={handleLogout}/>
         </>
     );
 }
