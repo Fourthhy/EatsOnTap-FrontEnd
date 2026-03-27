@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, ArrowLeft, User } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
+import { Plus, ArrowLeft, User, Pencil, MoreVertical } from 'lucide-react'; 
+import { AnimatePresence, motion } from 'framer-motion'; 
 
 import { GenericTable } from '../../../../../components/global/table/GenericTable';
 import { SelectionActionBar } from '../SelectionActionBar';
@@ -8,6 +8,82 @@ import { useData } from "../../../../../context/DataContext";
 import { AddStudentModal } from '../AddStudentModal';
 import { CustomEditDropdown } from '../components/CustomEditDropdown';
 import { LinkStatusBadge } from '../LinkStatusBadge';
+
+// 🟢 Import your new Wizard Modal
+import { UpdateRecordsModal } from '../components/UpdateRecordsModal';
+
+// --- 🟢 NEW: 3-DOT ACTION MENU COMPONENT ---
+const TableActionsMenu = ({ onAdd, onUpdate }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div style={{ position: 'relative' }}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                style={{
+                    padding: '8px', backgroundColor: 'white', border: '1px solid #d1d5db',
+                    borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', 
+                    justifyContent: 'center', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', color: '#374151',
+                    transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+            >
+                <MoreVertical size={18} />
+            </button>
+
+            <AnimatePresence>
+                {isOpen && (
+                    <>
+                        {/* Invisible overlay to catch clicks outside the dropdown */}
+                        <div style={{ position: 'fixed', inset: 0, zIndex: 40 }} onClick={() => setIsOpen(false)} />
+                        
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                            transition={{ duration: 0.15 }}
+                            style={{
+                                position: 'absolute', top: '100%', right: 0, marginTop: '8px',
+                                backgroundColor: 'white', borderRadius: '6px', 
+                                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                                border: '1px solid #e5e7eb', zIndex: 50, minWidth: '180px', overflow: 'hidden',
+                                display: 'flex', flexDirection: 'column'
+                            }}
+                        >
+                            <button
+                                onClick={() => { setIsOpen(false); onAdd(); }}
+                                style={{
+                                    width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px',
+                                    fontSize: '0.875rem', fontWeight: '500', color: '#374151', backgroundColor: 'transparent', 
+                                    border: 'none', borderBottom: '1px solid #f3f4f6', cursor: 'pointer', textAlign: 'left'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                                <Plus size={16} style={{ color: '#2563eb' }} />
+                                Add Student
+                            </button>
+                            <button
+                                onClick={() => { setIsOpen(false); onUpdate(); }}
+                                style={{
+                                    width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px',
+                                    fontSize: '0.875rem', fontWeight: '500', color: '#374151', backgroundColor: 'transparent', 
+                                    border: 'none', cursor: 'pointer', textAlign: 'left'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                                <Pencil size={16} style={{ color: '#059669' }} />
+                                Update Records
+                            </button>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
 
 export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
     // 🟢 1. GET THE UNIFIED DATA
@@ -17,6 +93,7 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
     const [activeTab, setActiveTab] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // 🟢 Moved this here!
 
     // Selection & Actions
     const [selectedItem, setSelectedItem] = useState(null);
@@ -120,7 +197,7 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
     const inputStyle = {
         width: '100%',
         padding: '6px',
-        border: '1px solid #e5e7eb', // gray-200
+        border: '1px solid #e5e7eb', 
         borderRadius: '4px',
         fontSize: '12px',
         color: '#111827',
@@ -217,7 +294,9 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
 
     return (
         <>
+            {/* 🟢 MODALS */}
             <AddStudentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
+            <UpdateRecordsModal isOpen={isUpdateModalOpen} onClose={() => setIsUpdateModalOpen(false)} />
             
             <GenericTable
                 title={drilldownContext ? `Students in ${drilldownContext.level} - ${drilldownContext.sectionName}` : "Student Master List"}
@@ -231,17 +310,24 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
                 activeTab={activeTab} onTabChange={setActiveTab} 
                 searchTerm={searchTerm} onSearchChange={setSearchTerm} 
                 
-                customActions={drilldownContext ? null : switcher}
+                // 🟢 Inject the 3-dot menu alongside the switcher (only when NOT in drilldown)
+                customActions={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {!drilldownContext && switcher}
+                        {!drilldownContext && (
+                            <TableActionsMenu 
+                                onAdd={() => setIsAddModalOpen(true)} 
+                                onUpdate={() => setIsUpdateModalOpen(true)} // 🟢 Now properly opens the Wizard
+                            />
+                        )}
+                    </div>
+                }
                 
                 overrideHeader={headerVisible ? actionBar : null}
                 
-                onPrimaryAction={() => drilldownContext ? onGoBack() : setIsAddModalOpen(true)}
-                primaryActionLabel={drilldownContext ? "Go Back" : "Add Student"} 
-                primaryActionIcon={drilldownContext ? <ArrowLeft size={16} /> : <Plus size={16} />}
-                
-                onSecondaryAction={null} 
-                secondaryActionLabel={null} 
-                secondaryActionIcon={null}
+                onPrimaryAction={drilldownContext ? () => onGoBack() : undefined}
+                primaryActionLabel={drilldownContext ? "Go Back" : undefined} 
+                primaryActionIcon={drilldownContext ? <ArrowLeft size={16} /> : undefined}
                 
                 columns={['Student Name', 'Student ID', 'Type', 'Grade Level', getSectionLabel(), 'RFID Link']}
                 data={filteredStudents} 

@@ -19,7 +19,6 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
 
     const navigate = useNavigate();
-    const { setUserInformation } = useData();
 
     const loginHeader = "Login - Eat's on Tap";
 
@@ -74,13 +73,16 @@ export default function Login() {
         const trimmedPassword = password.trim();
 
         try {
+            // Inside handleSubmit() after successful loginApi call:
             const data = await loginApi(trimmedEmail, trimmedPassword);
 
-            setUserInformation(data);
-            console.log('INFORMATION RECEIVED!', data);
+            // 🟢 NEW: Save to LocalStorage directly instead of using Context
+            localStorage.setItem("userInformation", JSON.stringify(data));
+            console.log('INFORMATION SAVED TO STORAGE!', data);
 
             // 🟢 HELPER: Path Resolution
             let targetPath = '/';
+            window.location.replace(targetPath);
 
             if (data.section) {
                 targetPath = `/classAdviser/${data.section}/${data.userID}/submitMealList`;
@@ -186,7 +188,7 @@ export default function Login() {
                                             }
                                         </div>
                                         <p onClick={handleForgotPassword} className="w-[23vw] text-right font-geist text-white text-[.97vw] hover:underline hover:cursor-pointer"> Forgot Password? </p>
-                                        
+
                                         {/* 🟢 Laptop Login Button */}
                                         <Button
                                             disabled={isSubmitDisabled}
@@ -246,7 +248,7 @@ export default function Login() {
                                             }
                                         </div>
                                         <p onClick={handleForgotPassword} className="w-[80vw] text-right font-geist text-white text-[3.4vw] hover:underline hover:cursor-pointer"> Forgot Password? </p>
-                                        
+
                                         {/* 🟢 Handheld Login Button */}
                                         <Button
                                             disabled={isSubmitDisabled}

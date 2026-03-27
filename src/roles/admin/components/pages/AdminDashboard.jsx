@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react"; // 🟢 Added useMemo
 import { motion } from "framer-motion";
 
 // --- CONTEXT IMPORTS ---
@@ -10,8 +10,8 @@ import { useLoader } from "../../../../context/LoaderContext";
 import { BandedChartTADMC } from "../charts/BandedChartTADMC";
 import { BandedChartCUR } from "../charts/BandedChartCUR";
 import { BandedChartOCF } from "../charts/BandedChartOCF";
-// 🟢 1. Import the new Chart
-import DailyExpensesChart from "../charts/DailyExpensesChart";
+
+import { DailyExpensesChart } from "../charts/DailyExpensesChart";
 import { CustomStatsCard } from "../dashboard/CustomStatsCard";
 import { StatsCardGroup } from "../dashboard/StatsCardGroup";
 import { BarChartBox } from "../charts/BarChartBox";
@@ -19,7 +19,6 @@ import { LineChartBox } from "../charts/LineChartBox";
 import { OngoingEvents } from "../dashboard/OngoingEvents";
 import { EventsPanel } from "../dashboard/EventsPanel";
 import { AnalyticTabs } from "../dashboard/AnalyticTabs";
-import { DatePicker } from "../dashboard/DatePicker";
 import { HeaderBar } from "../../../../components/global/HeaderBar";
 import { Skeleton } from "../../../../components/global/Skeleton";
 
@@ -38,26 +37,30 @@ export default function AdminDashboard() {
         : "Admin User";
     const userRole = userInformation?.role || "Guest";
 
-    const getTimeframeKey = (id) => {
-        switch (id) {
+    // 🟢 REPLACED: getTimeframeKey(id)
+    const timeframeKey = useMemo(() => {
+        switch (selectedTab) {
             case 1: return 'today';
             case 2: return 'weekly';
             case 3: return 'monthly';
             default: return 'today';
         }
-    };
+    }, [selectedTab]);
 
     const getChartData = (chartKey) => {
         if (!dashboardData || isLoading) return [];
-        const timeframeKey = getTimeframeKey(selectedTab);
+
+        // 🟢 REPLACED: const timeframeKey = getTimeframeKey(selectedTab);
         const dataArray = dashboardData[timeframeKey];
+
         if (!Array.isArray(dataArray)) return [];
 
         const container = dataArray.find(obj => Object.keys(obj).includes(chartKey));
         return container ? container[chartKey] : [];
     };
 
-    const getStatsData = () => {
+    // 🟢 REPLACED: getStatsData() and statsData execution
+    const statsData = useMemo(() => {
         const stats = dashboardData.stats || {};
         const claimed = stats.totalClaimed || 0;
         const unclaimed = stats.totalUnclaimed || 0;
@@ -70,12 +73,11 @@ export default function AdminDashboard() {
             absent: stats.absentStudentCount || 0,
             waived: stats.waivedStudentCount || 0,
             eligible: eligible,
+            claimed: claimed, // 🟢 FIX: Added the claimed variable so the UI card works!
             acceptedRate,
             rejectedRate
         };
-    };
-
-    const statsData = getStatsData();
+    }, [dashboardData.stats]);
 
     const getCurrentMetricValue = (chartKey) => {
         const data = getChartData(chartKey);
@@ -115,9 +117,10 @@ export default function AdminDashboard() {
                                         isLoading={isLoading}
                                         urgentNotification={0}
                                         primaryData={[
-                                            { title: "Absent Students", value: statsData.absent, subtitle: metricSubtitle },
-                                            { title: "Waived Students", value: statsData.waived, subtitle: metricSubtitle },
-                                            { title: "Eligible Students", value: statsData.eligible, subtitle: metricSubtitle }
+                                            { title: "Absent Students", value: statsData.absent },
+                                            { title: "Waived Students", value: statsData.waived },
+                                            { title: "Claimed Students", value: statsData.claimed },
+                                            { title: "Eligible Students", value: statsData.eligible }
                                         ]}
                                         secondaryData={[
                                             { title: "Unclaimed Rate", value: statsData.rejectedRate, subtitle: metricSubtitle, isPercentage: true },

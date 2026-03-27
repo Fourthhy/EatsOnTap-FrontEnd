@@ -24,7 +24,7 @@ export const LoaderProvider = ({ children }) => {
         fetchSectionProgramList,
         fetchMealValue,
         fetchAllSettings,
-        fetchAllProgramSchedule,
+        fetchAllProgramSchedule,    
         fetchDashboardData,
         
         setDashboardData,

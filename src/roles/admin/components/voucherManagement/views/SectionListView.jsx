@@ -26,21 +26,12 @@ const mapDepartmentToTabId = (deptString) => {
 export const SectionListView = ({ switcher, onNavigateToStudents }) => {
     const { schoolData, sectionProgram, fetchSectionPrograms } = useData(); 
 
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSection, setSelectedSection] = useState(null);
     const [isActionBarVisible, setIsActionBarVisible] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
-    // 🟢 TRIGGER 1-SECOND DELAY ON DATA CHANGE
-    useEffect(() => {
-        setIsLoading(true);
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 500); 
-        return () => clearTimeout(timer);
-    }, [sectionProgram, schoolData]); 
 
     const getNameLabel = () => {
         if (activeTab === 'all') return "Section / Program";
@@ -50,7 +41,7 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
 
     const showAdviserColumn = activeTab !== 'higherEducation';
 
-    // --- MERGED & SORTED LOGIC ---
+// --- MERGED & SORTED LOGIC ---
     const flattenedSections = useMemo(() => {
         const combinedList = [];
         const searchLower = searchTerm.toLowerCase();
@@ -129,17 +120,25 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
             });
         }
 
-        // 🟢 3. SORT LOGIC
-        // Sort by Level (Numeric-aware) then by Section Name
+        // 🟢 3. FIXED SORT LOGIC (Sections First -> Programs Second -> Level -> Name)
         return combinedList.sort((a, b) => {
-            // Compare Levels (e.g., "1" vs "10" vs "2")
-            const levelCompare = a.level.toString().localeCompare(b.level.toString(), undefined, { numeric: true });
+            // Step A: Separate Sections (Basic Ed) from Programs (Higher Ed)
+            // If category is 'higherEducation', give it a weight of 1 (push to bottom). Else 0 (keep at top).
+            const isProgramA = a.category === 'higherEducation' ? 1 : 0;
+            const isProgramB = b.category === 'higherEducation' ? 1 : 0;
             
-            // If levels are the same, sort by Section Name
-            if (levelCompare === 0) {
-                return a.sectionName.localeCompare(b.sectionName);
+            if (isProgramA !== isProgramB) {
+                return isProgramA - isProgramB; 
             }
-            return levelCompare;
+
+            // Step B: If both are sections (or both are programs), sort by Level (Numeric-aware)
+            const levelCompare = a.level.toString().localeCompare(b.level.toString(), undefined, { numeric: true });
+            if (levelCompare !== 0) {
+                return levelCompare;
+            }
+            
+            // Step C: If levels are the exact same, sort alphabetically by Section/Program Name
+            return a.sectionName.localeCompare(b.sectionName);
         });
 
     }, [activeTab, searchTerm, schoolData, sectionProgram]);
@@ -163,6 +162,9 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                 <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }}>{startIndex + index + 1}</td>
                 <td style={{ ...cellStyle, fontWeight: 500, color: '#111827' }}>{section.level}</td>
                 <td style={cellStyle}>{section.sectionName}</td>
+                <td style={cellStyle}>
+                    {section.studentCount === 0 ? <span className="text-gray-400 italic">Empty</span> : section.studentCount}
+                </td>
                 {showAdviserColumn && (
                     <td style={cellStyle}>
                         {isHigherEdRow ? <span className="text-gray-300">-</span> : (
@@ -173,9 +175,6 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                         )}
                     </td>
                 )}
-                <td style={cellStyle}>
-                    {section.studentCount === 0 ? <span className="text-gray-400 italic">Empty</span> : section.studentCount}
-                </td>
             </tr>
         );
     };
@@ -194,8 +193,8 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
     );
 
     const columns = ['Level', getNameLabel()]; 
-    if (showAdviserColumn) columns.push('Adviser'); 
     columns.push('Student Count'); 
+    if (showAdviserColumn) columns.push('Adviser'); 
 
     if (isLoading) {
         return (

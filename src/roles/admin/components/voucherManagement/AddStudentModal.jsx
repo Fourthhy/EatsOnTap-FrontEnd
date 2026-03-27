@@ -137,7 +137,7 @@ const ManualAddForm = ({ onClose }) => {
         borderRadius: '6px', border: '1px solid #d1d5db',
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', width: '100%', boxSizing: 'border-box', outline: 'none'
     };
-    
+
     // --- SUCCESS VIEW ---
     if (isSuccess) {
         return (
@@ -253,10 +253,81 @@ const ManualAddForm = ({ onClose }) => {
     );
 };
 
-// --- UPLOAD FROM CSV COMPONENT (Updated with API & Loading) ---
+// --- 🟢 NEW: UPLOAD SUCCESS MODAL ---
+const UploadSuccessModal = ({ onClose, message }) => {
+    const [timeLeft, setTimeLeft] = useState(5);
+
+    useEffect(() => {
+        // Start the countdown timer
+        const timer = setInterval(() => {
+            setTimeLeft((prevTime) => {
+                if (prevTime <= 1) {
+                    clearInterval(timer);
+                    onClose(); // Auto-close when it hits 0
+                    return 0;
+                }
+                return prevTime - 1;
+            });
+        }, 1000);
+
+        // Cleanup interval on unmount
+        return () => clearInterval(timer);
+    }, [onClose]);
+
+    return (
+        <div
+            className="fixed inset-0 flex items-center justify-center z-[9999] backdrop-blur-sm"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
+            onClick={onClose} // Closes if they click the background
+        >
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="bg-white rounded-xl shadow-2xl p-6 flex flex-col items-center max-w-sm w-full mx-4 text-center"
+                onClick={(e) => e.stopPropagation()} // Prevents closing when clicking inside the modal
+                style={{ fontFamily: "inherit" }}
+            >
+                {/* Animated Check Circle */}
+                <div style={{ position: 'relative', marginBottom: '20px' }}>
+                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#dcfce7', animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite' }} />
+                    <CheckCircle size={56} color="#16a34a" style={{ position: 'relative', zIndex: 10 }} />
+                </div>
+
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', marginBottom: '8px' }}>
+                    Upload Successful!
+                </h3>
+
+                <p style={{ color: '#4b5563', fontSize: '0.875rem', marginBottom: '24px', lineHeight: '1.5' }}>
+                    {message}
+                </p>
+
+                <button
+                    onClick={onClose}
+                    style={{
+                        width: '100%', padding: '10px 16px', backgroundColor: '#2563eb', color: 'white',
+                        fontWeight: '500', borderRadius: '6px', border: 'none', cursor: 'pointer',
+                        transition: 'background-color 0.2s', display: 'flex', justifyContent: 'center', alignItems: 'center'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+                >
+                    Okay ({timeLeft})
+                </button>
+                <style>{`@keyframes ping { 75%, 100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }`}</style>
+            </motion.div>
+        </div>
+    );
+};
+
+// --- UPLOAD FROM CSV COMPONENT (Updated with Custom Modal) ---
 const UploadFromCSV = () => {
     const fileInputRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    // 🟢 NEW: State to control the Success Modal
+    const [successMessage, setSuccessMessage] = useState("");
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
     const handleButtonClick = () => {
         if (fileInputRef.current && !isLoading) {
@@ -264,13 +335,12 @@ const UploadFromCSV = () => {
         }
     };
 
-    // 🟢 Shared function to process the file (Input + Drop)
     const processFile = async (file) => {
         if (!file) return;
 
         // Validation
         if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-            alert("Please upload a valid CSV file.");
+            alert("Please upload a valid CSV file."); // (Kept alert for errors, but can be modaled later)
             return;
         }
 
@@ -279,7 +349,11 @@ const UploadFromCSV = () => {
         try {
             console.log(`Uploading: ${file.name}`);
             const response = await uploadStudentCSV(file);
-            alert(response.message); // "Successfully Created X students"
+
+            // 🟢 THE FIX: Replaced alert() with Modal state
+            setSuccessMessage(response.message); // e.g., "Successfully Created 50 students"
+            setIsSuccessModalOpen(true);
+
         } catch (error) {
             console.error(error);
             alert(error.message || "An error occurred during upload.");
@@ -294,7 +368,6 @@ const UploadFromCSV = () => {
         processFile(file);
     };
 
-    // 🟢 Drag and Drop Handlers
     const handleDragOver = (e) => {
         e.preventDefault();
     };
@@ -307,56 +380,62 @@ const UploadFromCSV = () => {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '16px', textAlign: 'center' }}>
-            <div 
-                className="hover:bg-gray-50" 
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                style={{ 
-                    padding: '32px', 
-                    border: '2px dashed #d1d5db', 
-                    borderRadius: '6px', 
-                    backgroundColor: isLoading ? '#f3f4f6' : '#f9fafb',
-                    cursor: isLoading ? 'not-allowed' : 'pointer',
-                    transition: 'background-color 0.2s'
-                }}
-            >
-                <FileText style={{ height: '40px', width: '40px', color: '#9ca3af', margin: '0 auto', marginBottom: '8px' }} />
-                <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>
-                    {isLoading ? "Uploading and syncing schedules..." : "Drag and drop your CSV file here, or click to select."}
-                </p>
-                <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    onChange={handleFileChange} 
-                    accept=".csv" 
-                    style={{ display: 'none' }} 
+        <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '16px', textAlign: 'center' }}>
+                <div
+                    className="hover:bg-gray-50"
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    style={{
+                        padding: '32px', border: '2px dashed #d1d5db', borderRadius: '6px',
+                        backgroundColor: isLoading ? '#f3f4f6' : '#f9fafb',
+                        cursor: isLoading ? 'not-allowed' : 'pointer',
+                        transition: 'background-color 0.2s'
+                    }}
+                >
+                    <FileText style={{ height: '40px', width: '40px', color: '#9ca3af', margin: '0 auto', marginBottom: '8px' }} />
+                    <p style={{ fontSize: '0.875rem', color: '#4b5563' }}>
+                        {isLoading ? "Uploading and syncing schedules..." : "Drag and drop your CSV file here, or click to select."}
+                    </p>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        accept=".csv"
+                        style={{ display: 'none' }}
+                        disabled={isLoading}
+                    />
+                </div>
+                <button
+                    onClick={handleButtonClick}
                     disabled={isLoading}
-                />
+                    style={{
+                        padding: '10px 16px', border: '1px solid #d1d5db', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        fontSize: '0.875rem', fontWeight: '500', borderRadius: '6px',
+                        color: isLoading ? '#9ca3af' : '#374151', backgroundColor: 'white',
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: isLoading ? 'not-allowed' : 'pointer',
+                        opacity: isLoading ? 0.7 : 1
+                    }}
+                >
+                    {isLoading ? (
+                        <><Loader className="animate-spin" size={16} style={{ marginRight: '8px' }} /> Processing...</>
+                    ) : (
+                        <><Upload size={16} style={{ marginRight: '8px' }} /> Browse Files</>
+                    )}
+                </button>
             </div>
-            <button 
-                onClick={handleButtonClick} 
-                disabled={isLoading}
-                style={{ 
-                    padding: '10px 16px', 
-                    border: '1px solid #d1d5db', 
-                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', 
-                    fontSize: '0.875rem', fontWeight: '500', 
-                    borderRadius: '6px', 
-                    color: isLoading ? '#9ca3af' : '#374151', 
-                    backgroundColor: 'white', 
-                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', 
-                    cursor: isLoading ? 'not-allowed' : 'pointer',
-                    opacity: isLoading ? 0.7 : 1
-                }}
-            >
-                {isLoading ? (
-                    <><Loader className="animate-spin" size={16} style={{ marginRight: '8px' }} /> Processing...</>
-                ) : (
-                    <><Upload size={16} style={{ marginRight: '8px' }} /> Browse Files</>
+
+            {/* 🟢 NEW: Mount the modal conditionally using AnimatePresence for smooth transitions */}
+            <AnimatePresence>
+                {isSuccessModalOpen && (
+                    <UploadSuccessModal
+                        message={successMessage}
+                        onClose={() => setIsSuccessModalOpen(false)}
+                    />
                 )}
-            </button>
-        </div>
+            </AnimatePresence>
+        </>
     );
 };
 

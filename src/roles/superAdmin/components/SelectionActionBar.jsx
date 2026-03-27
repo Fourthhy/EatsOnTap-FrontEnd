@@ -20,9 +20,10 @@ export const SelectionActionBar = ({
     // Program Specific
     onEditSchedule,
 
-    // User Management Specific (🟢 NEW)
+    // User Management Specific 
     onEditUser,
     onResetPassword,
+    onArchiveUser, // 🟢 ADDED: Must accept the prop here
 
     // Student Specific (Edit Mode)
     activeDropdown, 
@@ -85,6 +86,20 @@ export const SelectionActionBar = ({
     };
 
     const renderActions = () => {
+        // --- 🟢 EDIT MODE (Moved to top so it correctly overrides other variants) ---
+        if (isEditing) {
+            return (
+                <>
+                    <button style={styles.cancelButton} onClick={onCancelEdit}>
+                        <X size={16} /> Cancel
+                    </button>
+                    <button style={styles.saveButton} onClick={onSaveStudent}>
+                        <Save size={16} /> Save Changes
+                    </button>
+                </>
+            );
+        }
+
         // --- 🟢 USER MODE ---
         if (variant === 'user') {
             return (
@@ -94,6 +109,10 @@ export const SelectionActionBar = ({
                     </button>
                     <button onClick={onResetPassword} style={styles.primaryButton}>
                         <RotateCcw size={16} /> Reset Password
+                    </button>
+                    {/* 🟢 ADDED: The Archive Button for User Mode */}
+                    <button onClick={onArchiveUser} style={styles.ghostButton}>
+                        <Archive size={16} /> Archive
                     </button>
                 </>
             );
@@ -105,20 +124,6 @@ export const SelectionActionBar = ({
                 <button onClick={onEditSchedule} style={styles.primaryButton}>
                     <CalendarClock size={16} /> Edit Schedule
                 </button>
-            );
-        }
-
-        // --- EDIT MODE ---
-        if (isEditing) {
-            return (
-                <>
-                    <button style={styles.cancelButton} onClick={onCancelEdit}>
-                        <X size={16} /> Cancel
-                    </button>
-                    <button style={styles.saveButton} onClick={onSaveStudent}>
-                        <Save size={16} /> Save Changes
-                    </button>
-                </>
             );
         }
 

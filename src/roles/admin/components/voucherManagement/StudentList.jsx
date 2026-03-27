@@ -5,7 +5,6 @@ import { FaChalkboardTeacher } from "react-icons/fa";
 // --- SUB-VIEWS ---
 import { SectionListView } from './views/SectionListView';
 import { StudentListView } from './views/StudentListView';
-import { AdviserListView } from './views/AdviserListView';
 
 // --- SHARED COMPONENTS ---a
 import { SwitcherButton } from './SwitcherButton';
@@ -38,10 +37,6 @@ const StudentList = () => {
                 mode="sections" currentMode={viewMode} icon={<School size={14} />} label="View Sections" 
                 onClick={() => { setViewMode('sections'); setDrilldownContext(null); }} 
             />
-            <SwitcherButton 
-                mode="advisers" currentMode={viewMode} icon={<FaChalkboardTeacher size={14} />} label="View Advisers" 
-                onClick={() => { setViewMode('advisers'); setDrilldownContext(null); }} 
-            />
         </div>
     );
 
@@ -62,11 +57,6 @@ const StudentList = () => {
                 />
             )}
 
-            {viewMode === 'advisers' && (
-                <AdviserListView 
-                    switcher={viewSwitcher} 
-                />
-            )}
         </div>
     );
 };

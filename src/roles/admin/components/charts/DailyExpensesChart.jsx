@@ -131,4 +131,6 @@ const DailyExpensesChart = ({ data }) => {
   );
 };
 
-export default DailyExpensesChart;
+export {
+  DailyExpensesChart
+};

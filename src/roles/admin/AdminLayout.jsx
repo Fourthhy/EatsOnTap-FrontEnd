@@ -18,13 +18,13 @@ import { viewDishes } from "../../functions/admin/viewDishes";
 const AdminLayoutContent = () => {
     // --- MODAL & MEAL STATE LOGIC ---
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
+
     // 🟢 State to track if menu exists for today
     const [addedTodaysDish, setAddedTodaysDish] = useState(false);
-    
+
     // 🟢 State for the input fields
-    const [meals, setMeals] = useState(["", ""]); 
-    
+    const [meals, setMeals] = useState(["", ""]);
+
     // 🟢 State to store the "Original/Saved" menu for comparison
     const [todaysMenu, setTodaysMenu] = useState([]);
 
@@ -60,7 +60,7 @@ const AdminLayoutContent = () => {
     // Change Detection Logic (Compare 'meals' inputs vs 'todaysMenu' saved state)
     // If they match, disable save. If they differ, enable save.
     const hasChanges = JSON.stringify(meals) !== JSON.stringify(todaysMenu);
-    
+
     // Logic: 
     // - If it's a NEW entry (!addedTodaysDish), always enable save (unless empty).
     // - If it's an EDIT (addedTodaysDish), only enable save if there are changes.
@@ -82,6 +82,11 @@ const AdminLayoutContent = () => {
         setIsModalOpen(false);
         // Refresh the data to confirm it was saved and update UI state
         checkTodaysMenu();
+    };
+
+    // 🟢 NEW: Function to remove a specific input field
+    const removeMealField = (indexToRemove) => {
+        setMeals(prevMeals => prevMeals.filter((_, index) => index !== indexToRemove));
     };
 
     const menuItems = [
@@ -119,11 +124,7 @@ const AdminLayoutContent = () => {
 
             <Sidebar
                 menuItems={menuItems}
-                menutItemsLabel={"Pages"}
-
                 quickActions={quickActions}
-                quickActionsLabel={"Quick Actions"}
-                
                 settingMenu={settingMenu}
             />
 
@@ -133,9 +134,10 @@ const AdminLayoutContent = () => {
                 meals={meals}
                 onMealChange={handleMealChange}
                 onAddMealField={addMealField}
-                onSubmit={handleSubmitMeals} // 🟢 Pass the refresh handler
+                onRemoveMealField={removeMealField} // 🟢 YOU MUST ADD THIS LINE!
+                onSubmit={handleSubmitMeals}
                 isSaveDisabled={isSaveDisabled}
-                addedTodaysDish={addedTodaysDish} // 🟢 Pass the checker state
+                addedTodaysDish={addedTodaysDish}
             />
         </>
     );

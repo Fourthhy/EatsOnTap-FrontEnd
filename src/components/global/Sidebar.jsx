@@ -1,7 +1,7 @@
 import { logout } from "../../functions/logoutAuth";
 import { useState, useRef, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { LogOut, Loader2 } from "lucide-react"; // 🟢 Added Loader2
+import { LogOut, Loader2 } from "lucide-react"; 
 import { useBreakpoint } from "use-breakpoint";
 import logo from "/lv-logo.svg";
 import { SidebarItem } from "./SidebarItem";
@@ -13,7 +13,8 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
 
     // --- STATE ---
     const [isExpanded, setIsExpanded] = useState(false);
-    const [isLoggingOut, setIsLoggingOut] = useState(false); // 🟢 New Loading State
+    const [isLoggingOut, setIsLoggingOut] = useState(false); 
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false); // 🟢 NEW: Logout Modal State
     const containerRef = useRef(null);
 
     // --- HELPER: Determine if a path is active ---
@@ -32,20 +33,18 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
         document.title = `${pageTitle} - Eat's on Tap`;
     }, [location.pathname, menuItems, quickActions, settingMenu]);
 
-    // 🟢 UPDATED: Async Logout Handler with Loader
+    // 🟢 UPDATED: This now actually performs the logout after confirmation
     const handleLogout = async () => {
-        if (isLoggingOut) return; // Prevent double clicks
+        if (isLoggingOut) return; 
 
-        setIsLoggingOut(true); // Start Loader
+        setIsLoggingOut(true); 
 
         try {
-            await logout(); // Wait for the API call to finish
+            await logout(); 
         } catch (error) {
             console.error("Logout process encountered an error:", error);
         } finally {
-            // Navigate regardless of success or failure to ensure user isn't stuck
             navigate('/');
-            // No need to set false, component will unmount
         }
     };
 
@@ -60,18 +59,11 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
 
     const { breakpoint } = useBreakpoint(BREAKPOINTS, 'mobile-md');
 
-    // This controls the SIDEBAR width (Dynamic)
     const sidebarWidth = isExpanded ? "288px" : "80px";
-
-    // This controls the CONTENT margin (Static)
     const contentMargin = "80px";
 
-    // Shared transition for sync
     const springTransition = {
-        type: "spring",
-        stiffness: 500,
-        damping: 30,
-        mass: 0.8,
+        type: "spring", stiffness: 500, damping: 30, mass: 0.8,
     };
 
     return (
@@ -100,49 +92,21 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
             >
                 <div>
                     {/* --- LOGO AREA (ANIMATED) --- */}
-                    <div style={{
-                        display: "flex",
-                        alignItems: "center",
-                        marginTop: "1rem",
-                        marginBottom: "1.5rem",
-                        minHeight: "3.5rem",
-                        paddingLeft: "20px",
-                        overflow: "hidden"
-                    }}>
-                        {/* Stationary Logo Image */}
+                    <div style={{ display: "flex", alignItems: "center", marginTop: "1rem", marginBottom: "1.5rem", minHeight: "3.5rem", paddingLeft: "20px", overflow: "hidden" }}>
                         <motion.img
                             src={logo}
                             alt="Logo"
                             initial={false}
-                            animate={{
-                                width: isExpanded ? "3.5rem" : "2.5rem",
-                                height: isExpanded ? "3.5rem" : "2.5rem"
-                            }}
-                            style={{
-                                flexShrink: 0,
-                                objectFit: "contain",
-                                zIndex: 10,
-                                position: "relative"
-                            }}
+                            animate={{ width: isExpanded ? "3.5rem" : "2.5rem", height: isExpanded ? "3.5rem" : "2.5rem" }}
+                            style={{ flexShrink: 0, objectFit: "contain", zIndex: 10, position: "relative" }}
                             transition={springTransition}
                         />
 
-                        {/* Sliding Text */}
                         <AnimatePresence>
                             {isExpanded && (
                                 <motion.div
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    transition={{ duration: 0.2, ease: "easeOut" }}
-                                    style={{
-                                        marginLeft: '10px',
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
-                                        zIndex: 5,
-                                        whiteSpace: "nowrap"
-                                    }}
+                                    initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2, ease: "easeOut" }}
+                                    style={{ marginLeft: '10px', display: "flex", flexDirection: "column", justifyContent: "center", zIndex: 5, whiteSpace: "nowrap" }}
                                 >
                                     <p style={{ fontWeight: "bold" }} className="font-geist text-[13px] h-auto flex items-end">Eat's on Tap</p>
                                     <p style={{ fontWeight: 'regular' }} className="font-tolkien text-[11px] h-auto flex items-start">LA VERDAD CHRISTIAN COLLEGE</p>
@@ -152,28 +116,12 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                     </div>
 
                     {/* Navigation Items */}
-                    <nav
-                        style={{
-                            marginTop: "0.5rem",
-                            position: "relative",
-                            overflow: "visible",
-                            padding: "0px 4px"
-                        }}
-                        ref={containerRef}
-                    >
+                    <nav style={{ marginTop: "0.5rem", position: "relative", overflow: "visible", padding: "0px 4px" }} ref={containerRef}>
                         {quickActions && quickActions.map((item, i) => (
                             <SidebarItem
-                                key={i}
-                                icon={item.icon}
-                                text={item.text}
-                                expanded={isExpanded}
-                                active={isPathActive(item.path)}
+                                key={i} icon={item.icon} text={item.text} expanded={isExpanded} active={isPathActive(item.path)}
                                 onClick={() => {
-                                    if (item.onClickAction) {
-                                        item.onClickAction();
-                                    } else if (item.path) {
-                                        handleItemClick(item.path);
-                                    }
+                                    if (item.onClickAction) { item.onClickAction(); } else if (item.path) { handleItemClick(item.path); }
                                 }}
                             />
                         ))}
@@ -184,12 +132,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
 
                         {menuItems.map((item, i) => (
                             <SidebarItem
-                                key={i}
-                                index={i}
-                                icon={item.icon}
-                                text={item.text}
-                                expanded={isExpanded}
-                                active={isPathActive(item.path)}
+                                key={i} index={i} icon={item.icon} text={item.text} expanded={isExpanded} active={isPathActive(item.path)}
                                 onClick={() => handleItemClick(item.path)}
                             />
                         ))}
@@ -201,56 +144,33 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                     <div style={{ padding: "1rem 1rem 1rem 3px" }} >
                         {settingMenu && settingMenu.map((setting, i) => (
                             <SidebarItem
-                                key={i}
-                                icon={setting.icon}
-                                text={setting.text}
-                                expanded={isExpanded}
-                                active={isPathActive(setting.path)}
+                                key={i} icon={setting.icon} text={setting.text} expanded={isExpanded} active={isPathActive(setting.path)}
                                 onClick={() => handleItemClick(setting.path)}
                             />
                         ))}
                     </div>
 
-                    {/* --- LOGOUT BUTTON --- */}
+                    {/* --- LOGOUT TRIGGER BUTTON --- */}
                     <div style={{ padding: "0px 1rem 1rem 1rem" }}>
                         <motion.button
-                            onClick={handleLogout}
-                            disabled={isLoggingOut} // Disable while loading
+                            onClick={() => setShowLogoutConfirm(true)} // 🟢 CHANGED: Now opens the modal
+                            disabled={isLoggingOut} 
                             initial={false}
                             animate={{
-                                width: "100%",
-                                justifyContent: "flex-start",
+                                width: "100%", justifyContent: "flex-start",
                                 backgroundColor: isLoggingOut ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.3)",
-                                paddingLeft: "12px",
-                                cursor: isLoggingOut ? "wait" : "pointer"
+                                paddingLeft: "12px", cursor: isLoggingOut ? "wait" : "pointer"
                             }}
                             whileHover={!isLoggingOut ? { backgroundColor: "#52728F" } : {}}
                             style={{
-                                display: "flex",
-                                alignItems: "center",
-                                height: "50px",
-                                borderRadius: "0.5rem",
-                                border: "none",
-                                color: "white",
-                                position: "relative",
-                                overflow: "hidden"
+                                display: "flex", alignItems: "center", height: "50px", borderRadius: "0.5rem",
+                                border: "none", color: "white", position: "relative", overflow: "hidden"
                             }}
                             transition={springTransition}
                         >
-                            <div style={{
-                                position: 'relative',
-                                zIndex: 10,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                minWidth: '24px'
-                            }}>
-                                {/* 🟢 Swap Icon for Loader when loading */}
+                            <div style={{ position: 'relative', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '24px' }}>
                                 {isLoggingOut ? (
-                                    <motion.div
-                                        animate={{ rotate: 360 }}
-                                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                    >
+                                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
                                         <Loader2 size={20} />
                                     </motion.div>
                                 ) : (
@@ -261,16 +181,8 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
                             <AnimatePresence>
                                 {isExpanded && (
                                     <motion.span
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.2, ease: "easeOut" }}
-                                        style={{
-                                            fontSize: "0.875rem",
-                                            marginLeft: "12px",
-                                            whiteSpace: "nowrap",
-                                            zIndex: 5
-                                        }}
+                                        initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2, ease: "easeOut" }}
+                                        style={{ fontSize: "0.875rem", marginLeft: "12px", whiteSpace: "nowrap", zIndex: 5 }}
                                     >
                                         {isLoggingOut ? "Logging out..." : "Logout"}
                                     </motion.span>
@@ -282,17 +194,58 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
             </motion.div>
 
             {/* 2. Main Content Area */}
-            <div
-                style={{
-                    marginLeft: contentMargin, // Fixed at 80px
-                    width: `calc(100% - ${contentMargin})`, // Fixed width
-                    backgroundColor: "#f9fafb",
-                    minHeight: "100vh",
-                    transition: "all 0.3s ease"
-                }}
-            >
+            <div style={{ marginLeft: contentMargin, width: `calc(100% - ${contentMargin})`, backgroundColor: "#f9fafb", minHeight: "100vh", transition: "all 0.3s ease" }}>
                 <Outlet context={{ isSidebarOpen: isExpanded, handleToggleSidebar: () => setIsExpanded(!isExpanded) }} />
             </div>
+
+            {/* 🟢 3. NEW: Logout Confirmation Modal */}
+            <AnimatePresence>
+                {showLogoutConfirm && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {/* Backdrop */}
+                        <motion.div 
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} 
+                            onClick={() => !isLoggingOut && setShowLogoutConfirm(false)} 
+                        />
+                        
+                        {/* Modal Box */}
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                            style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', width: '100%', maxWidth: '360px', zIndex: 10, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
+                        >
+                            <div style={{ backgroundColor: '#FEE2E2', padding: '12px', borderRadius: '50%', marginBottom: '16px', color: '#DC2626' }}>
+                                <LogOut size={24} />
+                            </div>
+                            
+                            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1F2937', marginBottom: '8px' }}>Confirm Logout</h3>
+                            <p style={{ fontSize: '14px', color: '#4B5563', lineHeight: '1.5', marginBottom: '24px' }}>
+                                Are you sure you want to log out? You will need to sign back in to access your dashboard.
+                            </p>
+
+                            <div style={{ display: 'flex', width: '100%', gap: '12px' }}>
+                                <button 
+                                    onClick={() => setShowLogoutConfirm(false)} 
+                                    disabled={isLoggingOut}
+                                    style={{ flex: 1, padding: '10px 0', borderRadius: '8px', border: '1px solid #D1D5DB', background: 'white', color: '#374151', cursor: isLoggingOut ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 500 }}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={handleLogout} 
+                                    disabled={isLoggingOut}
+                                    style={{ flex: 1, padding: '10px 0', borderRadius: '8px', border: 'none', background: '#DC2626', color: 'white', cursor: isLoggingOut ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                >
+                                    {isLoggingOut ? <Loader2 size={16} className="animate-spin" /> : "Log Out"}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
         </div >
     );
 }

@@ -1,5 +1,5 @@
-const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
+const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 export async function getDashboardData(date = null) {
     // 1. Construct URL with optional Query Parameter
