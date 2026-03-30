@@ -33,7 +33,7 @@ import EventManagement from "../roles/admin/components/pages/EventManagement";
 import StudentManagement from "../roles/admin/components/pages/StudentManagement";
 import SystemSettings from "../roles/admin/components/pages/SystemSettings";
 
-import Playground from "../Playground";
+import LandingPage from "../LandingPage";
 
 import ClassAdviserLayout from "../roles/classAdviser/ClassAdviserLayout";
 import SubmitMealList from "../roles/classAdviser/SubmitMealList";
@@ -45,9 +45,9 @@ export default function Routers() {
         <Router>
             <Routes>
                 {/* 🟢 PUBLIC ROUTES (No Data, No Loaders, No Sockets) */}
-                <Route path="/" element={<Login />} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<Login />} />
                 <Route path="/sample" element={<SidebarLayout />} />
-                <Route path="/playground" element={<Playground />} />
                 <Route path="/loginRegistration/:token/:userEmail" element={<LoginRegistration />} />
 
                 {/* 🔴 SECURE ROUTES: Wrapped in DataProvider -> LoaderProvider AFTER the Auth check */}

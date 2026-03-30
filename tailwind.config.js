@@ -1,6 +1,11 @@
 module.exports = {
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        times: ['"Times New Roman"', 'Times', 'serif'],        
+        'tolkien': ['Tolkien', 'serif'],
+      },
+    },
     screens: {
       'mobile-md': '375px',
       'mobile-lg': '425px',
