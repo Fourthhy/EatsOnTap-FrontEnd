@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion'; // 🟢 Added framer-motion
 
 function LandingPage() {
     // State for header background change and Go-To-Top button visibility
     const [isScrolled, setIsScrolled] = useState(false);
     const [showTopBtn, setShowTopBtn] = useState(false);
+    
+    const carouselRef = useRef(null);
 
     // Listen for window scroll to trigger the CSS animations you already designed
     useEffect(() => {
@@ -46,6 +49,16 @@ function LandingPage() {
             top: 0,
             behavior: "smooth"
         });
+    };
+
+    const scrollCarousel = (direction) => {
+        if (carouselRef.current) {
+            const scrollAmount = 392; 
+            carouselRef.current.scrollBy({
+                left: direction === 'next' ? scrollAmount : -scrollAmount,
+                behavior: 'smooth'
+            });
+        }
     };
 
     return (
@@ -478,7 +491,6 @@ function LandingPage() {
         .carousel-track {
             display: flex;
             gap: 32px;
-            /* 🟢 FIX: Added top and bottom padding so the cards have space to animate up without clipping against the overflow container */
             padding-top: 24px; 
             padding-bottom: 40px; 
         }
@@ -843,7 +855,12 @@ function LandingPage() {
             {/* Hero Section */}
             <section className="hero">
                 <div className="hero-content">
-                    <div className="hero-text">
+                    <motion.div 
+                        className="hero-text"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                    >
                         <h1>
                             <span>Eat's on Tap</span>
                         </h1>
@@ -857,8 +874,13 @@ function LandingPage() {
                                 Learn More
                             </a>
                         </div>
-                    </div>
-                    <div className="hero-visual">
+                    </motion.div>
+                    <motion.div 
+                        className="hero-visual"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                    >
                         <div className="mockup-container">
                             <div className="floating-card card-1">
                                 <div className="stat-number">575</div>
@@ -871,11 +893,6 @@ function LandingPage() {
                                         alt="LVCC Campus"
                                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                     />
-                                    {/* <img
-                                        src="tuff-tuff-baby.gif"
-                                        alt="LVCC Campus"
-                                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                    /> */}
                                 </div>
                             </div>
                             <div className="floating-card card-2">
@@ -883,37 +900,56 @@ function LandingPage() {
                                 <div className="stat-label">Efficiency</div>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
             {/* Features Section */}
             <section id="features" className="features">
                 <div className="features-container">
-                    <div className="section-header">
+                    <motion.div 
+                        className="section-header"
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-50px" }}
+                        transition={{ duration: 0.6 }}
+                    >
                         <div className="section-badge">KEY FEATURES</div>
                         <h2>Built for Efficiency</h2>
                         <p>
                             Everything you need to modernize your meal distribution system and
                             enhance student welfare.
                         </p>
-                    </div>
+                    </motion.div>
                     <div className="features-grid">
                         <div className="carousel">
-                            <div className="carousel-viewport" id="featuresViewport">
+                            <div className="carousel-viewport" id="featuresViewport" ref={carouselRef}>
                                 <div className="carousel-track">
+                                    {/* Wrapping individual cards in motion divs */}
                                     <div className="carousel-item">
-                                        <div className="feature-card">
+                                        <motion.div 
+                                            className="feature-card"
+                                            initial={{ opacity: 0, y: 30 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ duration: 0.5, delay: 0.1 }}
+                                        >
                                             <div className="feature-icon">⚡</div>
                                             <h3>Instant RFID Claiming</h3>
                                             <p>
                                                 Students simply tap their ID to claim meals in seconds. No
                                                 more physical coupons or lengthy verification processes.
                                             </p>
-                                        </div>
+                                        </motion.div>
                                     </div>
                                     <div className="carousel-item">
-                                        <div className="feature-card">
+                                        <motion.div 
+                                            className="feature-card"
+                                            initial={{ opacity: 0, y: 30 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ duration: 0.5, delay: 0.2 }}
+                                        >
                                             <div className="feature-icon">📊</div>
                                             <h3>Real-Time Analytics</h3>
                                             <p>
@@ -921,10 +957,16 @@ function LandingPage() {
                                                 participation rates, and generate comprehensive reports
                                                 instantly.
                                             </p>
-                                        </div>
+                                        </motion.div>
                                     </div>
                                     <div className="carousel-item">
-                                        <div className="feature-card">
+                                        <motion.div 
+                                            className="feature-card"
+                                            initial={{ opacity: 0, y: 30 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ duration: 0.5, delay: 0.3 }}
+                                        >
                                             <div className="feature-icon">🔒</div>
                                             <h3>Secure &amp; Compliant</h3>
                                             <p>
@@ -932,10 +974,16 @@ function LandingPage() {
                                                 10173 (Data Privacy Act of 2012) to protect student
                                                 information.
                                             </p>
-                                        </div>
+                                        </motion.div>
                                     </div>
                                     <div className="carousel-item">
-                                        <div className="feature-card">
+                                        <motion.div 
+                                            className="feature-card"
+                                            initial={{ opacity: 0, y: 30 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ duration: 0.5, delay: 0.4 }}
+                                        >
                                             <div className="feature-icon">💰</div>
                                             <h3>Virtual Credit System</h3>
                                             <p>
@@ -943,20 +991,32 @@ function LandingPage() {
                                                 Students can use credits flexibly at meal stations or the
                                                 canteen.
                                             </p>
-                                        </div>
+                                        </motion.div>
                                     </div>
                                     <div className="carousel-item">
-                                        <div className="feature-card">
+                                        <motion.div 
+                                            className="feature-card"
+                                            initial={{ opacity: 0, y: 30 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ duration: 0.5, delay: 0.5 }}
+                                        >
                                             <div className="feature-icon">👥</div>
                                             <h3>Multi-User Management</h3>
                                             <p>
                                                 Role-based access for PSAS staff, food servers, canteen
                                                 personnel, and administrators with tailored permissions.
                                             </p>
-                                        </div>
+                                        </motion.div>
                                     </div>
                                     <div className="carousel-item">
-                                        <div className="feature-card">
+                                        <motion.div 
+                                            className="feature-card"
+                                            initial={{ opacity: 0, y: 30 }}
+                                            whileInView={{ opacity: 1, y: 0 }}
+                                            viewport={{ once: true }}
+                                            transition={{ duration: 0.5, delay: 0.6 }}
+                                        >
                                             <div className="feature-icon">📱</div>
                                             <h3>Web-Based Platform</h3>
                                             <p>
@@ -964,7 +1024,7 @@ function LandingPage() {
                                                 installations, just login and start managing meals
                                                 efficiently.
                                             </p>
-                                        </div>
+                                        </motion.div>
                                     </div>
                                 </div>
                             </div>
@@ -972,10 +1032,15 @@ function LandingPage() {
                                 <button
                                     className="carousel-button carousel-prev"
                                     aria-label="Previous"
+                                    onClick={() => scrollCarousel('prev')}
                                 >
                                     ‹
                                 </button>
-                                <button className="carousel-button carousel-next" aria-label="Next">
+                                <button 
+                                    className="carousel-button carousel-next" 
+                                    aria-label="Next"
+                                    onClick={() => scrollCarousel('next')}
+                                >
                                     ›
                                 </button>
                             </div>
@@ -987,16 +1052,28 @@ function LandingPage() {
             {/* How It Works */}
             <section id="how-it-works" className="how-it-works">
                 <div className="features-container">
-                    <div className="section-header">
+                    <motion.div 
+                        className="section-header"
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-50px" }}
+                        transition={{ duration: 0.6 }}
+                    >
                         <div className="section-badge">HOW IT WORKS</div>
                         <h2>Three Simple Steps</h2>
                         <p>
                             From registration to meal claiming, the process is designed to be
                             seamless and efficient.
                         </p>
-                    </div>
+                    </motion.div>
                     <div className="steps">
-                        <div className="step">
+                        <motion.div 
+                            className="step"
+                            initial={{ opacity: 0, x: -30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true, margin: "-50px" }}
+                            transition={{ duration: 0.6, delay: 0.1 }}
+                        >
                             <div className="step-number">1</div>
                             <div className="step-content">
                                 <h3>Student Eligibility Registration</h3>
@@ -1006,8 +1083,14 @@ function LandingPage() {
                                     seamless identification.
                                 </p>
                             </div>
-                        </div>
-                        <div className="step">
+                        </motion.div>
+                        <motion.div 
+                            className="step"
+                            initial={{ opacity: 0, x: -30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true, margin: "-50px" }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
+                        >
                             <div className="step-number">2</div>
                             <div className="step-content">
                                 <h3>Tap to Claim</h3>
@@ -1017,8 +1100,14 @@ function LandingPage() {
                                     appropriate credit amount.
                                 </p>
                             </div>
-                        </div>
-                        <div className="step">
+                        </motion.div>
+                        <motion.div 
+                            className="step"
+                            initial={{ opacity: 0, x: -30 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true, margin: "-50px" }}
+                            transition={{ duration: 0.6, delay: 0.3 }}
+                        >
                             <div className="step-number">3</div>
                             <div className="step-content">
                                 <h3>Automatic Recording</h3>
@@ -1027,7 +1116,7 @@ function LandingPage() {
                                     comprehensive reports and analytics.
                                 </p>
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </section>
@@ -1035,39 +1124,75 @@ function LandingPage() {
             {/* Stats Section */}
             <section id="stats" className="stats">
                 <div className="stats-grid">
-                    <div className="stat-item">
+                    <motion.div 
+                        className="stat-item"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.1 }}
+                    >
                         <h4>8 hrs</h4>
                         <p>Saved Daily</p>
-                    </div>
-                    <div className="stat-item">
+                    </motion.div>
+                    <motion.div 
+                        className="stat-item"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                    >
                         <h4>Zero</h4>
                         <p>Lost Coupons</p>
-                    </div>
-                    <div className="stat-item">
+                    </motion.div>
+                    <motion.div 
+                        className="stat-item"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.3 }}
+                    >
                         <h4>2,343</h4>
                         <p>Students Served</p>
-                    </div>
-                    <div className="stat-item">
+                    </motion.div>
+                    <motion.div 
+                        className="stat-item"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.4 }}
+                    >
                         <h4>100%</h4>
                         <p>Digital</p>
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
             {/* CTA Section */}
             <section id="contact" className="cta-section">
-                <div className="cta-content">
+                <motion.div 
+                    className="cta-content"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ duration: 0.6 }}
+                >
                     <h2>Ready to Transform Your Meal Distribution?</h2>
                     <p>
                         Join La Verdad Christian College in modernizing student welfare services
                         with cutting-edge RFID technology.
                     </p>
-                </div>
+                </motion.div>
             </section>
 
             {/* Footer */}
             <footer>
-                <div className="footer-content">
+                <motion.div 
+                    className="footer-content"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                >
                     <div className="footer-brand">
                         <h3>Eat's on Tap</h3>
                         <p>
@@ -1089,7 +1214,7 @@ function LandingPage() {
                         <a href="#">Privacy Policy</a>
                         <a href="#contact" onClick={(e) => scrollToSection(e, 'contact')}>Contact</a>
                     </div>
-                </div>
+                </motion.div>
                 <div className="footer-bottom">
                     <p>
                         © 2025 La Verdad Christian College, Inc. All rights reserved. |
@@ -1098,8 +1223,7 @@ function LandingPage() {
                 </div>
             </footer>
         </>
-
-    )
+    );
 }
 
 export default LandingPage;
