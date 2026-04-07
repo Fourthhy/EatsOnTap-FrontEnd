@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Utensils, Plus, X } from "lucide-react"; // 🟢 Added X to imports if not already there
+import { Utensils, Plus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { addDishes } from "../../../../functions/admin/addDish";
 import { viewDishes } from "../../../../functions/admin/viewDishes";
@@ -10,7 +10,7 @@ const AddDishModal = ({
     meals,
     onMealChange,
     onAddMealField,
-    onRemoveMealField, // 🟢 NEW: Added this prop to handle removing fields
+    onRemoveMealField, 
     onSubmit, 
     isSaveDisabled,
     addedTodaysDish
@@ -46,7 +46,7 @@ const AddDishModal = ({
         }
     };
 
-    // 🟢 NEW: Logic to prevent adding a new field if the last one is empty
+    // Logic to prevent adding a new field if the last one is empty
     const isAddAnotherDisabled = meals && meals.length > 0 && meals[meals.length - 1].trim() === "";
 
     return (
@@ -95,7 +95,6 @@ const AddDishModal = ({
                                         Meal Number {index + 1}:
                                     </label>
                                     
-                                    {/* 🟢 CHANGED: Wrapped input and X button in a flex container that matches the old 75% width */}
                                     <div className="w-[75%] flex items-center gap-2">
                                         <input
                                             type="text"
@@ -106,9 +105,10 @@ const AddDishModal = ({
                                             style={{ borderRadius: 6, paddingLeft: 10, fontSize: 13 }}
                                         />
                                         
-                                        {/* 🟢 Render X button only if it's NOT the first field (index > 0) */}
+                                        {/* 🟢 THE FIX: type="button" added below */}
                                         {index > 0 && (
                                             <button 
+                                                type="button" 
                                                 onClick={() => onRemoveMealField(index)}
                                                 className="text-gray-400 hover:text-red-500 transition-colors p-1"
                                                 title="Remove meal"
@@ -123,11 +123,12 @@ const AddDishModal = ({
                             {/* Add Another Meal Button */}
                             <div className="w-[92%] flex justify-start">
                                 <button
+                                    type="button" // Also good practice to add type="button" here too!
                                     onClick={onAddMealField}
-                                    disabled={isAddAnotherDisabled} // 🟢 Prevents click if last field is empty
+                                    disabled={isAddAnotherDisabled} 
                                     className="flex items-center gap-2 text-sm mt-4 pl-1 transition-colors disabled:cursor-not-allowed"
                                     style={{ 
-                                        color: isAddAnotherDisabled ? '#9CA3AF' : '#4B5563', // Grayed out if disabled
+                                        color: isAddAnotherDisabled ? '#9CA3AF' : '#4B5563', 
                                     }}
                                 >
                                     <Plus 
@@ -144,6 +145,7 @@ const AddDishModal = ({
                         {/* Footer Actions */}
                         <div className="flex justify-end gap-3" style={{ marginTop: 15, marginBottom: 15, paddingRight: 20 }}>
                             <button
+                                type="button"
                                 onClick={onClose}
                                 className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-md text-sm transition-colors"
                                 style={{ paddingRight: 30, paddingLeft: 30, paddingTop: 15, paddingBottom: 15 }}
@@ -152,6 +154,7 @@ const AddDishModal = ({
                             </button>
 
                             <button
+                                type="button"
                                 onClick={handleSubmit}
                                 disabled={isSaveDisabled || isLoading}
                                 className={`px-8 py-2.5 rounded-md text-sm transition-colors ${isSaveDisabled || isLoading

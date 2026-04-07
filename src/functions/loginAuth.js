@@ -1,11 +1,11 @@
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
-const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST
+const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 // 🟢 THE FIX: Accept an object with optional parameters
 export async function loginApi({ email, password, idToken }) {
   // Helper to fetch all users and check for email
   const fetchAndFind = async (endpoint) => {
-    const res = await fetch(`${VITE_LOCALHOST}${endpoint}`);
+    const res = await fetch(`${VITE_BASE_URL}${endpoint}`);
     if (!res.ok) throw new Error('Failed to fetch');
     const list = await res.json();
     return list.find(u => u.email === email);
@@ -42,7 +42,7 @@ export async function loginApi({ email, password, idToken }) {
     ? { email, idToken }     // Sending Google Token
     : { email, password };   // Sending standard password
   
-  const loginRes = await fetch(`${VITE_LOCALHOST}${endpoint}`, {
+  const loginRes = await fetch(`${VITE_BASE_URL}${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(requestBody),
