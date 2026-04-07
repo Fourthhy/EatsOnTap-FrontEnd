@@ -1,5 +1,5 @@
-const VITE_BASE_URL = import.meta.env.VITE_LOCALHOST; 
-// const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
+// const VITE_BASE_URL = import.meta.env.VITE_LOCALHOST; 
+const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 /**
  * Fetches the dishes for a specific date.
