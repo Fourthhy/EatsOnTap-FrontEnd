@@ -36,7 +36,7 @@ export const viewDishes = async (date) => {
 
         // Handle Errors 
         if (!response.ok) {
-            throw new Error(data.message || "Failed to fetch dishes");
+            throw new Error(data.message || "Failed to fetch dishes");  
         }
 
         // 🟢 FIX 2: Return only the array of dishes so your React components don't crash

@@ -40,6 +40,9 @@ import SubmitMealList from "../roles/classAdviser/SubmitMealList";
 
 import LoginRegistration from "../LoginRegistration";
 
+import AboutLVCC from "../../AboutLVCC";
+import TeamPage from "../../TeamPage";
+
 export default function Routers() {
     return (
         <Router>
@@ -48,6 +51,8 @@ export default function Routers() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/sample" element={<SidebarLayout />} />
+                <Route path="/about" element={<AboutLVCC/>} />
+                <Route path="/team" element={<TeamPage />} />
                 <Route path="/loginRegistration/:token/:userEmail" element={<LoginRegistration />} />
 
                 {/* 🔴 SECURE ROUTES: Wrapped in DataProvider -> LoaderProvider AFTER the Auth check */}
