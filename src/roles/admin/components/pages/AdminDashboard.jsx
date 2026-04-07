@@ -19,6 +19,7 @@ import { LineChartBox } from "../charts/LineChartBox";
 import { OngoingEvents } from "../dashboard/OngoingEvents";
 import { EventsPanel } from "../dashboard/EventsPanel";
 import { AnalyticTabs } from "../dashboard/AnalyticTabs";
+import { MealOverridePanel } from "../dashboard/MealOverridePanel";
 import { HeaderBar } from "../../../../components/global/HeaderBar";
 import { Skeleton } from "../../../../components/global/Skeleton";
 
@@ -215,6 +216,8 @@ export default function AdminDashboard() {
                         <div style={{ position: 'sticky', top: '35px', height: 'fit-content', display: 'flex', flexDirection: 'column', gap: "18px" }}>
                             <OngoingEvents events={eventMealRequest[1] || []} isLoading={isLoading} />
                             <EventsPanel events={eventMealRequest[0] || []} isLoading={isLoading} />
+                            <MealOverridePanel />
+                            <div className="h-4"></div>
                         </div>
                     </div>
                 </div>

@@ -2,7 +2,7 @@ const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 export async function createNewClassAdviser(adviserData) {
-    const targetUrl = `${VITE_BASE_URL}/api/classAdviser/addClassAdviser`;
+    const targetUrl = `${VITE_LOCALHOST}/api/classAdviser/addClassAdviser`;
     try {
         const response = await fetch(targetUrl, {
             method: 'POST',

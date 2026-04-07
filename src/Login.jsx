@@ -9,6 +9,10 @@ import { loginApi } from "./functions/loginAuth"
 import { resetPassword } from "./functions/admin/resetPassword";
 import { useData } from "./context/DataContext";
 
+// 🟢 NEW: Import Firebase functions and your local Firebase config
+import { signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider } from './config/firebase';
+
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -59,7 +63,7 @@ export default function Login() {
         }
     };
 
-    // 🟢 LOGIN HANDLER
+    // 🟢 LOGIN HANDLER (Standard Email/Password)
     const handleSubmit = async () => {
         // Double check in case the button was somehow forced
         if (isSubmitDisabled) return;
@@ -73,16 +77,13 @@ export default function Login() {
         const trimmedPassword = password.trim();
 
         try {
-            // Inside handleSubmit() after successful loginApi call:
             const data = await loginApi(trimmedEmail, trimmedPassword);
 
-            // 🟢 NEW: Save to LocalStorage directly instead of using Context
             localStorage.setItem("userInformation", JSON.stringify(data));
             console.log('INFORMATION SAVED TO STORAGE!', data);
 
-            // 🟢 HELPER: Path Resolution
             let targetPath = '/';
-            window.location.replace(targetPath);
+            // window.location.replace(targetPath); // Removed to prevent early redirect
 
             if (data.section) {
                 targetPath = `/classAdviser/${data.section}/${data.userID}/submitMealList`;
@@ -108,10 +109,88 @@ export default function Login() {
             setTimeout(() => {
                 setError('');
                 setLoading(false);
-                // Optional: Clear fields on error if desired, or keep them for correction
-                // setEmail(''); 
-                // setPassword('');
             }, 3000);
+        }
+    };
+
+    // 🟢 NEW: GOOGLE FIREBASE LOGIN HANDLER
+    const handleGoogleLogin = async () => {
+        setError('');
+        setErrorPassword('');
+        setSuccess('');
+        setLoading(true);
+
+        const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
+
+        try {
+            // 1. Pop up the Google Login window via Firebase
+            const result = await signInWithPopup(auth, googleProvider);
+
+            // 2. Grab the secure token Firebase assigns to the user
+            const idToken = await result.user.getIdToken();
+
+            // 3. Shoot it over to your secure Express backend
+            const response = await fetch(`${VITE_BASE_URL}/api/auth/google`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: idToken })
+            });
+
+            const data = await response.json();
+
+            // Check if backend rejected it (e.g., Unregistered email or wrong domain)
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to authenticate with server.");
+            }
+
+            // 4. Exact same routing logic as standard login!
+            localStorage.setItem("userInformation", JSON.stringify(data));
+            console.log('GOOGLE INFORMATION SAVED TO STORAGE!', data);
+
+            let targetPath = '/';
+
+            if (data.section) {
+                targetPath = `/classAdviser/${data.section}/${data.userID}/submitMealList`;
+            } else {
+                switch (data.role) {
+                    case 'ADMIN': targetPath = '/admin/dashboard'; break;
+                    case 'ADMIN-ASSISTANT': targetPath = '/adminAssistant'; break;
+                    case 'CANTEEN-STAFF': targetPath = '/canteenStaff'; break;
+                    case 'CHANCELLOR': targetPath = '/chancellor'; break;
+                    case 'FOOD-SERVER': targetPath = '/foodServer'; break;
+                    case 'SUPER-ADMIN': targetPath = '/superAdmin'; break;
+                    case 'STUDENT': targetPath = '/student/dashboard'; break; // Added just in case
+                    default:
+                        setError('Unknown user role.');
+                        setLoading(false);
+                        return;
+                }
+            }
+
+            window.location.replace(targetPath);
+
+        } catch (error) {
+            console.error("Firebase Login Error:", error);
+
+            // 🟢 THE FIX: Safely ignore the "popup closed" errors
+            if (
+                error.code === 'auth/popup-closed-by-user' ||
+                error.code === 'auth/cancelled-popup-request' ||
+                (error.message && error.message.includes('closed by user'))
+            ) {
+                console.log("Google sign-in was cancelled by the user.");
+                // We just return silently without setting any red error text
+                return;
+            }
+
+            // For all other ACTUAL errors (like network issues), show the error message
+            setError(error.message || "An error occurred during Google Sign-In.");
+            setTimeout(() => {
+                setError('');
+            }, 3000);
+
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -189,7 +268,6 @@ export default function Login() {
                                         </div>
                                         <p onClick={handleForgotPassword} className="w-[23vw] text-right font-geist text-white text-[.97vw] hover:underline hover:cursor-pointer"> Forgot Password? </p>
 
-                                        {/* 🟢 Laptop Login Button */}
                                         <Button
                                             disabled={isSubmitDisabled}
                                             className={isSubmitDisabled ? "cursor-not-allowed opacity-50" : "hover:cursor-pointer"}
@@ -204,10 +282,19 @@ export default function Login() {
                                             <span style={{ color: 'white', margin: '8px', fontSize: '1vw', fontFamily: 'sans-serif' }}>or</span>
                                             <div style={{ width: '35%', height: '1px', backgroundColor: 'white', marginLeft: '16px' }} />
                                         </div>
-                                        <Button className="hover:cursor-pointer" style={{ width: '23vw', height: buttonHeight, backgroundColor: 'white' }}>
+
+                                        {/* 🟢 NEW: Laptop Google Login Button Wired Up */}
+                                        <Button
+                                            onClick={handleGoogleLogin}
+                                            disabled={loading}
+                                            className={loading ? "cursor-not-allowed opacity-50" : "hover:cursor-pointer"}
+                                            style={{ width: '23vw', height: buttonHeight, backgroundColor: 'white' }}
+                                        >
                                             <div className="flex gap-3 items-center">
                                                 <img src="/google-icon.svg" alt="google-icon" />
-                                                <p style={{ paddingTop: '2px' }} className="pt-[1px] font-geist text-[.97vw] font-medium text-black"> Continue with Google </p>
+                                                <p style={{ paddingTop: '2px' }} className="pt-[1px] font-geist text-[.97vw] font-medium text-black">
+                                                    {loading ? "Signing in..." : "Continue with Google"}
+                                                </p>
                                             </div>
                                         </Button>
                                     </div>
@@ -249,7 +336,6 @@ export default function Login() {
                                         </div>
                                         <p onClick={handleForgotPassword} className="w-[80vw] text-right font-geist text-white text-[3.4vw] hover:underline hover:cursor-pointer"> Forgot Password? </p>
 
-                                        {/* 🟢 Handheld Login Button */}
                                         <Button
                                             disabled={isSubmitDisabled}
                                             className={isSubmitDisabled ? "cursor-not-allowed opacity-50" : "hover:cursor-pointer"}
@@ -264,10 +350,19 @@ export default function Login() {
                                             <span style={{ color: 'white', margin: '8px', fontSize: '1.5vh', fontFamily: 'sans-serif' }}>or</span>
                                             <div style={{ width: '35%', height: '1px', backgroundColor: 'white', marginLeft: '16px' }} />
                                         </div>
-                                        <Button className="hover:cursor-pointer" style={{ width: '80vw', height: buttonHeight, backgroundColor: 'white' }}>
+
+                                        {/* 🟢 NEW: Handheld Google Login Button Wired Up */}
+                                        <Button
+                                            onClick={handleGoogleLogin}
+                                            disabled={loading}
+                                            className={loading ? "cursor-not-allowed opacity-50" : "hover:cursor-pointer"}
+                                            style={{ width: '80vw', height: buttonHeight, backgroundColor: 'white' }}
+                                        >
                                             <div className="flex gap-3 items-center">
                                                 <img src="/google-icon.svg" alt="google-icon" />
-                                                <p style={{ paddingTop: '2px' }} className="pt-[1px] font-geist text-[3.5vw] font-medium text-black"> Continue with Google </p>
+                                                <p style={{ paddingTop: '2px' }} className="pt-[1px] font-geist text-[3.5vw] font-medium text-black">
+                                                    {loading ? "Signing in..." : "Continue with Google"}
+                                                </p>
                                             </div>
                                         </Button>
                                     </div>

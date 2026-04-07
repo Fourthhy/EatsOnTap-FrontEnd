@@ -44,7 +44,7 @@ function Sidebar({ menuItems, menutItemsLabel, quickActions, quickActionsLabel, 
         } catch (error) {
             console.error("Logout process encountered an error:", error);
         } finally {
-            navigate('/');
+            navigate('/login');
         }
     };
 

@@ -883,8 +883,8 @@ function LandingPage() {
                     >
                         <div className="mockup-container">
                             <div className="floating-card card-1">
-                                <div className="stat-number">575</div>
-                                <div className="stat-label">Meals Today</div>
+                                <div className="stat-number">Zero</div>
+                                <div className="stat-label">Lost Coupons</div>
                             </div>
                             <div className="device-frame">
                                 <div className="screen">
@@ -912,7 +912,7 @@ function LandingPage() {
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "-50px" }}
-                        transition={{ duration: 0.6 }}
+                        transition={{ duration: 0.2 }}
                     >
                         <div className="section-badge">KEY FEATURES</div>
                         <h2>Built for Efficiency</h2>
@@ -932,7 +932,7 @@ function LandingPage() {
                                             initial={{ opacity: 0, y: 30 }}
                                             whileInView={{ opacity: 1, y: 0 }}
                                             viewport={{ once: true }}
-                                            transition={{ duration: 0.5, delay: 0.1 }}
+                                            transition={{ duration: 0.2, delay: 0.1 }}
                                         >
                                             <div className="feature-icon">⚡</div>
                                             <h3>Instant RFID Claiming</h3>
@@ -948,7 +948,7 @@ function LandingPage() {
                                             initial={{ opacity: 0, y: 30 }}
                                             whileInView={{ opacity: 1, y: 0 }}
                                             viewport={{ once: true }}
-                                            transition={{ duration: 0.5, delay: 0.2 }}
+                                            transition={{ duration: 0.2, delay: 0.2 }}
                                         >
                                             <div className="feature-icon">📊</div>
                                             <h3>Real-Time Analytics</h3>
@@ -965,7 +965,7 @@ function LandingPage() {
                                             initial={{ opacity: 0, y: 30 }}
                                             whileInView={{ opacity: 1, y: 0 }}
                                             viewport={{ once: true }}
-                                            transition={{ duration: 0.5, delay: 0.3 }}
+                                            transition={{ duration: 0.2, delay: 0.3 }}
                                         >
                                             <div className="feature-icon">🔒</div>
                                             <h3>Secure &amp; Compliant</h3>
@@ -982,7 +982,7 @@ function LandingPage() {
                                             initial={{ opacity: 0, y: 30 }}
                                             whileInView={{ opacity: 1, y: 0 }}
                                             viewport={{ once: true }}
-                                            transition={{ duration: 0.5, delay: 0.4 }}
+                                            transition={{ duration: 0.2, delay: 0.4 }}
                                         >
                                             <div className="feature-icon">💰</div>
                                             <h3>Virtual Credit System</h3>
@@ -999,7 +999,7 @@ function LandingPage() {
                                             initial={{ opacity: 0, y: 30 }}
                                             whileInView={{ opacity: 1, y: 0 }}
                                             viewport={{ once: true }}
-                                            transition={{ duration: 0.5, delay: 0.5 }}
+                                            transition={{ duration: 0.2, delay: 0.5 }}
                                         >
                                             <div className="feature-icon">👥</div>
                                             <h3>Multi-User Management</h3>
@@ -1015,7 +1015,7 @@ function LandingPage() {
                                             initial={{ opacity: 0, y: 30 }}
                                             whileInView={{ opacity: 1, y: 0 }}
                                             viewport={{ once: true }}
-                                            transition={{ duration: 0.5, delay: 0.6 }}
+                                            transition={{ duration: 0.2, delay: 0.6 }}
                                         >
                                             <div className="feature-icon">📱</div>
                                             <h3>Web-Based Platform</h3>

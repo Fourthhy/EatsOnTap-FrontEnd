@@ -3,7 +3,7 @@ const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 export async function createNewUser(userData) {
     // ⚠️ CHECK ROUTE: Matches /api/users/addUser
-    const targetUrl = `${VITE_BASE_URL}/api/users/addUser`;
+    const targetUrl = `${VITE_LOCALHOST}/api/users/addUser`;
     try {
         const response = await fetch(targetUrl, {
             method: 'POST',
