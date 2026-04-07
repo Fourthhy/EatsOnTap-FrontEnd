@@ -77,7 +77,10 @@ export default function Login() {
         const trimmedPassword = password.trim();
 
         try {
-            const data = await loginApi(trimmedEmail, trimmedPassword);
+            const data = await loginApi({
+                email: trimmedEmail,
+                password: trimmedPassword
+            });
 
             localStorage.setItem("userInformation", JSON.stringify(data));
             console.log('INFORMATION SAVED TO STORAGE!', data);
@@ -115,35 +118,31 @@ export default function Login() {
 
     // 🟢 NEW: GOOGLE FIREBASE LOGIN HANDLER
     const handleGoogleLogin = async () => {
+        // Double check if the form is busy
+        if (loading) return;
+
         setError('');
         setErrorPassword('');
         setSuccess('');
         setLoading(true);
 
-        const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
-
         try {
             // 1. Pop up the Google Login window via Firebase
             const result = await signInWithPopup(auth, googleProvider);
 
-            // 2. Grab the secure token Firebase assigns to the user
+            // 2. Grab the secure token AND the email from Firebase
             const idToken = await result.user.getIdToken();
+            const googleEmail = result.user.email;
 
-            // 3. Shoot it over to your secure Express backend
-            const response = await fetch(`${VITE_BASE_URL}/api/auth/google`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: idToken })
+            // 3. 🟢 THE FIX: Pass both directly to your updated loginApi!
+            // No more manual fetch requests needed here.
+            const data = await loginApi({
+                email: googleEmail,
+                idToken: idToken
             });
 
-            const data = await response.json();
-
-            // Check if backend rejected it (e.g., Unregistered email or wrong domain)
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to authenticate with server.");
-            }
-
             // 4. Exact same routing logic as standard login!
+            // (loginApi already saves the token to localStorage for you)
             localStorage.setItem("userInformation", JSON.stringify(data));
             console.log('GOOGLE INFORMATION SAVED TO STORAGE!', data);
 
@@ -159,7 +158,7 @@ export default function Login() {
                     case 'CHANCELLOR': targetPath = '/chancellor'; break;
                     case 'FOOD-SERVER': targetPath = '/foodServer'; break;
                     case 'SUPER-ADMIN': targetPath = '/superAdmin'; break;
-                    case 'STUDENT': targetPath = '/student/dashboard'; break; // Added just in case
+                    case 'STUDENT': targetPath = '/student/dashboard'; break;
                     default:
                         setError('Unknown user role.');
                         setLoading(false);
@@ -170,20 +169,19 @@ export default function Login() {
             window.location.replace(targetPath);
 
         } catch (error) {
-            console.error("Firebase Login Error:", error);
+            console.error("Firebase/Unified Login Error:", error);
 
-            // 🟢 THE FIX: Safely ignore the "popup closed" errors
+            // Safely ignore the "popup closed" errors
             if (
                 error.code === 'auth/popup-closed-by-user' ||
                 error.code === 'auth/cancelled-popup-request' ||
                 (error.message && error.message.includes('closed by user'))
             ) {
                 console.log("Google sign-in was cancelled by the user.");
-                // We just return silently without setting any red error text
                 return;
             }
 
-            // For all other ACTUAL errors (like network issues), show the error message
+            // For all other ACTUAL errors (like invalid domain or unregistered user)
             setError(error.message || "An error occurred during Google Sign-In.");
             setTimeout(() => {
                 setError('');

@@ -1,10 +1,11 @@
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST
 
-export async function loginApi(email, password) {
+// 🟢 THE FIX: Accept an object with optional parameters
+export async function loginApi({ email, password, idToken }) {
   // Helper to fetch all users and check for email
   const fetchAndFind = async (endpoint) => {
-    const res = await fetch(`${VITE_BASE_URL}${endpoint}`);
+    const res = await fetch(`${VITE_LOCALHOST}${endpoint}`);
     if (!res.ok) throw new Error('Failed to fetch');
     const list = await res.json();
     return list.find(u => u.email === email);
@@ -36,10 +37,15 @@ export async function loginApi(email, password) {
   // Login with correct endpoint
   const endpoint = isUser ? '/api/auth/login' : '/api/auth/loginClassAdviser';
   
-  const loginRes = await fetch(`${VITE_BASE_URL}${endpoint}`, {
+  // 🟢 THE FIX: Decide which payload to send to the backend
+  const requestBody = idToken 
+    ? { email, idToken }     // Sending Google Token
+    : { email, password };   // Sending standard password
+  
+  const loginRes = await fetch(`${VITE_LOCALHOST}${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(requestBody),
     
     // 🟢 CRITICAL FIX: This allows the browser to save the cookie
     credentials: 'include' 
@@ -56,4 +62,4 @@ export async function loginApi(email, password) {
   if (loginData.token) localStorage.setItem('authToken', loginData.token);
 
   return loginData;
-} 
+}
