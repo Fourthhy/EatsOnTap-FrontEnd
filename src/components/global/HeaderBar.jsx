@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PanelLeftOpen, PanelRightOpen, RotateCcw } from "lucide-react"; 
 import { useOutletContext } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion"; // Ensure motion is imported
+import { motion, AnimatePresence } from "framer-motion"; 
 
 import { NotificationDropdown } from './NotificationDropdown';
 
@@ -30,11 +30,7 @@ const DEFAULT_NOTIFICATIONS = [
 ];
 
 function HeaderBar({ 
-    userAvatar, 
     headerTitle, 
-    userName = "Sample Name", 
-    userRole = "Sample Role",
-    userEmail = "user.email@laverdad.edu.ph",
     hasNotification = false,
     notificationList = DEFAULT_NOTIFICATIONS 
 }) {
@@ -46,6 +42,28 @@ function HeaderBar({
     const [isSimulating, setIsSimulating] = useState(false); 
     const [triggerShake, setTriggerShake] = useState(false); 
     const [isProfileOpen, setIsProfileOpen] = useState(false); 
+
+    // 🟢 NEW: State to hold the dynamic user data
+    const [userData, setUserData] = useState({
+        fullName: 'Loading...',
+        role: 'USER',
+        email: 'user@laverdad.edu.ph',
+        photoURL: null
+    });
+
+    // 🟢 NEW: Fetch the real user data from local storage when Header loads
+    useEffect(() => {
+        const storedInfo = localStorage.getItem('userInformation');
+        if (storedInfo) {
+            const parsedInfo = JSON.parse(storedInfo);
+            setUserData({
+                fullName: parsedInfo.fullName || `${parsedInfo.first_name} ${parsedInfo.last_name}`,
+                role: parsedInfo.role ? parsedInfo.role.replace('-', ' ') : 'USER',
+                email: parsedInfo.email || '',
+                photoURL: parsedInfo.photoURL || null
+            });
+        }
+    }, []);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -93,7 +111,7 @@ function HeaderBar({
         }, 3000);
 
         return () => { clearTimeout(timer1); clearTimeout(timer2); };
-    }, []);
+    }, [animationPhase]);
 
     const greetingStyle = {
         position: 'absolute', right: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
@@ -103,19 +121,19 @@ function HeaderBar({
         opacity: animationPhase === 'hold' ? 1 : 0, pointerEvents: 'none',
     };
 
-    // We remove the transition from here and handle it via AnimatePresence on children
     const profileStyle = {
         display: 'flex', flexDirection: 'row', gap: '12px', alignItems: 'center',
-        // Keep the position logic for the container
         transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s',
         transform: animationPhase === 'swap' ? 'translateY(0)' : 'translateY(-20px)',
         opacity: animationPhase === 'swap' ? 1 : 0,
-        minWidth: '150px', // Prevent layout shift when content disappears
+        minWidth: '150px', 
         justifyContent: 'flex-end'
     };
 
     const isNotified = hasNotification || isSimulating;
-    const avatarSrc = "/default_image.png"; 
+    
+    // 🟢 THE FIX: Use the Google photo if it exists, otherwise fallback to your default image
+    const avatarSrc = userData.photoURL || "/default_image.png"; 
 
     return (
         <div style={{ height: '60px', width: '100%' }}>
@@ -139,34 +157,17 @@ function HeaderBar({
                 isOpen={isProfileOpen} 
                 onClose={() => setIsProfileOpen(false)} 
                 notifications={notificationList}
-                userName={userName}
-                userRole={userRole}
-                userEmail={userEmail}
+                // 🟢 THE FIX: Pass dynamic data to the Dropdown
+                userName={userData.fullName}
+                userRole={userData.role}
+                userEmail={userData.email}
                 userAvatar={avatarSrc}
             />
-
-            {/* --- 2. SIMULATION TRIGGER ---
-            <div 
-                onClick={handleSimulationToggle} 
-                className="hover:bg-gray-100"
-                style={{
-                    position: 'fixed', top: '15px', left: isExpanded ? '480px' : '250px', 
-                    zIndex: 8000, backgroundColor: 'white', width: '30px', height: '30px', 
-                    borderRadius: 6,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-                    transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s' 
-                }}
-                title="Toggle Notification Simulation"
-            >
-                <RotateCcw size={16} color={"#F68A3A"} />
-            </div> */}
 
             {/* --- 3. FLOATING AVATAR (SCENARIO B - Scrolled) --- */}
             <div 
                 style={{
                     position: 'fixed', top: '10px', right: '20px', zIndex: 8000,
-                    // If profile is open, we hide this entire block visually (or unmount it)
                     pointerEvents: (isScrolled && !isProfileOpen) ? 'auto' : 'none',
                     transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                     transform: isScrolled ? 'translateY(0)' : 'translateY(-20px)',
@@ -233,7 +234,8 @@ function HeaderBar({
                     <div style={{ marginRight: "20px", position: 'relative', height: '100%', display: 'flex', alignItems: 'center' }}>
                         {animationPhase !== 'swap' && (
                             <div style={greetingStyle}>
-                                {greeting} <span style={{ color: '#000', fontWeight: 600, marginLeft: '4px' }}>{userName.split(' ')[0]}</span>
+                                {/* 🟢 THE FIX: Safely split the full name to get their first name */}
+                                {greeting} <span style={{ color: '#000', fontWeight: 600, marginLeft: '4px' }}>{userData.fullName.split(' ')[0]}</span>
                             </div>
                         )}
 
@@ -243,7 +245,7 @@ function HeaderBar({
                                     <motion.div
                                         initial={{ opacity: 0, x: 10 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: 10 }} // Slide out to right
+                                        exit={{ opacity: 0, x: 10 }} 
                                         transition={{ duration: 0.2 }}
                                         style={{ display: 'flex', flexDirection: 'row', gap: '12px', alignItems: 'center' }}
                                     >
@@ -271,11 +273,13 @@ function HeaderBar({
 
                                         <div className="flex flex-col items-start justify-start">
                                             <span style={{ fontFamily: "geist", color: "#000", fontWeight: "600", fontSize: 13, lineHeight: '1.2' }}>
-                                                {userName}
+                                                {/* 🟢 THE FIX: Inject real name */}
+                                                {userData.fullName}
                                             </span>
-                                            <p style={{ fontFamily: "geist", color: "#9CA3AF", fontWeight: "400", fontSize: 11 }}>
-                                                {userRole}
-                                            </p>
+                                            <span style={{ fontFamily: "geist", color: "#9CA3AF", fontWeight: "400", fontSize: 11, textTransform: 'capitalize' }}>
+                                                {/* 🟢 THE FIX: Inject real role */}
+                                                {userData.role.toLowerCase()}
+                                            </span>
                                         </div>
                                     </motion.div>
                                 )}

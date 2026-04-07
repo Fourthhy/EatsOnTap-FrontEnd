@@ -65,7 +65,6 @@ export default function Login() {
 
     // 🟢 LOGIN HANDLER (Standard Email/Password)
     const handleSubmit = async () => {
-        // Double check in case the button was somehow forced
         if (isSubmitDisabled) return;
 
         setError('');
@@ -82,11 +81,17 @@ export default function Login() {
                 password: trimmedPassword
             });
 
-            localStorage.setItem("userInformation", JSON.stringify(data));
-            console.log('INFORMATION SAVED TO STORAGE!', data);
+            // 🟢 THE FIX: Standardize data shape for the Header (No photo for manual login)
+            const enrichedData = {
+                ...data,
+                photoURL: null,
+                fullName: data.first_name ? `${data.first_name} ${data.last_name}` : 'Eat\'s on Tap User'
+            };
+
+            localStorage.setItem("userInformation", JSON.stringify(enrichedData));
+            console.log('INFORMATION SAVED TO STORAGE!', enrichedData);
 
             let targetPath = '/';
-            // window.location.replace(targetPath); // Removed to prevent early redirect
 
             if (data.section) {
                 targetPath = `/classAdviser/${data.section}/${data.userID}/submitMealList`;
@@ -118,7 +123,6 @@ export default function Login() {
 
     // 🟢 NEW: GOOGLE FIREBASE LOGIN HANDLER
     const handleGoogleLogin = async () => {
-        // Double check if the form is busy
         if (loading) return;
 
         setError('');
@@ -127,24 +131,29 @@ export default function Login() {
         setLoading(true);
 
         try {
-            // 1. Pop up the Google Login window via Firebase
             const result = await signInWithPopup(auth, googleProvider);
 
-            // 2. Grab the secure token AND the email from Firebase
             const idToken = await result.user.getIdToken();
             const googleEmail = result.user.email;
+            
+            // 🟢 THE FIX: Grab the Google profile details
+            const googlePhoto = result.user.photoURL;
+            const googleName = result.user.displayName; 
 
-            // 3. 🟢 THE FIX: Pass both directly to your updated loginApi!
-            // No more manual fetch requests needed here.
             const data = await loginApi({
                 email: googleEmail,
                 idToken: idToken
             });
 
-            // 4. Exact same routing logic as standard login!
-            // (loginApi already saves the token to localStorage for you)
-            localStorage.setItem("userInformation", JSON.stringify(data));
-            console.log('GOOGLE INFORMATION SAVED TO STORAGE!', data);
+            // 🟢 THE FIX: Merge the Google photo and name into your data object
+            const enrichedData = {
+                ...data,
+                photoURL: googlePhoto,
+                fullName: data.first_name ? `${data.first_name} ${data.last_name}` : googleName
+            };
+
+            localStorage.setItem("userInformation", JSON.stringify(enrichedData));
+            console.log('GOOGLE INFORMATION SAVED TO STORAGE!', enrichedData);
 
             let targetPath = '/';
 
@@ -171,7 +180,6 @@ export default function Login() {
         } catch (error) {
             console.error("Firebase/Unified Login Error:", error);
 
-            // Safely ignore the "popup closed" errors
             if (
                 error.code === 'auth/popup-closed-by-user' ||
                 error.code === 'auth/cancelled-popup-request' ||
@@ -181,7 +189,6 @@ export default function Login() {
                 return;
             }
 
-            // For all other ACTUAL errors (like invalid domain or unregistered user)
             setError(error.message || "An error occurred during Google Sign-In.");
             setTimeout(() => {
                 setError('');
@@ -281,7 +288,6 @@ export default function Login() {
                                             <div style={{ width: '35%', height: '1px', backgroundColor: 'white', marginLeft: '16px' }} />
                                         </div>
 
-                                        {/* 🟢 NEW: Laptop Google Login Button Wired Up */}
                                         <Button
                                             onClick={handleGoogleLogin}
                                             disabled={loading}
@@ -349,7 +355,6 @@ export default function Login() {
                                             <div style={{ width: '35%', height: '1px', backgroundColor: 'white', marginLeft: '16px' }} />
                                         </div>
 
-                                        {/* 🟢 NEW: Handheld Google Login Button Wired Up */}
                                         <Button
                                             onClick={handleGoogleLogin}
                                             disabled={loading}
