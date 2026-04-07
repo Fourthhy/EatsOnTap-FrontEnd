@@ -1,5 +1,5 @@
+// const VITE_BASE_URL = import.meta.env.VITE_LOCALHOST;
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
-const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 // 🟢 THE FIX: Accept an object with optional parameters
 export async function loginApi({ email, password, idToken }) {
