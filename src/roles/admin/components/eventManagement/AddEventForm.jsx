@@ -1,54 +1,27 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Calendar, Search, X, Check, Tag, Edit2, ChevronLeft, ChevronRight, Plus, Loader2, ArrowRight } from 'lucide-react';
 import { getSchoolStructure } from '../../../../functions/admin/getSchoolStructure';
-import { addEvent } from "../../../../functions/admin/addEvent"; 
+import { addEvent } from "../../../../functions/admin/addEvent";
 
-// --- PRIMARY ACTION BUTTON COMPONENT ---
-const PrimaryActionButton = ({ label, icon, onClick, style, className }) => {
-    const [isMounted, setIsMounted] = useState(false);
+// --- HELPERS ---
+const formatDeptName = (name) => {
+    if (!name) return "";
+    const result = name.replace(/([A-Z])/g, " $1");
+    return result.charAt(0).toUpperCase() + result.slice(1);
+};
 
-    useEffect(() => {
-        const timer = setTimeout(() => setIsMounted(true), 10);
-        return () => clearTimeout(timer);
-    }, []);
-
+const PrimaryActionButton = ({ label, icon, onClick }) => {
     return (
         <button
             onClick={onClick}
-            className={`relative overflow-hidden group ${className || ''}`}
-            style={{
-                ...style,
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: "1px solid #ddddddaf",
-                backgroundColor: 'transparent',
-                cursor: 'pointer',
-                padding: '8px 16px',
-                borderRadius: 6,
-                fontSize: 12,
-                fontWeight: 500,
-                fontFamily: 'geist',
-            }}
+            className="flex items-center bg-[#4268BD] text-white rounded-md text-sm font-medium hover:bg-[#3556a0] transition-all shadow-sm"
+            style={{ border: 'none', cursor: 'pointer', padding: '8px 16px', gap: '8px' }}
         >
-            <div
-                style={{
-                    position: 'absolute', top: 0, left: 0, height: '100%',
-                    backgroundColor: '#4268BD', zIndex: 0,
-                    width: isMounted ? '100%' : '0%',
-                    opacity: isMounted ? 1 : 0,
-                    transition: 'width 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms ease',
-                }}
-            />
-            <span className="relative z-10 flex items-center gap-2 text-[#EEEEEE]">
-                {icon} {label}
-            </span>
+            {icon || <Plus size={16} />} {label}
         </button>
     );
 };
 
-// --- CONSTANTS ---
 const EVENT_COLORS = [
     { name: 'Blue', value: '#dbeafe', text: '#1e40af' },
     { name: 'Red', value: '#fee2e2', text: '#991b1b' },
@@ -58,96 +31,34 @@ const EVENT_COLORS = [
     { name: 'Violet', value: '#f3e8ff', text: '#6b21a8' },
 ];
 
-// --- ANIMATED PAGE BUTTON ---
-const AnimatedPageButton = ({ page, isActive, onClick }) => {
-    const [animState, setAnimState] = useState({ width: '0%', opacity: 0 });
-
-    useEffect(() => {
-        if (isActive) {
-            setAnimState({ width: '0%', opacity: 0 });
-            const timer = setTimeout(() => {
-                setAnimState({ width: '100%', opacity: 1 });
-            }, 10);
-            return () => clearTimeout(timer);
-        } else {
-            setAnimState({ width: '0%', opacity: 0 });
-        }
-    }, [isActive]);
-
-    const baseStyle = {
-        width: '28px', height: '28px', borderRadius: '6px',
-        boxShadow: isActive ? "0 2px 6px #e5eaf0ac" : "none",
-        position: 'relative', overflow: 'hidden', display: 'flex',
-        alignItems: 'center', justifyContent: 'center', fontSize: '12px',
-        fontWeight: 500, cursor: 'pointer', border: 'none',
-        fontFamily: 'geist', transition: 'color 200ms ease',
-        backgroundColor: 'transparent',
-    };
-
-    return (
-        <button
-            type="button"
-            onClick={() => onClick(page)}
-            className={`${isActive ? 'text-[#EEEEEE]' : 'text-gray-500 hover:bg-white hover:text-gray-700'}`}
-            style={baseStyle}
-        >
-            {isActive && (
-                <div
-                    style={{
-                        position: 'absolute', top: 0, left: 0, height: '100%',
-                        backgroundColor: '#4268BD', zIndex: 0,
-                        width: animState.width, opacity: animState.opacity,
-                        transition: 'width 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 300ms ease',
-                    }}
-                />
-            )}
-            <span style={{ position: 'relative', zIndex: 10 }}>{page}</span>
-        </button>
-    );
-};
-
 export const AddEventForm = () => {
-    // --- MODAL STATE ---
     const [isOpen, setIsOpen] = useState(false);
-    const [isClosing, setIsClosing] = useState(false);
-
-    // --- DATA STATE ---
     const [structureData, setStructureData] = useState([]);
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // --- UI INTERACTION STATE ---
-    const [isEditingName, setIsEditingName] = useState(true);
-    const [isDeptContainerHovered, setIsDeptContainerHovered] = useState(false);
-
-    // --- FORM STATE ---
+    // Form State
     const [eventName, setEventName] = useState('');
-    const [eventDate, setEventDate] = useState('');     // Start Date
-    const [eventEndDate, setEventEndDate] = useState(''); // End Date
+    const [eventDate, setEventDate] = useState('');
+    const [eventEndDate, setEventEndDate] = useState('');
     const [selectedColor, setSelectedColor] = useState(EVENT_COLORS[0].value);
     const [selectedDepartments, setSelectedDepartments] = useState([]);
-    
-    const [selectedPrograms, setSelectedPrograms] = useState([]); 
-    const [validationError, setValidationError] = useState({});
-
-    const nameInputRef = useRef(null);
-
-    // --- PAGINATION ---
+    const [selectedPrograms, setSelectedPrograms] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 12;
+    
+    // 🟢 PAGINATION CONSTANTS
+    const ITEMS_PER_PAGE = 10; 
 
-    // --- FETCH DATA ON OPEN ---
     useEffect(() => {
         if (isOpen) {
             const fetchData = async () => {
                 setIsLoadingData(true);
                 try {
                     const data = await getSchoolStructure();
-                    if (Array.isArray(data)) {
-                        setStructureData(data);
-                    }
+                    if (Array.isArray(data)) setStructureData(data);
                 } catch (error) {
-                    console.error("Error fetching school structure:", error);
+                    console.error(error);
                 } finally {
                     setIsLoadingData(false);
                 }
@@ -156,535 +67,257 @@ export const AddEventForm = () => {
         }
     }, [isOpen]);
 
-    // --- DERIVED DATA ---
-    const availableDepartments = useMemo(() => {
-        return structureData.map(item => item.category);
-    }, [structureData]);
+    const availableDepartments = useMemo(() => structureData.map(item => item.category), [structureData]);
 
     const allProgramsToDisplay = useMemo(() => {
         if (!isOpen || structureData.length === 0) return [];
-        setCurrentPage(1);
+        let relevant = selectedDepartments.includes('All') ? structureData : structureData.filter(item => selectedDepartments.includes(item.category));
 
-        let relevantCategories = [];
-        
-        if (selectedDepartments.includes('All')) {
-            relevantCategories = structureData;
-        } else {
-            relevantCategories = structureData.filter(item => 
-                selectedDepartments.includes(item.category)
-            );
-        }
-
-        // 🟢 FLATTEN AND TAG DATA (Fixed Logic Here)
-        const flattened = relevantCategories.flatMap(cat => 
+        return relevant.flatMap(cat => 
             cat.levels.flatMap(level => 
-                level.sections.map(section => {
-                    const secName = section.section || section.name || section;
-                    const yearLevel = level.levelName || level.gradeLevel || "N/A";
-                    
-                    // Determine Type based on Category Name
-                    const lowerCat = cat.category.toLowerCase();
-                    const isHigherEd = lowerCat.includes("college") || lowerCat.includes("higher") || lowerCat.includes("tertiary");
-
-                    return {
-                        id: `${yearLevel}-${secName}`, // Unique ID for selection
-                        section: secName, // Basic Ed: Section Name, Higher Ed: Program Name
-                        year: yearLevel,
-                        display: `${yearLevel} - ${secName}`, // For display in grid
-                        type: isHigherEd ? 'HIGHER_ED' : 'BASIC_ED' // 🟢 Tag Added
-                    };
-                })
+                level.sections.map(section => ({
+                    id: `${level.levelName || level.gradeLevel}-${section.section || section.name || section}`,
+                    section: section.section || section.name || section,
+                    year: level.levelName || level.gradeLevel || "N/A",
+                    display: `${level.levelName || level.gradeLevel} - ${section.section || section.name || section}`,
+                    type: cat.category.toLowerCase().includes("college") ? 'HIGHER_ED' : 'BASIC_ED'
+                }))
             )
-        );
-
-        // Remove duplicates based on ID
-        const unique = [];
-        const map = new Map();
-        for (const item of flattened) {
-            if(!map.has(item.id)){
-                map.set(item.id, true);
-                unique.push(item);
-            }
-        }
-
-        return unique.sort((a, b) => a.display.localeCompare(b.display));
+        ).sort((a, b) => a.display.localeCompare(b.display));
     }, [selectedDepartments, isOpen, structureData]);
 
-    const totalPages = Math.ceil(allProgramsToDisplay.length / ITEMS_PER_PAGE);
+    const filteredPrograms = useMemo(() => {
+        if (!searchQuery.trim()) return allProgramsToDisplay;
+        return allProgramsToDisplay.filter(p => p.display.toLowerCase().includes(searchQuery.toLowerCase()));
+    }, [allProgramsToDisplay, searchQuery]);
 
+    // 🟢 FIXED SIZE PAGINATION LOGIC
     const programsToDisplay = useMemo(() => {
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        const endIndex = startIndex + ITEMS_PER_PAGE;
-        return allProgramsToDisplay.slice(startIndex, endIndex);
-    }, [allProgramsToDisplay, currentPage]);
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        const end = start + ITEMS_PER_PAGE;
+        const sliced = filteredPrograms.slice(start, end);
 
-    // --- PAGINATION HELPER ---
-    const getVisiblePages = () => {
-        const pages = [];
-        if (totalPages <= 5) {
-            for (let i = 1; i <= totalPages; i++) pages.push(i);
-        } else {
-            if (currentPage <= 3) {
-                pages.push(1, 2, 3, 4);
-            } else if (currentPage >= totalPages - 2) {
-                pages.push(totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
-            } else {
-                pages.push(currentPage - 1, currentPage, currentPage + 1);
-            }
+        // Fill with empty placeholders to keep grid structure 2x5
+        const padded = [...sliced];
+        while (padded.length < ITEMS_PER_PAGE) {
+            padded.push({ id: `empty-${padded.length}`, isEmpty: true });
         }
-        return pages;
-    };
-    const visiblePages = getVisiblePages();
+        return padded;
+    }, [filteredPrograms, currentPage]);
 
-    // --- HANDLERS ---
-    const resetForm = () => {
-        setEventName('');
-        setEventDate('');
-        setEventEndDate(''); 
-        setSelectedDepartments([]);
-        setSelectedPrograms([]);
-        setValidationError({});
-        setSelectedColor(EVENT_COLORS[0].value);
-        setCurrentPage(1);
-        setIsEditingName(true);
-        setIsSubmitting(false);
-    };
+    const totalPages = Math.ceil(filteredPrograms.length / ITEMS_PER_PAGE);
 
-    const handleCloseModal = () => {
-        if (isClosing) return;
-        setIsClosing(true);
-        setTimeout(() => {
-            setIsOpen(false);
-            setIsClosing(false);
-        }, 300);
-    };
-
-    const handleEventNameChange = (e) => {
-        const value = e.target.value;
-        setEventName(value);
-        if (validationError.eventName && value.trim()) setValidationError(prev => ({ ...prev, eventName: false }));
-    };
-
-    useEffect(() => {
-        if (isEditingName && nameInputRef.current) {
-            nameInputRef.current.focus();
-        }
-    }, [isEditingName]);
-
-    const handleNameBlur = () => {
-        if (eventName.trim()) {
-            setIsEditingName(false);
-        }
-    };
-
-    const handleEventDateChange = (e) => {
-        const value = e.target.value;
-        setEventDate(value);
-        if(eventEndDate && new Date(value) > new Date(eventEndDate)) {
-            setEventEndDate("");
-        }
-        if (validationError.eventDate && value) setValidationError(prev => ({ ...prev, eventDate: false }));
-    };
-
-    const handleEventEndDateChange = (e) => {
-        setEventEndDate(e.target.value);
-    };
-
-    const toggleDepartment = (dept) => {
-        setSelectedDepartments(prevDepts => {
-            let newDepts;
-            if (dept === 'All') {
-                newDepts = prevDepts.includes('All') 
-                    ? [] 
-                    : ['All', ...availableDepartments];
-            } else {
-                newDepts = prevDepts.filter(d => d !== 'All');
-                if (newDepts.includes(dept)) {
-                    newDepts = newDepts.filter(d => d !== dept);
-                } else {
-                    newDepts = [...newDepts, dept];
-                }
-            }
-
-            const allIndividualSelected = availableDepartments.every(d => newDepts.includes(d));
-            if (allIndividualSelected && availableDepartments.length > 0) {
-                newDepts = ['All', ...availableDepartments];
-            }
-
-            if (validationError.departments && newDepts.length > 0) setValidationError(prev => ({ ...prev, departments: false }));
-            if (validationError.programs) setValidationError(prev => ({ ...prev, programs: false }));
-            return newDepts;
-        });
-        setSelectedPrograms([]);
-    };
-
-    const handleProgramToggle = (programObj) => {
-        setSelectedPrograms(prevPrograms => {
-            const isSelected = prevPrograms.some(p => p.id === programObj.id);
-            let nextPrograms;
-            if (isSelected) {
-                nextPrograms = prevPrograms.filter(p => p.id !== programObj.id);
-            } else {
-                nextPrograms = [...prevPrograms, programObj];
-            }
-            
-            if (validationError.programs && nextPrograms.length > 0) setValidationError(prev => ({ ...prev, programs: false }));
-            return nextPrograms;
-        });
-    };
-
-    const handlePageChange = (pageNumber) => {
-        if (pageNumber >= 1 && pageNumber <= totalPages) setCurrentPage(pageNumber);
-    };
-
-    // --- 🟢 UPDATED CREATE EVENT HANDLER ---
     const handleCreateEvent = async (e) => {
         e.preventDefault();
-
-        const errors = {};
-        if (!eventName.trim()) errors.eventName = true;
-        if (!eventDate) errors.eventDate = true;
-        if (selectedDepartments.length === 0) errors.departments = true;
-        const mustSelectPrograms = selectedDepartments.length > 0 && allProgramsToDisplay.length > 0;
-        if (mustSelectPrograms && selectedPrograms.length === 0) errors.programs = true;
-
-        setValidationError(errors);
-
-        if (Object.keys(errors).length === 0) {
-            setIsSubmitting(true);
-            
-            try {
-                // 1. Calculate Date Components
-                const startDateObj = new Date(eventDate);
-                const endDateObj = eventEndDate ? new Date(eventEndDate) : startDateObj;
-
-                const startDay = startDateObj.getDate();
-                const endDay = endDateObj.getDate();
-                const startMonth = startDateObj.toLocaleString('default', { month: 'long' });
-                const endMonth = endDateObj.toLocaleString('default', { month: 'long' });
-
-                // 2. Determine Scope
-                const eventScope = selectedDepartments.includes('All') ? 'School-Wide' : 'Departmental';
-
-                // 3. 🟢 SPLIT PAYLOAD (Fixes the Backend Issue)
-                const basicEdSelections = selectedPrograms.filter(p => p.type !== 'HIGHER_ED');
-                const higherEdSelections = selectedPrograms.filter(p => p.type === 'HIGHER_ED');
-
-                const payload = {
-                    eventName: eventName,
-                    eventScope: eventScope,
-                    startDay: startDay,
-                    endDay: endDay,
-                    startMonth: startMonth,
-                    endMonth: endMonth,
-                    eventColor: selectedColor,
-                    
-                    // Basic Ed Array
-                    forEligibleSection: basicEdSelections.map(p => ({
-                        section: p.section,
-                        year: p.year,
-                        totalEligibleCount: 0,
-                        totalClaimedCount: 0
-                    })),
-
-                    // Higher Ed Array (Mapped to 'program')
-                    forEligibleProgramsAndYear: higherEdSelections.map(p => ({
-                        program: p.section, // Frontend 'section' holds the program name here
-                        year: p.year,
-                        totalEligibleCount: 0,
-                        totalClaimedCount: 0
-                    })),
-
-                    submissionStatus: 'APPROVED', 
-                    scheduleStatus: 'ONGOING' 
-                };
-
-                // 4. API Call
-                await addEvent(payload);
-
-                handleCloseModal();
-                resetForm();
-            } catch (error) {
-                console.error("Failed to create event:", error);
-            } finally {
-                setIsSubmitting(false);
-            }
+        setIsSubmitting(true);
+        try {
+            const startDateObj = new Date(eventDate);
+            const endDateObj = eventEndDate ? new Date(eventEndDate) : startDateObj;
+            const payload = {
+                eventName,
+                eventScope: selectedDepartments.includes('All') ? 'School-Wide' : 'Departmental',
+                startDay: startDateObj.getDate(),
+                endDay: endDateObj.getDate(),
+                startMonth: startDateObj.toLocaleString('default', { month: 'long' }),
+                endMonth: endDateObj.toLocaleString('default', { month: 'long' }),
+                eventColor: selectedColor,
+                forEligibleSection: selectedPrograms.filter(p => p.type !== 'HIGHER_ED').map(p => ({ section: p.section, year: p.year })),
+                forEligibleProgramsAndYear: selectedPrograms.filter(p => p.type === 'HIGHER_ED').map(p => ({ program: p.section, year: p.year })),
+                submissionStatus: 'APPROVED',
+                scheduleStatus: 'ONGOING'
+            };
+            await addEvent(payload);
+            setIsOpen(false);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
         }
-    };
-
-    const isFormComplete = eventName.trim() && eventDate && selectedDepartments.length > 0 &&
-        (allProgramsToDisplay.length === 0 || selectedPrograms.length > 0);
-    
-    const isButtonDisabled = !isFormComplete || Object.keys(validationError).length > 0 || isSubmitting;
-
-    // --- STYLES ---
-    const animationClass = isClosing
-        ? 'animate-out fade-out slide-out-to-top-3'
-        : 'animate-in fade-in slide-in-from-top-3';
-
-    const modalOverlayStyle = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9000, backdropFilter: 'blur(2px)', opacity: isClosing ? 0 : 1, transition: 'opacity 0.3s ease-in-out' };
-    const modalContentStyle = { backgroundColor: 'white', borderRadius: '0.75rem', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', width: '95%', maxWidth: '1200px', maxHeight: '95vh', height: '95vh', display: 'flex', flexDirection: 'row', position: 'relative', overflow: 'hidden' };
-
-    const leftPanelStyle = { flex: 1.4, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: 10, overflowY: 'auto' };
-    const rightPanelStyle = { flex: 1, backgroundColor: '#f9fafb', borderLeft: '1px solid #e5e7eb', padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '1rem' };
-
-    const inputStyle = { backgroundColor: '#f3f4f6', border: 'none', padding: '10px 10px', borderRadius: '0.5rem', width: '100%', outline: 'none', color: '#374151', fontSize: 14, fontFamily: "geist" };
-    const departmentChipStyle = (dept) => ({ padding: '5px 10px', borderRadius: 12, fontSize: 12, cursor: 'pointer', backgroundColor: selectedDepartments.includes(dept) ? '#3b82f6' : '#f3f4f6', color: selectedDepartments.includes(dept) ? 'white' : '#4b5563', fontFamily: "geist", transition: 'all 0.15s ease-in-out' });
-    const labelStyle = (isError) => ({ fontSize: 14, fontWeight: 450, fontFamily: "geist", color: isError ? 'red' : 'inherit', whiteSpace: 'nowrap' });
-    const colorSwatchStyle = (color, isSelected) => ({ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: color, cursor: 'pointer', border: isSelected ? '2px solid #3b82f6' : '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'transform 0.1s ease', transform: isSelected ? 'scale(1.1)' : 'scale(1)', boxShadow: isSelected ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' });
-    const dateButtonStyle = (isError) => ({ position: 'relative', padding: "5px 10px", fontSize: 12, fontFamily: "geist", fontWeight: 450, borderRadius: 8, border: isError ? '1px solid red' : '1px solid #e5e7eb', backgroundColor: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', color: isError ? 'red' : (eventDate ? '#374151' : '#4b5563') });
-    
-    const submitButtonStyle = (isDisabled) => {
-        const activeStyles = { background: 'linear-gradient(to right, #4268BD, #3F6AC9)', cursor: 'pointer', fontWeight: '600' };
-        const disabledStyles = { backgroundColor: '#cccccc', background: '#cccccc', cursor: 'not-allowed', fontWeight: '400' };
-        return { color: 'white', padding: '10px 24px', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px', border: 'none', fontFamily: "geist", fontSize: 12, ...(isDisabled ? disabledStyles : activeStyles) };
     };
 
     const currentColorObj = EVENT_COLORS.find(c => c.value === selectedColor) || EVENT_COLORS[0];
 
-    // Helper to display date range
-    const displayDateRange = () => {
-        if (!eventDate) return 'Date';
-        const start = new Date(eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        if (!eventEndDate) return start;
-        const end = new Date(eventEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        return `${start} - ${end}`;
-    };
-
     return (
         <>
-            <PrimaryActionButton
-                label="Add Event"
-                onClick={() => setIsOpen(true)}
-            />
+            <PrimaryActionButton label="Add Event" onClick={() => setIsOpen(true)} />
 
-            {isOpen && (
-                <div style={modalOverlayStyle} onClick={handleCloseModal}>
-                    <form style={modalContentStyle} onSubmit={handleCreateEvent} className={animationClass} onClick={(e) => e.stopPropagation()}>
-                        <button type="button" onClick={handleCloseModal} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10" style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}><X size={20} /></button>
-
-                        {/* LEFT COLUMN */}
-                        <div style={leftPanelStyle}>
-                            <div className="flex justify-between items-center flex-shrink-0">
-                                <h2 style={{ fontSize: 16, fontFamily: "geist", fontWeight: 450 }}>Add Event</h2>
+            {/* OVERLAY */}
+            <div 
+                style={{
+                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                    backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)',
+                    zIndex: 9000, visibility: isOpen ? 'visible' : 'hidden',
+                    opacity: isOpen ? 1 : 0, transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}
+                onClick={() => setIsOpen(false)}
+            >
+                {/* PREVIEW CONTAINER */}
+                <div 
+                    style={{
+                        position: 'absolute', left: '30%', top: '50%', transform: 'translate(-50%, -50%)',
+                        zIndex: 9001, pointerEvents: 'none', transition: 'all 0.5s ease',
+                        opacity: isOpen ? 1 : 0, scale: isOpen ? 1 : 0.8
+                    }}
+                >
+                    <div style={{ padding: '10px', backgroundColor: 'white', borderRadius: '24px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
+                        <div style={{ width: '320px', height: '420px', backgroundColor: selectedColor, borderRadius: '20px', padding: '30px', display: 'flex', flexDirection: 'column', transition: 'background-color 0.4s ease' }}>
+                            <div style={{ backgroundColor: 'white', width: 'fit-content', padding: '6px 12px', borderRadius: '10px', fontSize: 12, fontWeight: 700, color: currentColorObj.text, marginBottom: '20px' }}>
+                                {eventDate ? new Date(eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'DATE'} 
+                                {eventEndDate && ` - ${new Date(eventEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
                             </div>
-
-                            {/* Date & Submit */}
-                            <div className="flex justify-between items-center flex-shrink-0">
-                                <div className="flex gap-2 max-h-[40px] items-center">
-                                    {/* Start Date */}
-                                    <label style={dateButtonStyle(validationError.eventDate)} className="hover:bg-gray-50 transition-colors">
-                                        <span style={{ color: validationError.eventDate ? 'red' : (eventDate ? '#374151' : 'inherit'), fontWeight: eventDate ? 500 : 450 }}>{eventDate ? new Date(eventDate).toLocaleDateString('en-US') : 'Start Date'}</span>
-                                        <Calendar size={12} style={{ color: validationError.eventDate ? 'red' : '#4b5563' }} />
-                                        <input type="date" value={eventDate} onChange={handleEventDateChange} onClick={(e) => { try { if (e.target.showPicker) e.target.showPicker(); } catch (error) { } }} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} />
-                                    </label>
-                                    
-                                    {/* End Date */}
-                                    {eventDate && (
-                                        <>
-                                            <span className="text-gray-400 text-xs">to</span>
-                                            <label style={dateButtonStyle(false)} className="hover:bg-gray-50 transition-colors">
-                                                <span style={{ color: eventEndDate ? '#374151' : 'inherit', fontWeight: eventEndDate ? 500 : 450 }}>{eventEndDate ? new Date(eventEndDate).toLocaleDateString('en-US') : 'End Date (Optional)'}</span>
-                                                <Calendar size={12} style={{ color: '#4b5563' }} />
-                                                <input type="date" min={eventDate} value={eventEndDate} onChange={handleEventEndDateChange} onClick={(e) => { try { if (e.target.showPicker) e.target.showPicker(); } catch (error) { } }} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} />
-                                            </label>
-                                        </>
-                                    )}
-                                </div>
-                                <button type="submit" disabled={isButtonDisabled} style={submitButtonStyle(isButtonDisabled)} className="transition-colors hover:bg-blue-700 shadow-md">
-                                    {isSubmitting ? (
-                                        <>
-                                            <Loader2 size={14} className="animate-spin" /> Saving...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span>✓</span> Submit
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-
-                            {/* Event Name */}
-                            <div className="flex items-center gap-4 w-full flex-shrink-0">
-                                <label style={labelStyle(validationError.eventName)} className="w-[120px]">Event Name:</label>
-                                {isEditingName ? (
-                                    <input
-                                        ref={nameInputRef}
-                                        type="text"
-                                        placeholder="e.g., Celebration Day!"
-                                        style={{ ...inputStyle, border: validationError.eventName ? '1px solid red' : 'none' }}
-                                        value={eventName}
-                                        onChange={handleEventNameChange}
-                                        onBlur={handleNameBlur}
-                                    />
-                                ) : (
-                                    <div
-                                        onClick={() => setIsEditingName(true)}
-                                        className="w-full flex items-center justify-between cursor-pointer hover:bg-gray-100 rounded px-2 py-2 group"
-                                    >
-                                        <span style={{ fontSize: 18, fontWeight: 600, fontFamily: 'geist', color: '#111827' }}>
-                                            {eventName}
-                                        </span>
-                                        <Edit2 size={14} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Color Picker */}
-                            <div className="flex items-center gap-4 w-full flex-shrink-0">
-                                <label style={labelStyle(false)} className="w-[120px]">Color Tag:</label>
-                                <div className="flex gap-2">
-                                    {EVENT_COLORS.map((colorObj) => (
-                                        <div key={colorObj.name} title={colorObj.name} onClick={() => setSelectedColor(colorObj.value)} style={colorSwatchStyle(colorObj.value, selectedColor === colorObj.value)}>
-                                            {selectedColor === colorObj.value && <Check size={14} className="text-blue-600" strokeWidth={3} />}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Department Selection */}
-                            <div
-                                onMouseEnter={() => setIsDeptContainerHovered(true)}
-                                onMouseLeave={() => setIsDeptContainerHovered(false)}
-                                className="flex flex-col gap-2 flex-shrink-0 transition-all duration-300 ease-in-out"
-                            >
-                                {isLoadingData ? (
-                                    <div className="flex items-center gap-2 text-gray-400 text-xs">
-                                        <Loader2 size={12} className="animate-spin" /> Loading departments...
-                                    </div>
-                                ) : !isDeptContainerHovered && selectedDepartments.length > 0 ? (
-                                    <div className="flex items-center gap-3 h-[45px]" >
-                                        <label style={labelStyle(validationError.departments)}>Selected Department/s:</label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {selectedDepartments.slice(0, 2).map((dept, i) => (
-                                                <span key={i} style={{ ...departmentChipStyle(dept), cursor: 'default' }}>{dept}</span>
-                                            ))}
-                                            {selectedDepartments.length > 2 && (
-                                                <span style={{ padding: '5px 10px', borderRadius: 12, fontSize: 12, backgroundColor: '#e5e7eb', color: '#374151', fontFamily: "geist", cursor: 'default' }}>
-                                                    +{selectedDepartments.length - 2}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <label style={labelStyle(validationError.departments)}>Select Department/s:</label>
-                                        <div className="flex flex-wrap gap-2.5 border-gray-200 border-[1px] rounded-md p-3 bg-white" style={{ padding: "5px" }}>
-                                            <span 
-                                                style={departmentChipStyle('All')} 
-                                                className="transition-colors hover:bg-gray-200" 
-                                                onClick={() => toggleDepartment('All')}
-                                            >
-                                                All Departments
-                                            </span>
-                                            {availableDepartments.map((dept, i) => (
-                                                <span key={i} style={departmentChipStyle(dept)} className="transition-colors hover:bg-gray-200" onClick={() => toggleDepartment(dept)}>{dept}</span>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-
-                            {/* Program Section */}
-                            <div className="flex flex-col flex-grow min-h-0">
-                                <div style={{ marginBottom: 5 }}><label style={labelStyle(validationError.programs)}>Select sections:</label></div>
-                                {selectedDepartments.length === 0 ? (
-                                    <div className="flex items-center justify-center h-full" style={{ padding: 16, backgroundColor: '#fef3c7', borderRadius: 8, color: '#92400e', fontFamily: "geist", fontSize: 14, fontWeight: 450 }}>Please select a Department.</div>
-                                ) : (
-                                    <>
-                                        <div className="w-full flex justify-between flex-shrink-0" style={{ marginBottom: 10 }}>
-                                            <div className="relative flex-1 max-w-md flex-row">
-                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" size={14} />
-                                                <input type="text" placeholder="Search" className="w-full text-sm outline-none" style={{ width: '100%', paddingLeft: '40px', paddingRight: '16px', paddingTop: '6px', paddingBottom: '6px', backgroundColor: '#F0F1F6', border: 'none', borderRadius: 8, fontSize: 12, fontFamily: "geist", fontWeight: 450 }} />
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm ml-4">
-                                                <input type="checkbox" className="accent-blue-600 w-4 h-4" checked={selectedPrograms.length === allProgramsToDisplay.length && allProgramsToDisplay.length > 0} onChange={(e) => { const programsToSelect = e.target.checked ? allProgramsToDisplay : []; setSelectedPrograms(programsToSelect); if (validationError.programs && programsToSelect.length > 0) setValidationError(prev => ({ ...prev, programs: false })); }} />
-                                                <label style={{ fontWeight: 450, fontSize: 12, fontFamily: "geist" }}>Select All</label>
-                                            </div>
-                                        </div>
-
-                                        {/* List Container */}
-                                        <div className="rounded-lg border border-gray-200 flex flex-col flex-grow min-h-0 overflow-hidden bg-white">
-                                            <div className="overflow-y-auto flex-grow">
-                                                <div className="grid grid-cols-3 gap-3" style={{ padding: "10px" }}>
-                                                    {programsToDisplay.map((program, idx) => {
-                                                        const isSelected = selectedPrograms.some(p => p.id === program.id);
-                                                        return (
-                                                            <div
-                                                                key={idx}
-                                                                onClick={() => handleProgramToggle(program)}
-                                                                className={`flex items-center p-2 rounded-md cursor-pointer border transition-all duration-200
-                                                                ${isSelected
-                                                                    ? 'bg-blue-50 border-blue-200 shadow-sm'
-                                                                    : 'bg-white border-gray-100 hover:border-gray-300 hover:bg-gray-50'
-                                                                }`}
-                                                                style={{ height: '40px' }}
-                                                            >
-                                                                <div className="flex items-center justify-center w-8 shrink-0 mr-2">
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        className="accent-blue-600 w-4 h-4 cursor-pointer"
-                                                                        checked={isSelected}
-                                                                        readOnly
-                                                                    />
-                                                                </div>
-                                                                <span
-                                                                    className="truncate"
-                                                                    style={{
-                                                                        fontWeight: 500, fontSize: 12, fontFamily: "geist",
-                                                                        color: isSelected ? '#1e40af' : '#111827'
-                                                                    }}
-                                                                    title={program.display}
-                                                                >
-                                                                    {program.display}
-                                                                </span>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-
-                                            {/* Pagination UI */}
-                                            {allProgramsToDisplay.length > ITEMS_PER_PAGE && (
-                                                <div style={{ paddingTop: '10px', borderTop: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', paddingBottom: '10px' }} className="flex-shrink-0 bg-white">
-                                                    <button type="button" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" style={{ padding: '6px 10px', borderRadius: '6px', border: 'none', background: 'transparent' }}>
-                                                        <ChevronLeft size={14} /> Previous
-                                                    </button>
-                                                    {totalPages > 5 && visiblePages[0] > 1 && (<><AnimatedPageButton page={1} isActive={currentPage === 1} onClick={handlePageChange} /><span className="text-gray-400 text-xs">...</span></>)}
-                                                    {visiblePages.map((page) => (<AnimatedPageButton key={page} page={page} isActive={currentPage === page} onClick={handlePageChange} />))}
-                                                    {totalPages > 5 && visiblePages[visiblePages.length - 1] < totalPages && (<><span className="text-gray-400 text-xs">...</span><AnimatedPageButton page={totalPages} isActive={currentPage === totalPages} onClick={handlePageChange} /></>)}
-                                                    <button type="button" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" style={{ padding: '6px 10px', borderRadius: '6px', border: 'none', background: 'transparent' }}>
-                                                        Next <ChevronRight size={14} />
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </>
-                                )}
+                            <h2 style={{ fontSize: 28, fontWeight: 800, color: currentColorObj.text, lineHeight: 1.1, fontFamily: 'geist' }}>
+                                {eventName || "New Event"}
+                            </h2>
+                            <div style={{ marginTop: 'auto', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                {selectedDepartments.map(d => (
+                                    <span key={d} style={{ fontSize: 10, background: 'white', padding: '4px 10px', borderRadius: 20, color: currentColorObj.text, fontWeight: 600 }}>
+                                        {formatDeptName(d)}
+                                    </span>
+                                ))}
                             </div>
                         </div>
-
-                        {/* RIGHT COLUMN (Preview) */}
-                        <div style={rightPanelStyle}>
-                            <h3 style={{ fontFamily: 'geist', fontSize: 12, color: '#6b7280', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Preview Card</h3>
-                            <div style={{ width: '280px', height: '380px', backgroundColor: selectedColor, borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', transition: 'background-color 0.3s ease', position: 'relative' }}>
-                                <div style={{ backgroundColor: 'rgba(255,255,255,0.6)', padding: '4px 10px', borderRadius: '8px', alignSelf: 'flex-start', marginBottom: '20px', fontSize: 12, fontWeight: 600, fontFamily: 'geist', color: currentColorObj.text, display: 'flex', alignItems: 'center', gap: 6 }}>
-                                    <Calendar size={12} />
-                                    {displayDateRange()}
-                                </div>
-                                <div style={{ flex: 1 }}>
-                                    <h3 style={{ fontFamily: 'geist', fontSize: 24, fontWeight: 600, color: currentColorObj.text, lineHeight: 1.2, wordBreak: 'break-word' }}>{eventName || "Event Title Goes Here"}</h3>
-                                    <div style={{ marginTop: 8, fontSize: 13, color: currentColorObj.text, opacity: 0.8, fontFamily: 'geist' }}>{selectedPrograms.length > 0 ? `${selectedPrograms.length} section${selectedPrograms.length !== 1 ? 's' : ''} selected` : "No sections selected"}</div>
-                                </div>
-                                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 'auto' }}>
-                                    {selectedDepartments.length > 0 ? (selectedDepartments.slice(0, 3).map((dept, i) => <span key={i} style={{ fontSize: 10, backgroundColor: 'white', padding: '4px 8px', borderRadius: 20, fontFamily: 'geist', color: currentColorObj.text, fontWeight: 500 }}>{dept}</span>)) : (<div style={{ display: 'flex', alignItems: 'center', gap: 4, opacity: 0.5 }}><Tag size={14} color={currentColorObj.text} /><span style={{ fontSize: 12, fontFamily: 'geist', color: currentColorObj.text }}>Departments</span></div>)}
-                                    {selectedDepartments.length > 3 && (<span style={{ fontSize: 10, backgroundColor: 'white', padding: '4px 8px', borderRadius: 20, fontFamily: 'geist', color: currentColorObj.text }}>+{selectedDepartments.length - 3}</span>)}
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                    </div>
                 </div>
-            )}
+
+                {/* SLIDE PANEL (RIGHT) */}
+                <div 
+                    style={{
+                        position: 'absolute', right: 0, top: 0, width: '450px', height: '100%',
+                        backgroundColor: 'white', boxShadow: '-10px 0 30px rgba(0,0,0,0.1)',
+                        transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
+                        transition: 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+                        display: 'flex', flexDirection: 'column', padding: '40px 30px'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="flex justify-between items-center" style={{ marginBottom: '32px' }}>
+                        <h2 className="text-lg font-geist" style={{ fontWeight: 400 }}>Create Event</h2>
+                        <button onClick={() => setIsOpen(false)} className="hover:bg-gray-100 rounded-full" style={{ border: 'none', cursor: 'pointer', padding: '8px' }}><X size={20}/></button>
+                    </div>
+
+                    <div style={{ flex: 1, overflowY: 'auto', paddingRight: '10px' }} className="custom-scrollbar">
+                        {/* Dates Row */}
+                        <div className="flex" style={{ gap: '16px', marginBottom: '24px' }}>
+                            <div className="flex-1">
+                                <label className="text-xs font-geist text-gray-500 uppercase block" style={{ marginBottom: '8px', fontWeight: 420 }}>Start Date</label>
+                                <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} className="font-geist w-full bg-gray-50 rounded-lg text-sm border-none outline-none" style={{ padding: '12px' }} />
+                            </div>
+                            <div className="flex-1">
+                                <label className="text-xs font-geist text-gray-500 uppercase block" style={{ marginBottom: '8px', fontWeight: 420 }}>End Date</label>
+                                <input type="date" min={eventDate} value={eventEndDate} onChange={(e) => setEventEndDate(e.target.value)} className="font-geist w-full bg-gray-50 rounded-lg text-sm border-none outline-none" style={{ padding: '12px' }} />
+                            </div>
+                        </div>
+
+                        {/* Name Input */}
+                        <div style={{ marginBottom: '24px' }}>
+                            <label className="text-xs font-geist text-gray-500 uppercase block" style={{ marginBottom: '8px', fontWeight: 420 }}>Event Name</label>
+                            <input 
+                                type="text" placeholder="e.g. Culminating Activity, Meeting" value={eventName} 
+                                onChange={(e) => setEventName(e.target.value)} 
+                                className="font-geist w-full bg-gray-50 rounded-lg text-sm border-none outline-none" 
+                                style={{ padding: '12px' }}
+                            />
+                        </div>
+
+                        {/* Theme Colors */}
+                        <div style={{ marginBottom: '24px' }}>
+                            <label className="text-xs font-geist text-gray-500 uppercase block" style={{ marginBottom: '12px', fontWeight: 420 }}>Theme Color</label>
+                            <div className="flex" style={{ gap: '12px' }}>
+                                {EVENT_COLORS.map(c => (
+                                    <div 
+                                        key={c.value} onClick={() => setSelectedColor(c.value)}
+                                        style={{ width: 28, height: 28, background: c.value, borderRadius: '50%', cursor: 'pointer', border: selectedColor === c.value ? '2px solid #3b82f6' : '2px solid transparent' }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Departments Chips */}
+                        <div style={{ marginBottom: '24px' }}>
+                            <label className="text-xs font-geist text-gray-500 uppercase block" style={{ marginBottom: '12px', fontWeight: 420 }}>Departments</label>
+                            <div className="flex flex-wrap" style={{ gap: '8px' }}>
+                                <span 
+                                    onClick={() => setSelectedDepartments(['All', ...availableDepartments])}
+                                    className={`font-bold cursor-pointer transition-all ${selectedDepartments.includes('All') ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+                                    style={{ padding: '6px 12px', borderRadius: '20px', fontSize: '11px' }}
+                                >
+                                    ALL
+                                </span>
+                                {availableDepartments.map(d => (
+                                    <span 
+                                        key={d} onClick={() => setSelectedDepartments(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d])}
+                                        className={`font-bold cursor-pointer transition-all ${selectedDepartments.includes(d) ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+                                        style={{ padding: '6px 12px', borderRadius: '20px', fontSize: '11px' }}
+                                    >
+                                        {formatDeptName(d)}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* 🟢 FIXED SIZE SECTION LIST */}
+                        <div>
+                            <div className="flex justify-between items-center" style={{ marginBottom: '12px' }}>
+                                <label className="text-xs font-bold text-gray-500 uppercase">Specific Sections (Optional)</label>
+                                <div className="flex items-center" style={{ gap: '8px' }}>
+                                    <Search size={14} className="text-gray-400" />
+                                    <input 
+                                        value={searchQuery} onChange={(e) => {setSearchQuery(e.target.value); setCurrentPage(1);}}
+                                        placeholder="Search..." className="bg-transparent text-xs outline-none w-20 border-b border-gray-200"
+                                        style={{ paddingBottom: '4px' }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Grid: 2 Columns, 5 Rows Fixed */}
+                            <div className="grid grid-cols-2" style={{ gap: '8px', marginBottom: '16px', minHeight: '230px' }}>
+                                {programsToDisplay.map(p => {
+                                    if (p.isEmpty) {
+                                        return (
+                                            <div 
+                                                key={p.id} 
+                                                style={{ padding: '8px', border: '1px dashed #f3f4f6', height: '34px', borderRadius: '6px' }}
+                                            />
+                                        );
+                                    }
+                                    const isSelected = selectedPrograms.find(x => x.id === p.id);
+                                    return (
+                                        <div 
+                                            key={p.id} onClick={() => setSelectedPrograms(prev => isSelected ? prev.filter(x => x.id !== p.id) : [...prev, p])}
+                                            className={`rounded-md border text-[10px] font-bold cursor-pointer flex justify-between items-center transition-all ${isSelected ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-100 text-gray-500 hover:border-gray-300'}`}
+                                            style={{ padding: '8px', height: '34px' }}
+                                        >
+                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.display}</span>
+                                            {isSelected && <Check size={12} />}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Pagination Controls */}
+                            {totalPages > 1 && (
+                                <div className="flex justify-center" style={{ gap: '16px' }}>
+                                    <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="disabled:opacity-30" style={{ border: 'none', background: 'transparent', padding: '4px', cursor: 'pointer' }}><ChevronLeft size={16}/></button>
+                                    <span className="text-xs font-bold text-gray-400" style={{ display: 'flex', alignItems: 'center' }}>{currentPage} / {totalPages}</span>
+                                    <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)} className="disabled:opacity-30" style={{ border: 'none', background: 'transparent', padding: '4px', cursor: 'pointer' }}><ChevronRight size={16}/></button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Footer Submit */}
+                    <div style={{ paddingTop: '24px', borderTop: '1px solid #e5e7eb', marginTop: 'auto' }}>
+                        <button 
+                            disabled={isSubmitting || !eventName || !eventDate || selectedDepartments.length === 0}
+                            onClick={handleCreateEvent}
+                            className="w-full bg-[#4268BD] text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-[#3556a0] transition-all disabled:grayscale disabled:opacity-50"
+                            style={{ padding: '16px', border: 'none', cursor: 'pointer' }}
+                        >
+                            {isSubmitting ? 'CREATING EVENT...' : 'CREATE EVENT'}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </>
     );
 };
