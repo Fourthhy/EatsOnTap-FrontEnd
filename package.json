@@ -25,6 +25,8 @@
     "framer-motion": "^12.23.26",
     "geist": "^1.5.1",
     "hugeicons-react": "^0.3.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.544.0",
     "motion": "^12.23.26",
     "react": "^19.1.1",

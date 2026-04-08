@@ -1,47 +1,80 @@
-import React, { useState, useEffect } from 'react';
-import { X, FileText, Download, CheckSquare, Square } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Download, AlertTriangle, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { exportAndArchiveReport } from "../../../../functions/admin/exportAndArchiveReport";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable'; // 🟢 Import it as a function
 
 const ExportReportModal = ({ isOpen, onClose }) => {
-    // --- STATE ---
-    // 🟢 Hardcoded to 'pdf' and auto-selected IDs for the demo
-    const [selectedFormats, setSelectedFormats] = useState('pdf'); 
-    const [selectedReports, setSelectedReports] = useState(['bar_chart', 'line_chart', 'banded_tadmc', 'banded_cur', 'banded_ocf', 'individual_claims']);
-    const [selectedScopes, setSelectedScopes] = useState(['daily', 'weekly', 'monthly']);
+    const [isProcessing, setIsProcessing] = useState(false);
 
-    // --- OPTIONS DATA ---
-    const reportOptions = [
-        { id: 'bar_chart', label: 'Bar Chart' },
-        { id: 'line_chart', label: 'Line Chart' },
-        { id: 'banded_tadmc', label: 'Banded Chart TADMC' },
-        { id: 'banded_cur', label: 'Banded Chart CUR' },
-        { id: 'banded_ocf', label: 'Banded Chart OCF' },
-        { id: 'individual_claims', label: 'Individual Claims' },
-    ];
+    // --- PDF GENERATOR ENGINE ---
+    const generatePDF = (reportData) => {
+        const doc = new jsPDF('p', 'mm', 'a4');
 
-    const scopeOptions = [
-        { id: 'daily', label: 'All past data in daily format' },
-        { id: 'weekly', label: 'All past data in weekly format' },
-        { id: 'monthly', label: 'All past data in monthly format' },
-    ];
+        // 1. Header & Title
+        doc.setFontSize(22);
+        doc.setTextColor(30, 58, 138); // Dark Blue
+        doc.text(`Monthly System Report: ${reportData.bucketMonth}`, 14, 20);
 
-    // --- THE "FAKE" EXPORT LOGIC ---
-    const handleExport = () => {
-        console.log("Simulating Export...");
+        doc.setFontSize(11);
+        doc.setTextColor(100, 116, 139); // Slate Gray
+        doc.text(`Academic Year: ${reportData.academicYear}`, 14, 28);
+        doc.text(`Exported on: ${new Date().toLocaleString()}`, 14, 34);
 
-        // 🟢 SIMULATED DOWNLOAD LOGIC
-        // This looks for a file in your 'public' folder named 'Report_Demo.pdf'
-        const link = document.createElement('a');
-        link.href = '/eot_pdf_report.pdf'; // Path to your fake file in public folder
-        link.download = `System_Report_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // 2. Decorative Line
+        doc.setDrawColor(226, 232, 240);
+        doc.line(14, 40, 196, 40);
 
-        // Close after a tiny delay so it feels like it "processed"
-        setTimeout(() => {
-            onClose();
-        }, 500);
+        // 3. Prepare Executive Summary Data
+        const summaryBody = [
+            ['Total Eligible Students', reportData.statistics.totalEligible],
+            ['Total Meals Claimed', reportData.statistics.totalMealsClaimed],
+            ['Total Snacks Claimed', reportData.statistics.totalSnacksClaimed],
+            ['Total Unclaimed (incl. Absences)', reportData.statistics.totalUnclaimed + reportData.statistics.totalAbsences],
+            ['Total Allotted Credits', `PHP ${reportData.financials.totalAllottedCredits.toLocaleString()}`],
+            ['Total Used Credits', `PHP ${reportData.financials.totalUsedCredits.toLocaleString()}`],
+            ['Total On-Hand Cash (Extras)', `PHP ${reportData.financials.totalOnHandCash.toLocaleString()}`],
+        ];
+
+        autoTable(doc, {
+            startY: 45,
+            head: [['Operational Metric', 'Monthly Total']],
+            body: summaryBody,
+            theme: 'grid',
+            headStyles: { fillColor: [66, 104, 189], fontSize: 11 },
+            styles: { fontSize: 10, cellPadding: 5 },
+            columnStyles: {
+                0: { fontStyle: 'bold', cellWidth: 100 },
+                1: { halign: 'right' }
+            }
+        });
+
+        // 5. Save the File
+        doc.save(`EOT_Archive_${reportData.bucketMonth}.pdf`);
+    };
+
+    const handleExport = async () => {
+        setIsProcessing(true);
+        try {
+            // 🟢 Using the new clean function
+            const result = await exportAndArchiveReport({ bucketMonth: "2026-03" });
+
+            console.log("✅ Data retrieved from central API function:", result);
+
+            // Generate the PDF using the returned data
+            generatePDF(result.data);
+
+            setTimeout(() => {
+                onClose();
+            }, 1000);
+
+        } catch (error) {
+            console.error("❌ Export Error:", error.message);
+            alert(`System Error: ${error.message}`);
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     // --- STYLES ---
@@ -52,99 +85,77 @@ const ExportReportModal = ({ isOpen, onClose }) => {
     };
 
     const modalStyle = {
-        backgroundColor: 'white', width: '600px', maxHeight: '98vh',
+        backgroundColor: 'white', width: '550px', maxHeight: '98vh',
         overflowY: 'auto', borderRadius: '12px', padding: '24px',
         fontFamily: 'geist', position: 'relative',
     };
-
-    const sectionTitleStyle = {
-        fontSize: '11px', fontWeight: 600, color: '#9ca3af', 
-        textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px'
-    };
-
-    const checkboxRowStyle = (isSelected) => ({
-        display: 'flex', alignItems: 'center', gap: '10px',
-        padding: '8px 12px', borderRadius: '6px', cursor: 'pointer',
-        backgroundColor: isSelected ? '#eff6ff' : 'transparent',
-        border: isSelected ? '1px solid #bfdbfe' : '1px solid transparent',
-        transition: 'all 0.15s ease'
-    });
 
     return (
         <AnimatePresence>
             {isOpen && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={overlayStyle} onClick={onClose}>
-                    <motion.div 
-                        initial={{ scale: 0.95, opacity: 0, y: 10 }} 
-                        animate={{ scale: 1, opacity: 1, y: 0 }} 
-                        exit={{ scale: 0.95, opacity: 0, y: 10 }} 
-                        style={modalStyle} 
+                    <motion.div
+                        initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                        style={modalStyle}
                         onClick={e => e.stopPropagation()}
                     >
                         {/* Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '24px' }}>
                             <div>
-                                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#111827', margin: 0 }}>Export System Report</h2>
-                                <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0 0' }}>All system analytics are pre-selected for full export.</p>
+                                <h2 style={{ fontSize: '18px', fontWeight: 600, color: '#111827', margin: 0 }}>Export & Archive Report</h2>
+                                <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0 0' }}>Generate a secure PDF backup of your monthly meal operations.</p>
                             </div>
                             <button onClick={onClose} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#9ca3af' }}><X size={20} /></button>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                            {/* SECTION 1: REPORTS */}
-                            <div>
-                                <div style={sectionTitleStyle}>1. Analytics Included</div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
-                                    {reportOptions.map((opt) => (
-                                        <div key={opt.id} style={checkboxRowStyle(true)}>
-                                            <CheckSquare size={18} color="#4268BD" />
-                                            <span style={{ fontSize: '13px', fontWeight: 500 }}>{opt.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                            {/* SECTION 1: EXPECTED CONTENT */}
+                            <div style={{ backgroundColor: '#f9fafb', padding: '16px', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+                                <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#374151', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <Info size={16} color="#4268BD" /> What is included in this PDF?
+                                </h3>
+                                <ul style={{ margin: 0, paddingLeft: '24px', color: '#4b5563', fontSize: '13px', lineHeight: '1.6' }}>
+                                    <li><strong>Executive Summary:</strong> Total eligible vs. claimed meals for the month.</li>
+                                    <li><strong>Daily Breakdowns:</strong> Operational data and menus for every active day.</li>
+                                    <li><strong>Financial Metrics:</strong> Daily Cost Averages (TADMC), Utilization (CUR), and Overclaim (OCF) statistics.</li>
+                                </ul>
                             </div>
 
-                            {/* SECTION 2: SCOPE */}
-                            <div>
-                                <div style={sectionTitleStyle}>2. Data Scope</div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                    {scopeOptions.map((opt) => (
-                                        <div key={opt.id} style={checkboxRowStyle(true)}>
-                                            <CheckSquare size={18} color="#4268BD" />
-                                            <span style={{ fontSize: '13px', fontWeight: 500 }}>{opt.label}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* SECTION 3: FORMAT */}
-                            <div>
-                                <div style={sectionTitleStyle}>3. Export Format</div>
-                                <div style={{ 
-                                    padding: '16px', border: '2px solid #4268BD', borderRadius: '8px', 
-                                    backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', gap: '12px' 
-                                }}>
-                                    <FileText size={32} color="#b91c1c" />
-                                    <div>
-                                        <p style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>PDF Document</p>
-                                        <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>Optimized for presentation and printing.</p>
-                                    </div>
-                                </div>
+                            {/* SECTION 2: THE PURGE WARNING */}
+                            <div style={{ backgroundColor: '#fef2f2', padding: '16px', borderRadius: '8px', border: '1px solid #fecaca' }}>
+                                <h3 style={{ fontSize: '14px', fontWeight: 600, color: '#991b1b', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <AlertTriangle size={16} color="#dc2626" /> 24-Hour Automated Purge
+                                </h3>
+                                <p style={{ margin: 0, color: '#991b1b', fontSize: '13px', lineHeight: '1.5' }}>
+                                    To optimize database performance, exporting this document will schedule the raw daily data for hard deletion.
+                                    <strong> You will have a 24-hour recovery window</strong> to re-download the file or cancel the purge. Top-level historical monthly aggregates will be permanently retained.
+                                </p>
                             </div>
                         </div>
 
                         {/* Footer */}
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '32px', borderTop: '1px solid #f3f4f6', paddingTop: '20px' }}>
-                            <button onClick={onClose} style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #e5e7eb', background: 'white', cursor: 'pointer' }}>Cancel</button>
-                            <button 
+                            <button
+                                onClick={onClose}
+                                disabled={isProcessing}
+                                style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid #e5e7eb', background: 'white', cursor: isProcessing ? 'not-allowed' : 'pointer' }}
+                            >
+                                Cancel
+                            </button>
+                            <button
                                 onClick={handleExport}
-                                style={{ 
-                                    padding: '8px 24px', borderRadius: '6px', border: 'none', 
-                                    background: 'linear-gradient(to right, #4268BD, #3F6AC9)', 
-                                    color: 'white', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
+                                disabled={isProcessing}
+                                style={{
+                                    padding: '8px 24px', borderRadius: '6px', border: 'none',
+                                    background: isProcessing ? '#9ca3af' : 'linear-gradient(to right, #4268BD, #3F6AC9)',
+                                    color: 'white', fontWeight: 600, cursor: isProcessing ? 'not-allowed' : 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s'
                                 }}
                             >
-                                <Download size={18} /> Generate PDF
+                                <Download size={18} /> {isProcessing ? "Processing..." : "Export & Archive"}
                             </button>
                         </div>
                     </motion.div>
