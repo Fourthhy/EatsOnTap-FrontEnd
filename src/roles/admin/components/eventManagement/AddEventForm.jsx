@@ -80,7 +80,9 @@ export const AddEventForm = () => {
                     section: section.section || section.name || section,
                     year: level.levelName || level.gradeLevel || "N/A",
                     display: `${level.levelName || level.gradeLevel} - ${section.section || section.name || section}`,
-                    type: cat.category.toLowerCase().includes("college") ? 'HIGHER_ED' : 'BASIC_ED'
+                    type: cat.category.toLowerCase().includes("college") ? 'HIGHER_ED' : 'BASIC_ED',
+                    // 🟢 ADDED CATEGORY: To track which department this section belongs to for hybrid selection
+                    category: cat.category 
                 }))
             )
         ).sort((a, b) => a.display.localeCompare(b.display));
@@ -111,6 +113,29 @@ export const AddEventForm = () => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
+            // 🟢 HYBRID SELECTION LOGIC
+            const actualDepts = selectedDepartments.includes('All') ? availableDepartments : selectedDepartments;
+            let finalPayloadItems = [];
+
+            actualDepts.forEach(deptName => {
+                // Check if the user manually ticked ANY sections for this specific department
+                const manuallySelectedInDept = selectedPrograms.filter(p => p.category === deptName);
+
+                if (manuallySelectedInDept.length > 0) {
+                    // Rule: If there are specific sections, then that's it.
+                    finalPayloadItems.push(...manuallySelectedInDept);
+                } else {
+                    // Rule: If department without specific section, then all sections must be selected.
+                    const allSectionsInDept = allProgramsToDisplay.filter(p => p.category === deptName);
+                    finalPayloadItems.push(...allSectionsInDept);
+                }
+            });
+
+            // Split the hybrid list into Basic and Higher Ed for the backend arrays
+            const basicEdSelections = finalPayloadItems.filter(p => p.type !== 'HIGHER_ED');
+            const higherEdSelections = finalPayloadItems.filter(p => p.type === 'HIGHER_ED');
+
+            // --- PAYLOAD CONSTRUCTION ---
             const startDateObj = new Date(eventDate);
             const endDateObj = eventEndDate ? new Date(eventEndDate) : startDateObj;
             const payload = {
@@ -121,11 +146,15 @@ export const AddEventForm = () => {
                 startMonth: startDateObj.toLocaleString('default', { month: 'long' }),
                 endMonth: endDateObj.toLocaleString('default', { month: 'long' }),
                 eventColor: selectedColor,
-                forEligibleSection: selectedPrograms.filter(p => p.type !== 'HIGHER_ED').map(p => ({ section: p.section, year: p.year })),
-                forEligibleProgramsAndYear: selectedPrograms.filter(p => p.type === 'HIGHER_ED').map(p => ({ program: p.section, year: p.year })),
+                
+                // 🟢 Send the finalized, auto-expanded hybrid arrays!
+                forEligibleSection: basicEdSelections.map(p => ({ section: p.section, year: p.year })),
+                forEligibleProgramsAndYear: higherEdSelections.map(p => ({ program: p.section, year: p.year })),
+                
                 submissionStatus: 'APPROVED',
                 scheduleStatus: 'ONGOING'
             };
+
             await addEvent(payload);
             setIsOpen(false);
         } catch (error) {

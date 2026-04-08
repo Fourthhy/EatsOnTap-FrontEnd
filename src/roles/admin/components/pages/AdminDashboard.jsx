@@ -16,8 +16,10 @@ import { CustomStatsCard } from "../dashboard/CustomStatsCard";
 import { StatsCardGroup } from "../dashboard/StatsCardGroup";
 import { BarChartBox } from "../charts/BarChartBox";
 import { LineChartBox } from "../charts/LineChartBox";
+
 import { OngoingEvents } from "../dashboard/OngoingEvents";
 import { EventsPanel } from "../dashboard/EventsPanel";
+
 import { AnalyticTabs } from "../dashboard/AnalyticTabs";
 import { MealOverridePanel } from "../dashboard/MealOverridePanel";
 import { HeaderBar } from "../../../../components/global/HeaderBar";
@@ -214,8 +216,8 @@ export default function AdminDashboard() {
                         </div>
 
                         <div style={{ position: 'sticky', top: '35px', height: 'fit-content', display: 'flex', flexDirection: 'column', gap: "18px" }}>
-                            <OngoingEvents events={eventMealRequest[1] || []} isLoading={isLoading} />
-                            <EventsPanel events={eventMealRequest[0] || []} isLoading={isLoading} />
+                            <OngoingEvents events={eventMealRequest[0] || []} isLoading={isLoading} />
+                            <EventsPanel events={eventMealRequest[1] || []} isLoading={isLoading} />
                             <MealOverridePanel />
                             <div className="h-4"></div>
                         </div>

@@ -3,16 +3,35 @@ import { X, ChevronLeft, ChevronRight, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventPreviewCard } from './EventPreviewCard';
 import { GenericTable } from '../../../../components/global/table/GenericTable';
+import { getSchoolStructure } from '../../../../functions/admin/getSchoolStructure';
+
+// --- HELPER: Formats camelCase to Title Case (e.g., primaryEducation -> Primary Education) ---
+const formatDeptName = (name) => {
+    if (!name) return "Other";
+    const result = name.replace(/([A-Z])/g, " $1");
+    return result.charAt(0).toUpperCase() + result.slice(1);
+};
 
 const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [activeTab, setActiveTab] = useState('All'); 
     const [searchTerm, setSearchTerm] = useState('');
+    
+    // 🟢 1. STATE FOR DYNAMIC SCHOOL STRUCTURE
+    const [structureData, setStructureData] = useState([]);
+
+    // 🟢 2. FETCH LIVE STRUCTURE ON MOUNT
+    useEffect(() => {
+        if (isOpen) {
+            getSchoolStructure().then(data => {
+                if (Array.isArray(data)) setStructureData(data);
+            }).catch(err => console.error("Failed to load school structure", err));
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         if (isOpen && events.length > 0) {
-            // Support finding by mongo _id OR custom eventID
             const index = events.findIndex(e => e._id === initialEventId || e.id === initialEventId);
             setCurrentIndex(index >= 0 ? index : 0);
         }
@@ -20,6 +39,7 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
 
     useEffect(() => {
         setSearchTerm('');
+        setActiveTab('All'); // Reset tab when changing events
     }, [currentIndex]);
 
     const handleNext = (e) => {
@@ -34,70 +54,91 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
 
     const currentEvent = events[currentIndex];
 
-    // --- DEPARTMENT CLASSIFICATION ---
+    // --- 🟢 3. DYNAMIC DEPARTMENT CLASSIFICATION ---
     const getDepartment = (item) => {
-        // If explicitly tagged as Higher Ed / Program
-        if (item.categoryType === 'PROGRAM' || item.type === 'Higher Ed') return 'Higher Education';
+        // Try to reverse-lookup the department using the live structure data
+        if (structureData.length > 0) {
+            const identifier = item.section || item.program;
+            const year = item.year;
 
+            for (const cat of structureData) {
+                for (const level of cat.levels) {
+                    const levelIdentifier = level.levelName || level.gradeLevel;
+                    // String conversion ensures safe comparison between '1' and 1
+                    if (String(levelIdentifier) === String(year)) {
+                        const found = level.sections.find(s => 
+                            (s.section === identifier) || (s.name === identifier) || (s === identifier)
+                        );
+                        if (found) {
+                            return formatDeptName(cat.category);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fallback safety net (while structure is loading, or for old legacy data)
+        if (item.categoryType === 'PROGRAM' || item.type === 'Higher Ed') return 'Higher Education';
         const y = parseInt(item.year, 10);
         if (isNaN(y)) return 'Other';
-
         if (y >= 1 && y <= 6) return 'Primary Education';    
         if (y >= 7 && y <= 10) return 'Junior High School';  
         if (y >= 11 && y <= 12) return 'Senior High School'; 
-        
         return 'Higher Education'; 
     };
 
-    // --- 🟢 DATA PREPARATION (FIXED) ---
+    // --- DATA PREPARATION ---
     const allEligibleGroups = useMemo(() => {
         if (!currentEvent) return [];
 
-        // CASE 1: Data comes from processed Dashboard (Standardized)
         if (currentEvent.selectedPrograms) {
             return currentEvent.selectedPrograms.map(item => ({
                 ...item,
-                displayName: item.display || `${item.year} - ${item.section || item.program}`,
+                // 🟢 THE FIX: Strictly use the raw section/program name.
+                // We completely ignore item.display because it contains the ugly "Year - Section" prefix.
+                displayName: item.section || item.program,
                 categoryType: (item.type === 'Basic Ed' || item.categoryType === 'SECTION') ? 'SECTION' : 'PROGRAM',
                 totalEligibleCount: item.totalEligibleCount || 0,
                 totalClaimedCount: item.totalClaimedCount || 0
             }));
         }
         
-        // CASE 2: Fallback (If raw backend data is passed)
         const sections = (currentEvent.forEligibleSection || []).map(s => ({
             ...s, 
-            displayName: `${s.year} - ${s.section}`, 
+            displayName: s.section, 
             categoryType: 'SECTION' 
         }));
 
         const programs = (currentEvent.forEligibleProgramsAndYear || []).map(p => ({
             ...p, 
-            displayName: `${p.year} - ${p.program}`,
+            displayName: p.program,
             categoryType: 'PROGRAM' 
         }));
 
         return [...sections, ...programs];
     }, [currentEvent]);
 
-    // --- TABS CONFIGURATION ---
+    // --- 🟢 4. DYNAMIC TABS CONFIGURATION ---
     const tabs = useMemo(() => {
         if (!currentEvent) return [];
         
         const baseTabs = [{ id: 'All', label: 'All Departments' }];
         const depts = new Set();
 
+        // Find every unique department in this specific event
         allEligibleGroups.forEach(group => {
             depts.add(getDepartment(group));
         });
 
-        if (depts.has('Primary Education')) baseTabs.push({ id: 'Primary Education', label: 'Primary Education' });
-        if (depts.has('Junior High School')) baseTabs.push({ id: 'Junior High School', label: 'Junior High School' });
-        if (depts.has('Senior High School')) baseTabs.push({ id: 'Senior High School', label: 'Senior High School' });
-        if (depts.has('Higher Education')) baseTabs.push({ id: 'Higher Education', label: 'Higher Education' });
+        // Generate tabs automatically (No more hardcoded ifs!)
+        Array.from(depts).sort().forEach(deptName => {
+            if (deptName !== 'All') {
+                baseTabs.push({ id: deptName, label: deptName });
+            }
+        });
 
         return baseTabs;
-    }, [allEligibleGroups, currentEvent]);
+    }, [allEligibleGroups, currentEvent, structureData]); // Depends on structureData to refresh when loaded
 
 
     // --- DYNAMIC DATA PROCESSING ---
@@ -106,35 +147,32 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
 
         let filteredGroups = allEligibleGroups;
 
-        // 1. Filter by Department
+        // Filter by Department
         if (activeTab !== 'All') {
             filteredGroups = allEligibleGroups.filter(g => getDepartment(g) === activeTab);
         }
 
-        // 2. Search Logic
+        // Search Logic
         if (searchTerm) {
             filteredGroups = filteredGroups.filter(g => 
                 (g.displayName || '').toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
-        // 3. Format for Table
+        // Format for Table
         return filteredGroups.map(g => ({
-            id: g._id || Math.random(), // Fallback ID
+            id: g._id || Math.random(), 
             name: g.displayName, 
             year: g.year,
             totalEligible: g.totalEligibleCount,
             totalClaimed: g.totalClaimedCount,
-            percentage: g.totalEligibleCount > 0 
-                ? Math.round((g.totalClaimedCount / g.totalEligibleCount) * 100) 
-                : 0
         }));
 
-    }, [allEligibleGroups, activeTab, searchTerm, currentEvent]);
+    }, [allEligibleGroups, activeTab, searchTerm, currentEvent, structureData]);
 
 
     // --- COLUMN CONFIGURATION ---
-    const columns = ['Section / Program', 'Year Level', 'Eligible Students', 'Claimed Meals', 'Status'];
+    const columns = ['Section / Program', 'Year Level', 'Eligible Students', 'Claimed Meals'];
 
     // --- ROW RENDERER ---
     const renderRow = (item, index, startIndex) => {
@@ -142,6 +180,9 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
             fontFamily: 'geist, sans-serif', fontSize: '12px', color: '#4b5563',
             padding: '12px 24px 12px 0px', borderBottom: '1px solid #f3f4f6'
         };
+
+        // 🟢 MINOR UX FIX: Capitalize "pre" if it shows up in the year column
+        const displayYear = String(item.year).toLowerCase() === 'pre' ? 'Pre' : item.year;
 
         return (
             <tr key={item.id} className="row-hover">
@@ -151,22 +192,13 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
                         <Users size={14} className="text-blue-500" /> {item.name}
                     </div>
                 </td>
-                <td style={cellStyle}>Year {item.year}</td>
+                <td style={cellStyle}>{displayYear}</td>
                 <td style={cellStyle}>{item.totalEligible} Students</td>
-                <td style={cellStyle}>
+                <td style={{...cellStyle, paddingLeft: "30px" }}>
                     <span style={{ fontWeight: 600, color: item.totalClaimed > 0 ? '#15803d' : '#6b7280' }}>
                         {item.totalClaimed}
                     </span>
-                    <span className="text-xs text-gray-400 ml-1">({item.percentage}%)</span>
-                </td>
-                <td style={cellStyle}>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
-                        item.percentage === 100 ? 'bg-green-50 text-green-700 border-green-100' 
-                        : item.percentage > 0 ? 'bg-blue-50 text-blue-700 border-blue-100'
-                        : 'bg-gray-50 text-gray-500 border-gray-100'
-                    }`}>
-                        {item.percentage === 100 ? 'Completed' : item.percentage > 0 ? 'In Progress' : 'No Claims'}
-                    </span>
+                    <span className="text-xs text-gray-400 ml-1">{item.percentage}</span>
                 </td>
             </tr>
         );
@@ -256,6 +288,7 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
                                         currentEvent.selectedDepartments 
                                         || (currentEvent.eventScope === 'School-Wide' ? ['All'] : ['Departmental'])
                                     }
+                                    // 🟢 We also pass the clean display names here so the preview card matches the table!
                                     selectedPrograms={allEligibleGroups.map(g => g.displayName)}
                                 />
                             </div>

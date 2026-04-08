@@ -13,7 +13,7 @@ const buttonListGroup = [
 ];
 
 export function EventDashboard() {
-    // 🟢 1. Consume Real Data
+    // 🟢 1. Consume Real Data (Now a multi-dimensional array from the new controller!)
     const { eventMealRequest = [] } = useData(); 
 
     const [activeTab, setActiveTab] = useState("ongoing");
@@ -22,67 +22,70 @@ export function EventDashboard() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEventId, setSelectedEventId] = useState(null);
 
-    // --- 🟢 2. DATA PROCESSING & CLASSIFICATION ---
-    const processedEvents = useMemo(() => {
-        if (!eventMealRequest) return [];
+    // --- 🟢 2. DATA PROCESSING & UNPACKING ---
+    const processedData = useMemo(() => {
+        // Safe check to guarantee we are dealing with our [ongoing, upcoming, recent] format
+        const isMultiDimensional = Array.isArray(eventMealRequest) && Array.isArray(eventMealRequest[0]);
+        
+        // If data isn't loaded yet, return empty arrays to prevent crashes
+        if (!isMultiDimensional) return { ongoing: [], upcoming: [], recent: [], all: [] };
 
         const currentYear = new Date().getFullYear();
 
-        return eventMealRequest.map(event => {
-            // 🛠️ FIX 1: Construct Date Object from new fields
-            // The backend gives us "February", "15". We need to make that a date.
+        // Helper function to transform a raw backend event into the format the UI expects
+        const formatEventForUI = (event) => {
             const dateString = `${event.startMonth} ${event.startDay}, ${currentYear}`;
             const eventDateObj = new Date(dateString);
             
-            // Handle End Date for Display (e.g., "Feb 15 - Feb 17")
             const endDateString = `${event.endMonth} ${event.endDay}, ${currentYear}`;
             const formattedDate = event.startDay === event.endDay 
                 ? eventDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                 : `${eventDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(endDateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
-            // 🛠️ FIX 2: Use Backend Status
-            // Your backend calculates "ONGOING", "UPCOMING", "RECENT". We just convert to lowercase to match tabs.
-            // Fallback to 'recent' if undefined.
-            const classification = event.scheduleStatus ? event.scheduleStatus.toLowerCase() : 'recent';
-
-            // 🛠️ FIX 3: Merge Basic Ed and Higher Ed arrays for display
-            // The UI expects a single list of "selectedPrograms"
             const mergedEligible = [
                 ...(event.forEligibleSection || []).map(item => ({
                     ...item,
-                    display: `${item.year} - ${item.section}`, // Standardization for UI
+                    display: `${item.year} - ${item.section}`,
                     type: 'Basic Ed'
                 })),
                 ...(event.forEligibleProgramsAndYear || []).map(item => ({
                     ...item,
-                    display: `${item.year} - ${item.program}`, // Standardization for UI
+                    display: `${item.year} - ${item.program}`,
                     type: 'Higher Ed'
                 }))
             ];
 
             return {
                 id: event.eventID,
-                mongoId: event._id, // Keep reference to real ID if needed
+                mongoId: event._id,
                 eventName: event.eventName,
                 eventDate: formattedDate, 
-                classification: classification,
-                
-                // Use the color saved in DB, or fallback
+                classification: event.scheduleStatus ? event.scheduleStatus.toLowerCase() : 'recent',
                 selectedColor: event.eventColor || "#dbeafe",
-                
-                // Map merged list to UI
                 selectedPrograms: mergedEligible,
-                
-                // Map DB 'eventScope' to UI 'selectedDepartments'
                 selectedDepartments: event.eventScope === 'School-Wide' ? ['All'] : ['Departmental']
             };
-        });
+        };
+
+        // 🟢 UNPACK THE MULTI-DIMENSIONAL ARRAY
+        const ongoing = (eventMealRequest[0] || []).map(formatEventForUI);
+        const upcoming = (eventMealRequest[1] || []).map(formatEventForUI);
+        const recent = (eventMealRequest[2] || []).map(formatEventForUI);
+
+        return {
+            ongoing,
+            upcoming,
+            recent,
+            // We combine them all into one flat array just for the Modal, 
+            // so it can find an event by ID no matter which tab is active!
+            all: [...ongoing, ...upcoming, ...recent] 
+        };
+
     }, [eventMealRequest]);
 
-    // --- 🟢 3. FILTERING LOGIC ---
-    const filteredEvents = useMemo(() => {
-        return processedEvents.filter(event => event.classification === activeTab);
-    }, [activeTab, processedEvents]);
+    // --- 🟢 3. FILTERING LOGIC (Massively Simplified) ---
+    // Because the backend already sorted them, we just grab the array matching the active tab!
+    const eventsToDisplay = processedData[activeTab] || [];
 
     // --- HANDLERS ---
     const handleCardClick = (eventId) => {
@@ -114,7 +117,7 @@ export function EventDashboard() {
             <EventDetailModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
-                events={processedEvents} // Pass all events so modal can find by ID even if tab changes
+                events={processedData.all} // 🟢 Pass the flat array here!
                 initialEventId={selectedEventId}
             />
 
@@ -142,7 +145,7 @@ export function EventDashboard() {
                     
                     {/* Render Real Data */}
                     <EventDisplayer
-                        events={filteredEvents}
+                        events={eventsToDisplay} // 🟢 Pass the pre-sorted array directly!
                         onEventClick={handleCardClick}
                     />
                 </motion.div>

@@ -1,7 +1,26 @@
+import React from 'react';
 import { motion } from "framer-motion"; 
 import { Skeleton } from "../../../../components/global/Skeleton";
 
-function EventsPanel({ events = [], isHyerlink = true, canViewAll = true, isLoading = false}) {
+// Helper function to format the backend date fields into a clean string
+const formatEventDate = (startMonth, startDay, endMonth, endDay) => {
+  if (!startMonth || !startDay) return "TBA";
+  
+  if (startMonth === endMonth && startDay === endDay) {
+    return `${startMonth} ${startDay}`;
+  } else if (startMonth === endMonth) {
+    return `${startMonth} ${startDay} - ${endDay}`;
+  } else {
+    return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
+  }
+};
+
+// 🟢 THE FIX: We rename the incoming prop to 'rawEvents' 
+function EventsPanel({ events: rawEvents, isHyerlink = true, canViewAll = true, isLoading = false}) {
+  
+  // 🟢 THE FIX: We force it to be an array, and call it 'events'. 
+  // Now every single 'events.map' below is 100% guaranteed to be safe!
+  const events = Array.isArray(rawEvents) ? rawEvents : [];
 
   return (
     <div
@@ -78,8 +97,8 @@ function EventsPanel({ events = [], isHyerlink = true, canViewAll = true, isLoad
               display: 'flex', 
               justifyContent: 'center', 
               alignItems: 'center', 
-              height: '150px', // Slightly taller for panel look
-              color: '#9CA3AF', // Gray-400
+              height: '150px', 
+              color: '#9CA3AF', 
               fontFamily: 'geist',
               fontSize: '13px',
               fontWeight: 500,
@@ -92,60 +111,48 @@ function EventsPanel({ events = [], isHyerlink = true, canViewAll = true, isLoad
           // --- REAL DATA STATE (Animated) ---
           events.map((event, idx) => (
             <motion.div
-              key={event.title || idx}
+              key={event._id || idx} 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: idx * 0.1 }} 
               style={{
                 padding: "15px 15px",
                 marginBottom: 8,
-                background: event.color
+                background: event.eventColor || "#f3f4f6" 
               }}
               className="rounded-lg flex justify-between items-center"
             >
               <div style={{ padding: "5px 0px 5px 0px" }}>
-                <h3
-                  style={{
-                    fontFamily: "geist",
-                    fontSize: 13,
-                    color: "#000",
-                    fontWeight: "550"
-                  }}
-                  className="font-semibold text-gray-800 text-base"
-                >
-                  {event.title}
-                </h3>
+                <div className="flex items-center gap-2">
+                  <h3
+                    style={{
+                      fontFamily: "geist",
+                      fontSize: 13,
+                      color: "#000",
+                      fontWeight: "550"
+                    }}
+                    className="font-semibold text-gray-800 text-base"
+                  >
+                    {event.eventName} 
+                  </h3>
+                  {/* Scope Badge */}
+                  <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.6)', color: '#4b5563', fontFamily: 'geist' }}>
+                    {event.eventScope}
+                  </span>
+                </div>
                 <p
                   style={{
                     fontFamily: "geist",
                     fontSize: 10,
                     color: "#667085",
-                    fontWeight: "400"
+                    fontWeight: "400",
+                    marginTop: 4
                   }}
                   className="text-xs text-gray-700 mt-1"
                 >
-                  {event.date}
+                  {formatEventDate(event.startMonth, event.startDay, event.endMonth, event.endDay)}
                 </p>
               </div>
-              {isHyerlink ? (
-                <>
-                  <a
-                    href={event.link}
-                    style={{
-                      fontSize: 11,
-                      color: "#254280",
-                      fontFamily: "geist",
-                      fontWeight: 500,
-                      paddingRight: "20px"
-                    }}
-                    className="hover:underline transition text-center"
-                  >
-                    View Details
-                  </a>
-                </>
-              ) : (
-                ""
-              )}
             </motion.div>
           ))
         )}
