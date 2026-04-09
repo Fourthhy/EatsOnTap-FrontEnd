@@ -1119,9 +1119,9 @@ function LandingPage() {
               real-time analytics for La Verdad Christian College.
             </p>
             <div className="cta-buttons">
-              <a href="#features" className="btn btn-secondary" onClick={(e) => scrollToSection(e, 'features')}>
-                Learn More
-              </a>
+              <Link to="/login" className="btn btn-secondary">
+                Sign in
+              </Link>
             </div>
           </motion.div>
           <motion.div
@@ -1344,7 +1344,7 @@ function LandingPage() {
           <p style={{ fontSize: '18px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '40px' }}>
             Everything you need to know about the Eat's on Tap RFID meal system.
           </p>
-          
+
           <div className="faq-list">
             {faqs.map((faq, index) => (
               <motion.div
@@ -1364,26 +1364,26 @@ function LandingPage() {
                     transition={{ duration: 0.3 }}
                   >+</motion.div>
                 </div>
-                
+
                 <AnimatePresence initial={false}> {/* 🟢 2. Added initial={false} */}
                   {openFaq === index && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
-                      animate={{ 
-                          height: "auto", 
-                          opacity: 1,
-                          transition: {
-                              height: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }, // 🟢 3. Smoother Curve
-                              opacity: { duration: 0.25, delay: 0.1 }
-                          }
+                      animate={{
+                        height: "auto",
+                        opacity: 1,
+                        transition: {
+                          height: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }, // 🟢 3. Smoother Curve
+                          opacity: { duration: 0.25, delay: 0.1 }
+                        }
                       }}
-                      exit={{ 
-                          height: 0, 
-                          opacity: 0,
-                          transition: {
-                              height: { duration: 0.3 },
-                              opacity: { duration: 0.1 }
-                          }
+                      exit={{
+                        height: 0,
+                        opacity: 0,
+                        transition: {
+                          height: { duration: 0.3 },
+                          opacity: { duration: 0.1 }
+                        }
                       }}
                       style={{ overflow: 'hidden' }}
                     >
@@ -1396,7 +1396,7 @@ function LandingPage() {
               </motion.div>
             ))}
           </div>
-          
+
         </motion.div>
       </section>
 

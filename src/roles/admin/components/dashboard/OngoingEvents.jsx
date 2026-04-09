@@ -75,7 +75,7 @@ function OngoingEvents({ events = [], isHyerlink = true, isLoading = false }) {
               display: 'flex', 
               justifyContent: 'center', 
               alignItems: 'center', 
-              height: '100px',
+              height: '50px',
               color: '#9CA3AF', 
               fontFamily: 'geist',
               fontSize: '13px',
