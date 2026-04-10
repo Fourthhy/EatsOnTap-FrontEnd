@@ -3,19 +3,32 @@ import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const PromotionModal = ({ isOpen, onClose, onSelectType, nextSections, onBulkPromote }) => {
-    if (!isOpen) return null;
-
     const [selectedBulkSection, setSelectedBulkSection] = useState(null);
 
+    if (!isOpen) return null;
+
+    // 🟢 NEW: Clean close handler that resets internal state
+    const handleClose = () => {
+        setSelectedBulkSection(null);
+        onClose();
+    };
+
     return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div 
+            // 🟢 NEW: Added onClick to close when clicking the dark background
+            onClick={handleClose} 
+            style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
             <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                // 🟢 NEW: e.stopPropagation() stops the background click from triggering when you click inside the white box
+                onClick={(e) => e.stopPropagation()} 
                 style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', width: '400px', maxWidth: '90%', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}
             >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#111827', margin: 0 }}>Promote Students</h3>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}><X size={20} /></button>
+                    {/* 🟢 NEW: Pointing this to handleClose */}
+                    <button onClick={handleClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}><X size={20} /></button>
                 </div>
 
                 {!selectedBulkSection ? (
@@ -32,7 +45,11 @@ export const PromotionModal = ({ isOpen, onClose, onSelectType, nextSections, on
                         </button>
 
                         <button 
-                            onClick={() => onSelectType('individual')}
+                            onClick={() => {
+                                // 🟢 NEW: Cleanly close this modal before opening the individual selection view
+                                handleClose();
+                                onSelectType('individual');
+                            }}
                             style={{ padding: '16px', borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: 'white', textAlign: 'left', cursor: 'pointer', transition: 'all 0.2s' }}
                             onMouseEnter={(e) => e.currentTarget.style.borderColor = '#4268BD'} onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
                         >
@@ -47,7 +64,10 @@ export const PromotionModal = ({ isOpen, onClose, onSelectType, nextSections, on
                             {nextSections.length > 0 ? nextSections.map((sect, idx) => (
                                 <button 
                                     key={idx}
-                                    onClick={() => onBulkPromote(sect.name)}
+                                    onClick={() => {
+                                        handleClose(); // Close modal on selection
+                                        onBulkPromote(sect.name);
+                                    }}
                                     style={{ width: '100%', padding: '12px', textAlign: 'left', background: 'white', borderBottom: '1px solid #f3f4f6', cursor: 'pointer', fontSize: '13px' }}
                                 >
                                     {sect.name}
@@ -65,9 +85,15 @@ export const PromotionModal = ({ isOpen, onClose, onSelectType, nextSections, on
 export const AssignmentModal = ({ isOpen, onClose, nextSections, onConfirm }) => {
     if (!isOpen) return null;
     return (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 70, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div 
+            // 🟢 NEW: Click background to close
+            onClick={onClose} 
+            style={{ position: 'fixed', inset: 0, zIndex: 70, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
             <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                // 🟢 NEW: Prevent clicks inside from closing the modal
+                onClick={(e) => e.stopPropagation()} 
                 style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', width: '350px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}
             >
                 <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px' }}>Assign Section</h3>
@@ -75,7 +101,10 @@ export const AssignmentModal = ({ isOpen, onClose, nextSections, onConfirm }) =>
                     {nextSections.map((sect, idx) => (
                         <button 
                             key={idx}
-                            onClick={() => onConfirm(sect.name)}
+                            onClick={() => {
+                                onConfirm(sect.name);
+                                onClose(); // 🟢 Ensure we close the modal after selection
+                            }}
                             style={{ padding: '10px', borderRadius: '6px', border: '1px solid #e5e7eb', background: 'white', cursor: 'pointer', textAlign: 'left', fontSize: '13px' }}
                             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}

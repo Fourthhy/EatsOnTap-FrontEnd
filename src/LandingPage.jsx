@@ -1102,7 +1102,7 @@ function LandingPage() {
             <a href="#stats" onClick={(e) => scrollToSection(e, 'stats')}>Impact</a>
             <a href="#faq" onClick={(e) => scrollToSection(e, 'faq')}>FAQ</a>
             <a href="#contact" onClick={(e) => scrollToSection(e, 'contact')}>Contact</a>
-            <a href="#" className="header-cta" style={{ textDecoration: 'none' }}>Log In</a>
+            <a href="/login" className="header-cta" style={{ textDecoration: 'none' }}>Log In</a>
           </nav>
           <div className="menu-toggle">
             <span />
