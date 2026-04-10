@@ -3,7 +3,7 @@ const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
 // Use VITE_LOCALHOST for local testing if needed, or VITE_BASE_URL for production
-const BASE_URL = VITE_LOCALHOST; // Change to VITE_LOCALHOST if testing locally without deployed backend
+const BASE_URL = VITE_BASE_URL; // Change to VITE_LOCALHOST if testing locally without deployed backend
 
 /**
  * Suspends meal operations for a specific date range.

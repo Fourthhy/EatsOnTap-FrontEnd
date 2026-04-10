@@ -1,5 +1,5 @@
 // const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
-const VITE_BASE_URL = import.meta.env.VITE_LOCALHOST;
+const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export async function getAllEvents() {
     const targetUrl = `${VITE_BASE_URL}/api/fetch/getAllEvents`;
