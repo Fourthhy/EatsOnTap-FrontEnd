@@ -23,7 +23,7 @@ function TeamPage() {
       role: 'Project Manager',
       image: 'PM.png',
       description: "Oversees the project from start to finish, ensuring it stays on track, within budget, and aligned with requirements. Maintains quality standards and serves as the central point of communication among team members.",
-      socials: { linkedin: '#', twitter: '#', github: '#' }
+      socials: { linkedin: 'https://www.linkedin.com/in/aerrol-kyle-santos-491aba279/', insta: 'https://www.instagram.com/aerrol_kylee/', spotify: 'https://open.spotify.com/user/31uxgqex2bne3t2yszrrclcvwnsq?si=27e2c5d70b264c6d', github: 'https://github.com/Aerrol-Kyle' }
     },
     {
       id: '2',
@@ -31,7 +31,7 @@ function TeamPage() {
       role: 'Full-Stack Developer',
       image: 'DEV.png',
       description: 'Leads the technical development and implementation of the system, handling coding, building key features, and ensuring all components function as intended.',
-      socials: { linkedin: '#', twitter: '#', github: '#' }
+      socials: { linkedin: 'https://www.linkedin.com/in/miguel-ma%C3%B1abo/', insta: 'https://www.instagram.com/archivistttt/', spotify: 'https://open.spotify.com/user/31oehewbagxue6rlryei5excfrue', github: 'https://github.com/Fourthhy    ' }
     },
     {
       id: '3',
@@ -39,7 +39,7 @@ function TeamPage() {
       role: 'UI/UX Designer',
       image: 'UI.jpg',
       description: 'Designs the system’s visual interface and overall look, ensuring it meets requirements and delivers a high-quality user experience.',
-      socials: { linkedin: '#', twitter: '#', github: '#' }
+      socials: { linkedin: 'https://www.linkedin.com/in/roylyn-joy-dicdican-0665453a9?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app', insta: 'https://www.instagram.com/lynxtorm', spotify: 'https://open.spotify.com/user/lultuinao50uz0k7q5xq4b9sd?si=jFmO6fhwSMqNKGHiHbwKSQ', github: 'https://github.com/roylynjoy' }
     },
     {
       id: '4',
@@ -47,7 +47,7 @@ function TeamPage() {
       role: 'Quality Assurance',
       image: 'SQA.png',
       description: 'Ensures the project meets defined quality standards by monitoring deliverables, identifying issues, and supporting continuous improvement throughout the development process.',
-      socials: { linkedin: '#', twitter: '#', github: '#' }
+      socials: { linkedin: 'https://www.linkedin.com/in/mark-joseph-santos-5b4825401/', insta: 'https://www.instagram.com/josephmark.santos1234/', spotify: 'https://open.spotify.com/user/31mcf2v3jgl6ux2wrlcpeydyaane?si=87664e21a9614e66', github: 'https://github.com/markjosephsantos1234' }
     }
   ];
 
@@ -55,6 +55,7 @@ function TeamPage() {
 
   return (
     <>
+      <title>Eat's on Tap - About the Team</title>
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -76,6 +77,7 @@ function TeamPage() {
             font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: #0f172a;
             color: #f8fafc;
+            scroll-behavior: smooth;
         }
 
         .font-tolkien {
@@ -235,7 +237,7 @@ function TeamPage() {
             background: linear-gradient(135deg, rgba(30, 58, 138, 0.1) 0%, rgba(15, 23, 42, 0.3) 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px;
-            padding: 40px 50px;
+            padding: 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -404,6 +406,10 @@ function TeamPage() {
             transition: color 0.3s ease;
         }
 
+        .footer-links a:hover {
+            color: #60a5fa;
+        }
+
         .team-signature {
             text-align: center;
             padding-top: 60px;
@@ -543,7 +549,7 @@ function TeamPage() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          BSIS 4 TEAM 4 2025 - 26
+          BSIS 4 / TEAM 4 / 2025-26
         </motion.div>
       </section>
 
@@ -592,24 +598,24 @@ function TeamPage() {
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
                   </a>
                 )}
-                {selectedMember.socials?.twitter && (
-                  <a href={selectedMember.socials.twitter} className="social-link" target="_blank" rel="noopener noreferrer">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" /></svg>
+                {selectedMember.socials?.insta && (
+                  <a href={selectedMember.socials.insta} className="social-link" target="_blank" rel="noopener noreferrer">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                  </a>
+                )}
+                {selectedMember.socials?.spotify && (
+                  <a href={selectedMember.socials.spotify} className="social-link" target="_blank" rel="noopener noreferrer">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.306c-.215.352-.676.463-1.028.248-2.856-1.745-6.452-2.14-10.686-1.173-.404.092-.812-.162-.904-.565-.092-.403.162-.811.565-.903 4.634-1.06 8.604-.616 11.805 1.341.352.215.464.676.248 1.028zm1.472-3.26c-.27.439-.846.581-1.285.311-3.268-2.008-8.25-2.592-12.115-1.419-.495.15-1.021-.131-1.171-.626-.15-.495.129-1.021.625-1.171 4.412-1.339 9.904-.69 13.636 1.604.438.27.58.846.31 1.285zm.135-3.393C15.228 8.1 8.878 7.888 5.176 9.011c-.58.176-1.192-.156-1.368-.736s.156-1.192.736-1.368c4.25-1.29 11.272-1.045 15.753 1.614.523.311.692.987.382 1.51-.311.522-.988.692-1.511.382z" /></svg>
+                  </a>
+                )}
+                {selectedMember.socials?.gmail && (
+                  <a href={`mailto:${selectedMember.socials.gmail === '#' ? '' : selectedMember.socials.gmail}`} className="social-link" target="_blank" rel="noopener noreferrer">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                   </a>
                 )}
                 {selectedMember.socials?.github && (
                   <a href={selectedMember.socials.github} className="social-link" target="_blank" rel="noopener noreferrer">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" /></svg>
-                  </a>
-                )}
-                {selectedMember.socials?.spotify && (
-                  <a href={selectedMember.socials.spotify} className="social-link" target="_blank" rel="noopener noreferrer">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.467 17.273a.75.75 0 01-.99.27c-2.707-1.662-6.114-2.039-10.12-1.136a.75.75 0 01-.3-1.468c4.344-.887 8.083-.445 11.112 1.28a.75.75 0 01.298 1.054zm1.424-3.49a.75.75 0 01-1.02.34c-3.1-1.76-7.828-2.276-11.489-1.27a.75.75 0 01-.358-1.455c4.031-.985 8.47-0.383 11.717 1.435a.75.75 0 01.15 1.0zm-.091-3.574c-3.627-2.07-9.72-2.257-13.448-1.26a.75.75 0 01-.41-1.438c3.964-1.13 10.692-.913 14.682 1.38a.75.75 0 01-.825 1.318z" /></svg>
-                  </a>
-                )}
-                {selectedMember.socials?.instagram && (
-                  <a href={selectedMember.socials.instagram} className="social-link" target="_blank" rel="noopener noreferrer">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.17.056 1.97.24 2.427.403a4.9 4.9 0 011.675 1.093 4.9 4.9 0 011.093 1.675c.163.457.347 1.257.403 2.427.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.056 1.17-.24 1.97-.403 2.427a4.902 4.902 0 01-1.093 1.675 4.902 4.902 0 01-1.675 1.093c-.457.163-1.257.347-2.427.403-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.17-.056-1.97-.24-2.427-.403a4.9 4.9 0 01-1.675-1.093 4.9 4.9 0 01-1.093-1.675c-.163-.457-.347-1.257-.403-2.427C2.175 15.747 2.163 15.367 2.163 12s.012-3.584.07-4.85c.056-1.17.24-1.97.403-2.427a4.9 4.9 0 011.093-1.675A4.9 4.9 0 015.334 2.566c.457-.163 1.257-.347 2.427-.403C8.416 2.175 8.796 2.163 12 2.163zm0-2.163C8.736 0 8.332.012 7.052.07 5.777.128 4.653.34 3.72.724c-.94.382-1.737.897-2.537 1.697C.343 3.221-.172 4.018-.554 4.958c-.384.933-.596 2.057-.654 3.332C-.012 8.332 0 8.736 0 12c0 3.264.012 3.668.07 4.948.058 1.275.27 2.399.654 3.332.382.94.897 1.737 1.697 2.537.8.8 1.597 1.315 2.537 1.697.933.384 2.057.596 3.332.654C8.332 23.988 8.736 24 12 24c3.264 0 3.668-.012 4.948-.07 1.275-.058 2.399-.27 3.332-.654.94-.382 1.737-.897 2.537-1.697.8-.8 1.315-1.597 1.697-2.537.384-.933.596-2.057.654-3.332.058-1.28.07-1.684.07-4.948 0-3.264-.012-3.668-.07-4.948-.058-1.275-.27-2.399-.654-3.332-.382-.94-.897-1.737-1.697-2.537C20.428.343 19.631-.172 18.69-.554c-.933-.384-2.057-.596-3.332-.654C15.668.012 15.264 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zm0 10.162a3.999 3.999 0 110-7.998 3.999 3.999 0 010 7.998zm6.406-11.845a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z" /></svg>
                   </a>
                 )}
               </motion.div>
@@ -634,15 +640,15 @@ function TeamPage() {
           </div>
           <div className="footer-links">
             <h4>Product</h4>
-            <Link to="/">Features</Link>
-            <Link to="/">How It Works</Link>
-            <a href="/#contact">Contact Us</a>
+            <Link to="/#features">Features</Link>
+            <Link to="/#how-it-works">How It Works</Link>
+            <Link to="/#contact">Contact Us</Link>
           </div>
           <div className="footer-links">
             <h4>About</h4>
             <Link to="/about">LVCC</Link>
             <Link to="/team">Team</Link>
-            <Link to="/">FAQ</Link>
+            <Link to="/#faq">FAQ</Link>
           </div>
         </div>
         <div className="footer-bottom">

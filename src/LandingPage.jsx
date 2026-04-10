@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion'; // 🟢 Added framer-motion
 import { Link } from 'react-router-dom';
 
 function LandingPage() {
@@ -122,7 +122,7 @@ function LandingPage() {
     <>
       <meta charSet="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Eat's on Tap - LVCC RFID Meal System</title>
+      <title>Eat's on Tap - Home</title>
       <link href="https://fonts.cdnfonts.com/css/geist" rel="stylesheet" />
       <style
         dangerouslySetInnerHTML={{
@@ -251,11 +251,12 @@ function LandingPage() {
         }
 
         .header-cta {
-            padding: 10px 24px;
+            padding: 13px 37px;
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 600;
+            font-size: 14px;
             transition: all 0.3s ease;
         }
 
@@ -385,6 +386,8 @@ function LandingPage() {
 
         .btn {
             padding: 18px 36px;
+            min-width: 180px;
+            text-align: center;
             border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
@@ -641,7 +644,7 @@ function LandingPage() {
             border-radius: 24px;
             padding: 56px; /* larger padding */
             min-height: 320px;
-            transition: all 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
             position: relative;
             overflow: hidden;
         }
@@ -659,8 +662,8 @@ function LandingPage() {
         }
 
         .feature-card:hover {
-            transform: translateY(-8px);
             border-color: rgba(96, 165, 250, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(96, 165, 250, 0.15);
         }
 
         .feature-card:hover::before {
@@ -792,7 +795,7 @@ function LandingPage() {
             margin-bottom: 40px;
         }
 
-        /* FAQ Accordion Styles - 🟢 FIXED */
+        /* FAQ Accordion Styles */
         .faq-list {
             margin-top: 40px;
             display: flex;
@@ -819,7 +822,7 @@ function LandingPage() {
             user-select: none;
         }
         .faq-question {
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 500;
             color: white;
             margin: 0;
@@ -827,26 +830,53 @@ function LandingPage() {
         }
         .faq-icon {
             color: #3b82f6;
-            font-size: 24px;
-            font-weight: 300;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.1);
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(59, 130, 246, 0.1);
+        }
+        .faq-icon::before,
+        .faq-icon::after {
+            content: '';
+            position: absolute;
+            background: currentColor;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        /* Horizontal line */
+        .faq-icon::before {
+            width: 14px;
+            height: 2px;
+        }
+        /* Vertical line */
+        .faq-icon::after {
+            width: 2px;
+            height: 14px;
+        }
+        .faq-item.active .faq-icon::after {
+            transform: scaleY(0);
+            opacity: 0;
+        }
+        .faq-item.active .faq-icon {
+            background: rgba(59, 130, 246, 0.15);
+        }
+        .faq-content-wrapper {
+            overflow: hidden;
         }
         .faq-content {
-            /* 🟢 Removed transition, height, and opacity - Framer Motion handles this now */
-            padding: 0 24px;
+            padding: 0 24px 24px;
         }
         .faq-answer {
-            font-size: 16px;
+            font-size: 18px !important;
+            font-weight: 400 !important;
             color: rgba(255, 255, 255, 0.7);
             line-height: 1.6;
             margin: 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding-top: 16px;
         }
 
@@ -1072,6 +1102,7 @@ function LandingPage() {
             <a href="#stats" onClick={(e) => scrollToSection(e, 'stats')}>Impact</a>
             <a href="#faq" onClick={(e) => scrollToSection(e, 'faq')}>FAQ</a>
             <a href="#contact" onClick={(e) => scrollToSection(e, 'contact')}>Contact</a>
+            <a href="#" className="header-cta" style={{ textDecoration: 'none' }}>Log In</a>
           </nav>
           <div className="menu-toggle">
             <span />
@@ -1119,9 +1150,12 @@ function LandingPage() {
               real-time analytics for La Verdad Christian College.
             </p>
             <div className="cta-buttons">
-              <Link to="/login" className="btn btn-secondary">
-                Sign in
+              <Link to="/login" className="btn btn-primary">
+                Log In
               </Link>
+              <a href="#features" className="btn btn-secondary" onClick={(e) => scrollToSection(e, 'features')}>
+                Learn More
+              </a>
             </div>
           </motion.div>
           <motion.div
@@ -1178,10 +1212,11 @@ function LandingPage() {
                     <div className="carousel-item" key={i}>
                       <motion.div
                         className="feature-card"
-                        initial={{ opacity: 0, y: 30 }}
+                        initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.2, delay: (i % 6) * 0.1 }}
+                        transition={{ duration: 0.3, delay: (i % 6) * 0.05 }}
+                        whileHover={{ y: -10, transition: { duration: 0.3, ease: "easeOut" } }}
                       >
                         <div className="feature-icon">{feature.icon}</div>
                         <h3>{feature.title}</h3>
@@ -1344,50 +1379,35 @@ function LandingPage() {
           <p style={{ fontSize: '18px', color: 'rgba(255, 255, 255, 0.6)', marginBottom: '40px' }}>
             Everything you need to know about the Eat's on Tap RFID meal system.
           </p>
-
           <div className="faq-list">
             {faqs.map((faq, index) => (
               <motion.div
                 key={index}
                 className={`faq-item ${openFaq === index ? 'active' : ''}`}
-                layout="size" // 🟢 1. Added layout="size" 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-20px" }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
               >
                 <div className="faq-header" onClick={() => toggleFaq(index)}>
                   <h3 className="faq-question">{faq.question}</h3>
                   <motion.div
                     className="faq-icon"
-                    animate={{ rotate: openFaq === index ? 45 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >+</motion.div>
+                    animate={{ rotate: openFaq === index ? 180 : 0 }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                  ></motion.div>
                 </div>
-
-                <AnimatePresence initial={false}> {/* 🟢 2. Added initial={false} */}
+                <AnimatePresence>
                   {openFaq === index && (
                     <motion.div
+                      key="content"
+                      className="faq-content-wrapper"
                       initial={{ height: 0, opacity: 0 }}
-                      animate={{
-                        height: "auto",
-                        opacity: 1,
-                        transition: {
-                          height: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }, // 🟢 3. Smoother Curve
-                          opacity: { duration: 0.25, delay: 0.1 }
-                        }
-                      }}
-                      exit={{
-                        height: 0,
-                        opacity: 0,
-                        transition: {
-                          height: { duration: 0.3 },
-                          opacity: { duration: 0.1 }
-                        }
-                      }}
-                      style={{ overflow: 'hidden' }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
-                      <div className="faq-content" style={{ paddingBottom: '24px' }}> {/* 🟢 4. Inner padding wrapper */}
+                      <div className="faq-content">
                         <p className="faq-answer">{faq.answer}</p>
                       </div>
                     </motion.div>
@@ -1396,7 +1416,6 @@ function LandingPage() {
               </motion.div>
             ))}
           </div>
-
         </motion.div>
       </section>
 
@@ -1413,7 +1432,7 @@ function LandingPage() {
             <div className="section-badge">CONTACT US</div>
             <h2>Ask us anything!</h2>
             <p>
-              Have a question about Eat's on Tap, or want to know more about how we digitize student meals? Drop us a message and our team will get back to you shortly.
+              Have a question about Eat's on Tap, or want to know more about how we digitalize student meals? Drop us a message and our team will get back to you shortly.
             </p>
           </div>
           <form className="contact-form" onSubmit={(e) => e.preventDefault()}>
@@ -1481,8 +1500,8 @@ function LandingPage() {
           </div>
           <div className="footer-links">
             <h4>About</h4>
-            <Link to="/about" style={{ display: 'block', color: 'rgba(255, 255, 255, 0.6)', textDecoration: 'none', marginBottom: '12px' }}>LVCC</Link>
-            <Link to="/team" style={{ display: 'block', color: 'rgba(255, 255, 255, 0.6)', textDecoration: 'none', marginBottom: '12px' }}>Team</Link>
+            <Link to="/about">LVCC</Link>
+            <Link to="/team">Team</Link>
             <a href="#faq" onClick={(e) => scrollToSection(e, 'faq')}>FAQ</a>
           </div>
         </motion.div>
