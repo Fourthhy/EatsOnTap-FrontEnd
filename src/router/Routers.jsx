@@ -43,6 +43,8 @@ import LoginRegistration from "../LoginRegistration";
 import AboutLVCC from "../../AboutLVCC";
 import TeamPage from "../../TeamPage";
 
+import EligibilityChecker from "../../EligibilityChecker";
+
 export default function Routers() {
     return (
         <Router>
@@ -54,6 +56,7 @@ export default function Routers() {
                 <Route path="/about" element={<AboutLVCC/>} />
                 <Route path="/team" element={<TeamPage />} />
                 <Route path="/loginRegistration/:token/:userEmail" element={<LoginRegistration />} />
+                <Route path="/checker" element={<EligibilityChecker />} />
 
                 {/* 🔴 SECURE ROUTES: Wrapped in DataProvider -> LoaderProvider AFTER the Auth check */}
                 <Route path="/admin" element={
@@ -93,7 +96,7 @@ export default function Routers() {
                         <DataProvider>
                             <LoaderProvider>
                                 <AdminAssistantLayout />
-                            </LoaderProvider>
+                            </LoaderProvider> 
                         </DataProvider>
                     </ProtectedRoute>
                 }>
