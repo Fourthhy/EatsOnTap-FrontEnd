@@ -3,7 +3,7 @@ import { logout } from "../../functions/logoutAuth";
 import { Button } from "../../components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // 🟢 IMPORTS
@@ -160,16 +160,24 @@ export default function FoodItemClaim() {
     const [systemMessage, setSystemMessage] = useState("");
     const [successBalance, setSuccessBalance] = useState(0);
 
+    // 🟢 Ticking Clock State
+    const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+    // 🟢 LOGOUT STATE
+    const [isLoggingOut, setIsLoggingOut] = useState(false); 
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
     // --- CALCULATIONS ---
     const currentBalance = studentData ? studentData.temporaryCreditBalance : 0;
     const totalCost = parseFloat(amount) || 0;
     const remainingBalance = currentBalance - totalCost;
 
-    const currentDateTime = new Date();
     const dateOnlyString = currentDateTime.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     const timeString = currentDateTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-    // --- INITIAL DATA LOAD ---
+    // =======================================================================
+    // 🟢 EFFECT 1: Fetch Data and Settings (Runs ONCE when page loads)
+    // =======================================================================
     useEffect(() => {
         const loadData = async () => {
             try {
@@ -185,25 +193,56 @@ export default function FoodItemClaim() {
 
         const checkSystemStatus = async () => {
             try {
-                const status = await isSettingActive("STUDENT-CLAIM");
-                if (status) {
-                    setIsSystemActive(status);
-                    setSystemMessage(status.message);
+                console.log("checking STUDENT-CLAIM setting status:");
+                const statusResponse = await isSettingActive("STUDENT-CLAIM");
+                console.log("RAW STATUS RECEIVED:", statusResponse);
+
+                if (statusResponse && typeof statusResponse === 'object') {
+                    setIsSystemActive(statusResponse.isActive === true);
+                    setSystemMessage(statusResponse.message || "System is closed.");
+                } else {
+                    setIsSystemActive(statusResponse === true);
+                    setSystemMessage(statusResponse ? "" : "System is currently disabled.");
                 }
             } catch (error) {
                 console.error("Failed to check status:", error);
+                setIsSystemActive(false); 
+                setSystemMessage("Network Error. Cannot connect to settings.");
             }
         };
 
         loadData();
         checkSystemStatus();
+    }, []); // EMPTY ARRAY
 
-        if (inputRef.current && isSystemActive) inputRef.current.focus();
+    // =======================================================================
+    // 🟢 EFFECT 2: The Clock and Input Focus 
+    // =======================================================================
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentDateTime(new Date());
+        }, 1000);
+
+        if (inputRef.current && isSystemActive) {
+            inputRef.current.focus();
+        }
+
+        return () => clearInterval(timer);
     }, [isSystemActive]);
 
-    const handleLogout = () => {
-        logout();
-        navigate('/');
+    // 🟢 LOGOUT HANDLER
+    const handleLogout = async () => {
+        if (isLoggingOut) return; 
+
+        setIsLoggingOut(true); 
+
+        try {
+            await logout(); 
+        } catch (error) {
+            console.error("Logout process encountered an error:", error);
+        } finally {
+            navigate('/');
+        }
     };
 
     // --- 1. HANDLE LOCAL SEARCH ---
@@ -327,6 +366,66 @@ export default function FoodItemClaim() {
 
     return (
         <>
+            {/* 🟢 FLOATING LOGOUT BUTTON: Anchored bottom-right */}
+            <div style={{ position: "absolute", bottom: "20px", left: "20px", zIndex: 9000 }}>
+                <Button 
+                    onClick={() => setShowLogoutConfirm(true)} 
+                    disabled={isLoggingOut}
+                    variant="destructive" 
+                    style={{ boxShadow: "0 4px 6px rgba(0,0,0,0.1)", padding: "5px 10px" }}
+                >
+                    Log out
+                </Button>
+            </div>
+
+            {/* 🟢 LOGOUT CONFIRMATION MODAL */}
+            <AnimatePresence>
+                {showLogoutConfirm && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {/* Backdrop */}
+                        <motion.div 
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} 
+                            onClick={() => !isLoggingOut && setShowLogoutConfirm(false)} 
+                        />
+                        
+                        {/* Modal Box */}
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                            style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', width: '100%', maxWidth: '360px', zIndex: 10, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
+                        >
+                            <div style={{ backgroundColor: '#FEE2E2', padding: '12px', borderRadius: '50%', marginBottom: '16px', color: '#DC2626' }}>
+                                <LogOut size={24} />
+                            </div>
+                            
+                            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1F2937', marginBottom: '8px' }}>Confirm Logout</h3>
+                            <p style={{ fontSize: '14px', color: '#4B5563', lineHeight: '1.5', marginBottom: '24px' }}>
+                                Are you sure you want to log out? You will need to sign back in to access your terminal.
+                            </p>
+
+                            <div style={{ display: 'flex', width: '100%', gap: '12px' }}>
+                                <button 
+                                    onClick={() => setShowLogoutConfirm(false)} 
+                                    disabled={isLoggingOut}
+                                    style={{ flex: 1, padding: '10px 0', borderRadius: '8px', border: '1px solid #D1D5DB', background: 'white', color: '#374151', cursor: isLoggingOut ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 500 }}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={handleLogout} 
+                                    disabled={isLoggingOut}
+                                    style={{ flex: 1, padding: '10px 0', borderRadius: '8px', border: 'none', background: '#DC2626', color: 'white', cursor: isLoggingOut ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                >
+                                    {isLoggingOut ? <Loader2 size={16} className="animate-spin" /> : "Log Out"}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden", fontFamily: "geist, sans-serif" }}>
 
                 <SuccessModal isOpen={isSuccessOpen} newBalance={successBalance} />
@@ -355,19 +454,23 @@ export default function FoodItemClaim() {
                                 }}>
                                     <h2 className="text-2xl font-bold text-gray-800">Scan ID to Start</h2>
                                     <Input
-                                        type="password" // 🟢 Asterisk Mask
+                                        type="password" // Asterisk Mask
                                         ref={inputRef}
                                         value={inputVal}
                                         onChange={(e) => setInputVal(e.target.value)}
                                         onKeyDown={handleSearchStudent}
                                         placeholder={!isSystemActive ? "System Disabled" : !isDataLoaded ? "Loading Data..." : "Tap RFID or Type ID"}
                                         disabled={!isSystemActive || !isDataLoaded}
-                                        autoFocus={true}
+                                        autoFocus={isSystemActive}
                                         style={{
-                                            background: '#FFFFFF', width: '80%', height: '60px',
-                                            fontSize: '18px', textAlign: 'center', borderRadius: '12px', border: '1px solid #d1d5db'
+                                            background: (isSystemActive && isDataLoaded) ? '#FFFFFF' : '#e5e7eb', width: '80%', height: '60px',
+                                            fontSize: '18px', textAlign: 'center', borderRadius: '12px', border: '1px solid #d1d5db',
+                                            cursor: (isSystemActive && isDataLoaded) ? 'text' : 'not-allowed'
                                         }}
                                     />
+                                    {!isSystemActive && (
+                                        <p className="text-red-500 font-geist text-sm text-center">{systemMessage}</p>
+                                    )}
                                     {loading && <div className="text-blue-600 font-semibold flex items-center gap-2"><Loader2 className="animate-spin" /> Processing...</div>}
                                 </div>
                             ) : uiStatus !== "ELIGIBLE" ? (
@@ -494,7 +597,6 @@ export default function FoodItemClaim() {
                     </div>
                 </div>
             </div>
-            <Button onClick={handleLogout}/>
         </>
     );
 }

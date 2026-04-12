@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react"; // 🟢 Added useMemo
+import React, { useState, useMemo } from "react"; 
 import { motion } from "framer-motion";
 
 // --- CONTEXT IMPORTS ---
@@ -11,11 +11,11 @@ import { BandedChartTADMC } from "../charts/BandedChartTADMC";
 import { BandedChartCUR } from "../charts/BandedChartCUR";
 import { BandedChartOCF } from "../charts/BandedChartOCF";
 
+import { LineChartBox } from "../charts/LineChartBox"; //Claim Statistics Chart
 import { DailyExpensesChart } from "../charts/DailyExpensesChart";
 import { CustomStatsCard } from "../dashboard/CustomStatsCard";
 import { StatsCardGroup } from "../dashboard/StatsCardGroup";
 import { BarChartBox } from "../charts/BarChartBox";
-import { LineChartBox } from "../charts/LineChartBox";
 
 import { OngoingEvents } from "../dashboard/OngoingEvents";
 import { EventsPanel } from "../dashboard/EventsPanel";
@@ -40,7 +40,7 @@ export default function AdminDashboard() {
         : "Admin User";
     const userRole = userInformation?.role || "Guest";
 
-    // 🟢 REPLACED: getTimeframeKey(id)
+    // 🟢 timeframeKey dynamically updates based on the selected tab
     const timeframeKey = useMemo(() => {
         switch (selectedTab) {
             case 1: return 'today';
@@ -50,19 +50,34 @@ export default function AdminDashboard() {
         }
     }, [selectedTab]);
 
+    // =========================================================================
+    // 🟢 THE UPDATED CHART DATA FETCHER & TRANSLATOR
+    // =========================================================================
     const getChartData = (chartKey) => {
         if (!dashboardData || isLoading) return [];
 
-        // 🟢 REPLACED: const timeframeKey = getTimeframeKey(selectedTab);
         const dataArray = dashboardData[timeframeKey];
 
         if (!Array.isArray(dataArray)) return [];
 
         const container = dataArray.find(obj => Object.keys(obj).includes(chartKey));
-        return container ? container[chartKey] : [];
-    };
+        const rawData = container ? container[chartKey] : [];
 
-    // 🟢 REPLACED: getStatsData() and statsData execution
+        // 🟢 THE TRANSLATOR: Intercept trendsData to fix the legacy backend issues
+        if (chartKey === 'trendsData' && rawData.length > 0) {
+            return rawData.map(item => ({
+                dataSpan: item.dataSpan,
+                Meals: item["Customized Order"] || 0,     // Translates headcount
+                Snacks: item["Pre-packed Food"] || 0,     // Translates headcount
+                // 🟢 MATH FIX: Divides the massive peso amount by 60 to convert it back to a student headcount
+                Unclaimed: item["Unused vouchers"] ? Math.round(item["Unused vouchers"] / 60) : 0   
+            }));
+        }
+
+        return rawData;
+    };
+    // =========================================================================
+
     const statsData = useMemo(() => {
         const stats = dashboardData.stats || {};
         const claimed = stats.totalClaimed || 0;
@@ -76,7 +91,7 @@ export default function AdminDashboard() {
             absent: stats.absentStudentCount || 0,
             waived: stats.waivedStudentCount || 0,
             eligible: eligible,
-            claimed: claimed, // 🟢 FIX: Added the claimed variable so the UI card works!
+            claimed: claimed, 
             acceptedRate,
             rejectedRate
         };
@@ -155,7 +170,7 @@ export default function AdminDashboard() {
                                                     </div>
                                                 </div>
 
-                                                {/* 🟢 NEW: DAILY EXPENSES CHART */}
+                                                {/* DAILY EXPENSES CHART */}
                                                 <div className="flex h-[350px] w-[98%] border-[#D9D9D9] border-[1px] my-2 rounded-xl" style={{ margin: 10 }}>
                                                     <div className="h-full w-full" style={{ padding: 20 }}>
                                                         <p className="font-geist text-sm text-gray-800">Meal Value Spending Chart</p>

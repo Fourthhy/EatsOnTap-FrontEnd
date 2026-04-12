@@ -2,7 +2,6 @@ import React from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 function CustomTooltip({ active, payload, label }) {
-
   if (active && payload && payload.length) {
     return (
       <div
@@ -19,20 +18,14 @@ function CustomTooltip({ active, payload, label }) {
         }}
         className="custom-tooltip"
       >
-        {/* Header/label (e.g., month) */}
         <div style={{ fontWeight: 700, fontSize: 14, color: "#222", marginBottom: 6 }}>
           {label}
         </div>
-        {/* Iterate each dataKey for this label */}
         {payload.map((entry) => (
           <div key={entry.dataKey} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
             <div style={{
-              width: 12,
-              height: 12,
-              background: entry.color,
-              borderRadius: 2,
-              display: 'inline-block',
-              marginRight: 8,
+              width: 12, height: 12, background: entry.color,
+              borderRadius: 2, display: 'inline-block', marginRight: 8,
             }} />
             <span style={{ color: "#242424", fontWeight: 600, marginRight: 6 }}>
               {entry.name || entry.dataKey}:
@@ -53,20 +46,11 @@ function CustomLegend({ payload }) {
     <div style={{ display: "flex", gap: 20, alignItems: "center", justifyContent: "end", marginTop: 10, paddingBottom: 10 }}>
       {payload.map((entry) => (
         <div key={entry.value} style={{ display: "flex", alignItems: "center", flexDirection: "row", gap: 6 }}>
-          {/* Colored square/box */}
           <div style={{
-            width: 12,
-            height: 12,
-            background: entry.color,
-            borderRadius: 2,
-            marginRight: 4
+            width: 12, height: 12, background: entry.color,
+            borderRadius: 2, marginRight: 4
           }} />
-          <span style={{
-            fontFamily: "geist",
-            color: "#4C4B4B",
-            fontSize: 13,
-            fontWeight: 500
-          }}>
+          <span style={{ fontFamily: "geist", color: "#4C4B4B", fontSize: 13, fontWeight: 500 }}>
             {entry.value}
           </span>
         </div>
@@ -78,10 +62,8 @@ function CustomLegend({ payload }) {
 function LineChartBox({ data }) {
   const geistTickStyle = { fontFamily: 'geist', fontSize: 12, fill: '#666' };
 
-
   return (
     <div style={{ width: "100%", height: 230, marginRight: 10 }}>
-      {/* FIX: Changed width="full" to width="100%" */}
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
           <CartesianGrid stroke="#e6e6e6" vertical={false} />
@@ -90,25 +72,22 @@ function LineChartBox({ data }) {
             tick={geistTickStyle}
             tickLine={false}
             axisLine={false}
-            dy={10} // Adds padding between chart and labels
+            dy={10} 
           />
           <YAxis
-            hide={false} // Ensure YAxis is visible, or set to true to hide lines but keep scale
+            hide={false} 
             tickLine={false}
             axisLine={false}
             tick={geistTickStyle}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#eaebec', strokeWidth: 2 }} />
 
-          <Line type="linear" dataKey="Pre-packed Food" stroke="#10B981" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
-          <Line type="linear" dataKey="Customized Order" stroke="#047857" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
-          <Line type="linear" dataKey="Unused vouchers" stroke="#D13B3B" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+          {/* 🟢 UPDATED: Mapping to the new database logic */}
+          <Line type="linear" dataKey="Meals" name="Meals Claimed" stroke="#10B981" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+          <Line type="linear" dataKey="Snacks" name="Snacks Claimed" stroke="#047857" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+          <Line type="linear" dataKey="Unclaimed" name="Unclaimed/Missed" stroke="#D13B3B" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
 
-          <Legend
-            content={<CustomLegend />} 
-            verticalAlign="top"
-            align="end"
-            />
+          <Legend content={<CustomLegend />} verticalAlign="top" align="end" />
         </LineChart>
       </ResponsiveContainer>
     </div>

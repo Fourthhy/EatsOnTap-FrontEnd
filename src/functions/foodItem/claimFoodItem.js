@@ -1,7 +1,9 @@
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
+
+const BASE_URL = VITE_LOCALHOST;
 export async function claimFoodItem(studentID, creditTaken) {
-    const targetUrl = `${VITE_BASE_URL}/api/claim/${encodeURIComponent(studentID)}/claim-foodItem`;
+    const targetUrl = `${BASE_URL}/api/claim/${encodeURIComponent(studentID)}/claim-foodItem`;
 
     try {
         const response = await fetch(targetUrl, {
