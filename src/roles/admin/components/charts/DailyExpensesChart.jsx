@@ -99,17 +99,15 @@ const DailyExpensesChart = ({ data }) => {
             wrapperStyle={{ fontFamily: 'geist', fontSize: '12px' }}
           />
 
-          {/* STACKING LOGIC:
-             Both Areas share `stackId="1"`. 
-             They stack on top of each other. 
-             The total height = Claimed + Unclaimed = Total Allotted.
+          {/* 🟢 OVERLAPPING LOGIC:
+              Removed stackId so both elements start from the exact 0 baseline.
+              Claimed is rendered first (background), Unclaimed is rendered second (foreground).
           */}
 
           <Area 
             type="monotone" 
             dataKey="claimed" 
             name="Total Claimed"
-            stackId="1" 
             stroke="#10B981" 
             fill="url(#colorClaimed)" 
             strokeWidth={2}
@@ -119,7 +117,6 @@ const DailyExpensesChart = ({ data }) => {
             type="monotone" 
             dataKey="unclaimed" 
             name="Total Unclaimed"
-            stackId="1" 
             stroke="#EF4444" 
             fill="url(#colorUnclaimed)" 
             strokeWidth={2}
