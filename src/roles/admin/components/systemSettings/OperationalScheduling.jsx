@@ -226,7 +226,7 @@ const OperationalScheduling = () => {
         { id: 'SUBMIT-MEAL-REQUEST', label: 'Meal Requests' }, 
         { id: 'ASSIGN-CREDITS', label: 'Credit Assignment' },
         { id: 'STUDENT-CLAIM', label: 'Student Claims' },
-        { id: 'REMOVE-CREDITS', label: 'Credit Removal' },
+        { id: 'END-OF-DAY-SWEEP', label: 'Credit Removal' },
     ];
 
     const cardStyle = {

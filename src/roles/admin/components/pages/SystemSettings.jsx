@@ -36,7 +36,7 @@ const SystemSettings = () => {
             </motion.div>
 
             {/* 3. SYSTEM ACTIVATION */}
-            <motion.div
+            {/* <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ type: "spring", delay: 0.8 }}>
@@ -44,7 +44,7 @@ const SystemSettings = () => {
                     systemStatus={systemStatus}
                     setSystemStatus={setSystemStatus}
                 />
-            </motion.div>
+            </motion.div> */}
         </div>
     );
 };
