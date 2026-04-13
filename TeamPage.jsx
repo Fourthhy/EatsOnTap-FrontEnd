@@ -514,7 +514,7 @@ function TeamPage() {
           <div className="team-badge">OUR TEAM</div>
           <h1>Meet the Minds</h1>
           <p>
-            The dedicated members behind Eat's on Tap, consistently striving to innovate meal distribution systems through robust and seamless RFID technology.
+            The dedicated members behind Eat's on Tap, consistently striving to innovate meal claiming systems through the digitalization of student welfare services through robust and seamless RFID technology.
           </p>
         </motion.div>
 

@@ -24,11 +24,12 @@ function LandingPage() {
     { question: "Why RFID and not QR code?", answer: "RFID technology offers superior speed and reliability for high-volume environments like school canteens. Unlike QR codes, RFID allows for instant, tap-and-go transactions without the need for scanning, reducing queues and ensuring a seamless meal claiming experience for students." },
     { question: "What would the students do if the system is down?", answer: "In the event of system outage, the students are required to go to the PSAS department to claim for their temporary coupon by tapping their student ID on the provided RFID Scanner." },
     { question: "How secured the system is?", answer: "Our system is highly secure, combining Google's cryptographic verification with strict @laverdad.edu.ph domain locking to block unauthorized users. It further protects accounts using encrypted passwords, HTTP-only secure cookies, and comprehensive backend activity logging." },
+    { question: "How to request meal during events?", answer: "Requesting meal for events requires a formal inquiry to the PSAS department, along with the reason and schedule of the event to justify the need for a free meal." },
   ];
 
   const features = [
     { icon: '⚡', title: 'Instant RFID Claiming', desc: 'Students simply tap their ID to claim meals in seconds. No more physical coupons or lengthy verification processes.' },
-    { icon: '📊', title: 'Real-Time Analytics', desc: 'Monitor meal distribution with live dashboards, track participation rates, and generate comprehensive reports instantly.' },
+    { icon: '📊', title: 'Real-Time Analytics', desc: 'Monitor meal claiming with live dashboards, track participation rates, and generate comprehensive reports instantly.' },
     { icon: '🔒', title: 'Secure & Compliant', desc: 'Built with data privacy in mind, fully compliant with RA 10173 (Data Privacy Act of 2012) to protect student information.' },
     { icon: '💰', title: 'Virtual Credit System', desc: 'Automated daily credit allocation with automatic resets. Students can use credits flexibly at meal stations or the canteen.' },
     { icon: '👥', title: 'Multi-User Management', desc: 'Role-based access for PSAS staff, food servers, canteen personnel, and administrators with tailored permissions.' },
@@ -1102,7 +1103,7 @@ function LandingPage() {
             <a href="#stats" onClick={(e) => scrollToSection(e, 'stats')}>Impact</a>
             <a href="#faq" onClick={(e) => scrollToSection(e, 'faq')}>FAQ</a>
             <a href="#contact" onClick={(e) => scrollToSection(e, 'contact')}>Contact</a>
-            <a href="/login" className="header-cta" style={{ textDecoration: 'none' }}>Log In</a>
+            <a href="#" className="header-cta" style={{ textDecoration: 'none' }}>Log In</a>
           </nav>
           <div className="menu-toggle">
             <span />
@@ -1145,9 +1146,9 @@ function LandingPage() {
               <span>Eat's on Tap</span>
             </h1>
             <p>
-              Transform your free meal distribution with RFID technology. Eat's on
-              Tap eliminates manual coupons, reduces wait times, and provides
-              real-time analytics for La Verdad Christian College.
+              Digitalization of student's free meal claiming through an RFID-driven
+              solution. Eat's on Tap provides the PSAS Department with a
+              seamless system to better serve the scholars at LVCC Apalit.
             </p>
             <div className="cta-buttons">
               <Link to="/login" className="btn btn-primary">
@@ -1200,8 +1201,8 @@ function LandingPage() {
             <div className="section-badge">KEY FEATURES</div>
             <h2>Built for Efficiency</h2>
             <p>
-              Everything you need to modernize your meal distribution system and
-              enhance student welfare.
+              Optimizing student welfare through the digitalization of meal
+              claiming systems, ensuring a secure and efficient experience for every scholar.
             </p>
           </motion.div>
           <div className="features-grid">
