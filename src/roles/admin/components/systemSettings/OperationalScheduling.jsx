@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Save, Loader2 } from 'lucide-react';
-import { PasswordConfirmationModal } from './PasswordConfirmationModal';
+import { Clock, Save, Loader2, AlertCircle } from 'lucide-react';
 import { ButtonGroup } from '../../../../components/global/ButtonGroup';
 import { useData } from '../../../../context/DataContext';
 
@@ -17,7 +16,7 @@ const theme = {
         white: '#FFFFFF',
         textWhite: '#EEEEEE',
         bg: '#F9FAFB',
-        disabled: '#9CA3AF', // Added for disabled state
+        disabled: '#9CA3AF', 
     },
     fonts: { main: "'Geist', sans-serif" },
     radius: { md: '6px', lg: '6px', full: '9999px' },
@@ -26,27 +25,49 @@ const theme = {
 
 // --- SUB-COMPONENTS ---
 
-const ToggleSwitch = ({ checked, onChange }) => {
-    const trackStyle = {
-        width: '44px', height: '24px', backgroundColor: checked ? theme.colors.primary : '#E5E7EB',
-        borderRadius: theme.radius.full, position: 'relative', cursor: 'pointer',
-        transition: 'background-color 0.2s', display: 'flex', alignItems: 'center',
-    };
-    const knobStyle = {
-        width: '20px', height: '20px', backgroundColor: theme.colors.white, borderRadius: theme.radius.full,
-        position: 'absolute', left: checked ? '22px' : '2px', transition: 'left 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-    };
+// 🟢 NEW: Clean Confirmation Modal
+const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, isSaving }) => {
+    if (!isOpen) return null;
     return (
-        <div style={trackStyle} onClick={() => onChange(!checked)}>
-            <div style={knobStyle} />
+        <div style={{
+            position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)'
+        }}>
+            <div style={{
+                backgroundColor: theme.colors.white, borderRadius: '12px', padding: '24px', width: '100%', 
+                maxWidth: '360px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', textAlign: 'center', fontFamily: theme.fonts.main
+            }}>
+                <div style={{ backgroundColor: '#EFF6FF', padding: '12px', borderRadius: '50%', marginBottom: '16px', color: theme.colors.primary, display: 'inline-flex' }}>
+                    <AlertCircle size={24} />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 700, color: theme.colors.textMain, marginBottom: '8px' }}>{title}</h3>
+                <p style={{ fontSize: '14px', color: theme.colors.textSec, marginBottom: '24px', lineHeight: '1.5' }}>
+                    Are you sure you want to apply these schedule changes? This will affect system operations immediately.
+                </p>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <button 
+                        onClick={onClose} 
+                        disabled={isSaving}
+                        style={{ flex: 1, padding: '10px', borderRadius: '8px', border: `1px solid ${theme.colors.border}`, backgroundColor: 'white', color: theme.colors.textMain, cursor: isSaving ? 'not-allowed' : 'pointer', fontWeight: 500 }}
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        onClick={onConfirm} 
+                        disabled={isSaving}
+                        style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', backgroundColor: theme.colors.primary, color: 'white', cursor: isSaving ? 'not-allowed' : 'pointer', fontWeight: 500, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                    >
+                        {isSaving ? <Loader2 size={16} className="animate-spin" /> : "Confirm"}
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
 
 const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
     // --- STATE ---
-    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); // 🟢 Replaced Password State
     const [isSaving, setIsSaving] = useState(false);
 
     // Schema Fields
@@ -85,10 +106,11 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
     // --- HANDLERS ---
     const handleUpdateClick = () => {
         if (!hasChanges) return;
-        setIsPasswordModalOpen(true);
+        setIsConfirmModalOpen(true);
     };
 
-    const handlePasswordConfirmed = async (password) => {
+    // 🟢 No longer expects a password argument
+    const handleConfirmUpdate = async () => {
         setIsSaving(true);
         
         const payload = {
@@ -98,18 +120,20 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
             endHour: parseInt(endHour, 10),
             endMinute: parseInt(endMinute, 10),
             isActive: isActive, 
-            password: password 
+            // 🟢 Password removed from payload
         };
 
         console.log("Submitting Payload:", payload);
 
         try {
             await editSetting(payload); 
+            setIsConfirmModalOpen(false);
+            // Optionally add a success toast/alert here
         } catch (error) {
             console.error("Update failed:", error);
+            alert(error.message || "Failed to update schedule.");
         } finally {
             setIsSaving(false);
-            setIsPasswordModalOpen(false);
         }
     };
 
@@ -128,10 +152,9 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
             width: '100%', padding: '10px', backgroundColor: '#F9FAFB', border: `1px solid ${theme.colors.border}`,
             borderRadius: theme.radius.md, fontSize: '14px', color: theme.colors.textMain, outline: 'none', fontFamily: theme.fonts.main
         },
-        // 🟢 UPDATED BUTTON STYLE
         button: {
-            backgroundColor: hasChanges ? theme.colors.primary : '#F3F4F6', // Blue if changed, Light Grey if not
-            color: hasChanges ? theme.colors.textWhite : theme.colors.disabled, // White if changed, Grey text if not
+            backgroundColor: hasChanges ? theme.colors.primary : '#F3F4F6', 
+            color: hasChanges ? theme.colors.textWhite : theme.colors.disabled, 
             border: hasChanges ? 'none' : `1px solid ${theme.colors.border}`,
             borderRadius: theme.radius.md,
             padding: '10px 20px', fontSize: '14px', fontWeight: '500', 
@@ -196,18 +219,19 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
                 <button 
                     style={styles.button} 
                     onClick={handleUpdateClick} 
-                    disabled={isSaving || !hasChanges} // 🟢 Disable if no changes
+                    disabled={isSaving || !hasChanges} 
                 >
                     {isSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} Update Schedule
                 </button>
             </div>
 
-            {/* --- PASSWORD MODAL --- */}
-            <PasswordConfirmationModal 
-                isOpen={isPasswordModalOpen}
-                onClose={() => setIsPasswordModalOpen(false)}
-                onConfirm={handlePasswordConfirmed}
-                actionTitle={`Update ${label}`}
+            {/* 🟢 NEW CONFIRMATION MODAL */}
+            <ConfirmationModal 
+                isOpen={isConfirmModalOpen}
+                onClose={() => setIsConfirmModalOpen(false)}
+                onConfirm={handleConfirmUpdate}
+                title={`Update ${label}`}
+                isSaving={isSaving}
             />
         </div>
     );
@@ -217,7 +241,7 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
 
 const OperationalScheduling = () => {
     // We use the Schema 'setting' field as the ID
-    const [activeSettingKey, setActiveSettingKey] = useState('SUBMIT-MEAL-REQUEST'); // 🟢 Fixed Initial State 
+    const [activeSettingKey, setActiveSettingKey] = useState('SUBMIT-MEAL-REQUEST'); 
     
     // 🟢 GET DATA FROM CONTEXT
     const { setting } = useData(); 
