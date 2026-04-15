@@ -25,7 +25,6 @@ const theme = {
 
 // --- SUB-COMPONENTS ---
 
-// 🟢 NEW: Clean Confirmation Modal
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, isSaving }) => {
     if (!isOpen) return null;
     return (
@@ -65,19 +64,17 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, isSaving }) => {
     );
 };
 
-const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
-    // --- STATE ---
-    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); // 🟢 Replaced Password State
+// 🟢 ADDED: onSaveSuccess prop to pass data back up to the parent
+const ScheduleConfigForm = ({ settingKey, label, initialData, onSaveSuccess }) => {
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); 
     const [isSaving, setIsSaving] = useState(false);
 
-    // Schema Fields
     const [isActive, setIsActive] = useState(false);
     const [startHour, setStartHour] = useState(0);
     const [startMinute, setStartMinute] = useState(0);
     const [endHour, setEndHour] = useState(0);
     const [endMinute, setEndMinute] = useState(0);
 
-    // 🟢 SYNC STATE: Update local state when prop data changes
     useEffect(() => {
         if (initialData) {
             setIsActive(initialData.isActive ?? false);
@@ -85,16 +82,9 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
             setStartMinute(initialData.startMinute ?? 0);
             setEndHour(initialData.endHour ?? 0);
             setEndMinute(initialData.endMinute ?? 0);
-        } else {
-            setIsActive(false);
-            setStartHour(0);
-            setStartMinute(0);
-            setEndHour(0);
-            setEndMinute(0);
         }
     }, [initialData]);
 
-    // 🟢 CHECK FOR CHANGES
     const hasChanges = initialData && (
         isActive !== (initialData.isActive ?? false) ||
         parseInt(startHour, 10) !== (initialData.startHour ?? 0) ||
@@ -103,13 +93,11 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
         parseInt(endMinute, 10) !== (initialData.endMinute ?? 0)
     );
 
-    // --- HANDLERS ---
     const handleUpdateClick = () => {
         if (!hasChanges) return;
         setIsConfirmModalOpen(true);
     };
 
-    // 🟢 No longer expects a password argument
     const handleConfirmUpdate = async () => {
         setIsSaving(true);
         
@@ -120,15 +108,17 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
             endHour: parseInt(endHour, 10),
             endMinute: parseInt(endMinute, 10),
             isActive: isActive, 
-            // 🟢 Password removed from payload
         };
 
-        console.log("Submitting Payload:", payload);
-
         try {
+            // 1. Update the database
             await editSetting(payload); 
+            
+            // 2. 🟢 Update the local UI immediately so it reflects the change!
+            // We pass the payload back up, but we also ensure 'setting' matches your database schema key
+            onSaveSuccess({ ...payload, setting: settingKey }); 
+            
             setIsConfirmModalOpen(false);
-            // Optionally add a success toast/alert here
         } catch (error) {
             console.error("Update failed:", error);
             alert(error.message || "Failed to update schedule.");
@@ -138,11 +128,6 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
     };
 
     const styles = {
-        headerBox: {
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            backgroundColor: '#F9FAFB', padding: '16px', borderRadius: theme.radius.md,
-            border: `1px solid ${theme.colors.border}`, marginBottom: '24px',
-        },
         sectionTitle: {
             display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px',
             fontWeight: '600', color: '#374151', marginBottom: '12px', fontFamily: theme.fonts.main
@@ -172,12 +157,10 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
 
     return (
         <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
-            {/* Time Settings */}
             <div style={{ marginBottom: '24px' }}>
                 <div style={styles.sectionTitle}><Clock size={16} /> Daily Time Window (24-Hour Format)</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                     
-                    {/* START TIME */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                         <div>
                             <label style={styles.label}>Start Hour (0-23)</label>
@@ -195,7 +178,6 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
                         </div>
                     </div>
 
-                    {/* END TIME */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                         <div>
                             <label style={styles.label}>End Hour (0-23)</label>
@@ -225,7 +207,6 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
                 </button>
             </div>
 
-            {/* 🟢 NEW CONFIRMATION MODAL */}
             <ConfirmationModal 
                 isOpen={isConfirmModalOpen}
                 onClose={() => setIsConfirmModalOpen(false)}
@@ -240,11 +221,19 @@ const ScheduleConfigForm = ({ settingKey, label, initialData }) => {
 // --- MAIN COMPONENT ---
 
 const OperationalScheduling = () => {
-    // We use the Schema 'setting' field as the ID
     const [activeSettingKey, setActiveSettingKey] = useState('SUBMIT-MEAL-REQUEST'); 
     
-    // 🟢 GET DATA FROM CONTEXT
     const { setting } = useData(); 
+
+    // 🟢 NEW: Shadow state to hold our local, immediately-updateable version of the settings
+    const [localSettings, setLocalSettings] = useState([]);
+
+    // Sync the context data into our shadow state whenever it initially loads
+    useEffect(() => {
+        if (setting && Array.isArray(setting)) {
+            setLocalSettings(setting);
+        }
+    }, [setting]);
 
     const scheduleTabs = [
         { id: 'SUBMIT-MEAL-REQUEST', label: 'Meal Requests' }, 
@@ -259,8 +248,7 @@ const OperationalScheduling = () => {
         padding: '24px', fontFamily: theme.fonts.main,
     };
 
-    // 🟢 CHECK IF SETTING ARRAY IS LOADED
-    if (!setting && !Array.isArray(setting)) {
+    if (localSettings.length === 0) {
         return (
             <section style={cardStyle}>
                 <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B7280' }}>
@@ -271,10 +259,19 @@ const OperationalScheduling = () => {
         );
     }
 
-    // 🟢 FIND ACTIVE SETTING
-    const activeSettingData = Array.isArray(setting) 
-        ? setting.find(s => s.setting === activeSettingKey) 
-        : null;
+    // 🟢 Extract active data from our LOCAL shadow state, not the stale context
+    const activeSettingData = localSettings.find(s => s.setting === activeSettingKey);
+
+    // 🟢 HANDLER: Updates our shadow state so the UI reacts instantly
+    const handleSettingSavedLocally = (updatedSettingObject) => {
+        setLocalSettings(prevSettings => 
+            prevSettings.map(s => 
+                s.setting === updatedSettingObject.setting 
+                    ? { ...s, ...updatedSettingObject } // Merge in the new payload data
+                    : s
+            )
+        );
+    };
 
     return (
         <section style={cardStyle}>
@@ -298,6 +295,7 @@ const OperationalScheduling = () => {
                     settingKey={activeSettingKey}
                     label={scheduleTabs.find(t => t.id === activeSettingKey)?.label} 
                     initialData={activeSettingData}
+                    onSaveSuccess={handleSettingSavedLocally} // 🟢 Pass the updater function down
                 />
             </div>
         </section>

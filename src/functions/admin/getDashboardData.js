@@ -1,13 +1,15 @@
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
+const BASE_URL = VITE_BASE_URL;
+
 export async function getDashboardData(date = null) {
     // 1. Construct URL with optional Query Parameter
     // Assuming your router is mounted at /api/reports
-    let targetUrl = `${VITE_BASE_URL}/api/fetch/getDashboardData`;
+    let targetUrl = `${BASE_URL}/api/fetch/getDashboardData`;
 
     // If a specific date is provided, append it to the URL
-    // Format: ?date=2026-02-03
+    // Format: ?date=2026-02-03 
     if (date) {
         const dateString = new Date(date).toISOString(); // Ensure valid ISO string
         targetUrl += `?date=${dateString}`;
