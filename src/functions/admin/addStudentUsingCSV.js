@@ -1,10 +1,12 @@
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
+const BASE_URL = VITE_BASE_URL;
+
 export async function uploadStudentCSV(file) {
     // ⚠️ CHECK ROUTE: Matches /api/students/usingCSV
     // Derived from app.use('/api/students', ...) + router.post('/usingCSV', ...)
-    const targetUrl = `${VITE_BASE_URL}/api/students/usingCSV`;
+    const targetUrl = `${BASE_URL}/api/students/usingCSV`;
 
     const formData = new FormData();
     // The key 'students_information' must match upload.single('students_information') in your route

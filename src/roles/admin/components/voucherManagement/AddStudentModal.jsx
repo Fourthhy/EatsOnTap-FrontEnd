@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useRef, useMemo, useEffect, use } from 'react';
-import { ChevronDown, Check, ChevronUp, ChevronLeft, Plus, Upload, FileText, X, User, Wifi, CheckCircle, Loader } from 'lucide-react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { ChevronDown, Check, ChevronLeft, Plus, Upload, FileText, X, User, Wifi, CheckCircle, Loader, AlertTriangle } from 'lucide-react';
 import { createStudent } from "../../../../functions/admin/createStudent";
 import { useData } from "../../../../context/DataContext";
 import { AnimatePresence, motion } from 'framer-motion';
@@ -253,54 +253,94 @@ const ManualAddForm = ({ onClose }) => {
     );
 };
 
-// --- 🟢 NEW: UPLOAD SUCCESS MODAL ---
-const UploadSuccessModal = ({ onClose, message }) => {
-    const [timeLeft, setTimeLeft] = useState(5);
-
-    useEffect(() => {
-        // Start the countdown timer
-        const timer = setInterval(() => {
-            setTimeLeft((prevTime) => {
-                if (prevTime <= 1) {
-                    clearInterval(timer);
-                    onClose(); // Auto-close when it hits 0
-                    return 0;
-                }
-                return prevTime - 1;
-            });
-        }, 1000);
-
-        // Cleanup interval on unmount
-        return () => clearInterval(timer);
-    }, [onClose]);
+// --- 🟢 UPDATED: UPLOAD SUCCESS MODAL (NOW WITH METRICS & ERRORS) ---
+const UploadSuccessModal = ({ onClose, result }) => {
+    // Destructure the data from the backend
+    const { metrics, errors, message } = result;
+    const hasErrors = errors && errors.length > 0;
 
     return (
         <div
             className="fixed inset-0 flex items-center justify-center z-[9999] backdrop-blur-sm"
             style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
-            onClick={onClose} // Closes if they click the background
+            onClick={onClose} 
         >
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                className="bg-white rounded-xl shadow-2xl p-6 flex flex-col items-center max-w-sm w-full mx-4 text-center"
-                onClick={(e) => e.stopPropagation()} // Prevents closing when clicking inside the modal
-                style={{ fontFamily: "inherit" }}
+                className="bg-white rounded-xl shadow-2xl p-6 flex flex-col w-full mx-4 max-w-md"
+                onClick={(e) => e.stopPropagation()} 
+                style={{ fontFamily: "inherit", maxHeight: '90vh', overflowY: 'auto' }}
             >
-                {/* Animated Check Circle */}
-                <div style={{ position: 'relative', marginBottom: '20px' }}>
-                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#dcfce7', animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite' }} />
-                    <CheckCircle size={56} color="#16a34a" style={{ position: 'relative', zIndex: 10 }} />
+                {/* Header Section */}
+                <div className="text-center mb-6">
+                    <div style={{ display: 'inline-flex', position: 'relative', marginBottom: '16px' }}>
+                        <div style={{ 
+                            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
+                            width: '64px', height: '64px', borderRadius: '50%', 
+                            backgroundColor: hasErrors ? '#fef08a' : '#dcfce7', // Yellow if errors, Green if perfect
+                            animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite' 
+                        }} />
+                        {hasErrors ? (
+                            <AlertTriangle size={56} color="#ca8a04" style={{ position: 'relative', zIndex: 10 }} />
+                        ) : (
+                            <CheckCircle size={56} color="#16a34a" style={{ position: 'relative', zIndex: 10 }} />
+                        )}
+                    </div>
+                    
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827' }}>
+                        {hasErrors ? "Upload Completed with Issues" : "Upload Successful!"}
+                    </h3>
+                    <p style={{ color: '#4b5563', fontSize: '0.875rem', marginTop: '4px' }}>
+                        {message}
+                    </p>
                 </div>
 
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#111827', marginBottom: '8px' }}>
-                    Upload Successful!
-                </h3>
+                {/* 🟢 METRICS GRID */}
+                {metrics && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '24px' }}>
+                        <div style={{ padding: '12px', backgroundColor: '#f3f4f6', borderRadius: '8px', textAlign: 'center' }}>
+                            <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: '700', color: '#1f2937' }}>{metrics.totalIndicated}</span>
+                            <span style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: '500' }}>Total Processed</span>
+                        </div>
+                        <div style={{ padding: '12px', backgroundColor: '#ecfdf5', borderRadius: '8px', textAlign: 'center' }}>
+                            <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: '700', color: '#059669' }}>{metrics.added}</span>
+                            <span style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: '500' }}>Newly Added</span>
+                        </div>
+                        <div style={{ padding: '12px', backgroundColor: '#eff6ff', borderRadius: '8px', textAlign: 'center' }}>
+                            <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: '700', color: '#2563eb' }}>{metrics.skippedDuplicates}</span>
+                            <span style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: '500' }}>Skipped (Dupes)</span>
+                        </div>
+                        <div style={{ padding: '12px', backgroundColor: '#fef2f2', borderRadius: '8px', textAlign: 'center' }}>
+                            <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: '700', color: '#dc2626' }}>{metrics.failedValidation}</span>
+                            <span style={{ fontSize: '0.75rem', color: '#6b7280', fontWeight: '500' }}>Failed</span>
+                        </div>
+                    </div>
+                )}
 
-                <p style={{ color: '#4b5563', fontSize: '0.875rem', marginBottom: '24px', lineHeight: '1.5' }}>
-                    {message}
-                </p>
+                {/* 🟢 ERROR SCROLLBOX (Only shows if there are failed rows) */}
+                {hasErrors && (
+                    <div style={{ marginBottom: '24px' }}>
+                        <h4 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                            Action Required for {errors.length} row(s):
+                        </h4>
+                        <div style={{ 
+                            maxHeight: '150px', overflowY: 'auto', border: '1px solid #e5e7eb', 
+                            borderRadius: '6px', padding: '8px', backgroundColor: '#fafafa' 
+                        }}>
+                            {errors.map((err, idx) => (
+                                <div key={idx} style={{ 
+                                    fontSize: '0.75rem', padding: '6px', 
+                                    borderBottom: idx !== errors.length - 1 ? '1px solid #e5e7eb' : 'none' 
+                                }}>
+                                    <span style={{ fontWeight: '600', color: '#dc2626' }}>Row {err.rowNumber}</span>: 
+                                    ID [{err.studentID}] - {err.reason}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <button
                     onClick={onClose}
@@ -312,7 +352,7 @@ const UploadSuccessModal = ({ onClose, message }) => {
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
                 >
-                    Okay ({timeLeft})
+                    Close Report
                 </button>
                 <style>{`@keyframes ping { 75%, 100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }`}</style>
             </motion.div>
@@ -320,13 +360,13 @@ const UploadSuccessModal = ({ onClose, message }) => {
     );
 };
 
-// --- UPLOAD FROM CSV COMPONENT (Updated with Custom Modal) ---
+// --- 🟢 UPDATED: UPLOAD FROM CSV COMPONENT ---
 const UploadFromCSV = () => {
     const fileInputRef = useRef(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // 🟢 NEW: State to control the Success Modal
-    const [successMessage, setSuccessMessage] = useState("");
+    // Changed from string to object to hold the full payload
+    const [uploadResult, setUploadResult] = useState(null);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
     const handleButtonClick = () => {
@@ -338,9 +378,8 @@ const UploadFromCSV = () => {
     const processFile = async (file) => {
         if (!file) return;
 
-        // Validation
         if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-            alert("Please upload a valid CSV file."); // (Kept alert for errors, but can be modaled later)
+            alert("Please upload a valid CSV file."); 
             return;
         }
 
@@ -350,8 +389,8 @@ const UploadFromCSV = () => {
             console.log(`Uploading: ${file.name}`);
             const response = await uploadStudentCSV(file);
 
-            // 🟢 THE FIX: Replaced alert() with Modal state
-            setSuccessMessage(response.message); // e.g., "Successfully Created 50 students"
+            // Pass the entire response object to the modal
+            setUploadResult(response); 
             setIsSuccessModalOpen(true);
 
         } catch (error) {
@@ -426,11 +465,10 @@ const UploadFromCSV = () => {
                 </button>
             </div>
 
-            {/* 🟢 NEW: Mount the modal conditionally using AnimatePresence for smooth transitions */}
             <AnimatePresence>
-                {isSuccessModalOpen && (
+                {isSuccessModalOpen && uploadResult && (
                     <UploadSuccessModal
-                        message={successMessage}
+                        result={uploadResult}
                         onClose={() => setIsSuccessModalOpen(false)}
                     />
                 )}
