@@ -1,7 +1,7 @@
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const BASE_URL = VITE_LOCALHOST;
+const BASE_URL = VITE_BASE_URL;
 export async function claimFoodItem(studentID, creditTaken) {
     const targetUrl = `${BASE_URL}/api/claim/${encodeURIComponent(studentID)}/claim-foodItem`;
 
