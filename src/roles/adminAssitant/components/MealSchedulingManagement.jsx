@@ -5,115 +5,10 @@ import { fetchProgramCodes } from "../../../functions/adminAssistant/fetchProgra
 // 🟢 Import the API Caller
 import { addProgramSchedule } from "../../../functions/adminAssistant/addProgramSchedule";
 
-// --- CUSTOM DROPDOWN COMPONENT (Unchanged) ---
-const CustomDropdown = ({ label, value, options, onChange }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const getLabel = (opt) => (typeof opt === 'object' ? opt.label : opt);
-    const getValue = (opt) => (typeof opt === 'object' ? opt.value : opt);
-    const selectedLabel = options.find(opt => getValue(opt) === value)?.label || value || "Select...";
-
-    return (
-        <div style={{ position: 'relative', width: '100%' }}>
-            {label && (
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '4px', textAlign: 'left' }}>
-                    {label}
-                </label>
-            )}
-            <button
-                type="button"
-                onClick={() => setIsOpen(!isOpen)}
-                style={{
-                    width: '100%', padding: '10px 14px', fontSize: '0.875rem', textAlign: 'left',
-                    backgroundColor: 'white', border: '1px solid #d1d5db', borderRadius: '6px',
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    cursor: 'pointer', color: value ? '#1f2937' : '#9ca3af',
-                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', fontFamily: 'geist'
-                }}
-            >
-                <span>{selectedLabel}</span>
-                <ChevronDown size={16} className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            <AnimatePresence>
-                {isOpen && (
-                    <>
-                        <div style={{ position: 'fixed', inset: 0, zIndex: 9050 }} onClick={() => setIsOpen(false)} />
-                        <motion.div
-                            initial={{ opacity: 0, y: -5 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -5 }}
-                            transition={{ duration: 0.15 }}
-                            style={{
-                                position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '4px',
-                                backgroundColor: 'white', borderRadius: '6px',
-                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)',
-                                border: '1px solid #f3f4f6', zIndex: 9051, maxHeight: '200px', overflowY: 'auto'
-                            }}
-                        >
-                            {options.map((opt) => {
-                                const optLabel = getLabel(opt);
-                                const optValue = getValue(opt);
-                                const isSelected = value === optValue;
-                                return (
-                                    <button
-                                        key={optValue}
-                                        type="button"
-                                        onClick={() => { onChange(optValue); setIsOpen(false); }}
-                                        style={{
-                                            width: '100%', padding: '10px 14px', fontSize: '0.875rem', textAlign: 'left',
-                                            backgroundColor: 'transparent', border: 'none', cursor: 'pointer',
-                                            display: 'flex', alignItems: 'center', gap: '8px', color: '#374151',
-                                            borderBottom: '1px solid #f9fafb', fontFamily: 'geist'
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
-                                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                                    >
-                                        {isSelected && <Check size={14} className="text-blue-600" />}
-                                        <span style={{ marginLeft: isSelected ? 0 : '22px' }}>{optLabel}</span>
-                                    </button>
-                                );
-                            })}
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
-        </div>
-    );
-};
-
-// --- SUBMISSION TYPE DROPDOWN (Unchanged) ---
-function SubmissionTypeDropdown({ selectedSubmissionType, setSelectedSubmissionType }) {
-    const options = [
-        { label: 'Meal Eligibility Request', value: 'mealEligibility' },
-        { label: 'Event Meal Request', value: 'eventMeal' },
-    ];
-
-    return (
-        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', padding: "7px" }}>
-            <h1 style={{ fontFamily: 'geist', fontSize: '0.90rem', fontWeight: 400, paddingBottom: 10, color: '#374151' }}>
-                Submission Type
-            </h1>
-            <div className="font-geist" style={{ width: '100%' }}>
-                <CustomDropdown
-                    value={selectedSubmissionType}
-                    options={options}
-                    onChange={setSelectedSubmissionType}
-                />
-            </div>
-        </div>
-    );
-}
-
-// --- STEP 1 (Unchanged) ---
+// --- STEP 1 ---
 const Step1 = ({
-    submissionType,
-    setSubmissionType,
     selectedDays,
     setSelectedDays,
-    startDate,
-    setStartDate,
-    endDate,
-    setEndDate,
     isStep1Valid,
     paginate
 }) => {
@@ -128,7 +23,7 @@ const Step1 = ({
     };
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center min-h-[630px]">
+        <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center min-h-[250px]">
             {/* Header Circle */}
             <div style={{ marginBottom: "10px" }} className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
                 <span className="text-2xl font-bold text-blue-600 font-geist">1</span>
@@ -136,227 +31,54 @@ const Step1 = ({
 
             <h3 className="text-xl font-bold text-gray-800 font-geist">Configuration</h3>
             <p style={{ marginBottom: "20px" }} className="text-gray-500 font-geist text-sm">
-                Select request type and schedule.
+                Select the meal eligibility schedule.
             </p>
 
             <div className="w-full max-w-md mx-auto flex flex-col gap-6">
-
-                {/* 1. Submission Type Dropdown */}
-                <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                    <SubmissionTypeDropdown
-                        selectedSubmissionType={submissionType}
-                        setSelectedSubmissionType={setSubmissionType}
-                    />
-                </div>
-
-                {/* 2. DYNAMIC CONTENT AREA */}
+                {/* DYNAMIC CONTENT AREA */}
                 <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 animate-in fade-in slide-in-from-top-2 duration-300" style={{ padding: "15px" }}>
-
-                    {submissionType === 'mealEligibility' ? (
-                        // --- MEAL ELIGIBILITY: DAY GRID ---
-                        <>
-                            <div style={{ marginBottom: '8px', textAlign: 'left' }}>
-                                <label style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151', fontFamily: 'geist' }}>
-                                    Select Days
-                                </label>
-                            </div>
-                            <div className="grid grid-cols-3 gap-3">
-                                {daysOfWeek.map((day, idx) => {
-                                    const isSelected = selectedDays.includes(day);
-                                    return (
-                                        <div
-                                            key={idx}
-                                            onClick={() => toggleDay(day)}
-                                            className={`flex items-center p-2 rounded-md cursor-pointer border transition-all duration-200
+                    {/* --- MEAL ELIGIBILITY: DAY GRID --- */}
+                    <div style={{ marginBottom: '8px', textAlign: 'left' }}>
+                        <label style={{ fontSize: '0.875rem', fontWeight: '500', color: '#374151', fontFamily: 'geist' }}>
+                            Select Days
+                        </label>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                        {daysOfWeek.map((day, idx) => {
+                            const isSelected = selectedDays.includes(day);
+                            return (
+                                <div
+                                    key={idx}
+                                    onClick={() => toggleDay(day)}
+                                    className={`flex items-center p-2 rounded-md cursor-pointer border transition-all duration-200
                                     ${isSelected
-                                                    ? 'bg-blue-50 border-blue-200 shadow-sm'
-                                                    : 'bg-white border-gray-100 hover:border-gray-300 hover:bg-gray-50'
-                                                }`}
-                                            style={{ height: '40px' }}
-                                        >
-                                            <div className="flex items-center justify-center w-8 shrink-0 mr-2">
-                                                <input
-                                                    type="checkbox"
-                                                    className="accent-blue-600 w-4 h-4 cursor-pointer"
-                                                    checked={isSelected}
-                                                    readOnly
-                                                />
-                                            </div>
-                                            <span
-                                                className="truncate"
-                                                style={{
-                                                    fontWeight: 500, fontSize: 12, fontFamily: "geist",
-                                                    color: isSelected ? '#1e40af' : '#111827'
-                                                }}
-                                                title={day}
-                                            >
-                                                {day}
-                                            </span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </>
-                    ) : (
-                        // --- EVENT MEAL: DATE RANGE PICKER ---
-                        <div
-                            style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "16px", // gap-4
-                                textAlign: "left",
-                            }}
-                        >
-                            {/* Start Date */}
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: "4px", // gap-1
-                                }}
-                            >
-                                <label
-                                    style={{
-                                        fontSize: "0.875rem",
-                                        fontWeight: 500,
-                                        color: "#374151", // gray-700
-                                        fontFamily: "Geist, sans-serif",
-                                    }}
+                                            ? 'bg-blue-50 border-blue-200 shadow-sm'
+                                            : 'bg-white border-gray-100 hover:border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                    style={{ height: '40px' }}
                                 >
-                                    Start Date
-                                </label>
-
-                                <div style={{ position: "relative" }}>
-                                    <Calendar
-                                        size={16}
-                                        style={{
-                                            position: "absolute",
-                                            left: "12px", // left-3
-                                            top: "50%",
-                                            transform: "translateY(-50%)",
-                                            color: "#9CA3AF", // gray-400
-                                            pointerEvents: "none",
-                                        }}
-                                    />
-
-                                    <input
-                                        type="date"
-                                        value={startDate}
-                                        onChange={(e) => setStartDate(e.target.value)}
-                                        style={{
-                                            width: "100%",
-                                            paddingLeft: "40px", // pl-10
-                                            paddingRight: "12px", // pr-3
-                                            paddingTop: "8px", // py-2
-                                            paddingBottom: "8px",
-                                            border: "1px solid #D1D5DB", // gray-300
-                                            borderRadius: "6px", // rounded-md
-                                            outline: "none",
-                                            fontSize: "14px", // text-sm
-                                            fontFamily: "Geist, sans-serif",
-                                            color: "#374151", // gray-700
-                                        }}
-                                        onFocus={(e) => {
-                                            e.target.style.border = "2px solid #3B82F6"; // blue-500
-                                        }}
-                                        onBlur={(e) => {
-                                            e.target.style.border = "1px solid #D1D5DB";
-                                        }}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* End Date */}
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: "4px",
-                                }}
-                            >
-                                <label
-                                    style={{
-                                        fontSize: "0.875rem",
-                                        fontWeight: 500,
-                                        color: "#374151",
-                                        fontFamily: "Geist, sans-serif",
-                                    }}
-                                >
-                                    End Date{" "}
+                                    <div className="flex items-center justify-center w-8 shrink-0 mr-2">
+                                        <input
+                                            type="checkbox"
+                                            className="accent-blue-600 w-4 h-4 cursor-pointer"
+                                            checked={isSelected}
+                                            readOnly
+                                        />
+                                    </div>
                                     <span
+                                        className="truncate"
                                         style={{
-                                            color: "#9CA3AF", // gray-400
-                                            fontWeight: 400,
+                                            fontWeight: 500, fontSize: 12, fontFamily: "geist",
+                                            color: isSelected ? '#1e40af' : '#111827'
                                         }}
+                                        title={day}
                                     >
-                                        (Optional)
+                                        {day}
                                     </span>
-                                </label>
-
-                                <div style={{ position: "relative" }}>
-                                    <Calendar
-                                        size={16}
-                                        style={{
-                                            position: "absolute",
-                                            left: "12px",
-                                            top: "50%",
-                                            transform: "translateY(-50%)",
-                                            color: "#9CA3AF",
-                                            pointerEvents: "none",
-                                        }}
-                                    />
-
-                                    <input
-                                        type="date"
-                                        value={endDate}
-                                        onChange={(e) => setEndDate(e.target.value)}
-                                        min={startDate}
-                                        style={{
-                                            width: "100%",
-                                            paddingLeft: "40px",
-                                            paddingRight: "12px",
-                                            paddingTop: "8px",
-                                            paddingBottom: "8px",
-                                            border: "1px solid #D1D5DB",
-                                            borderRadius: "6px",
-                                            outline: "none",
-                                            fontSize: "14px",
-                                            fontFamily: "Geist, sans-serif",
-                                            color: "#374151",
-                                        }}
-                                        onFocus={(e) => {
-                                            e.target.style.border = "2px solid #3B82F6";
-                                        }}
-                                        onBlur={(e) => {
-                                            e.target.style.border = "1px solid #D1D5DB";
-                                        }}
-                                    />
                                 </div>
-                            </div>
-
-                            {/* Info Box */}
-                            <div
-                                style={{
-                                    backgroundColor: "#EFF6FF", // blue-50
-                                    border: "1px solid #DBEAFE", // blue-100
-                                    borderRadius: "6px",
-                                    padding: "12px", // p-3
-                                }}
-                            >
-                                <p
-                                    style={{
-                                        fontSize: "12px", // text-xs
-                                        color: "#1D4ED8", // blue-700
-                                        fontFamily: "Geist, sans-serif",
-                                        lineHeight: "1.6", // leading-relaxed
-                                    }}
-                                >
-                                    Leaving the end date blank implies the event is only for the start date.
-                                </p>
-                            </div>
-                        </div>
-
-                    )}
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
 
@@ -375,7 +97,7 @@ const Step1 = ({
     );
 };
 
-// --- ELIGIBLE PROGRAMS FORM (Unchanged) ---
+// --- ELIGIBLE PROGRAMS FORM ---
 const EligibleProgramsForm = ({ checkedPrograms, handleCheckboxChange, toggleSelectAll, isAllSelected, programCodes }) => {
     const programs = ["BSSW", "BSA", "BSAIS", "BAB", "BSIS", "ACT"];
     const years = [1, 2, 3, 4];
@@ -440,15 +162,11 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
     const [isVisible, setIsVisible] = useState(isOpen);
     const [step, setStep] = useState(1);
     const [direction, setDirection] = useState(0);
-    const [isSubmitting, setIsSubmitting] = useState(false); // 🟢 Loading State
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const TOTAL_STEPS = 3;
 
     // --- DATA STATE ---
-    const [submissionType, setSubmissionType] = useState('mealEligibility');
     const [selectedDays, setSelectedDays] = useState([]);
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
-
     const [checkedPrograms, setCheckedPrograms] = useState({});
     const [programCodes, setProgramCodes] = useState([]);
 
@@ -503,12 +221,7 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
     }, [checkedPrograms]);
 
     const isStep1Valid = () => {
-        if (!submissionType) return false;
-        if (submissionType === 'mealEligibility') {
-            return selectedDays.length > 0;
-        } else {
-            return startDate !== "";
-        }
+        return selectedDays.length > 0;
     };
 
     const isNextDisabled = (step === 1 && !isStep1Valid()) || (step === 2 && !hasSelectedPrograms) || step === TOTAL_STEPS;
@@ -529,10 +242,6 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
 
     // 🟢 SUBMIT HANDLER INTEGRATION
     const handleFinalSubmit = async () => {
-        // Prevent submission if type is eventMeal (since we're using the schedule API)
-        // Or handle it differently if your backend supports it. 
-        // For now, we focus on the mealEligibility logic as requested.
-        
         setIsSubmitting(true);
         try {
             // 1. Get List of Selected Programs (e.g., ["BSIS - 1", "BSA - 2"])
@@ -550,9 +259,7 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
             const daysPayload = selectedDays.map(d => d.toUpperCase());
 
             // 3. Send API Request for EACH selected program
-            // We iterate and fire multiple calls to addProgramSchedule
             const promises = selectedProgramKeys.map(key => {
-                // Split "BSIS - 1" into "BSIS" and "1"
                 const [programName, year] = key.split(" - ");
                 
                 return addProgramSchedule({
@@ -566,7 +273,6 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
             await Promise.all(promises);
 
             // 4. Success Feedback
-            // You can replace this alert with a toast notification
             alert(`Successfully updated schedules for ${selectedProgramKeys.length} programs!`);
             
             // Close modal
@@ -598,7 +304,6 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
 
     const Step2 = () => (
         <div className="w-full h-full flex flex-col items-center justify-evenly text-center min-h-[650px]">
-
             <div className="flex flex-col items-center mb-6">
                 <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4">
                     <span className="text-2xl font-bold text-blue-600 font-geist">2</span>
@@ -647,10 +352,6 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
             .filter(([_, isChecked]) => isChecked)
             .map(([id]) => id);
 
-        const typeLabel = submissionType === "mealEligibility"
-            ? "Meal Eligibility Request"
-            : "Event Meal Request";
-
         return (
             <div style={{ width: "100%", height: "100%", minHeight: "650px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "20px" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "24px" }}>
@@ -669,7 +370,7 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                             <FileText size={16} style={{ color: "#2563EB" }} />
                             <span style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6B7280", fontFamily: "Geist, sans-serif" }}>Request Type</span>
                         </div>
-                        <p style={{ color: "#1F2933", fontWeight: "500", paddingLeft: "24px", fontFamily: "Geist, sans-serif" }}>{typeLabel}</p>
+                        <p style={{ color: "#1F2933", fontWeight: "500", paddingLeft: "24px", fontFamily: "Geist, sans-serif" }}>Meal Eligibility Request</p>
                     </div>
 
                     {/* Schedule / Date Info */}
@@ -679,13 +380,7 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                             <span style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.05em", color: "#6B7280", fontFamily: "Geist, sans-serif" }}>Schedule</span>
                         </div>
                         <div style={{ paddingLeft: "24px", fontFamily: "Geist, sans-serif", fontSize: "14px", color: "#374151" }}>
-                            {submissionType === 'mealEligibility' ? (
-                                selectedDays.length > 0 ? selectedDays.join(", ") : "No days selected"
-                            ) : (
-                                <span>
-                                    {startDate} {endDate ? ` to ${endDate}` : "(Single Day)"}
-                                </span>
-                            )}
+                            {selectedDays.length > 0 ? selectedDays.join(", ") : "No days selected"}
                         </div>
                     </div>
 
@@ -728,7 +423,6 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                     <div
                         onMouseEnter={() => setIsHover(true)}
                         onMouseLeave={() => setIsHover(false)}
-                        // 🟢 Connect Handler here
                         onClick={isSubmitting ? null : handleFinalSubmit}
                         style={{ 
                             flex: 1, 
@@ -778,8 +472,6 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
 
                     <div className="relative z-10 flex flex-col items-center gap-6 w-full h-full justify-center pointer-events-none p-4">
                         <div className="flex items-center gap-4 md:gap-8 w-full justify-center flex-1 min-h-0">
-                            {/* 🟢 REMOVED SIDE BUTTONS (< AND >) */}
-
                             <motion.div
                                 onClick={(e) => e.stopPropagation()}
                                 initial={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -796,14 +488,8 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                                             {/* 🟢 STEP 1 PROPS */}
                                             {step === 1 && (
                                                 <Step1
-                                                    submissionType={submissionType}
-                                                    setSubmissionType={setSubmissionType}
                                                     selectedDays={selectedDays}
                                                     setSelectedDays={setSelectedDays}
-                                                    startDate={startDate}
-                                                    setStartDate={setStartDate}
-                                                    endDate={endDate}
-                                                    setEndDate={setEndDate}
                                                     isStep1Valid={isStep1Valid}
                                                     paginate={paginate}
                                                 />
