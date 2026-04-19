@@ -4,11 +4,11 @@ import { motion } from "framer-motion"; // 🟢 Import Framer Motion
 
 // --- COMPONENTS ---
 import { StatsCardGroup } from '../../../admin/components/dashboard/StatsCardGroup';
-import { EventsPanel } from '../../../admin/components/dashboard/EventsPanel';
 
 import { ProgramsList } from '../ProgramsList';
 import { ScheduleTabs } from '../ScheduleTabs';
 
+import { EventsPanel } from '../../../admin/components/dashboard/EventsPanel';
 import { OngoingEvents } from '../../../admin/components/dashboard/OngoingEvents';
 import { HeaderBar } from "../../../../components/global/HeaderBar";
 import { Skeleton } from "../../../../components/global/Skeleton"; // 🟢 Import Skeleton
@@ -38,7 +38,7 @@ const itemVariants = {
 };
 
 export default function AdminAssistantDashboard() {
-    const { events, programSchedule } = useData();
+    const { eventMealRequest, programSchedule } = useData();
     const [isLoading, setIsLoading] = useState(true);
 
     // 🟢 TRIGGER LOADING ONLY ONCE ON MOUNT
@@ -154,7 +154,7 @@ export default function AdminAssistantDashboard() {
                                     <Skeleton className="w-full h-64 rounded-xl shadow-sm" />
                                 ) : (
                                     <motion.div variants={itemVariants}>
-                                        <OngoingEvents events={events[1] || []} />
+                                        <OngoingEvents events={eventMealRequest[1] || []} />
                                     </motion.div>
                                 )}
                             </div>
@@ -165,7 +165,7 @@ export default function AdminAssistantDashboard() {
                                     <Skeleton className="w-full h-96 rounded-xl shadow-sm" />
                                 ) : (
                                     <motion.div variants={itemVariants}>
-                                        <EventsPanel events={events[0] || []} />
+                                        <EventsPanel events={eventMealRequest[0] || []} />
                                     </motion.div>
                                 )}
                             </div>
