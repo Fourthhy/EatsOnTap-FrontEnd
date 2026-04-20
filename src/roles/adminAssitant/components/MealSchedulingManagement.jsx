@@ -22,7 +22,7 @@ const Step1 = ({
     };
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center min-h-[250px]">
+        <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center min-h-[500px]">
             {/* Header Circle */}
             <div style={{ marginBottom: "10px" }} className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
                 <span className="text-2xl font-bold text-blue-600 font-geist">1</span>
