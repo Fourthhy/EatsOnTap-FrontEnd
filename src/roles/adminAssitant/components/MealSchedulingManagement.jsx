@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X, ChevronDown, Check, Loader2, FileText, ListFilter, Calendar } from 'lucide-react';
 import { fetchProgramCodes } from "../../../functions/adminAssistant/fetchProgramCodes";
-// 🟢 Import the API Caller
 import { addProgramSchedule } from "../../../functions/adminAssistant/addProgramSchedule";
 
 // --- STEP 1 ---
@@ -163,6 +162,10 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
     const [step, setStep] = useState(1);
     const [direction, setDirection] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    // 🟢 State for Success Modal
+    const [successData, setSuccessData] = useState(null); 
+    
     const TOTAL_STEPS = 3;
 
     // --- DATA STATE ---
@@ -232,19 +235,42 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
         if (isOpen) {
             setStep(1);
             setDirection(0);
+            setSuccessData(null); // Reset success state on open
         }
     }, [isOpen]);
 
+    // 🟢 UPDATED: Clear all form states when the modal completely closes
     const handleClose = () => {
         isClose();
         setIsVisible(false);
+        
+        // Wipe the slate clean!
+        setSelectedDays([]);
+        setCheckedPrograms({});
+        setStep(1);
+        setDirection(0);
     }
 
-    // 🟢 SUBMIT HANDLER INTEGRATION
+    const handleSuccessClose = () => {
+        setSuccessData(null);
+        handleClose();
+    };
+
+    // Auto-close Success Modal after 3 seconds
+    useEffect(() => {
+        let timer;
+        if (successData) {
+            timer = setTimeout(() => {
+                handleSuccessClose();
+            }, 3000);
+        }
+        return () => clearTimeout(timer);
+    }, [successData]);
+
+    // SUBMIT HANDLER INTEGRATION
     const handleFinalSubmit = async () => {
         setIsSubmitting(true);
         try {
-            // 1. Get List of Selected Programs (e.g., ["BSIS - 1", "BSA - 2"])
             const selectedProgramKeys = Object.entries(checkedPrograms)
                 .filter(([_, isChecked]) => isChecked)
                 .map(([key]) => key);
@@ -255,28 +281,22 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                 return;
             }
 
-            // 2. Prepare Days Array (Convert to Uppercase for Backend Enum)
             const daysPayload = selectedDays.map(d => d.toUpperCase());
 
-            // 3. Send API Request for EACH selected program
             const promises = selectedProgramKeys.map(key => {
                 const [programName, year] = key.split(" - ");
-                
+
                 return addProgramSchedule({
-                    programName: programName.trim(),
+                    program: programName.trim(), 
                     year: year.trim(),
-                    dayOfWeek: daysPayload
+                    dayOfWeek: daysPayload       
                 });
             });
 
-            // Wait for all to finish
             await Promise.all(promises);
 
-            // 4. Success Feedback
-            alert(`Successfully updated schedules for ${selectedProgramKeys.length} programs!`);
-            
-            // Close modal
-            handleClose();
+            // Success Feedback - Trigger Success Modal
+            setSuccessData({ count: selectedProgramKeys.length });
 
         } catch (error) {
             console.error("Submission Error:", error);
@@ -324,7 +344,6 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
 
             {/* STEP 2 NAVIGATION: PREVIOUS + NEXT */}
             <div className="flex gap-4 w-full max-w-sm mx-auto mt-5">
-                {/* PREVIOUS BUTTON */}
                 <div
                     className="flex-1 rounded-lg shadow-sm transition-colors border border-gray-200 bg-white cursor-pointer hover:bg-gray-50"
                     style={{ padding: "10px" }}
@@ -333,7 +352,6 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                     <span className="text-sm font-medium font-geist text-gray-700">Previous</span>
                 </div>
 
-                {/* NEXT BUTTON */}
                 <div
                     className={`flex-1 rounded-lg shadow-sm transition-colors border border-gray-200 ${!hasSelectedPrograms ? 'bg-gray-100 cursor-not-allowed opacity-50' : 'bg-white cursor-pointer hover:bg-gray-50'}`}
                     style={{ padding: "10px" }}
@@ -408,9 +426,8 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                     </div>
                 </div>
 
-                {/* 🟢 STEP 3 NAVIGATION: PREVIOUS + SUBMIT */}
+                {/* STEP 3 NAVIGATION: PREVIOUS + SUBMIT */}
                 <div className="flex gap-4 w-full max-w-sm mx-auto mt-5 justify-center" style={{ marginTop: 15 }}>
-                    {/* PREVIOUS BUTTON */}
                     <div
                         className="rounded-lg shadow-sm transition-colors border border-gray-200 bg-white cursor-pointer hover:bg-gray-50 flex-1 text-center"
                         style={{ padding: "12px" }}
@@ -419,19 +436,18 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                         <span className="text-sm font-medium font-geist text-gray-700">Previous</span>
                     </div>
 
-                    {/* SUBMIT BUTTON */}
                     <div
                         onMouseEnter={() => setIsHover(true)}
                         onMouseLeave={() => setIsHover(false)}
                         onClick={isSubmitting ? null : handleFinalSubmit}
-                        style={{ 
-                            flex: 1, 
-                            backgroundColor: isSubmitting ? "#93C5FD" : (isHover ? "#1D4ED8" : "#2563EB"), 
-                            color: "#FFFFFF", 
-                            borderRadius: "8px", 
-                            boxShadow: "0 4px 6px rgba(0,0,0,0.1)", 
-                            padding: "12px", 
-                            cursor: isSubmitting ? "wait" : "pointer", 
+                        style={{
+                            flex: 1,
+                            backgroundColor: isSubmitting ? "#93C5FD" : (isHover ? "#1D4ED8" : "#2563EB"),
+                            color: "#FFFFFF",
+                            borderRadius: "8px",
+                            boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                            padding: "12px",
+                            cursor: isSubmitting ? "wait" : "pointer",
                             transition: "background-color 0.2s ease",
                             display: 'flex',
                             alignItems: 'center',
@@ -478,14 +494,42 @@ export const MealSchedulingManagement = ({ isOpen, isClose }) => {
                                 animate={{ scale: 1, opacity: 1, y: 0 }}
                                 exit={{ scale: 0.95, opacity: 0, y: 20, transition: { duration: 0.2 } }}
                                 className="pointer-events-auto relative bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ease-in-out"
-                                style={{ minWidth: '600px', minHeight: '450px', width: 'auto', height: 'auto', maxWidth: '98%', maxHeight: '95vh' }}
+                                style={{ minWidth: '600px', minHeight: '200px', width: 'auto', height: 'auto', maxWidth: '98%', maxHeight: '95vh' }}
                             >
                                 <button onClick={handleClose} className="absolute top-4 right-4 z-50 text-gray-300 hover:text-gray-500 transition-colors p-1"><X size={20} /></button>
+
+                                {/* SUCCESS OVERLAY */}
+                                <AnimatePresence>
+                                    {successData && (
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.9 }}
+                                            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm rounded-2xl"
+                                        >
+                                            <button 
+                                                onClick={handleSuccessClose} 
+                                                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                                            >
+                                                <X size={20} />
+                                            </button>
+                                            
+                                            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                                                <Check size={40} className="text-green-600" />
+                                            </div>
+                                            
+                                            <h3 className="text-2xl font-bold text-gray-800 font-geist mb-2">Success!</h3>
+                                            <p className="text-gray-600 font-geist text-center px-6">
+                                                Successfully updated schedules for <span className="font-bold text-gray-900">{successData.count}</span> programs!
+                                            </p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
 
                                 <div className="flex-1 relative flex items-center justify-center overflow-hidden">
                                     <AnimatePresence initial={false} custom={direction} mode="popLayout">
                                         <motion.div key={step} custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" className="w-full h-full flex flex-col">
-                                            {/* 🟢 STEP 1 PROPS */}
+                                            {/* STEP 1 PROPS */}
                                             {step === 1 && (
                                                 <Step1
                                                     selectedDays={selectedDays}
