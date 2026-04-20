@@ -1,8 +1,10 @@
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
+const BASE_URL = VITE_BASE_URL;
+
 export async function getUnifiedSchoolData() {
-    const targetUrl = `${VITE_BASE_URL}/api/fetch/getUnifiedSchoolData`
+    const targetUrl = `${BASE_URL}/api/fetch/getUnifiedSchoolData`
     try {
         const response = await fetch(targetUrl);
 
