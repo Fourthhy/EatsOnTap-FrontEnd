@@ -24,7 +24,7 @@ function ProgramsList({ data = [], selectedTab }) {
         return output;
     });
 
-    // Helper: Color logic based on programName acronyms
+    // Helper: Color logic based on program acronyms
     const getProgramColor = (name) => {
         const code = (name || '').toUpperCase();
         if (code.includes("BSIS")) return "bg-red-400 shadow-red-100";
@@ -43,14 +43,14 @@ function ProgramsList({ data = [], selectedTab }) {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full" style={{ marginTop: 10 }}>
-                    {filteredPrograms.map((program) => {
-                        // Accessing properties directly from the object structure you provided
-                        const colorClass = getProgramColor(program.programName);
-                        const displayText = `${program.programName} ${program.year}`;
+                    {filteredPrograms.map((programData) => { // Renamed the variable to 'programData' for clarity
+                        // ✅ Changed from programName to program
+                        const colorClass = getProgramColor(programData.program);
+                        const displayText = `${programData.program} ${programData.year}`;
 
                         return (
                             <div
-                                key={program._id} // Using _id from model
+                                key={programData._id} 
                                 className="group relative flex items-center w-full h-10 bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
                                 style={{ margin: 10 }}
                             >
