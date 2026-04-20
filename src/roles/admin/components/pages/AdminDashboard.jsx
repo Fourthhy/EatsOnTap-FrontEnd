@@ -11,7 +11,7 @@ import { BandedChartTADMC } from "../charts/BandedChartTADMC";
 import { BandedChartCUR } from "../charts/BandedChartCUR";
 import { BandedChartOCF } from "../charts/BandedChartOCF";
 
-import { LineChartBox } from "../charts/LineChartBox"; //Claim Statistics Chart
+import { LineChartBox } from "../charts/LineChartBox"; 
 import { DailyExpensesChart } from "../charts/DailyExpensesChart";
 import { CustomStatsCard } from "../dashboard/CustomStatsCard";
 import { StatsCardGroup } from "../dashboard/StatsCardGroup";
@@ -67,9 +67,8 @@ export default function AdminDashboard() {
         if (chartKey === 'trendsData' && rawData.length > 0) {
             return rawData.map(item => ({
                 dataSpan: item.dataSpan,
-                Meals: item["Customized Order"] || 0,     // Translates headcount
-                Snacks: item["Pre-packed Food"] || 0,     // Translates headcount
-                // 🟢 MATH FIX: Divides the massive peso amount by 60 to convert it back to a student headcount
+                Meals: item["Customized Order"] || 0,     
+                Snacks: item["Pre-packed Food"] || 0,     
                 Unclaimed: item["Unused vouchers"] ? Math.round(item["Unused vouchers"] / 60) : 0   
             }));
         }
@@ -102,11 +101,54 @@ export default function AdminDashboard() {
         if (data && data.length > 0) {
             const lastItem = data[data.length - 1];
             const value = lastItem.TADMC || 0;
-            // toFixed(2) converts to string "0.00", parseFloat turns it back to a number
             return parseFloat(value.toFixed(2));
         }
         return 0;
     };
+
+    // =========================================================================
+    // 🟢 LOCAL TIMEZONE EVENT SORTER (Bypassing Backend UTC groupings)
+    // =========================================================================
+    const processedEvents = useMemo(() => {
+        if (!Array.isArray(eventMealRequest) || eventMealRequest.length === 0) {
+            return { ongoing: [], upcoming: [] };
+        }
+
+        const flatRawEvents = eventMealRequest.flat();
+        const currentYear = new Date().getFullYear();
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        const ongoing = [];
+        const upcoming = [];
+
+        flatRawEvents.forEach((event) => {
+            if (!event) return;
+
+            const startMonthIdx = months.indexOf(event.startMonth);
+            const endMonthIdx = months.indexOf(event.endMonth);
+            
+            const startDate = new Date(currentYear, startMonthIdx, event.startDay);
+            const endDate = new Date(currentYear, endMonthIdx, event.endDay, 23, 59, 59, 999);
+
+            // Clone event to safely update the string status for child components
+            const localEvent = { ...event };
+
+            if (now >= startDate && now <= endDate) {
+                localEvent.scheduleStatus = "ONGOING";
+                ongoing.push(localEvent);
+            } else if (startOfToday < startDate) {
+                localEvent.scheduleStatus = "UPCOMING";
+                upcoming.push(localEvent);
+            }
+            // Note: We ignore 'RECENT' here since the AdminDashboard sidebar doesn't show them!
+        });
+
+        return { ongoing, upcoming };
+    }, [eventMealRequest]);
+    // =========================================================================
 
     const metricSubtitle = selectedTab === 1 ? "Today" : selectedTab === 2 ? "This Week" : "This Month";
 
@@ -231,8 +273,9 @@ export default function AdminDashboard() {
                         </div>
 
                         <div style={{ position: 'sticky', top: '35px', height: 'fit-content', display: 'flex', flexDirection: 'column', gap: "18px" }}>
-                            <OngoingEvents events={eventMealRequest[0] || []} isLoading={isLoading} />
-                            <EventsPanel events={eventMealRequest[1] || []} isLoading={isLoading} />
+                            {/* 🟢 Replaced index-based arrays with the locally processed data */}
+                            <OngoingEvents events={processedEvents.ongoing} isLoading={isLoading} />
+                            <EventsPanel events={processedEvents.upcoming} isLoading={isLoading} />
                             <MealOverridePanel />
                             <div className="h-4"></div>
                         </div>
