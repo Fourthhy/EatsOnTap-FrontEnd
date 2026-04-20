@@ -12,12 +12,12 @@ import { getOverallClaimRecord } from '../functions/admin/getOverallClaimRecord'
 import { getSectionProgramList } from '../functions/admin/getSectionProgramList';
 import { getMealValue } from '../functions/admin/getMealValue';
 import { getAllSettings } from '../functions/admin/getAllSettings';
-import { getAllProgramSchedule } from '../functions/adminAssistant/getAllProgramSchedule';
 import { getDashboardData } from '../functions/admin/getDashboardData';
 
+//ADMIN ASSISTANT
 import { getWeeklyMealStats } from "../functions/adminAssistant/getWeeklyMealStats";
 import { getStudentsWithProgramOnly } from "../functions/adminAssistant/getStudentsWithProgramOnly";
-
+import { getAllProgramSchedule } from '../functions/adminAssistant/getAllProgramSchedule';
 
 const DataContext = createContext();
 

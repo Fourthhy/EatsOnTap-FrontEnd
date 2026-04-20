@@ -3,9 +3,11 @@ import { AlertCircle, Hash, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { GenericTable } from '../../../components/global/table/GenericTable';
-import { getAllProgramSchedule } from "../../../functions/adminAssistant/getAllProgramSchedule";
 
-// 🟢 IMPORT THE ACTION BAR
+// 🟢 Global Contexts
+import { useData } from "../../../context/DataContext";
+import { useLoader } from "../../../context/LoaderContext"; 
+
 import { SelectionActionBar } from '../../admin/components/voucherManagement/SelectionActionBar';
 
 // --- CONFIGURATION ---
@@ -21,12 +23,10 @@ const cellStyle = {
 
 // --- EDIT SCHEDULE MODAL ---
 const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
-  // --- STATE & DATA ---
   const daysOptions = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
   const [selectedDays, setSelectedDays] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync state with program data
   useEffect(() => {
     if (isOpen && program && program.dayOfWeek) {
       setSelectedDays([...program.dayOfWeek]);
@@ -35,7 +35,6 @@ const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
     }
   }, [isOpen, program]);
 
-  // Handlers
   const toggleDay = (dayConstant) => {
     if (selectedDays.includes(dayConstant)) {
       setSelectedDays(selectedDays.filter((d) => d !== dayConstant));
@@ -55,18 +54,6 @@ const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
   const formatDayLabel = (day) => {
     return day.charAt(0) + day.slice(1).toLowerCase();
   };
-
-  function getOrdinalSuffix(i) {
-    const j = i % 10,
-      k = i % 100;
-    if (j === 1 && k !== 11) return 'st';
-    if (j === 2 && k !== 12) return 'nd';
-    if (j === 3 && k !== 13) return 'rd';
-    return 'th';
-  }
-
-  // 🟢 REMOVE THE "if (!isOpen) return null" LINE.
-  // The rendering logic is now handled inside AnimatePresence below.
 
   return (
     <AnimatePresence>
@@ -110,8 +97,7 @@ const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
             style={{
               backgroundColor: '#FFFFFF',
               borderRadius: '12px',
-              boxShadow:
-                '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
+              boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
               width: '100%',
               maxWidth: '448px',
               overflow: 'hidden',
@@ -121,35 +107,13 @@ const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
             }}
           >
             {/* Header */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '24px',
-              }}
-            >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <div>
-                <h3
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: 700,
-                    color: '#1F2937',
-                    fontFamily: 'Geist, sans-serif',
-                  }}
-                >
+                <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1F2937', fontFamily: 'Geist, sans-serif' }}>
                   Edit Schedule
                 </h3>
-
-                <p
-                  style={{
-                    fontSize: '14px',
-                    color: '#6B7280',
-                    fontFamily: 'Geist, sans-serif',
-                  }}
-                >
-                  {program?.programName} - {program?.year}
-                  {getOrdinalSuffix(program?.year)} Year
+                <p style={{ fontSize: '14px', color: '#6B7280', fontFamily: 'Geist, sans-serif' }}>
+                  {program?.program} - {program?.year}{getOrdinalSuffix(program?.year)} Year
                 </p>
               </div>
 
@@ -171,26 +135,11 @@ const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
 
             {/* Days Selection */}
             <div style={{ marginBottom: '24px' }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  color: '#374151',
-                  marginBottom: '8px',
-                  fontFamily: 'Geist, sans-serif',
-                }}
-              >
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '8px', fontFamily: 'Geist, sans-serif' }}>
                 Select Eligible Days
               </label>
 
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: '12px',
-                }}
-              >
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
                 {daysOptions.map((dayConstant, idx) => {
                   const isSelected = selectedDays.includes(dayConstant);
 
@@ -204,67 +153,22 @@ const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
                         padding: '8px',
                         borderRadius: '6px',
                         cursor: 'pointer',
-                        border: isSelected
-                          ? '1px solid #BFDBFE' // blue-200
-                          : '1px solid #F3F4F6', // gray-100
-                        backgroundColor: isSelected
-                          ? '#EFF6FF' // blue-50
-                          : '#FFFFFF',
-                        boxShadow: isSelected
-                          ? '0 1px 2px rgba(0,0,0,0.05)'
-                          : 'none',
+                        border: isSelected ? '1px solid #BFDBFE' : '1px solid #F3F4F6',
+                        backgroundColor: isSelected ? '#EFF6FF' : '#FFFFFF',
+                        boxShadow: isSelected ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
                         height: '40px',
                         transition: 'all 0.2s ease',
                       }}
-                      onMouseEnter={(e) => {
-                        if (!isSelected) {
-                          e.currentTarget.style.backgroundColor = '#F9FAFB';
-                          e.currentTarget.style.border = '1px solid #D1D5DB';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isSelected) {
-                          e.currentTarget.style.backgroundColor = '#FFFFFF';
-                          e.currentTarget.style.border = '1px solid #F3F4F6';
-                        }
-                      }}
                     >
-                      {/* Checkbox */}
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: '32px',
-                          flexShrink: 0,
-                          marginRight: '8px',
-                        }}
-                      >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', flexShrink: 0, marginRight: '8px' }}>
                         <input
                           type="checkbox"
                           checked={isSelected}
                           readOnly
-                          style={{
-                            width: '16px',
-                            height: '16px',
-                            cursor: 'pointer',
-                            accentColor: '#2563EB',
-                          }}
+                          style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#2563EB' }}
                         />
                       </div>
-
-                      {/* Label */}
-                      <span
-                        style={{
-                          fontSize: '12px',
-                          fontWeight: 500,
-                          fontFamily: 'Geist, sans-serif',
-                          color: isSelected ? '#1E40AF' : '#111827',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}
-                      >
+                      <span style={{ fontSize: '12px', fontWeight: 500, fontFamily: 'Geist, sans-serif', color: isSelected ? '#1E40AF' : '#111827' }}>
                         {formatDayLabel(dayConstant)}
                       </span>
                     </div>
@@ -274,16 +178,7 @@ const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
             </div>
 
             {/* Footer */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                gap: '12px',
-                paddingTop: '16px',
-                borderTop: '1px solid #F3F4F6',
-              }}
-            >
-              {/* Cancel */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '16px', borderTop: '1px solid #F3F4F6' }}>
               <button
                 onClick={onClose}
                 style={{
@@ -296,19 +191,11 @@ const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
                   border: 'none',
                   cursor: 'pointer',
                   fontFamily: 'Geist, sans-serif',
-                  transition: 'background-color 0.2s ease',
                 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = '#F3F4F6')
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = 'transparent')
-                }
               >
                 Cancel
               </button>
 
-              {/* Save */}
               <button
                 onClick={handleSave}
                 disabled={isSaving}
@@ -325,26 +212,9 @@ const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                  transition: 'background-color 0.2s ease',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSaving)
-                    e.currentTarget.style.backgroundColor = '#1D4ED8';
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSaving)
-                    e.currentTarget.style.backgroundColor = '#2563EB';
                 }}
               >
-                {isSaving && (
-                  <Loader2
-                    size={14}
-                    style={{
-                      animation: 'spin 1s linear infinite',
-                    }}
-                  />
-                )}
+                {isSaving && <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />}
                 Save Changes
               </button>
             </div>
@@ -356,43 +226,24 @@ const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
 };
 
 const ProgramListView = ({ switcher }) => {
-    // --- STATE ---
-    const [schedules, setSchedules] = useState([]);
+    const { programSchedule } = useData();
+    const { isLoading } = useLoader();
+
     const [activeTab, setActiveTab] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
     const [isHovered, setIsHovered] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
 
-    // Selection State
     const [selectedProgram, setSelectedProgram] = useState(null);
     const [isActionBarVisible, setIsActionBarVisible] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    // --- FETCH LOGIC ---
-    const fetchData = async () => {
-        setIsLoading(true);
-        try {
-            const response = await getAllProgramSchedule();
-            if (Array.isArray(response)) {
-                setSchedules(response);
-            } else if (response && Array.isArray(response.data)) {
-                setSchedules(response.data);
-            } else {
-                setSchedules([]);
-            }
-        } catch (error) {
-            console.error("Failed to load program schedules", error);
-            setSchedules([]);
-        } finally {
-            setIsLoading(false);
+    const schedules = useMemo(() => {
+        if (programSchedule?.data && Array.isArray(programSchedule.data)) {
+            return programSchedule.data;
         }
-    };
+        return Array.isArray(programSchedule) ? programSchedule : [];
+    }, [programSchedule]);
 
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    // --- DYNAMIC TABS ---
     const tabs = useMemo(() => {
         const allTabs = [{ id: 'All', label: 'All Levels' }];
         const uniqueYears = [...new Set(schedules.map(s => s.year))].sort();
@@ -403,10 +254,9 @@ const ProgramListView = ({ switcher }) => {
         return [...allTabs, ...yearTabs];
     }, [schedules]);
 
-    // --- FILTER LOGIC ---
     const filteredSchedules = useMemo(() => {
         return schedules.filter(item => {
-            const programName = (item.programName || '').toUpperCase();
+            const programName = (item.program || '').toUpperCase();
             const year = item.year || '';
             let matchesTab = true;
             if (activeTab !== 'All') {
@@ -417,7 +267,6 @@ const ProgramListView = ({ switcher }) => {
         });
     }, [schedules, activeTab, searchTerm]);
 
-    // --- ROW RENDERER ---
     const renderRow = (item, index, startIndex) => {
         const isSelected = selectedProgram?._id === item._id;
 
@@ -447,12 +296,13 @@ const ProgramListView = ({ switcher }) => {
                 </td>
                 <td style={{ ...cellStyle, paddingLeft: "24px", paddingRight: "24px", fontWeight: 600, color: "#111827" }}>
                     <div style={{ display: "flex", alignItems: "start", justifyContent: "start", gap: "12px" }}>
-                        {item.programName}
+                        {item.program}
                     </div>
                 </td>
                 <td style={{ ...cellStyle, paddingLeft: "24px", paddingRight: "24px" }}>
                     <span style={{ fontFamily: "monospace", fontSize: "11px", backgroundColor: "#F3F4F6", padding: "4px 8px", borderRadius: "4px", color: "#4B5563", border: "1px solid #E5E7EB", display: "inline-block" }}>
-                        {getOrdinalSuffix(item.year)} Year
+                        {/* 🟢 FIXED: Now explicitly rendering `{item.year}` next to the suffix */}
+                        {item.year}{getOrdinalSuffix(item.year)} Year
                     </span>
                 </td>
                 <td style={{ ...cellStyle, paddingLeft: "24px", paddingRight: "24px" }}>
@@ -481,14 +331,11 @@ const ProgramListView = ({ switcher }) => {
     return (
         <div style={{ width: '100%', height: '100%' }}>
 
-            {/* EDIT MODAL */}
             <EditScheduleModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
                 program={selectedProgram}
                 onSave={(updatedProgram) => {
-                    const updatedList = schedules.map(p => p._id === updatedProgram._id ? updatedProgram : p);
-                    setSchedules(updatedList);
                     setSelectedProgram(updatedProgram);
                 }}
             />
@@ -502,7 +349,7 @@ const ProgramListView = ({ switcher }) => {
                 metrics={metrics}
                 primaryKey="_id"
                 isLoading={isLoading}
-                emptyMessage="No schedules found"
+                emptyMessage={schedules.length === 0 && !isLoading ? "No data loaded" : "No schedules found"}
                 emptyMessageIcon={<AlertCircle size={30} strokeWidth={1.5} />}
                 tabs={tabs}
                 activeTab={activeTab}
@@ -513,11 +360,10 @@ const ProgramListView = ({ switcher }) => {
                 selectable={false}
                 minItems={6}
 
-                // 🟢 FIX: CONDITIONAL RENDERING OF ACTION BAR
                 overrideHeader={
                     isActionBarVisible && selectedProgram ? (
                         <SelectionActionBar
-                            variant="program" // 🟢 Use new program variant
+                            variant="program" 
                             selectedItem={selectedProgram}
                             onClearSelection={() => {
                                 setSelectedProgram(null);
@@ -546,7 +392,14 @@ const DayBadge = ({ day }) => {
     );
 };
 
-function getOrdinalSuffix(i) {
+// 🟢 FIXED: Now safely parses strings to integers using parseInt
+function getOrdinalSuffix(val) {
+    if (!val) return "";
+    
+    // Convert string "1" to integer 1
+    const i = parseInt(val, 10);
+    if (isNaN(i)) return "";
+
     const j = i % 10, k = i % 100;
     if (j === 1 && k !== 11) return "st";
     if (j === 2 && k !== 12) return "nd";
