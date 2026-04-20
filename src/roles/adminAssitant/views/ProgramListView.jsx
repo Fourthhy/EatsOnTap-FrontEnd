@@ -6,19 +6,20 @@ import { GenericTable } from '../../../components/global/table/GenericTable';
 
 // 🟢 Global Contexts
 import { useData } from "../../../context/DataContext";
-import { useLoader } from "../../../context/LoaderContext"; 
+import { useLoader } from "../../../context/LoaderContext";
 
 import { SelectionActionBar } from '../../admin/components/voucherManagement/SelectionActionBar';
+import { updateProgramSchedule } from '../../../functions/adminAssistant/updateProgramSchedule';
 
 // --- CONFIGURATION ---
 const ITEM_HEIGHT_ESTIMATE_PX = 50;
 
 const cellStyle = {
-    fontSize: '12px',
-    color: '#4b5563',
-    borderBottom: '1px solid #f3f4f6',
-    height: '50px',
-    verticalAlign: 'middle'
+  fontSize: '12px',
+  color: '#4b5563',
+  borderBottom: '1px solid #f3f4f6',
+  height: '50px',
+  verticalAlign: 'middle'
 };
 
 // --- EDIT SCHEDULE MODAL ---
@@ -45,10 +46,25 @@ const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
 
   const handleSave = async () => {
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API
-    onSave({ ...program, dayOfWeek: selectedDays });
+
+    // 1. Create the payload
+    const payload = { ...program, dayOfWeek: selectedDays };
+
+    // 2. Call the real API
+    const response = await updateProgramSchedule(payload);
+
+    // 3. Handle the result
+    if (response && response.success) {
+      // Pass the updated data from the backend back to the parent component
+      onSave(response.data);
+      onClose();
+    } else {
+      // Log the error and optionally alert the user (you can replace this with a toast notification)
+      console.error("Update failed:", response?.message);
+      alert(`Failed to save: ${response?.message || "Unknown error occurred"}`);
+    }
+
     setIsSaving(false);
-    onClose();
   };
 
   const formatDayLabel = (day) => {
@@ -226,185 +242,185 @@ const EditScheduleModal = ({ isOpen, onClose, program, onSave }) => {
 };
 
 const ProgramListView = ({ switcher }) => {
-    const { programSchedule } = useData();
-    const { isLoading } = useLoader();
+  const { programSchedule } = useData();
+  const { isLoading } = useLoader();
 
-    const [activeTab, setActiveTab] = useState('All');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isHovered, setIsHovered] = useState(false);
+  const [activeTab, setActiveTab] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isHovered, setIsHovered] = useState(false);
 
-    const [selectedProgram, setSelectedProgram] = useState(null);
-    const [isActionBarVisible, setIsActionBarVisible] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState(null);
+  const [isActionBarVisible, setIsActionBarVisible] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    const schedules = useMemo(() => {
-        if (programSchedule?.data && Array.isArray(programSchedule.data)) {
-            return programSchedule.data;
-        }
-        return Array.isArray(programSchedule) ? programSchedule : [];
-    }, [programSchedule]);
+  const schedules = useMemo(() => {
+    if (programSchedule?.data && Array.isArray(programSchedule.data)) {
+      return programSchedule.data;
+    }
+    return Array.isArray(programSchedule) ? programSchedule : [];
+  }, [programSchedule]);
 
-    const tabs = useMemo(() => {
-        const allTabs = [{ id: 'All', label: 'All Levels' }];
-        const uniqueYears = [...new Set(schedules.map(s => s.year))].sort();
-        const yearTabs = uniqueYears.map(year => ({
-            id: year,
-            label: `${year}${getOrdinalSuffix(year)} Year`
-        }));
-        return [...allTabs, ...yearTabs];
-    }, [schedules]);
+  const tabs = useMemo(() => {
+    const allTabs = [{ id: 'All', label: 'All Levels' }];
+    const uniqueYears = [...new Set(schedules.map(s => s.year))].sort();
+    const yearTabs = uniqueYears.map(year => ({
+      id: year,
+      label: `${year}${getOrdinalSuffix(year)} Year`
+    }));
+    return [...allTabs, ...yearTabs];
+  }, [schedules]);
 
-    const filteredSchedules = useMemo(() => {
-        return schedules.filter(item => {
-            const programName = (item.program || '').toUpperCase();
-            const year = item.year || '';
-            let matchesTab = true;
-            if (activeTab !== 'All') {
-                matchesTab = year === activeTab;
-            }
-            const matchesSearch = programName.includes(searchTerm.toUpperCase());
-            return matchesTab && matchesSearch;
-        });
-    }, [schedules, activeTab, searchTerm]);
+  const filteredSchedules = useMemo(() => {
+    return schedules.filter(item => {
+      const programName = (item.program || '').toUpperCase();
+      const year = item.year || '';
+      let matchesTab = true;
+      if (activeTab !== 'All') {
+        matchesTab = year === activeTab;
+      }
+      const matchesSearch = programName.includes(searchTerm.toUpperCase());
+      return matchesTab && matchesSearch;
+    });
+  }, [schedules, activeTab, searchTerm]);
 
-    const renderRow = (item, index, startIndex) => {
-        const isSelected = selectedProgram?._id === item._id;
-
-        return (
-            <tr
-                key={item._id || index}
-                onClick={() => {
-                    if (isSelected) {
-                        setSelectedProgram(null);
-                        setIsActionBarVisible(false);
-                    } else {
-                        setSelectedProgram(item);
-                        setIsActionBarVisible(true);
-                    }
-                }}
-                onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
-                style={{
-                    height: ITEM_HEIGHT_ESTIMATE_PX,
-                    backgroundColor: isSelected ? "#eff6ff" : (isHovered ? "rgba(249, 250, 251, 0.8)" : "transparent"),
-                    transition: "background-color 0.2s ease",
-                    cursor: "pointer"
-                }}
-            >
-                <td style={{ ...cellStyle, textAlign: "center", width: "64px" }}>
-                    {startIndex + index + 1}
-                </td>
-                <td style={{ ...cellStyle, paddingLeft: "24px", paddingRight: "24px", fontWeight: 600, color: "#111827" }}>
-                    <div style={{ display: "flex", alignItems: "start", justifyContent: "start", gap: "12px" }}>
-                        {item.program}
-                    </div>
-                </td>
-                <td style={{ ...cellStyle, paddingLeft: "24px", paddingRight: "24px" }}>
-                    <span style={{ fontFamily: "monospace", fontSize: "11px", backgroundColor: "#F3F4F6", padding: "4px 8px", borderRadius: "4px", color: "#4B5563", border: "1px solid #E5E7EB", display: "inline-block" }}>
-                        {/* 🟢 FIXED: Now explicitly rendering `{item.year}` next to the suffix */}
-                        {item.year}{getOrdinalSuffix(item.year)} Year
-                    </span>
-                </td>
-                <td style={{ ...cellStyle, paddingLeft: "24px", paddingRight: "24px" }}>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
-                        {item.dayOfWeek && item.dayOfWeek.length > 0 ? (
-                            item.dayOfWeek.map((day, idx) => (
-                                <DayBadge key={idx} day={day} />
-                            ))
-                        ) : (
-                            <span style={{ color: "#9CA3AF", fontStyle: "italic", fontSize: "11px" }}>
-                                No schedule
-                            </span>
-                        )}
-                    </div>
-                </td>
-            </tr>
-        );
-    };
-
-    const columns = ['Program Name', 'Year Level', 'Scheduled Days'];
-    const metrics = [
-        { label: 'Total Programs', value: schedules.length },
-        { label: 'Visible', value: filteredSchedules.length, color: '#4268BD' }
-    ];
+  const renderRow = (item, index, startIndex) => {
+    const isSelected = selectedProgram?._id === item._id;
 
     return (
-        <div style={{ width: '100%', height: '100%' }}>
-
-            <EditScheduleModal
-                isOpen={isEditModalOpen}
-                onClose={() => setIsEditModalOpen(false)}
-                program={selectedProgram}
-                onSave={(updatedProgram) => {
-                    setSelectedProgram(updatedProgram);
-                }}
-            />
-
-            <GenericTable
-                title="Program Schedules"
-                subtitle="Manage meal eligibility days per program"
-                data={filteredSchedules}
-                columns={columns}
-                renderRow={renderRow}
-                metrics={metrics}
-                primaryKey="_id"
-                isLoading={isLoading}
-                emptyMessage={schedules.length === 0 && !isLoading ? "No data loaded" : "No schedules found"}
-                emptyMessageIcon={<AlertCircle size={30} strokeWidth={1.5} />}
-                tabs={tabs}
-                activeTab={activeTab}
-                onTabChange={(tab) => { setActiveTab(tab); setSelectedProgram(null); setIsActionBarVisible(false); }}
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
-                customActions={switcher}
-                selectable={false}
-                minItems={6}
-
-                overrideHeader={
-                    isActionBarVisible && selectedProgram ? (
-                        <SelectionActionBar
-                            variant="program" 
-                            selectedItem={selectedProgram}
-                            onClearSelection={() => {
-                                setSelectedProgram(null);
-                                setIsActionBarVisible(false);
-                            }}
-                            onEditSchedule={() => setIsEditModalOpen(true)}
-                        />
-                    ) : null
-                }
-            />
-        </div>
+      <tr
+        key={item._id || index}
+        onClick={() => {
+          if (isSelected) {
+            setSelectedProgram(null);
+            setIsActionBarVisible(false);
+          } else {
+            setSelectedProgram(item);
+            setIsActionBarVisible(true);
+          }
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{
+          height: ITEM_HEIGHT_ESTIMATE_PX,
+          backgroundColor: isSelected ? "#eff6ff" : (isHovered ? "rgba(249, 250, 251, 0.8)" : "transparent"),
+          transition: "background-color 0.2s ease",
+          cursor: "pointer"
+        }}
+      >
+        <td style={{ ...cellStyle, textAlign: "center", width: "64px" }}>
+          {startIndex + index + 1}
+        </td>
+        <td style={{ ...cellStyle, paddingLeft: "24px", paddingRight: "24px", fontWeight: 600, color: "#111827" }}>
+          <div style={{ display: "flex", alignItems: "start", justifyContent: "start", gap: "12px" }}>
+            {item.program}
+          </div>
+        </td>
+        <td style={{ ...cellStyle, paddingLeft: "24px", paddingRight: "24px" }}>
+          <span style={{ fontFamily: "monospace", fontSize: "11px", backgroundColor: "#F3F4F6", padding: "4px 8px", borderRadius: "4px", color: "#4B5563", border: "1px solid #E5E7EB", display: "inline-block" }}>
+            {/* 🟢 FIXED: Now explicitly rendering `{item.year}` next to the suffix */}
+            {item.year}{getOrdinalSuffix(item.year)} Year
+          </span>
+        </td>
+        <td style={{ ...cellStyle, paddingLeft: "24px", paddingRight: "24px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+            {item.dayOfWeek && item.dayOfWeek.length > 0 ? (
+              item.dayOfWeek.map((day, idx) => (
+                <DayBadge key={idx} day={day} />
+              ))
+            ) : (
+              <span style={{ color: "#9CA3AF", fontStyle: "italic", fontSize: "11px" }}>
+                No schedule
+              </span>
+            )}
+          </div>
+        </td>
+      </tr>
     );
+  };
+
+  const columns = ['Program Name', 'Year Level', 'Scheduled Days'];
+  const metrics = [
+    { label: 'Total Programs', value: schedules.length },
+    { label: 'Visible', value: filteredSchedules.length, color: '#4268BD' }
+  ];
+
+  return (
+    <div style={{ width: '100%', height: '100%' }}>
+
+      <EditScheduleModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        program={selectedProgram}
+        onSave={(updatedProgram) => {
+          setSelectedProgram(updatedProgram);
+        }}
+      />
+
+      <GenericTable
+        title="Program Schedules"
+        subtitle="Manage meal eligibility days per program"
+        data={filteredSchedules}
+        columns={columns}
+        renderRow={renderRow}
+        metrics={metrics}
+        primaryKey="_id"
+        isLoading={isLoading}
+        emptyMessage={schedules.length === 0 && !isLoading ? "No data loaded" : "No schedules found"}
+        emptyMessageIcon={<AlertCircle size={30} strokeWidth={1.5} />}
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={(tab) => { setActiveTab(tab); setSelectedProgram(null); setIsActionBarVisible(false); }}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        customActions={switcher}
+        selectable={false}
+        minItems={5}
+
+        overrideHeader={
+          isActionBarVisible && selectedProgram ? (
+            <SelectionActionBar
+              variant="program"
+              selectedItem={selectedProgram}
+              onClearSelection={() => {
+                setSelectedProgram(null);
+                setIsActionBarVisible(false);
+              }}
+              onEditSchedule={() => setIsEditModalOpen(true)}
+            />
+          ) : null
+        }
+      />
+    </div>
+  );
 };
 
 // --- HELPER COMPONENTS ---
 const DayBadge = ({ day }) => {
-    const dayMap = {
-        'MONDAY': 'Mon', 'TUESDAY': 'Tue', 'WEDNESDAY': 'Wed',
-        'THURSDAY': 'Thu', 'FRIDAY': 'Fri', 'SATURDAY': 'Sat', 'SUNDAY': 'Sun'
-    };
-    const shortDay = dayMap[day.toUpperCase()] || day;
-    return (
-        <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#EFF6FF', color: '#2563EB', border: '1px solid #DBEAFE', textTransform: 'uppercase' }}>
-            {shortDay}
-        </span>
-    );
+  const dayMap = {
+    'MONDAY': 'Mon', 'TUESDAY': 'Tue', 'WEDNESDAY': 'Wed',
+    'THURSDAY': 'Thu', 'FRIDAY': 'Fri', 'SATURDAY': 'Sat', 'SUNDAY': 'Sun'
+  };
+  const shortDay = dayMap[day.toUpperCase()] || day;
+  return (
+    <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#EFF6FF', color: '#2563EB', border: '1px solid #DBEAFE', textTransform: 'uppercase' }}>
+      {shortDay}
+    </span>
+  );
 };
 
 // 🟢 FIXED: Now safely parses strings to integers using parseInt
 function getOrdinalSuffix(val) {
-    if (!val) return "";
-    
-    // Convert string "1" to integer 1
-    const i = parseInt(val, 10);
-    if (isNaN(i)) return "";
+  if (!val) return "";
 
-    const j = i % 10, k = i % 100;
-    if (j === 1 && k !== 11) return "st";
-    if (j === 2 && k !== 12) return "nd";
-    if (j === 3 && k !== 13) return "rd";
-    return "th";
+  // Convert string "1" to integer 1
+  const i = parseInt(val, 10);
+  if (isNaN(i)) return "";
+
+  const j = i % 10, k = i % 100;
+  if (j === 1 && k !== 11) return "st";
+  if (j === 2 && k !== 12) return "nd";
+  if (j === 3 && k !== 13) return "rd";
+  return "th";
 }
 
 export { ProgramListView };
