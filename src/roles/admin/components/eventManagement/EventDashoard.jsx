@@ -13,8 +13,9 @@ const buttonListGroup = [
 ];
 
 export function EventDashboard() {
-    // 🟢 1. Consume Real Data (Now a multi-dimensional array from the new controller!)
-    const { eventMealRequest = [] } = useData(); 
+    // 🟢 1. Consume Real Data (Multi-dimensional array from the controller)
+    // Default to an empty array so destructuring doesn't fail if context is loading
+    const { eventMealRequest = [] } = useData();
 
     const [activeTab, setActiveTab] = useState("ongoing");
 
@@ -24,67 +25,74 @@ export function EventDashboard() {
 
     // --- 🟢 2. DATA PROCESSING & UNPACKING ---
     const processedData = useMemo(() => {
-        // Safe check to guarantee we are dealing with our [ongoing, upcoming, recent] format
-        const isMultiDimensional = Array.isArray(eventMealRequest) && Array.isArray(eventMealRequest[0]);
-        
-        // If data isn't loaded yet, return empty arrays to prevent crashes
-        if (!isMultiDimensional) return { ongoing: [], upcoming: [], recent: [], all: [] };
+        if (!Array.isArray(eventMealRequest) || eventMealRequest.length === 0) {
+            return { ongoing: [], upcoming: [], recent: [], all: [] };
+        }
+
+        // 1. FLATTEN the arrays to ignore the backend's timezone-flawed grouping
+        const flatRawEvents = eventMealRequest.flat();
 
         const currentYear = new Date().getFullYear();
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-        // Helper function to transform a raw backend event into the format the UI expects
-        const formatEventForUI = (event) => {
-            const dateString = `${event.startMonth} ${event.startDay}, ${currentYear}`;
-            const eventDateObj = new Date(dateString);
-            
-            const endDateString = `${event.endMonth} ${event.endDay}, ${currentYear}`;
-            const formattedDate = event.startDay === event.endDay 
-                ? eventDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                : `${eventDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(endDateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+        // 2. Get exact local boundaries using the user's browser timezone
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        const ongoing = [];
+        const upcoming = [];
+        const recent = [];
+        const all = [];
+
+        flatRawEvents.forEach((event) => {
+            if (!event) return;
+
+            const startMonthIdx = months.indexOf(event.startMonth);
+            const endMonthIdx = months.indexOf(event.endMonth);
+
+            const startDate = new Date(currentYear, startMonthIdx, event.startDay);
+            const endDate = new Date(currentYear, endMonthIdx, event.endDay, 23, 59, 59, 999);
+
+            // 🟢 3. The true source of truth: Browser Local Time Categorization
+            let computedStatus = "recent";
+            if (now >= startDate && now <= endDate) {
+                computedStatus = "ongoing";
+            } else if (startOfToday < startDate) {
+                computedStatus = "upcoming";
+            }
+
+            const isSameDayAndMonth = event.startDay === event.endDay && event.startMonth === event.endMonth;
+            const formattedDate = isSameDayAndMonth
+                ? startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
             const mergedEligible = [
-                ...(event.forEligibleSection || []).map(item => ({
-                    ...item,
-                    display: `${item.year} - ${item.section}`,
-                    type: 'Basic Ed'
-                })),
-                ...(event.forEligibleProgramsAndYear || []).map(item => ({
-                    ...item,
-                    display: `${item.year} - ${item.program}`,
-                    type: 'Higher Ed'
-                }))
+                ...(event.forEligibleSection || []).map(item => ({ ...item, display: `${item.year} - ${item.section}`, type: 'Basic Ed' })),
+                ...(event.forEligibleProgramsAndYear || []).map(item => ({ ...item, display: `${item.year} - ${item.program}`, type: 'Higher Ed' }))
             ];
 
-            return {
+            const formattedEvent = {
                 id: event.eventID,
                 mongoId: event._id,
                 eventName: event.eventName,
-                eventDate: formattedDate, 
-                classification: event.scheduleStatus ? event.scheduleStatus.toLowerCase() : 'recent',
+                eventDate: formattedDate,
+                classification: computedStatus, // Override with the correct frontend status
                 selectedColor: event.eventColor || "#dbeafe",
                 selectedPrograms: mergedEligible,
                 selectedDepartments: event.eventScope === 'School-Wide' ? ['All'] : ['Departmental']
             };
-        };
 
-        // 🟢 UNPACK THE MULTI-DIMENSIONAL ARRAY
-        const ongoing = (eventMealRequest[0] || []).map(formatEventForUI);
-        const upcoming = (eventMealRequest[1] || []).map(formatEventForUI);
-        const recent = (eventMealRequest[2] || []).map(formatEventForUI);
+            all.push(formattedEvent);
+            if (computedStatus === "ongoing") ongoing.push(formattedEvent);
+            else if (computedStatus === "upcoming") upcoming.push(formattedEvent);
+            else recent.push(formattedEvent);
+        });
 
-        return {
-            ongoing,
-            upcoming,
-            recent,
-            // We combine them all into one flat array just for the Modal, 
-            // so it can find an event by ID no matter which tab is active!
-            all: [...ongoing, ...upcoming, ...recent] 
-        };
+        return { ongoing, upcoming, recent, all };
 
     }, [eventMealRequest]);
 
-    // --- 🟢 3. FILTERING LOGIC (Massively Simplified) ---
-    // Because the backend already sorted them, we just grab the array matching the active tab!
+    // --- 🟢 3. FILTERING LOGIC ---
     const eventsToDisplay = processedData[activeTab] || [];
 
     // --- HANDLERS ---
@@ -142,7 +150,7 @@ export function EventDashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ type: "spring", delay: 0.1 }}
                     className="flex-1 overflow-y-auto">
-                    
+
                     {/* Render Real Data */}
                     <EventDisplayer
                         events={eventsToDisplay} // 🟢 Pass the pre-sorted array directly!
