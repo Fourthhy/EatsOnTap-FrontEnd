@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { motion } from "framer-motion"; // 🟢 Import Framer Motion
+import { motion } from "framer-motion";
 
 // --- COMPONENTS ---
 import { StatsCardGroup } from '../../../admin/components/dashboard/StatsCardGroup';
-
 import { ProgramsList } from '../ProgramsList';
 import { ScheduleTabs } from '../ScheduleTabs';
-
 import { EventsPanel } from '../../../admin/components/dashboard/EventsPanel';
 import { OngoingEvents } from '../../../admin/components/dashboard/OngoingEvents';
 import { HeaderBar } from "../../../../components/global/HeaderBar";
-import { Skeleton } from "../../../../components/global/Skeleton"; // 🟢 Import Skeleton
+import { Skeleton } from "../../../../components/global/Skeleton"; 
+import { getWeeklyMealStats } from "../../../../functions/adminAssistant/getWeeklyMealStats"; // 🟢 Imported New Function
 
 // --- CONTEXT ---
 import { useData } from "../../../../context/DataContext";
@@ -22,7 +21,7 @@ const containerVariants = {
     visible: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.1, // Stagger effect for children
+            staggerChildren: 0.1, 
             when: "beforeChildren"
         }
     }
@@ -39,15 +38,10 @@ const itemVariants = {
 
 export default function AdminAssistantDashboard() {
     const { eventMealRequest, programSchedule } = useData();
+    
+    // 🟢 NEW STATES FOR API DATA
     const [isLoading, setIsLoading] = useState(true);
-
-    // 🟢 TRIGGER LOADING ONLY ONCE ON MOUNT
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 2000);
-        return () => clearTimeout(timer);
-    }, []);
+    const [weeklyStats, setWeeklyStats] = useState([]);
 
     const context = useOutletContext() || {};
     const handleToggleSidebar = context.handleToggleSidebar || (() => { });
@@ -55,14 +49,44 @@ export default function AdminAssistantDashboard() {
 
     const date = new Date();
     const dayIndex = date.getDay(); // 0-6 (Sun-Sat)
-    // Adjust logic if your tabs (1-6) map differently to dayIndex
     const [selectedTab, setSelectedTab] = useState(dayIndex === 0 ? 1 : dayIndex); 
 
-    const higherEducationMealClaimStatus = [
-        { title: "Meal Claims", value: 1200, subtitle: "80% of total alotted" },
-        { title: "Meal Unclaims", value: 300, subtitle: "20% of total alotted" },
-        { title: "Total Alotted Meals", value: 1500, subtitle: "Today" },
+    // 🟢 FETCH DATA ON MOUNT
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            setIsLoading(true);
+            try {
+                // Fetch the multidimensional array
+                const response = await getWeeklyMealStats();
+                
+                if (response?.success && response?.data) {
+                    setWeeklyStats(response.data);
+                } else {
+                    setWeeklyStats([]);
+                }
+            } catch (error) {
+                console.error("Failed to load weekly stats:", error);
+                setWeeklyStats([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
+
+    // 🟢 DYNAMICALLY GET TODAY'S STATS BASED ON SELECTED TAB
+    // Assuming selectedTab is 1-indexed (1 = Monday, 2 = Tuesday...)
+    // Since our backend array is 0-indexed (0 = Monday, 1 = Tuesday...), we subtract 1.
+    const fallbackStats = [
+        { title: "Meal Claims", value: 0, subtitle: "0% of total allotted" },
+        { title: "Meal Unclaims", value: 0, subtitle: "0% of total allotted" },
+        { title: "Total Allotted Meals", value: 0, subtitle: "Loading..." },
     ];
+
+    const currentDayStats = weeklyStats.length > 0 && selectedTab > 0 
+        ? weeklyStats[selectedTab - 1] 
+        : fallbackStats;
 
     return (
         <>
@@ -80,7 +104,7 @@ export default function AdminAssistantDashboard() {
                 {/* CONTENT */}
                 <div className="h-full w-full">
                     
-                    {/* 🟢 MAIN GRID CONTAINER */}
+                    {/* MAIN GRID CONTAINER */}
                     <motion.div
                         style={{
                             borderRadius: '10px',
@@ -98,7 +122,7 @@ export default function AdminAssistantDashboard() {
                         {/* LEFT COLUMN */}
                         <div className="w-full h-auto flex flex-col gap-4">
 
-                            {/* 🟢 PASS ISLOADING TO TABS */}
+                            {/* TABS */}
                             <ScheduleTabs
                                 selectedTab={selectedTab}
                                 onTabChange={setSelectedTab}
@@ -120,9 +144,10 @@ export default function AdminAssistantDashboard() {
                                                     cardGroupTitle={"Claim Status"}
                                                     isDualPager={false}
                                                     urgentNotification={0}
-                                                    primaryData={higherEducationMealClaimStatus}
+                                                    // 🟢 INJECT DYNAMIC DATA HERE
+                                                    primaryData={currentDayStats}
                                                     displayDate={true}
-                                                    footnote={"That report contains from the collection of schedled programs and years listed below"}
+                                                    footnote={"That report contains from the collection of scheduled programs and years listed below"}
                                                 />
                                             </motion.div>
                                         )}

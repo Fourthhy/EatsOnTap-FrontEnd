@@ -1,12 +1,14 @@
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
+const BASE_URL = VITE_BASE_URL;
+
 // 🟢 Function to fetch ALL Program Schedules
 export async function getAllProgramSchedule() {
     
     // ⚠️ CHECK ROUTE: Ensure '/api/schedule' matches your server.js mount point
     // Example: router.get('/fetchAllProgramSchedule', ...)
-    const targetUrl = `${VITE_BASE_URL}/api/programschedule/fetchAllProgramSchedule`;
+    const targetUrl = `${BASE_URL}/api/programschedule/fetchAllProgramSchedule`;
     try {
         const response = await fetch(targetUrl, {
             method: 'GET',
