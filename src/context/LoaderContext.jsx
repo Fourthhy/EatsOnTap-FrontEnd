@@ -26,9 +26,12 @@ export const LoaderProvider = ({ children }) => {
         fetchAllSettings,
         fetchAllProgramSchedule,    
         fetchDashboardData,
-        
+
         setDashboardData,
-        setEvents
+        setEvents,
+
+        //ADMIN ASSISTANT
+        fetchWeeklyMealStats,
     } = useData();
 
     const mockApiCall = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -87,6 +90,10 @@ export const LoaderProvider = ({ children }) => {
                 if (task.id === "fetch_overall_claim_record") {
                     await fetchOverallClaimRecord();
                     await fetchSectionProgramList();
+                }
+
+                if (task.id === "fetch_admin_assistant_components") {
+                    await fetchWeeklyMealStats();
                 }
 
 

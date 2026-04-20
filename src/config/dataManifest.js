@@ -43,8 +43,13 @@ export const APP_INITIALIZATION_MANIFEST = {
         {
             id: 'fetch_programSchedule',
             label: 'Fetching Program Schedule..',
-            weight: 10
-        }
+            weight: 5
+        },
+        {
+            id: 'fetch_admin_assistant_components',
+            label: 'Fetching Admin Components',
+            weight: 5
+        },
     ],
     secondary: [
         { id: 'sync_events', label: 'Syncing Calendar Events...', weight: 10 },

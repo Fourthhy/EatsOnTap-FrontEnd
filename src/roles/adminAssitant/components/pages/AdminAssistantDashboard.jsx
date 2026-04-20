@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { motion } from "framer-motion";
 
@@ -10,12 +10,11 @@ import { EventsPanel } from '../../../admin/components/dashboard/EventsPanel';
 import { OngoingEvents } from '../../../admin/components/dashboard/OngoingEvents';
 import { HeaderBar } from "../../../../components/global/HeaderBar";
 import { Skeleton } from "../../../../components/global/Skeleton"; 
-import { getWeeklyMealStats } from "../../../../functions/adminAssistant/getWeeklyMealStats"; // 🟢 Imported New Function
 
 // --- CONTEXT ---
 import { useData } from "../../../../context/DataContext";
+import { useLoader } from "../../../../context/LoaderContext";
 
-// 🟢 ANIMATION VARIANTS
 const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -37,11 +36,8 @@ const itemVariants = {
 };
 
 export default function AdminAssistantDashboard() {
-    const { eventMealRequest, programSchedule } = useData();
-    
-    // 🟢 NEW STATES FOR API DATA
-    const [isLoading, setIsLoading] = useState(true);
-    const [weeklyStats, setWeeklyStats] = useState([]);
+    const { eventMealRequest, programSchedule, weeklyMealStats } = useData();
+    const { isLoading } = useLoader();
 
     const context = useOutletContext() || {};
     const handleToggleSidebar = context.handleToggleSidebar || (() => { });
@@ -51,41 +47,18 @@ export default function AdminAssistantDashboard() {
     const dayIndex = date.getDay(); // 0-6 (Sun-Sat)
     const [selectedTab, setSelectedTab] = useState(dayIndex === 0 ? 1 : dayIndex); 
 
-    // 🟢 FETCH DATA ON MOUNT
-    useEffect(() => {
-        const fetchDashboardData = async () => {
-            setIsLoading(true);
-            try {
-                // Fetch the multidimensional array
-                const response = await getWeeklyMealStats();
-                
-                if (response?.success && response?.data) {
-                    setWeeklyStats(response.data);
-                } else {
-                    setWeeklyStats([]);
-                }
-            } catch (error) {
-                console.error("Failed to load weekly stats:", error);
-                setWeeklyStats([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchDashboardData();
-    }, []);
-
-    // 🟢 DYNAMICALLY GET TODAY'S STATS BASED ON SELECTED TAB
-    // Assuming selectedTab is 1-indexed (1 = Monday, 2 = Tuesday...)
-    // Since our backend array is 0-indexed (0 = Monday, 1 = Tuesday...), we subtract 1.
     const fallbackStats = [
         { title: "Meal Claims", value: 0, subtitle: "0% of total allotted" },
         { title: "Meal Unclaims", value: 0, subtitle: "0% of total allotted" },
         { title: "Total Allotted Meals", value: 0, subtitle: "Loading..." },
     ];
 
-    const currentDayStats = weeklyStats.length > 0 && selectedTab > 0 
-        ? weeklyStats[selectedTab - 1] 
+    // 🟢 NEW: Safely extract the actual array from the { success: true, data: [...] } structure
+    const statsArray = weeklyMealStats?.success ? weeklyMealStats.data : [];
+
+    // 🟢 Use the extracted statsArray instead of the top-level weeklyMealStats object
+    const currentDayStats = statsArray && statsArray.length > 0 && selectedTab > 0 
+        ? statsArray[selectedTab - 1] 
         : fallbackStats;
 
     return (
@@ -144,7 +117,6 @@ export default function AdminAssistantDashboard() {
                                                     cardGroupTitle={"Claim Status"}
                                                     isDualPager={false}
                                                     urgentNotification={0}
-                                                    // 🟢 INJECT DYNAMIC DATA HERE
                                                     primaryData={currentDayStats}
                                                     displayDate={true}
                                                     footnote={"That report contains from the collection of scheduled programs and years listed below"}

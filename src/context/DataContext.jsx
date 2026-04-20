@@ -15,6 +15,8 @@ import { getAllSettings } from '../functions/admin/getAllSettings';
 import { getAllProgramSchedule } from '../functions/adminAssistant/getAllProgramSchedule';
 import { getDashboardData } from '../functions/admin/getDashboardData';
 
+import { getWeeklyMealStats } from "../functions/adminAssistant/getWeeklyMealStats";
+
 
 const DataContext = createContext();
 
@@ -40,6 +42,9 @@ const DataProvider = ({ children }) => {
     const [sectionProgram, setSectionProgram] = useState([]);
     const [mealValue, setMealValue] = useState()
     const [setting, setSetting] = useState([]);
+
+    //ADMIN ASSISTANT STATES
+    const [weeklyMealStats, setWeeklyMeatStats] = useState({});
     
     // 🟢 FIX: Initialize from LocalStorage (Persistence)
     // This prevents "undefined" errors on the Dashboard when refreshing the page.
@@ -207,6 +212,17 @@ const DataProvider = ({ children }) => {
         }
     })
 
+    //ADMIN ASSISTANT
+    const fetchWeeklyMealStats = useCallback(async () => {
+        try {
+            if (typeof getWeeklyMealStats !== 'function') throw new Error('getWeeklyMealStats import missing');
+            const data = await getWeeklyMealStats();
+            setWeeklyMeatStats(data);
+        } catch (error) {
+            console.error('Error fetching weekly meal stats', error);
+        }
+    })
+
     useEffect(() => {
         // Initial fetch on load
 
@@ -279,6 +295,9 @@ const DataProvider = ({ children }) => {
             setting,
             programSchedule,
 
+            //ADMIN ASSISTANT
+            weeklyMealStats,
+
             // Fetch Functions
             fetchUnifiedSchoolData,
             fetchAllClassAdvisers,
@@ -291,7 +310,10 @@ const DataProvider = ({ children }) => {
             fetchMealValue,
             fetchAllSettings,
             fetchAllProgramSchedule,
-            fetchDashboardData
+            fetchDashboardData,
+
+            //ADMIN ASSISTANT
+            fetchWeeklyMealStats
         }}>
             {children}
         </DataContext.Provider>
