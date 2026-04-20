@@ -1,9 +1,12 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { User, AlertCircle, Plus } from 'lucide-react'; // 🟢 Added Plus icon
+import React, { useState, useMemo } from 'react';
+import { User, AlertCircle, Plus } from 'lucide-react'; 
 import { GenericTable } from '../../../components/global/table/GenericTable';
-import { getStudentsWithProgramOnly } from '../../../functions/adminAssistant/getStudentsWithProgramOnly';
 
-// 🟢 Import the Modal (Adjust path if necessary)
+// 🟢 Global Contexts
+import { useData } from "../../../context/DataContext";
+import { useLoader } from "../../../context/LoaderContext";
+
+// 🟢 Modal
 import { AddStudentModal } from '../components/AddStudentModal';
 
 // --- CONFIGURATION ---
@@ -18,36 +21,22 @@ const cellStyle = {
 };
 
 const StudentListView = ({switcher}) => {
-    // --- STATE ---
-    const [students, setStudents] = useState([]);
+    // 🟢 Using Global Context State instead of local state
+    const { studentsWithPrograms } = useData();
+    const { isLoading } = useLoader();
+
     const [activeTab, setActiveTab] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
-
-    // 🟢 Modal State
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-    // --- FETCH DATA ---
-    const fetchData = async () => {
-        setIsLoading(true);
-        try {
-            const response = await getStudentsWithProgramOnly();
-            if (response && Array.isArray(response.data)) {
-                setStudents(response.data);
-            } else {
-                setStudents([]);
-            }
-        } catch (error) {
-            console.error("Failed to load students", error);
-            setStudents([]);
-        } finally {
-            setIsLoading(false);
+    // 🟢 Extract the actual array from the { message, count, data: [...] } structure
+    const students = useMemo(() => {
+        if (studentsWithPrograms?.data && Array.isArray(studentsWithPrograms.data)) {
+            return studentsWithPrograms.data;
         }
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, []);
+        // Fallback in case your context already unwraps it
+        return Array.isArray(studentsWithPrograms) ? studentsWithPrograms : [];
+    }, [studentsWithPrograms]);
 
     // --- DYNAMIC TABS GENERATOR ---
     const tabs = useMemo(() => {
@@ -78,8 +67,11 @@ const StudentListView = ({switcher}) => {
     // --- ROW RENDERER ---
     const renderRow = (student, index, startIndex) => {
         const displayName = `${student.first_name} ${student.middle_name ? student.middle_name[0] + '.' : ''} ${student.last_name}`;
-        const status = student.temporaryClaimStatus?.[0] || 'PENDING';
-        const type = student.academicStatus?.[0] || 'REGULAR';
+        
+        // 🟢 FIXED: The JSON shows these are pure Strings, not Arrays. Removed the [0] index.
+        const status = student.temporaryClaimStatus || 'PENDING';
+        const type = student.academicStatus || 'REGULAR';
+        
         const programDisplay = `${student.program} - ${student.year}`;
 
         return (
@@ -160,12 +152,12 @@ const StudentListView = ({switcher}) => {
                 minItems={6}
             />
 
-            {/* 🟢 MODAL RENDER */}
+            {/* MODAL RENDER */}
             <AddStudentModal
                 isOpen={isAddModalOpen}
                 onClose={() => {
                     setIsAddModalOpen(false);
-                    fetchData(); // Refresh list when modal closes after success
+                    // 🟢 Removed fetchData() - Let global state handle updates
                 }}
             />
         </div>

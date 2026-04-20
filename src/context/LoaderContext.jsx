@@ -32,6 +32,7 @@ export const LoaderProvider = ({ children }) => {
 
         //ADMIN ASSISTANT
         fetchWeeklyMealStats,
+        fetchStudentsWithProgramOnly
     } = useData();
 
     const mockApiCall = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -94,6 +95,7 @@ export const LoaderProvider = ({ children }) => {
 
                 if (task.id === "fetch_admin_assistant_components") {
                     await fetchWeeklyMealStats();
+                    await fetchStudentsWithProgramOnly();
                 }
 
 

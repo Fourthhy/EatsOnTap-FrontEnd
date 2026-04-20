@@ -16,6 +16,7 @@ import { getAllProgramSchedule } from '../functions/adminAssistant/getAllProgram
 import { getDashboardData } from '../functions/admin/getDashboardData';
 
 import { getWeeklyMealStats } from "../functions/adminAssistant/getWeeklyMealStats";
+import { getStudentsWithProgramOnly } from "../functions/adminAssistant/getStudentsWithProgramOnly";
 
 
 const DataContext = createContext();
@@ -45,6 +46,7 @@ const DataProvider = ({ children }) => {
 
     //ADMIN ASSISTANT STATES
     const [weeklyMealStats, setWeeklyMeatStats] = useState({});
+    const [studentsWithPrograms, setStudentsWithPrograms] = useState()
     
     // 🟢 FIX: Initialize from LocalStorage (Persistence)
     // This prevents "undefined" errors on the Dashboard when refreshing the page.
@@ -223,6 +225,17 @@ const DataProvider = ({ children }) => {
         }
     })
 
+    //getStudentsWithProgramOnly
+    const fetchStudentsWithProgramOnly = useCallback( async () => {
+        try {
+            if (typeof getStudentsWithProgramOnly !== 'function') throw new Error('getStudentsWithProgramOnly import missing');
+            const data = await getStudentsWithProgramOnly();
+            setStudentsWithPrograms(data)
+        } catch (error) {
+            console.error('Error fetching students with programs only', error);
+        }
+    })
+
     useEffect(() => {
         // Initial fetch on load
 
@@ -297,6 +310,7 @@ const DataProvider = ({ children }) => {
 
             //ADMIN ASSISTANT
             weeklyMealStats,
+            studentsWithPrograms,
 
             // Fetch Functions
             fetchUnifiedSchoolData,
@@ -313,7 +327,8 @@ const DataProvider = ({ children }) => {
             fetchDashboardData,
 
             //ADMIN ASSISTANT
-            fetchWeeklyMealStats
+            fetchWeeklyMealStats,
+            fetchStudentsWithProgramOnly
         }}>
             {children}
         </DataContext.Provider>
