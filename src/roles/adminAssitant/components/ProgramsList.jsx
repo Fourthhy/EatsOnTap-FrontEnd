@@ -36,7 +36,7 @@ function ProgramsList({ data = [], selectedTab }) {
     };
 
     return (
-        <div className="w-[100%] p-6 flex justify-center" style={{ marginTop: 10 }}>
+        <div className="w-[95%] p-6 flex justify-center" style={{ marginTop: 10 }}>
             {filteredPrograms.length === 0 ? (
                 <div className="text-sm text-gray-400 italic mt-4">
                     No programs scheduled for {targetDay ? targetDay.toLowerCase() : 'this day'}.
