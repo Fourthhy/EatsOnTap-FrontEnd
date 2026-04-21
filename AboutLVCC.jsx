@@ -340,7 +340,7 @@ function AboutLVCC() {
 
           <div className="about-content">
             <div className="about-badge">ABOUT LVCC</div>
-            <h1>Empowering Scholars</h1>
+            <h1 className="font-bold">Empowering Scholars</h1>
             <p>
               La Verdad Christian College (LVCC) is a private, non-stock, non-sectarian educational institution established in Apalit, Pampanga. It stands out uniquely for its remarkable advocacy: providing absolute free quality education to poor and deserving scholars.
             </p>

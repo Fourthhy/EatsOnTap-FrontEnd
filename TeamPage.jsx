@@ -512,7 +512,7 @@ function TeamPage() {
           transition={{ duration: 0.6 }}
         >
           <div className="team-badge">OUR TEAM</div>
-          <h1>Meet the Minds</h1>
+          <h1 className='font-bold'>Meet the Minds</h1>
           <p>
             The dedicated members behind Eat's on Tap, consistently striving to innovate meal claiming systems through the digitalization of student welfare services through robust and seamless RFID technology.
           </p>
@@ -536,7 +536,7 @@ function TeamPage() {
               <motion.div layoutId={`image-${member.id}`} className="team-card-image">
                 <img src={member.image} alt={member.name} />
               </motion.div>
-              <motion.h3 layoutId={`name-${member.id}`}>{member.name}</motion.h3>
+              <motion.h3 className="font-bold" layoutId={`name-${member.id}`}>{member.name}</motion.h3>
               <motion.p layoutId={`role-${member.id}`} className="role">{member.role}</motion.p>
             </motion.div>
           ))}
@@ -573,7 +573,7 @@ function TeamPage() {
               <motion.div layoutId={`image-${selectedId}`} className="team-card-image">
                 <img src={selectedMember.image} alt={selectedMember.name} />
               </motion.div>
-              <motion.h3 layoutId={`name-${selectedId}`}>{selectedMember.name}</motion.h3>
+              <motion.h3 className="font-bold" layoutId={`name-${selectedId}`}>{selectedMember.name}</motion.h3>
               <motion.p layoutId={`role-${selectedId}`} className="role">{selectedMember.role}</motion.p>
 
               <motion.p
