@@ -239,18 +239,7 @@ export default function ChancellorDashboard() {
                                         <>
                                             {/* TRENDS CHART */}
                                             <div className="flex h-[270px] w-[98%] border-[#D9D9D9] border-[1px] mt-5 mb-2 rounded-xl" style={{ margin: 10 }}>
-                                                <div className="w-[30%] h-auto flex items-center justify-center p-4">
-                                                    <CustomStatsCard 
-                                                        title={"Unclaim Count"} 
-                                                        value={statsData.waived || 0} 
-                                                        subtitle={metricSubtitle} 
-                                                        isPeso={false} 
-                                                        isPercentage={false} 
-                                                        isHasAcceptableRange={false} 
-                                                        hoverText={`The count of how many claims are not claimed for this ${metricSubtitle.toLowerCase()}`} 
-                                                    />
-                                                </div>
-                                                <div className="h-[100%] w-[70%] flex justify-end items-center p-4">
+                                                <div className="h-[100%] w-[100%] flex justify-end items-center p-4">
                                                     {isLoading ? <Skeleton className="w-full h-full rounded-lg" /> : <LineChartBox data={getChartData('trendsData')} />}
                                                 </div>
                                             </div>
@@ -273,18 +262,7 @@ export default function ChancellorDashboard() {
 
                                             {/* BAR CHART */}
                                             <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px] my-2 rounded-xl" style={{ margin: 10 }}>
-                                                <div className="w-[30%] h-auto flex items-center justify-center p-4">
-                                                    <CustomStatsCard 
-                                                        title={"Dish Claims"} 
-                                                        value={statsData.claimed || 0} 
-                                                        subtitle={`Total Claims`} 
-                                                        isPeso={false} 
-                                                        isPercentage={false} 
-                                                        isHasAcceptableRange={false} 
-                                                        hoverText={`The count of how many free meal claims are made for this ${metricSubtitle.toLowerCase()}`} 
-                                                    />
-                                                </div>
-                                                <div className="h-[100%] w-[70%] flex justify-end items-center p-4">
+                                                <div className="h-[100%] w-[100%] flex justify-end items-center p-4">
                                                     {isLoading ? <Skeleton className="w-full h-[200px] rounded-lg" /> : <BarChartBox data={getChartData('barChartData')} />}
                                                 </div>
                                             </div>
