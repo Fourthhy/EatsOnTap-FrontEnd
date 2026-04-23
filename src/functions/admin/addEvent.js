@@ -21,5 +21,5 @@ export const addEvent = async (eventData) => {
     } catch (error) {
         console.error("Error creating event:", error);
         throw error;
-    }
+    }   
 };

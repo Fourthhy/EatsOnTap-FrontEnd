@@ -409,8 +409,7 @@ const MealOrdersTable = () => {
     const viewSwitcher = (
         <div style={{ backgroundColor: '#f3f4f6', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px', margin: "5px" }}>
             <SwitcherButton mode="Pending Meal Orders" currentMode={orderType} icon={<Clock size={14} />} label="Pending" onClick={() => { setOrderType('Pending Meal Orders'); setSelectedIds([]); }} />
-            <SwitcherButton mode="Confirmed Meal Orders" currentMode={orderType} icon={<CheckCircle size={14} />} label="History" onClick={() => { setOrderType('Confirmed Meal Orders'); setSelectedIds([]); }} />
-            <SwitcherButton mode="Event Meal Request" currentMode={orderType} icon={<Calendar size={14} />} label="Events" onClick={() => { setOrderType('Event Meal Request'); setSelectedIds([]); }} />
+            <SwitcherButton mode="Confirmed Meal Orders" currentMode={orderType} icon={<CheckCircle size={14} />} label="Accepted" onClick={() => { setOrderType('Confirmed Meal Orders'); setSelectedIds([]); }} />
             <SwitcherButton mode="Unsubmitted Sections" currentMode={orderType} icon={<AlertCircle size={14} />} label="Unsubmitted" onClick={() => { setOrderType('Unsubmitted Sections'); setSelectedIds([]); }} />
         </div>
     );
