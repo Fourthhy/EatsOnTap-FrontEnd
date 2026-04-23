@@ -180,3 +180,407 @@ html, body {
     @apply bg-background text-foreground;
   }
 }
+
+/* ========================================================================
+   LOGIN PAGE — Fully Responsive Styles (Mobile-First)
+   Breakpoints: 375 / 425 / 768 / 1024 / 1440
+   ======================================================================== */
+
+/* ---- Page wrapper ---- */
+.login-page {
+  width: 100vw;
+  height: 100dvh;          /* dvh handles mobile browser chrome */
+  min-height: 100vh;       /* fallback */
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* ---- Grid: single-column on mobile, two-column on laptop+ ---- */
+.login-grid {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Form side ---- */
+.login-form-side {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+  gap: 0;
+}
+
+/* ---- Hero side: hidden on mobile/tablet ---- */
+.login-hero-side {
+  display: none;
+}
+.login-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+}
+
+/* ---- Branding ---- */
+.login-branding {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.login-logo {
+  width: clamp(40px, 7vh, 64px);
+  margin-bottom: 6px;
+}
+.login-college-name {
+  font-size: clamp(12px, 4.3vw, 18px);
+  margin-bottom: 3px;
+  text-align: center;
+}
+.login-college-address {
+  font-size: clamp(9px, 2.6vw, 13px);
+  text-align: center;
+}
+
+/* ---- Form card ---- */
+.login-card {
+  border-top-left-radius: 32px;
+  border-bottom-right-radius: 32px;
+  border: 1px solid white;
+  box-shadow: 0 0 25px rgba(0,0,0,0.25);
+}
+.login-card-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 24px;
+}
+
+/* ---- Labels: hidden on mobile, visible on laptop+ ---- */
+.login-label-wrap {
+  display: none;
+}
+
+/* ---- Input fields ---- */
+.login-input {
+  width: 80vw;
+  height: 44px;
+}
+
+/* ---- Eye icon (password toggle) ---- */
+.login-eye-icon {
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+/* ---- Forgot password ---- */
+.login-forgot-password {
+  width: 80vw;
+  text-align: right;
+  font-size: clamp(12px, 3.4vw, 15px);
+}
+
+/* ---- Buttons ---- */
+.login-btn {
+  width: 80vw;
+  height: 44px;
+}
+
+/* ---- Divider ("or") ---- */
+.login-divider {
+  width: 80vw;
+  height: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-divider-line {
+  width: 35%;
+  height: 1px;
+  background-color: white;
+}
+.login-divider-line:first-child {
+  margin-right: 16px;
+}
+.login-divider-line:last-child {
+  margin-left: 16px;
+}
+.login-divider-text {
+  color: white;
+  margin: 0 8px;
+  font-size: clamp(11px, 1.5vh, 14px);
+  font-family: sans-serif;
+}
+
+/* ---- Google button text ---- */
+.login-google-text {
+  font-size: clamp(12px, 3.5vw, 15px);
+}
+
+
+/* ========== 425px — larger phones ========== */
+@media (min-width: 425px) {
+  .login-input,
+  .login-forgot-password,
+  .login-btn,
+  .login-divider {
+    width: 75vw;
+  }
+  .login-college-name {
+    font-size: clamp(14px, 3.8vw, 18px);
+  }
+}
+
+
+/* ========== 768px — tablets ========== */
+@media (min-width: 768px) {
+  .login-input,
+  .login-forgot-password,
+  .login-btn,
+  .login-divider {
+    width: 55vw;
+  }
+  .login-logo {
+    width: clamp(50px, 6vh, 70px);
+    margin-bottom: 8px;
+  }
+  .login-college-name {
+    font-size: clamp(16px, 2.8vw, 22px);
+    margin-bottom: 5px;
+  }
+  .login-college-address {
+    font-size: clamp(11px, 1.8vw, 15px);
+  }
+  .login-branding {
+    margin-bottom: 20px;
+  }
+  .login-card-inner {
+    padding: 36px 32px;
+  }
+  .login-input {
+    height: 48px;
+  }
+  .login-btn {
+    height: 48px;
+  }
+  .login-forgot-password {
+    font-size: 14px;
+  }
+  .login-google-text {
+    font-size: 14px;
+  }
+  .login-eye-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+
+/* ========== 1024px — laptops ========== */
+@media (min-width: 1024px) {
+  /* Switch to two-column grid */
+  .login-grid {
+    display: grid;
+    grid-template-columns: 40vw 60vw;
+    flex-direction: unset;
+  }
+  .login-hero-side {
+    display: flex;
+    justify-content: flex-end;
+    height: 100dvh;
+    min-height: 100vh;
+  }
+  .login-form-side {
+    padding: 0;
+  }
+
+  /* Show labels on laptop */
+  .login-label-wrap {
+    display: block;
+  }
+
+  /* Form card uses glass bg instead of border */
+  .login-card {
+    background-color: #ffffff26;
+    border: none;
+    box-shadow: 0 0 25px rgba(0,0,0,0.25);
+  }
+  .login-card-inner {
+    padding: 40px 36px;
+  }
+
+  /* Input / button sizing */
+  .login-input,
+  .login-forgot-password,
+  .login-btn,
+  .login-divider {
+    width: 23vw;
+  }
+  .login-input {
+    height: clamp(38px, 6vh, 52px);
+  }
+  .login-btn {
+    height: clamp(36px, 4vh, 48px);
+  }
+
+  /* Branding */
+  .login-logo {
+    width: clamp(48px, 5vw, 80px);
+    margin-bottom: 10px;
+  }
+  .login-college-name {
+    font-size: clamp(14px, 1.6vw, 24px);
+    margin-bottom: 3px;
+  }
+  .login-college-address {
+    font-size: clamp(10px, 1.5vh, 14px);
+  }
+  .login-branding {
+    margin-bottom: 20px;
+  }
+
+  /* Forgot password & google text */
+  .login-forgot-password {
+    font-size: clamp(11px, 0.97vw, 15px);
+  }
+  .login-google-text {
+    font-size: clamp(11px, 0.97vw, 15px);
+  }
+
+  /* Divider */
+  .login-divider-text {
+    font-size: clamp(11px, 1vw, 14px);
+  }
+
+  /* Eye icon */
+  .login-eye-icon {
+    width: clamp(16px, 2vw, 28px);
+    height: auto;
+    top: 67%;
+  }
+}
+
+
+/* ========== 1440px — large laptops / desktops ========== */
+@media (min-width: 1440px) {
+  .login-input {
+    height: clamp(38px, 4vh, 50px);
+  }
+  .login-btn {
+    height: clamp(38px, 4vh, 50px);
+  }
+  .login-card-inner {
+    padding: 44px 40px;
+    gap: 18px;
+  }
+  .login-logo {
+    width: clamp(56px, 4.5vw, 90px);
+  }
+  .login-college-name {
+    font-size: clamp(16px, 1.5vw, 26px);
+  }
+  .login-college-address {
+    font-size: clamp(11px, 0.8vw, 15px);
+  }
+}
+
+
+/* ========== 1920px+ — Full HD and beyond ========== */
+@media (min-width: 1920px) {
+  .login-input,
+  .login-forgot-password,
+  .login-btn,
+  .login-divider {
+    width: 20vw;
+  }
+  .login-card-inner {
+    padding: 48px 44px;
+  }
+}
+
+
+/* ========== 2560px+ — QHD / Ultrawide ========== */
+@media (min-width: 2560px) {
+  .login-input,
+  .login-forgot-password,
+  .login-btn,
+  .login-divider {
+    width: 16vw;
+  }
+  .login-logo {
+    width: clamp(64px, 3.5vw, 100px);
+  }
+}
+
+
+/* ========== Landscape orientation on handhelds ========== */
+@media (max-width: 1023px) and (orientation: landscape) {
+  .login-page {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+  }
+  .login-form-side {
+    padding: 32px 0;
+  }
+  .login-input,
+  .login-forgot-password,
+  .login-btn,
+  .login-divider {
+    width: 50vw;
+  }
+  .login-logo {
+    width: clamp(32px, 5vh, 48px);
+  }
+  .login-college-name {
+    font-size: clamp(12px, 2.5vw, 18px);
+  }
+  .login-college-address {
+    font-size: clamp(9px, 1.5vw, 12px);
+  }
+}
+
+
+/* ========== Very small screens (< 375px, e.g. Galaxy Fold) ========== */
+@media (max-width: 374px) {
+  .login-input,
+  .login-forgot-password,
+  .login-btn,
+  .login-divider {
+    width: 85vw;
+  }
+  .login-card-inner {
+    padding: 20px 16px;
+    gap: 12px;
+  }
+  .login-logo {
+    width: 36px;
+  }
+  .login-college-name {
+    font-size: 11px;
+  }
+  .login-college-address {
+    font-size: 8px;
+  }
+  .login-forgot-password {
+    font-size: 11px;
+  }
+  .login-google-text {
+    font-size: 11px;
+  }
+}
