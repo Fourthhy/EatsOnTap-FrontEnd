@@ -248,11 +248,49 @@ html, body {
   text-align: center;
 }
 
+/* ---- Back button ---- */
+.login-back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-family: geist, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.login-back-btn:hover {
+  background-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.login-back-btn:active {
+  transform: scale(0.96);
+}
+.login-back-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.login-back-label {
+  display: none;
+}
+
 /* ---- Form card ---- */
 .login-card {
   border-top-left-radius: 32px;
   border-bottom-right-radius: 32px;
-  border: 1px solid white;
+  background-color: #ffffff26;
   box-shadow: 0 0 25px rgba(0,0,0,0.25);
 }
 .login-card-inner {
@@ -344,6 +382,9 @@ html, body {
   .login-college-name {
     font-size: clamp(14px, 3.8vw, 18px);
   }
+  .login-back-label {
+    display: inline;
+  }
 }
 
 
@@ -414,12 +455,6 @@ html, body {
     display: block;
   }
 
-  /* Form card uses glass bg instead of border */
-  .login-card {
-    background-color: #ffffff26;
-    border: none;
-    box-shadow: 0 0 25px rgba(0,0,0,0.25);
-  }
   .login-card-inner {
     padding: 40px 36px;
   }
@@ -472,6 +507,14 @@ html, body {
     width: clamp(16px, 2vw, 28px);
     height: auto;
     top: 67%;
+  }
+
+  /* Back button */
+  .login-back-btn {
+    top: 24px;
+    left: 24px;
+    padding: 9px 20px;
+    font-size: 14px;
   }
 }
 

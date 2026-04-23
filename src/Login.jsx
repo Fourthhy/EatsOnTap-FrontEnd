@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input"
 import { Button } from "./components/ui/button";
 import { Label } from "@/components/ui/label"
-import { FaEyeSlash, FaEye } from "react-icons/fa";
+import { FaEyeSlash, FaEye, FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { loginApi } from "./functions/loginAuth"
 import { resetPassword } from "./functions/admin/resetPassword";
@@ -227,7 +227,17 @@ export default function Login() {
 
     return (
         <div className="login-page" onKeyDown={handleKeyDown}>
-            <div className="login-page" style={{ background: 'linear-gradient(to bottom, #153FA3, #142345)' }}>
+            <div className="login-page" style={{ background: 'linear-gradient(to bottom, #153FA3, #142345)', position: 'relative' }}>
+                {/* Back to Landing Page button */}
+                <button
+                    className="login-back-btn"
+                    onClick={() => navigate('/')}
+                    aria-label="Back to landing page"
+                >
+                    <FaArrowLeft />
+                    <span className="login-back-label">Back</span>
+                </button>
+
                 <div className="login-grid">
                     {/* Left side — form */}
                     <div className="login-form-side">
