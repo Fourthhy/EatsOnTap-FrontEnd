@@ -239,12 +239,12 @@ html, body {
   margin-bottom: 6px;
 }
 .login-college-name {
-  font-size: clamp(12px, 4.3vw, 18px);
+  font-size: clamp(16px, 3vw, 26px);
   margin-bottom: 3px;
   text-align: center;
 }
 .login-college-address {
-  font-size: clamp(9px, 2.6vw, 13px);
+  font-size: clamp(10px, 1.5vw, 15px);
   text-align: center;
 }
 
@@ -256,34 +256,26 @@ html, body {
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background-color: rgba(255, 255, 255, 0.1);
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background-color: transparent;
   color: white;
-  font-family: geist, sans-serif;
-  font-size: 14px;
-  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  transition: background-color 0.2s ease, transform 0.15s ease;
 }
 .login-back-btn:hover {
-  background-color: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 .login-back-btn:active {
   transform: scale(0.96);
 }
 .login-back-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
-}
-.login-back-label {
-  display: none;
 }
 
 /* ---- Form card ---- */
@@ -304,9 +296,9 @@ html, body {
   padding: 28px 24px;
 }
 
-/* ---- Labels: hidden on mobile, visible on laptop+ ---- */
+/* ---- Labels: visible on all devices ---- */
 .login-label-wrap {
-  display: none;
+  display: block;
 }
 
 /* ---- Input fields ---- */
@@ -379,12 +371,6 @@ html, body {
   .login-divider {
     width: 75vw;
   }
-  .login-college-name {
-    font-size: clamp(14px, 3.8vw, 18px);
-  }
-  .login-back-label {
-    display: inline;
-  }
 }
 
 
@@ -399,13 +385,6 @@ html, body {
   .login-logo {
     width: clamp(50px, 6vh, 70px);
     margin-bottom: 8px;
-  }
-  .login-college-name {
-    font-size: clamp(16px, 2.8vw, 22px);
-    margin-bottom: 5px;
-  }
-  .login-college-address {
-    font-size: clamp(11px, 1.8vw, 15px);
   }
   .login-branding {
     margin-bottom: 20px;
@@ -450,11 +429,6 @@ html, body {
     padding: 0;
   }
 
-  /* Show labels on laptop */
-  .login-label-wrap {
-    display: block;
-  }
-
   .login-card-inner {
     padding: 40px 36px;
   }
@@ -477,13 +451,6 @@ html, body {
   .login-logo {
     width: clamp(48px, 5vw, 80px);
     margin-bottom: 10px;
-  }
-  .login-college-name {
-    font-size: clamp(14px, 1.6vw, 24px);
-    margin-bottom: 3px;
-  }
-  .login-college-address {
-    font-size: clamp(10px, 1.5vh, 14px);
   }
   .login-branding {
     margin-bottom: 20px;
@@ -513,8 +480,6 @@ html, body {
   .login-back-btn {
     top: 24px;
     left: 24px;
-    padding: 9px 20px;
-    font-size: 14px;
   }
 }
 
@@ -533,12 +498,6 @@ html, body {
   }
   .login-logo {
     width: clamp(56px, 4.5vw, 90px);
-  }
-  .login-college-name {
-    font-size: clamp(16px, 1.5vw, 26px);
-  }
-  .login-college-address {
-    font-size: clamp(11px, 0.8vw, 15px);
   }
 }
 
@@ -590,12 +549,6 @@ html, body {
   .login-logo {
     width: clamp(32px, 5vh, 48px);
   }
-  .login-college-name {
-    font-size: clamp(12px, 2.5vw, 18px);
-  }
-  .login-college-address {
-    font-size: clamp(9px, 1.5vw, 12px);
-  }
 }
 
 
@@ -613,12 +566,6 @@ html, body {
   }
   .login-logo {
     width: 36px;
-  }
-  .login-college-name {
-    font-size: 11px;
-  }
-  .login-college-address {
-    font-size: 8px;
   }
   .login-forgot-password {
     font-size: 11px;

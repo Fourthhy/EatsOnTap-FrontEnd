@@ -235,7 +235,6 @@ export default function Login() {
                     aria-label="Back to landing page"
                 >
                     <FaArrowLeft />
-                    <span className="login-back-label">Back</span>
                 </button>
 
                 <div className="login-grid">
