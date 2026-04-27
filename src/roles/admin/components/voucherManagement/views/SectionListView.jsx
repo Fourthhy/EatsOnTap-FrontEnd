@@ -205,6 +205,7 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
         );
     }
 
+    //@todo: check generic table components
     return (
         <>
             <AddSectionModal
@@ -237,7 +238,7 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                 data={flattenedSections}
                 renderRow={renderSectionRow}
                 onPrimaryAction={() => setIsAddModalOpen(true)}
-                primaryActionLabel={activeTab === 'higherEducation' ? "Add Program" : "Add Section"}
+                // primaryActionLabel={activeTab === 'higherEducation' ? "Add Program" : "Add Section"}
                 primaryActionIcon={<Plus size={16} />}
                 metrics={[{ label: "Total", value: flattenedSections.length }]}
             />

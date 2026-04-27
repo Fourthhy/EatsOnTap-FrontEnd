@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { Calendar, Search, X, Check, Tag, Edit2, ChevronLeft, ChevronRight, Plus, Loader2, ArrowRight } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Search, X, Check, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { getSchoolStructure } from '../../../../functions/admin/getSchoolStructure';
 import { addEvent } from "../../../../functions/admin/addEvent";
 
@@ -46,9 +46,9 @@ export const AddEventForm = () => {
     const [selectedPrograms, setSelectedPrograms] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    
+
     // 🟢 PAGINATION CONSTANTS
-    const ITEMS_PER_PAGE = 10; 
+    const ITEMS_PER_PAGE = 10;
 
     useEffect(() => {
         if (isOpen) {
@@ -56,6 +56,7 @@ export const AddEventForm = () => {
                 setIsLoadingData(true);
                 try {
                     const data = await getSchoolStructure();
+                    // Ensure the response is strictly an array before saving it to state
                     if (Array.isArray(data)) setStructureData(data);
                 } catch (error) {
                     console.error(error);
@@ -69,23 +70,52 @@ export const AddEventForm = () => {
 
     const availableDepartments = useMemo(() => structureData.map(item => item.category), [structureData]);
 
+    // 🟢 THE BULLETPROOF FIX: Zero map/flatMap used here. Impossible to throw "reading 'map' of undefined"
     const allProgramsToDisplay = useMemo(() => {
-        if (!isOpen || structureData.length === 0) return [];
-        let relevant = selectedDepartments.includes('All') ? structureData : structureData.filter(item => selectedDepartments.includes(item.category));
+        if (!isOpen || !Array.isArray(structureData) || structureData.length === 0) {
+            return [];
+        }
 
-        return relevant.flatMap(cat => 
-            cat.levels.flatMap(level => 
-                level.sections.map(section => ({
-                    id: `${level.levelName || level.gradeLevel}-${section.section || section.name || section}`,
-                    section: section.section || section.name || section,
-                    year: level.levelName || level.gradeLevel || "N/A",
-                    display: `${level.levelName || level.gradeLevel} - ${section.section || section.name || section}`,
-                    type: cat.category.toLowerCase().includes("college") ? 'HIGHER_ED' : 'BASIC_ED',
-                    // 🟢 ADDED CATEGORY: To track which department this section belongs to for hybrid selection
-                    category: cat.category 
-                }))
-            )
-        ).sort((a, b) => a.display.localeCompare(b.display));
+        const relevantDepts = selectedDepartments.includes('All') 
+            ? structureData 
+            : structureData.filter(dept => dept && selectedDepartments.includes(dept.category));
+
+        const results = [];
+
+        for (const dept of relevantDepts) {
+            if (!dept || !Array.isArray(dept.levels)) continue;
+
+            const isHigherEd = dept.category?.toLowerCase().includes("college") || dept.category === "higherEducation";
+            const type = isHigherEd ? 'HIGHER_ED' : 'BASIC_ED';
+
+            for (const level of dept.levels) {
+                if (!level) continue;
+
+                const levelNameStr = String(level.levelName || level.gradeLevel || 'N/A');
+                
+                // Safely extract the array no matter what it's named
+                const itemsArray = Array.isArray(level.sections) 
+                    ? level.sections 
+                    : Array.isArray(level.programs) 
+                        ? level.programs 
+                        : [];
+
+                for (const item of itemsArray) {
+                    if (!item) continue;
+                    
+                    results.push({
+                        id: `${levelNameStr}-${item}`,
+                        section: item, 
+                        year: levelNameStr,
+                        display: `${levelNameStr} - ${item}`,
+                        type: type,
+                        category: dept.category 
+                    });
+                }
+            }
+        }
+
+        return results.sort((a, b) => a.display.localeCompare(b.display));
     }, [selectedDepartments, isOpen, structureData]);
 
     const filteredPrograms = useMemo(() => {
@@ -93,13 +123,11 @@ export const AddEventForm = () => {
         return allProgramsToDisplay.filter(p => p.display.toLowerCase().includes(searchQuery.toLowerCase()));
     }, [allProgramsToDisplay, searchQuery]);
 
-    // 🟢 FIXED SIZE PAGINATION LOGIC
     const programsToDisplay = useMemo(() => {
         const start = (currentPage - 1) * ITEMS_PER_PAGE;
         const end = start + ITEMS_PER_PAGE;
         const sliced = filteredPrograms.slice(start, end);
 
-        // Fill with empty placeholders to keep grid structure 2x5
         const padded = [...sliced];
         while (padded.length < ITEMS_PER_PAGE) {
             padded.push({ id: `empty-${padded.length}`, isEmpty: true });
@@ -113,44 +141,42 @@ export const AddEventForm = () => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            // 🟢 HYBRID SELECTION LOGIC
             const actualDepts = selectedDepartments.includes('All') ? availableDepartments : selectedDepartments;
             let finalPayloadItems = [];
 
             actualDepts.forEach(deptName => {
-                // Check if the user manually ticked ANY sections for this specific department
                 const manuallySelectedInDept = selectedPrograms.filter(p => p.category === deptName);
-
                 if (manuallySelectedInDept.length > 0) {
-                    // Rule: If there are specific sections, then that's it.
                     finalPayloadItems.push(...manuallySelectedInDept);
                 } else {
-                    // Rule: If department without specific section, then all sections must be selected.
                     const allSectionsInDept = allProgramsToDisplay.filter(p => p.category === deptName);
                     finalPayloadItems.push(...allSectionsInDept);
                 }
             });
 
-            // Split the hybrid list into Basic and Higher Ed for the backend arrays
             const basicEdSelections = finalPayloadItems.filter(p => p.type !== 'HIGHER_ED');
             const higherEdSelections = finalPayloadItems.filter(p => p.type === 'HIGHER_ED');
 
-            // --- PAYLOAD CONSTRUCTION ---
-            const startDateObj = new Date(eventDate);
-            const endDateObj = eventEndDate ? new Date(eventEndDate) : startDateObj;
+            // 🟢 TIMEZONE SAFE DATE PARSING
+            const [startYear, startMonthNum, startDayNum] = eventDate.split('-');
+            const [endYear, endMonthNum, endDayNum] = eventEndDate ? eventEndDate.split('-') : [startYear, startMonthNum, startDayNum];
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
             const payload = {
                 eventName,
                 eventScope: selectedDepartments.includes('All') ? 'School-Wide' : 'Departmental',
-                startDay: startDateObj.getDate(),
-                endDay: endDateObj.getDate(),
-                startMonth: startDateObj.toLocaleString('default', { month: 'long' }),
-                endMonth: endDateObj.toLocaleString('default', { month: 'long' }),
-                eventColor: selectedColor,
                 
-                // 🟢 Send the finalized, auto-expanded hybrid arrays!
+                // Parsed purely from strings so timezones can't shift the day backward
+                startDay: parseInt(startDayNum, 10),
+                endDay: parseInt(endDayNum, 10),
+                startMonth: monthNames[parseInt(startMonthNum, 10) - 1],
+                endMonth: monthNames[parseInt(endMonthNum, 10) - 1],
+                
+                eventColor: selectedColor,
+
                 forEligibleSection: basicEdSelections.map(p => ({ section: p.section, year: p.year })),
                 forEligibleProgramsAndYear: higherEdSelections.map(p => ({ program: p.section, year: p.year })),
-                
+
                 submissionStatus: 'APPROVED',
                 scheduleStatus: 'ONGOING'
             };
@@ -171,7 +197,7 @@ export const AddEventForm = () => {
             <PrimaryActionButton label="Add Event" onClick={() => setIsOpen(true)} />
 
             {/* OVERLAY */}
-            <div 
+            <div
                 style={{
                     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
                     backgroundColor: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(4px)',
@@ -181,7 +207,7 @@ export const AddEventForm = () => {
                 onClick={() => setIsOpen(false)}
             >
                 {/* PREVIEW CONTAINER */}
-                <div 
+                <div
                     style={{
                         position: 'absolute', left: '30%', top: '50%', transform: 'translate(-50%, -50%)',
                         zIndex: 9001, pointerEvents: 'none', transition: 'all 0.5s ease',
@@ -191,7 +217,7 @@ export const AddEventForm = () => {
                     <div style={{ padding: '10px', backgroundColor: 'white', borderRadius: '24px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
                         <div style={{ width: '320px', height: '420px', backgroundColor: selectedColor, borderRadius: '20px', padding: '30px', display: 'flex', flexDirection: 'column', transition: 'background-color 0.4s ease' }}>
                             <div style={{ backgroundColor: 'white', width: 'fit-content', padding: '6px 12px', borderRadius: '10px', fontSize: 12, fontWeight: 700, color: currentColorObj.text, marginBottom: '20px' }}>
-                                {eventDate ? new Date(eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'DATE'} 
+                                {eventDate ? new Date(eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'DATE'}
                                 {eventEndDate && ` - ${new Date(eventEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
                             </div>
                             <h2 style={{ fontSize: 28, fontWeight: 800, color: currentColorObj.text, lineHeight: 1.1, fontFamily: 'geist' }}>
@@ -209,7 +235,7 @@ export const AddEventForm = () => {
                 </div>
 
                 {/* SLIDE PANEL (RIGHT) */}
-                <div 
+                <div
                     style={{
                         position: 'absolute', right: 0, top: 0, width: '450px', height: '100%',
                         backgroundColor: 'white', boxShadow: '-10px 0 30px rgba(0,0,0,0.1)',
@@ -221,7 +247,7 @@ export const AddEventForm = () => {
                 >
                     <div className="flex justify-between items-center" style={{ marginBottom: '32px' }}>
                         <h2 className="text-lg font-geist" style={{ fontWeight: 400 }}>Create Event</h2>
-                        <button onClick={() => setIsOpen(false)} className="hover:bg-gray-100 rounded-full" style={{ border: 'none', cursor: 'pointer', padding: '8px' }}><X size={20}/></button>
+                        <button onClick={() => setIsOpen(false)} className="hover:bg-gray-100 rounded-full" style={{ border: 'none', cursor: 'pointer', padding: '8px' }}><X size={20} /></button>
                     </div>
 
                     <div style={{ flex: 1, overflowY: 'auto', paddingRight: '10px' }} className="custom-scrollbar">
@@ -240,10 +266,10 @@ export const AddEventForm = () => {
                         {/* Name Input */}
                         <div style={{ marginBottom: '24px' }}>
                             <label className="text-xs font-geist text-gray-500 uppercase block" style={{ marginBottom: '8px', fontWeight: 420 }}>Event Name</label>
-                            <input 
-                                type="text" placeholder="e.g. Culminating Activity, Meeting" value={eventName} 
-                                onChange={(e) => setEventName(e.target.value)} 
-                                className="font-geist w-full bg-gray-50 rounded-lg text-sm border-none outline-none" 
+                            <input
+                                type="text" placeholder="e.g. Culminating Activity, Meeting" value={eventName}
+                                onChange={(e) => setEventName(e.target.value)}
+                                className="font-geist w-full bg-gray-50 rounded-lg text-sm border-none outline-none"
                                 style={{ padding: '12px' }}
                             />
                         </div>
@@ -253,7 +279,7 @@ export const AddEventForm = () => {
                             <label className="text-xs font-geist text-gray-500 uppercase block" style={{ marginBottom: '12px', fontWeight: 420 }}>Theme Color</label>
                             <div className="flex" style={{ gap: '12px' }}>
                                 {EVENT_COLORS.map(c => (
-                                    <div 
+                                    <div
                                         key={c.value} onClick={() => setSelectedColor(c.value)}
                                         style={{ width: 28, height: 28, background: c.value, borderRadius: '50%', cursor: 'pointer', border: selectedColor === c.value ? '2px solid #3b82f6' : '2px solid transparent' }}
                                     />
@@ -265,7 +291,7 @@ export const AddEventForm = () => {
                         <div style={{ marginBottom: '24px' }}>
                             <label className="text-xs font-geist text-gray-500 uppercase block" style={{ marginBottom: '12px', fontWeight: 420 }}>Departments</label>
                             <div className="flex flex-wrap" style={{ gap: '8px' }}>
-                                <span 
+                                <span
                                     onClick={() => setSelectedDepartments(['All', ...availableDepartments])}
                                     className={`font-bold cursor-pointer transition-all ${selectedDepartments.includes('All') ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
                                     style={{ padding: '6px 12px', borderRadius: '20px', fontSize: '11px' }}
@@ -273,7 +299,7 @@ export const AddEventForm = () => {
                                     ALL
                                 </span>
                                 {availableDepartments.map(d => (
-                                    <span 
+                                    <span
                                         key={d} onClick={() => setSelectedDepartments(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d])}
                                         className={`font-bold cursor-pointer transition-all ${selectedDepartments.includes(d) ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
                                         style={{ padding: '6px 12px', borderRadius: '20px', fontSize: '11px' }}
@@ -290,28 +316,24 @@ export const AddEventForm = () => {
                                 <label className="text-xs font-bold text-gray-500 uppercase">Specific Sections (Optional)</label>
                                 <div className="flex items-center" style={{ gap: '8px' }}>
                                     <Search size={14} className="text-gray-400" />
-                                    <input 
-                                        value={searchQuery} onChange={(e) => {setSearchQuery(e.target.value); setCurrentPage(1);}}
+                                    <input
+                                        value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                                         placeholder="Search..." className="bg-transparent text-xs outline-none w-20 border-b border-gray-200"
                                         style={{ paddingBottom: '4px' }}
                                     />
                                 </div>
                             </div>
 
-                            {/* Grid: 2 Columns, 5 Rows Fixed */}
                             <div className="grid grid-cols-2" style={{ gap: '8px', marginBottom: '16px', minHeight: '230px' }}>
                                 {programsToDisplay.map(p => {
                                     if (p.isEmpty) {
                                         return (
-                                            <div 
-                                                key={p.id} 
-                                                style={{ padding: '8px', border: '1px dashed #f3f4f6', height: '34px', borderRadius: '6px' }}
-                                            />
+                                            <div key={p.id} style={{ padding: '8px', border: '1px dashed #f3f4f6', height: '34px', borderRadius: '6px' }} />
                                         );
                                     }
                                     const isSelected = selectedPrograms.find(x => x.id === p.id);
                                     return (
-                                        <div 
+                                        <div
                                             key={p.id} onClick={() => setSelectedPrograms(prev => isSelected ? prev.filter(x => x.id !== p.id) : [...prev, p])}
                                             className={`rounded-md border text-[10px] font-bold cursor-pointer flex justify-between items-center transition-all ${isSelected ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-100 text-gray-500 hover:border-gray-300'}`}
                                             style={{ padding: '8px', height: '34px' }}
@@ -323,12 +345,11 @@ export const AddEventForm = () => {
                                 })}
                             </div>
 
-                            {/* Pagination Controls */}
                             {totalPages > 1 && (
                                 <div className="flex justify-center" style={{ gap: '16px' }}>
-                                    <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="disabled:opacity-30" style={{ border: 'none', background: 'transparent', padding: '4px', cursor: 'pointer' }}><ChevronLeft size={16}/></button>
+                                    <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="disabled:opacity-30" style={{ border: 'none', background: 'transparent', padding: '4px', cursor: 'pointer' }}><ChevronLeft size={16} /></button>
                                     <span className="text-xs font-bold text-gray-400" style={{ display: 'flex', alignItems: 'center' }}>{currentPage} / {totalPages}</span>
-                                    <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)} className="disabled:opacity-30" style={{ border: 'none', background: 'transparent', padding: '4px', cursor: 'pointer' }}><ChevronRight size={16}/></button>
+                                    <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)} className="disabled:opacity-30" style={{ border: 'none', background: 'transparent', padding: '4px', cursor: 'pointer' }}><ChevronRight size={16} /></button>
                                 </div>
                             )}
                         </div>
@@ -336,7 +357,7 @@ export const AddEventForm = () => {
 
                     {/* Footer Submit */}
                     <div style={{ paddingTop: '24px', borderTop: '1px solid #e5e7eb', marginTop: 'auto' }}>
-                        <button 
+                        <button
                             disabled={isSubmitting || !eventName || !eventDate || selectedDepartments.length === 0}
                             onClick={handleCreateEvent}
                             className="w-full bg-[#4268BD] text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 hover:bg-[#3556a0] transition-all disabled:grayscale disabled:opacity-50"
