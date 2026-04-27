@@ -951,6 +951,7 @@ footer {
 
 .footer-brand h3 {
     font-size: clamp(20px, 5vw, 24px);
+    font-weight: bold;
     color: white;
     margin-bottom: clamp(12px, 3vw, 16px);
 }

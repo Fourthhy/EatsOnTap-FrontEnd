@@ -243,6 +243,7 @@ function AboutLVCC() {
 
         .footer-brand h3 {
             font-size: 24px;
+            font-weight: bold;
             color: white;
             margin-bottom: 16px;
         }
