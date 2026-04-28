@@ -1,9 +1,11 @@
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
+const BASE_URL = VITE_LOCALHOST;
+
 export const addEvent = async (eventData) => {
     try {
-        const response = await fetch(`${VITE_BASE_URL}/api/event/addEvent`, {
+        const response = await fetch(`${BASE_URL}/api/event/addEvent`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

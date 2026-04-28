@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { PanelLeftOpen, PanelRightOpen, RotateCcw } from "lucide-react"; 
 import { useOutletContext } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion"; 
-
 import { NotificationDropdown } from './NotificationDropdown';
 
 // --- MOCK DATA ---
