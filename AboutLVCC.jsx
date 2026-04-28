@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import Footer from './src/components/global/Footer';
 
 function AboutLVCC() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -225,60 +226,7 @@ function AboutLVCC() {
             margin-bottom: 20px;
         }
 
-        /* Footer */
-        footer {
-            padding: 60px 60px 40px;
-            background: #0f172a;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
 
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 60px;
-            margin-bottom: 40px;
-        }
-
-        .footer-brand h3 {
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            margin-bottom: 16px;
-        }
-
-        .footer-brand p {
-            color: rgba(255, 255, 255, 0.6);
-            line-height: 1.7;
-        }
-
-        .footer-links h4 {
-            color: white;
-            margin-bottom: 20px;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .footer-links a {
-            display: block;
-            color: rgba(255, 255, 255, 0.6);
-            text-decoration: none;
-            margin-bottom: 12px;
-            transition: color 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            color: #60a5fa;
-        }
-        
-        .footer-bottom {
-            text-align: center;
-            padding-top: 40px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 14px;
-        }
 
         @media (max-width: 968px) {
             .about-container {
@@ -296,9 +244,6 @@ function AboutLVCC() {
             }
             nav {
                 display: none;
-            }
-            .footer-content {
-                grid-template-columns: 1fr;
             }
         }
           `
@@ -355,40 +300,7 @@ function AboutLVCC() {
         </motion.div>
       </section>
 
-      <motion.footer
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-      >
-        <div className="footer-content">
-          <div className="footer-brand">
-            <h3>Eat's on Tap</h3>
-            <p>
-              An RFID-Driven Solution for the Digitalization of Student's Free Meal
-              Claiming at La Verdad Christian College, Inc. Apalit, Pampanga.
-            </p>
-          </div>
-          <div className="footer-links">
-            <h4>Product</h4>
-            <Link to="/#features">Features</Link>
-            <Link to="/#how-it-works">How It Works</Link>
-            <Link to="/#contact">Contact Us</Link>
-          </div>
-          <div className="footer-links">
-            <h4>About</h4>
-            <Link to="/about">LVCC</Link>
-            <Link to="/team">Team</Link>
-            <Link to="/#faq">FAQ</Link>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>
-            © 2025-26 La Verdad Christian College, Inc. All rights reserved. |
-            Developed by BSIS 4 - TEAM 4
-          </p>
-        </div>
-      </motion.footer>
+      <Footer />
     </>
   );
 }

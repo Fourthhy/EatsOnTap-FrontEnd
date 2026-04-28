@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion'; // 🟢 Added framer-motion
 import { Link } from 'react-router-dom';
+import Footer from './components/global/Footer';
 
 function LandingPage() {
   // State for header background change and Go-To-Top button visibility
   const [isScrolled, setIsScrolled] = useState(false);
   const [showTopBtn, setShowTopBtn] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const closeMenu = () => setIsMenuOpen(false);
 
   const toggleFaq = (index) => {
     if (openFaq === index) {
@@ -89,6 +94,7 @@ function LandingPage() {
   // Custom scroll function to account for the fixed header height
   const scrollToSection = (e, sectionId) => {
     e.preventDefault();
+    closeMenu();
     const target = document.getElementById(sectionId);
     if (target) {
       const headerOffset = 88; // Height of your fixed header
@@ -270,12 +276,64 @@ nav a:hover::after {
     display: none;
 }
 
+/* Mobile Menu Overlay */
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(10, 22, 40, 0.98);
+    backdrop-filter: blur(15px);
+    z-index: 999; /* Below header */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+}
+
+.mobile-menu a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    position: relative;
+}
+
+.mobile-menu a::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: #60a5fa;
+    transition: width 0.3s ease;
+}
+
+.mobile-menu a:hover {
+    color: white;
+}
+
+.mobile-menu a:hover::after {
+    width: 100%;
+}
+
+.mobile-menu .header-cta {
+    margin-top: 20px;
+    font-size: 20px;
+    padding: 12px 40px;
+}
+
 .menu-toggle {
     display: flex; /* Visible on mobile */
     flex-direction: column;
     gap: 6px;
     cursor: pointer;
     padding: 8px;
+    z-index: 1001; /* Above mobile menu */
 }
 
 .menu-toggle span {
@@ -283,6 +341,18 @@ nav a:hover::after {
     height: 2px;
     background: white;
     transition: all 0.3s ease;
+}
+
+.menu-toggle.open span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+
+.menu-toggle.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.open span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
 }
 
 /* Go to Top Button */
@@ -933,61 +1003,7 @@ textarea.contact-input {
     box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
 }
 
-/* Footer (Mobile First) */
-footer {
-    padding: clamp(40px, 10vw, 60px) clamp(20px, 5vw, 60px) clamp(20px, 5vw, 40px);
-    background: #0f172a;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.footer-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr; /* Stacked on mobile */
-    gap: clamp(30px, 8vw, 60px);
-    margin-bottom: clamp(30px, 8vw, 40px);
-}
-
-.footer-brand h3 {
-    font-size: clamp(20px, 5vw, 24px);
-    font-weight: bold;
-    color: white;
-    margin-bottom: clamp(12px, 3vw, 16px);
-}
-
-.footer-brand p {
-    color: rgba(255, 255, 255, 0.6);
-    line-height: 1.7;
-    font-size: clamp(14px, 3.5vw, 16px);
-}
-
-.footer-links h4 {
-    color: white;
-    margin-bottom: clamp(16px, 4vw, 20px);
-    font-size: clamp(15px, 4vw, 16px);
-    font-weight: 600;
-}
-
-.footer-links a {
-    display: block;
-    color: rgba(255, 255, 255, 0.6);
-    text-decoration: none;
-    margin-bottom: clamp(10px, 2.5vw, 12px);
-    transition: color 0.3s ease;
-    font-size: clamp(14px, 3.5vw, 16px);
-}
-
-.footer-links a:hover { color: #60a5fa; }
-
-.footer-bottom {
-    text-align: center;
-    padding-top: clamp(30px, 8vw, 40px);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.5);
-    font-size: clamp(12px, 3vw, 14px);
-}
-
+/* Footer styles moved to index.css */
 
 /* ========================================================================
    RESPONSIVE BREAKPOINTS (Matching Login.jsx)
@@ -1015,9 +1031,6 @@ footer {
     .contact-submit {
         width: auto;
         align-self: flex-end;
-    }
-    .footer-content {
-        grid-template-columns: 2fr 1fr 1fr;
     }
     .hero::before {
         width: 50%;
@@ -1142,13 +1155,33 @@ footer {
             <a href="#contact" onClick={(e) => scrollToSection(e, 'contact')}>Contact</a>
             <a href="/login" className="header-cta" style={{ textDecoration: 'none' }}>Log In</a>
           </nav>
-          <div className="menu-toggle">
+          <div className={`menu-toggle ${isMenuOpen ? 'open' : ''}`} onClick={toggleMenu}>
             <span />
             <span />
             <span />
           </div>
         </div>
       </motion.header>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            className="mobile-menu"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            <a href="#features" onClick={(e) => scrollToSection(e, 'features')}>Features</a>
+            <a href="#how-it-works" onClick={(e) => scrollToSection(e, 'how-it-works')}>How It Works</a>
+            <a href="#stats" onClick={(e) => scrollToSection(e, 'stats')}>Impact</a>
+            <a href="#faq" onClick={(e) => scrollToSection(e, 'faq')}>FAQ</a>
+            <a href="#contact" onClick={(e) => scrollToSection(e, 'contact')}>Contact</a>
+            <Link to="/login" className="header-cta" onClick={closeMenu} style={{ textDecoration: 'none' }}>Log In</Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Go to Top Button */}
       <AnimatePresence>
@@ -1509,47 +1542,7 @@ footer {
         </motion.div>
       </section>
 
-      {/* Footer */}
-      <motion.footer
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8 }}
-      >
-        <motion.div
-          className="footer-content"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="footer-brand">
-            <h3>Eat's on Tap</h3>
-            <p>
-              An RFID-Driven Solution for the Digitalization of Student's Free Meal
-              Claiming at La Verdad Christian College, Inc. Apalit, Pampanga.
-            </p>
-          </div>
-          <div className="footer-links">
-            <h4>Product</h4>
-            <a href="#features" onClick={(e) => scrollToSection(e, 'features')}>Features</a>
-            <a href="#how-it-works" onClick={(e) => scrollToSection(e, 'how-it-works')}>How It Works</a>
-            <a href="#contact" onClick={(e) => scrollToSection(e, 'contact')}>Contact Us</a>
-          </div>
-          <div className="footer-links">
-            <h4>About</h4>
-            <Link to="/about">LVCC</Link>
-            <Link to="/team">Team</Link>
-            <a href="#faq" onClick={(e) => scrollToSection(e, 'faq')}>FAQ</a>
-          </div>
-        </motion.div>
-        <div className="footer-bottom">
-          <p>
-            © 2025-26 La Verdad Christian College, Inc. All rights reserved. |
-            Developed by BSIS 4 - TEAM 4
-          </p>
-        </div>
-      </motion.footer>
+      <Footer />
     </>
   );
 }
