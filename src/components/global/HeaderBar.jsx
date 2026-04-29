@@ -10,20 +10,25 @@ const DEFAULT_NOTIFICATIONS = [
         date: "Today",
         data: [
             { notificationType: "Meal Request", description: "Ms. Santos submitted a meal request for 1-Luke", time: "10:23 AM" },
-            { notificationType: "Credit Change", description: "Virtual Credit value updated to ₱70.00", time: "09:00 AM" }
+            { notificationType: "Event Creation", description: "A new event 'Joji conert' has been scheduled", time: "09:00 AM" }
         ]
     },
     {
         date: "December 25, 2025",
         data: [
-            { notificationType: "Event Meal Request", description: "Request for 'Sports Fest' approved", time: "2:30 PM" },
-            { notificationType: "Export Report", description: "Weekly consumption report downloaded", time: "11:15 AM" }
+            { notificationType: "Export Report", description: "Monthly Report downloaded!", time: "11:15 AM" },
+            { notificationType: "Export Student Backup", description: "Student Backup downloded!", time: "11:15 AM" },
+            { notificationType: "Setting Change", description: "Setting for Meal Request has been adjusted to 6:00 AM – 7:00 AM", time: "11:15 AM" },
         ]
     },
     {
         date: "December 24, 2025",
         data: [
-            { notificationType: "Upcoming Event", description: "System Maintenance scheduled for midnight", time: "5:00 PM" }
+            { notificationType: "Upcoming Event", description: "Tomorrow is the scheduled 'Higher Education Graduation' event", time: "12:00 AM" },
+            { notificationType: "Event Credit Allottment", description: "Meal Credits has been allotted in the 'Higher Education Graduation' event", time: "12:00 AM" },
+            { notificationType: "Update Student Registry", description: "Maria Leonora Teresa has been added to student registry", time: "12:00 AM" },
+            { notificationType: "Update Student Registry", description: "720 Students has been added through csv input", time: "12:00 AM" },
+            
         ]
     }
 ];
@@ -31,7 +36,7 @@ const DEFAULT_NOTIFICATIONS = [
 function HeaderBar({ 
     headerTitle, 
     hasNotification = false,
-    notificationList = DEFAULT_NOTIFICATIONS 
+    notificationList
 }) {
     const context = useOutletContext() || {};
     const [isExpanded, setIsExpanded] = useState(context.isSidebarOpen || false);

@@ -7,12 +7,16 @@ const getNotificationConfig = (type) => {
     switch (type) {
         case 'Meal Request': return { icon: Utensils, color: '#3B82F6', bg: '#EFF6FF' };
         case 'Event Creation': return { icon: CalendarDays, color: '#F68A3A', bg: '#FFF7ED' };
-        case 'Export Report': return { icon: FileDown, color: '#6B7280', bg: '#F3F4F6' };
-        case 'Setting Change': return { icon: Settings, color: '#EAB308', bg: '#FEFCE8' };
-        case 'Upcoming Event': return { icon: Calendar, color: '#8B5CF6', bg: '#F5F3FF' };
-        case 'Update Student Registry': return { icon: Users, color: '#6B7280', bg: '#F3F4F6' };
-        case 'Event Credit Bestowment': return { icon: Wallet, color: '#F68A3A', bg: '#FFF7ED' };
+        case 'Export Report': return { icon: FileDown, color: '#2cc970', bg: '#f4ffef' };
+        case 'Export Student Backup': return { icon: FileDown, color: '#2cc970', bg: '#f4ffef' };
+        case 'Setting Change': return { icon: Settings, color: '#6B7280', bg: '#F3F4F6' };
+        case 'Upcoming Event': return { icon: Calendar, color: '#F68A3A', bg: '#FFF7ED' };
+        case 'Update Student Registry': return { icon: Users, color: '#8B5CF6', bg: '#F5F3FF' };
+        case 'Event Credit Allottment': return { icon: Wallet, color: '#F68A3A', bg: '#FFF7ED' };
         default: return { icon: Clock, color: '#6B7280', bg: '#F3F4F6' };
+
+        //color: '#EAB308', bg: '#FEFCE8' students
+        //color: '#8B5CF6', bg: '#F5F3FF'
     }
 };
 
