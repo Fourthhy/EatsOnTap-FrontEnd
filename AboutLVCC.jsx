@@ -205,7 +205,7 @@ function AboutLVCC() {
             left: 0;
         }
 
-        .about-content h1 {
+        .about-heading {
             font-size: clamp(28px, 7vw, 48px);
             background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
             -webkit-background-clip: text;
@@ -233,8 +233,8 @@ function AboutLVCC() {
             margin-bottom: clamp(12px, 3vw, 20px);
         }
 
-        /* Mobile badge — hidden on desktop */
-        .about-badge-mobile {
+        /* Mobile/Desktop heading toggles */
+        .about-heading-mobile {
             display: none;
         }
 
@@ -264,15 +264,25 @@ function AboutLVCC() {
             .menu-toggle { display: none !important; }
             nav { display: none !important; }
 
-            /* Stack badge above carousel, centred */
+            /* Stack elements beneath carousel, centred */
             .about-visual-container {
                 flex-direction: column;
                 align-items: center;
             }
 
-            /* Hide desktop badge, show mobile badge centred above carousel */
+            /* Hide desktop elements, show mobile elements centred beneath carousel */
             .about-badge-desktop { display: none; }
-            .about-badge-mobile { display: inline-block; margin-bottom: 16px; }
+            .about-badge-mobile { 
+                display: inline-block; 
+                margin-top: 24px;
+                margin-bottom: 12px; 
+            }
+            .about-heading-desktop { display: none; }
+            .about-heading-mobile { 
+                display: block; 
+                text-align: center;
+                margin-bottom: 24px;
+            }
         }
 
         /* ========== 1024px — laptops ========== */
@@ -288,6 +298,8 @@ function AboutLVCC() {
             }
             .about-badge-desktop { display: inline-block; }
             .about-badge-mobile { display: none !important; }
+            .about-heading-desktop { display: block; }
+            .about-heading-mobile { display: none !important; }
         }
           `
         }}
@@ -324,20 +336,21 @@ function AboutLVCC() {
           transition={{ duration: 0.6 }}
         >
           <div className="about-visual-container">
-            {/* Mobile badge — centred above carousel */}
-            <span className="about-badge about-badge-mobile">ABOUT LVCC</span>
             <Carousel />
+            {/* Mobile elements — centred beneath carousel */}
+            <span className="about-badge about-badge-mobile">ABOUT LVCC</span>
+            <h1 className="font-bold about-heading about-heading-mobile">Empowering Scholars</h1>
           </div>
 
           <div className="about-content">
             {/* Desktop badge — normal flow above heading */}
             <div className="about-badge about-badge-desktop">ABOUT LVCC</div>
-            <h1 className="font-bold">Empowering Scholars</h1>
+            <h1 className="font-bold about-heading about-heading-desktop">Empowering Scholars</h1>
             <p>
               La Verdad Christian College (LVCC) is a private, non-stock, non-sectarian educational institution established in Apalit, Pampanga. It stands out uniquely for its remarkable advocacy: providing absolute free quality education to poor and deserving scholars.
             </p>
             <p>
-              Recognized as the first private school in the Philippines to grant a completely free college education—which includes devoid tuition, miscellaneous fees, uniform, and meals—LVCC envisions producing not only academically excellent professionals but individuals with strong moral fiber.
+              Recognized as the first private school in the Philippines to grant a completely free college education—which includes free tuition, miscellaneous fees, uniform, and meals—LVCC envisions producing not only academically excellent professionals but individuals with strong moral fiber.
             </p>
             <p>
               Driven by the philosophy "Wisdom Based on the Truth is Priceless". La Verdad continues to innovate, digitalize its systems (such as the Eat's on Tap RFID-driven meal claiming solution), and build a holistic environment where students thrive gracefully.
