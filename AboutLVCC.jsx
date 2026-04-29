@@ -265,6 +265,7 @@ function AboutLVCC() {
             nav { display: none !important; }
 
             /* Stack elements beneath carousel, centred */
+            .about-container { gap: 12px; } /* 👈 Reduced gap between visual container and text content */
             .about-visual-container {
                 flex-direction: column;
                 align-items: center;
@@ -274,14 +275,14 @@ function AboutLVCC() {
             .about-badge-desktop { display: none; }
             .about-badge-mobile { 
                 display: inline-block; 
-                margin-top: 24px;
+                margin-top: 36px; /* 👈 Increased from 24px for better breathing room */
                 margin-bottom: 12px; 
             }
             .about-heading-desktop { display: none; }
             .about-heading-mobile { 
                 display: block; 
                 text-align: center;
-                margin-bottom: 24px;
+                margin-bottom: 12px; /* 👈 Reduced from 24px */
             }
         }
 
