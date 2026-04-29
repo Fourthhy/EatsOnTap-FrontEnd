@@ -692,7 +692,7 @@ nav a:hover::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: clamp(20px, 5vw, 32px);
+    margin: 0 auto clamp(20px, 5vw, 32px);
     font-size: clamp(24px, 6vw, 36px);
 }
 
@@ -701,12 +701,14 @@ nav a:hover::after {
     color: white;
     margin-bottom: clamp(12px, 3vw, 18px);
     font-weight: 700;
+    text-align: center;
 }
 
 .feature-card p {
     color: rgba(255, 255, 255, 0.6);
     line-height: 1.7;
     font-size: clamp(14px, 3.5vw, 16px);
+    text-align: center;
 }
 
 .carousel-controls {
@@ -1074,6 +1076,13 @@ textarea.contact-input {
     .stats-grid {
         grid-template-columns: repeat(4, 1fr);
     }
+    .feature-icon {
+        margin: 0 0 clamp(20px, 5vw, 32px) 0;
+    }
+    .feature-card h3,
+    .feature-card p {
+        text-align: left;
+    }
 }
 
 /* ========== 1440px — large laptops / desktops ========== */
@@ -1185,7 +1194,7 @@ textarea.contact-input {
 
       {/* Go to Top Button */}
       <AnimatePresence>
-        {showTopBtn && (
+        {showTopBtn && !isMenuOpen && (
           <motion.div
             className="go-to-top visible"
             id="goToTop"
