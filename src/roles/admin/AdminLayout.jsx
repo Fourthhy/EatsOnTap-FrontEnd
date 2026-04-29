@@ -12,23 +12,14 @@ import { DataProvider } from "../../context/DataContext";
 import { LoaderProvider } from "../../context/LoaderContext";
 import { GlobalLoader } from "../../components/global/GlobalLoader";
 
-// 🟢 Import API to check existing menu
 import { viewDishes } from "../../functions/admin/viewDishes";
 
 const AdminLayoutContent = () => {
-    // --- MODAL & MEAL STATE LOGIC ---
     const [isModalOpen, setIsModalOpen] = useState(false);
-
-    // 🟢 State to track if menu exists for today
     const [addedTodaysDish, setAddedTodaysDish] = useState(false);
-
-    // 🟢 State for the input fields
     const [meals, setMeals] = useState(["", ""]);
-
-    // 🟢 State to store the "Original/Saved" menu for comparison
     const [todaysMenu, setTodaysMenu] = useState([]);
 
-    // 🟢 1. FETCH & CHECK MENU ON MOUNT
     const checkTodaysMenu = async () => {
         try {
             const today = new Date();
