@@ -1135,6 +1135,17 @@ textarea.contact-input {
     }
 }
 
+/* ========== Centre contact badge on mobile ========== */
+@media (max-width: 1023px) {
+    .contact-text {
+        text-align: center;
+    }
+    .contact-text h2,
+    .contact-text p {
+        text-align: left;
+    }
+}
+
 `
         }}
       />

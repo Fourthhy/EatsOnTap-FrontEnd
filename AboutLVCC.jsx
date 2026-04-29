@@ -5,10 +5,6 @@ import Footer from './src/components/global/Footer';
 
 function AboutLVCC() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const closeMenu = () => setIsMenuOpen(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -152,69 +148,6 @@ function AboutLVCC() {
             color: white !important;
         }
 
-        /* Mobile Menu Overlay */
-        .about-mobile-menu {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background: rgba(15, 23, 42, 0.98);
-            backdrop-filter: blur(15px);
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 30px;
-        }
-
-        .about-mobile-menu a {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            font-size: 24px;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .about-mobile-menu a:hover {
-            color: white;
-        }
-
-        .about-mobile-menu .btn-home {
-            margin-top: 20px;
-            font-size: 20px;
-            padding: 12px 40px;
-        }
-
-        .menu-toggle {
-            display: flex; /* Visible on mobile */
-            flex-direction: column;
-            gap: 6px;
-            cursor: pointer;
-            padding: 8px;
-            z-index: 1001;
-        }
-
-        .menu-toggle span {
-            width: 24px;
-            height: 2px;
-            background: white;
-            transition: all 0.3s ease;
-        }
-
-        .menu-toggle.open span:nth-child(1) {
-            transform: translateY(8px) rotate(45deg);
-        }
-
-        .menu-toggle.open span:nth-child(2) {
-            opacity: 0;
-        }
-
-        .menu-toggle.open span:nth-child(3) {
-            transform: translateY(-8px) rotate(-45deg);
-        }
-
         /* About Section (Mobile First) */
         .about-section {
             padding: clamp(100px, 20vw, 160px) clamp(16px, 5vw, 60px) clamp(40px, 10vw, 80px);
@@ -240,6 +173,7 @@ function AboutLVCC() {
             display: flex;
             margin-top: 0;
             margin-bottom: 0;
+            position: relative;
         }
 
         .about-content {
@@ -287,6 +221,7 @@ function AboutLVCC() {
             margin-bottom: clamp(16px, 4vw, 24px);
         }
 
+        /* Badge — identical to .section-badge in LandingPage */
         .about-badge {
             display: inline-block;
             padding: clamp(6px, 1.5vw, 8px) clamp(16px, 4vw, 20px);
@@ -298,28 +233,14 @@ function AboutLVCC() {
             margin-bottom: clamp(12px, 3vw, 20px);
         }
 
-        /* Carousel indicator dots */
+        /* Mobile badge — hidden on desktop */
+        .about-badge-mobile {
+            display: none;
+        }
+
+        /* Carousel dots — hidden for both views */
         .carousel-dots {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-top: clamp(12px, 3vw, 16px);
-        }
-
-        .carousel-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 0;
-        }
-
-        .carousel-dot.active {
-            background: #3b82f6;
-            transform: scale(1.3);
+            display: none;
         }
 
         /* ========================================================================
@@ -337,22 +258,36 @@ function AboutLVCC() {
             }
         }
 
+        /* ========== Mobile only (< 1024px) ========== */
+        @media (max-width: 1023px) {
+            /* Hide the burger/back button completely on mobile */
+            .menu-toggle { display: none !important; }
+            nav { display: none !important; }
+
+            /* Stack badge above carousel, centred */
+            .about-visual-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            /* Hide desktop badge, show mobile badge centred above carousel */
+            .about-badge-desktop { display: none; }
+            .about-badge-mobile { display: inline-block; margin-bottom: 16px; }
+        }
+
         /* ========== 1024px — laptops ========== */
         @media (min-width: 1024px) {
-            nav {
-                display: flex;
-            }
-            .menu-toggle {
-                display: none;
-            }
-            .about-container {
-                flex-direction: row; /* Side by side on desktop */
-            }
+            nav { display: flex; }
+            .about-container { flex-direction: row; }
             .about-visual-container {
                 flex: 0 0 40%;
+                flex-direction: row;
+                align-items: stretch;
                 margin-top: 56px;
                 margin-bottom: 24px;
             }
+            .about-badge-desktop { display: inline-block; }
+            .about-badge-mobile { display: none !important; }
         }
           `
         }}
@@ -378,28 +313,8 @@ function AboutLVCC() {
           <nav>
             <Link to="/" className="btn-home">Back to Home</Link>
           </nav>
-          <div className={`menu-toggle ${isMenuOpen ? 'open' : ''}`} onClick={toggleMenu}>
-            <span />
-            <span />
-            <span />
-          </div>
         </div>
       </motion.header>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            className="about-mobile-menu"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Link to="/" className="btn-home" onClick={closeMenu}>Back to Home</Link>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <section className="about-section">
         <motion.div
@@ -409,11 +324,14 @@ function AboutLVCC() {
           transition={{ duration: 0.6 }}
         >
           <div className="about-visual-container">
+            {/* Mobile badge — centred above carousel */}
+            <span className="about-badge about-badge-mobile">ABOUT LVCC</span>
             <Carousel />
           </div>
 
           <div className="about-content">
-            <div className="about-badge">ABOUT LVCC</div>
+            {/* Desktop badge — normal flow above heading */}
+            <div className="about-badge about-badge-desktop">ABOUT LVCC</div>
             <h1 className="font-bold">Empowering Scholars</h1>
             <p>
               La Verdad Christian College (LVCC) is a private, non-stock, non-sectarian educational institution established in Apalit, Pampanga. It stands out uniquely for its remarkable advocacy: providing absolute free quality education to poor and deserving scholars.
@@ -433,14 +351,9 @@ function AboutLVCC() {
   );
 }
 
-// Simple internal Image Carousel for the about page
+// Simple internal Image Carousel — auto-plays, no dots, no manual controls
 function Carousel() {
-  const images = [
-    "LV1.png",
-    "LV2.png",
-    "LV3.png"
-  ];
-
+  const images = ["LV1.png", "LV2.png", "LV3.png"];
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -451,31 +364,26 @@ function Carousel() {
   }, [images.length]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-      <div className="about-visual">
-        <AnimatePresence mode="popLayout">
-          <motion.img
-            key={currentIndex}
-            src={images[currentIndex]}
-            alt="LVCC Campus Highlight"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
-          />
-        </AnimatePresence>
-      </div>
-      <div className="carousel-dots">
-        {images.map((_, index) => (
-          <button
-            key={index}
-            className={`carousel-dot ${currentIndex === index ? 'active' : ''}`}
-            onClick={() => setCurrentIndex(index)}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
+    <div className="about-visual" style={{ width: '100%' }}>
+      <AnimatePresence mode="popLayout">
+        <motion.img
+          key={currentIndex}
+          src={images[currentIndex]}
+          alt="LVCC Campus Highlight"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+          }}
+        />
+      </AnimatePresence>
     </div>
   );
 }
