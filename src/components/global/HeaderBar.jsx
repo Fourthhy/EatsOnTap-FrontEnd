@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NotificationDropdown } from './NotificationDropdown';
 
 // --- MOCK DATA ---
-const DEFAULT_NOTIFICATIONS = [
+const NOTIFICATION_TEMPLATE = [
     {
         date: "Today",
         data: [
@@ -36,7 +36,7 @@ const DEFAULT_NOTIFICATIONS = [
 function HeaderBar({ 
     headerTitle, 
     hasNotification = false,
-    notificationList
+    notificationList = NOTIFICATION_TEMPLATE
 }) {
     const context = useOutletContext() || {};
     const [isExpanded, setIsExpanded] = useState(context.isSidebarOpen || false);

@@ -176,7 +176,7 @@ export default function AdminDashboard() {
                 <HeaderBar
                     userAvatar={USER_AVATAR}
                     headerTitle={"Dashboard"}
-                    notificationList={notifcations}
+                    // notificationList={notifcations}
                 />
 
                 <div className="w-full">
