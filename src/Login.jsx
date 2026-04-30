@@ -80,6 +80,7 @@ export default function Login() {
                 email: trimmedEmail,
                 password: trimmedPassword
             });
+            console.log(data);
 
             // 🟢 THE FIX: Standardize data shape for the Header (No photo for manual login)
             const enrichedData = {
@@ -89,12 +90,12 @@ export default function Login() {
             };
 
             localStorage.setItem("userInformation", JSON.stringify(enrichedData));
-            console.log('INFORMATION SAVED TO STORAGE!', enrichedData);
-
+            
             let targetPath = '/';
 
             if (data.section) {
-                targetPath = `/classAdviser/${data.section}/${data.userID}/submitMealList`;
+                targetPath = `/classAdviser/${data.section}/${data.userID}/${data.year}/submitMealList`;
+
             } else {
                 switch (data.role) {
                     case 'ADMIN': targetPath = '/admin/dashboard'; break;
