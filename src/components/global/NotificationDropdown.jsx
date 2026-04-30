@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'; // 🟢 IMPORT useState
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Utensils, CalendarDays, Wallet, FileDown, Calendar, Clock, Settings, Users, UserRoundPlus } from "lucide-react"; 
 
@@ -32,35 +32,27 @@ export const NotificationDropdown = ({
     onRefresh      
 }) => {
 
-    // 🟢 NEW: Local state to allow instant UI updates without waiting for the server
-    const [localNotifications, setLocalNotifications] = useState(notifications);
-
-    // 🟢 NEW: Sync local state if parent fetches fresh data
-    useEffect(() => {
-        setLocalNotifications(notifications);
-    }, [notifications]);
+    // 🟢 NEW: Track ONLY the IDs of notifications we are optimistically marking as read
+    const [optimisticReadIds, setOptimisticReadIds] = useState([]);
 
     // 🟢 UPDATED: Optimistic UI Update + API Call
     useEffect(() => {
-        if (isOpen && currentUserID && localNotifications.length > 0) {
+        if (isOpen && currentUserID && notifications.length > 0) {
             const unreadIds = [];
             
-            // 1. Map through local state and flip isRead to true immediately
-            const optimisticallyUpdated = localNotifications.map(group => {
-                const updatedData = group?.data?.map(item => {
-                    if (item.isRead === false) {
+            // 1. Find items that are unread AND haven't been optimistically marked yet
+            notifications.forEach(group => {
+                group?.data?.forEach(item => {
+                    if (item.isRead === false && !optimisticReadIds.includes(item.notificationId)) {
                         unreadIds.push(item.notificationId);
-                        return { ...item, isRead: true }; // Instantly mark true
                     }
-                    return item;
                 });
-                return { ...group, data: updatedData };
             });
 
             // 2. If we found anything to mark as read...
             if (unreadIds.length > 0) {
                 // Instantly update the UI so the dots disappear
-                setLocalNotifications(optimisticallyUpdated);
+                setOptimisticReadIds(prev => [...prev, ...unreadIds]);
 
                 // Fire the API silently in the background
                 markNotificationsAsRead(unreadIds, currentUserID)
@@ -70,12 +62,10 @@ export const NotificationDropdown = ({
                     })
                     .catch(error => {
                         console.error("Failed to mark as read in background:", error);
-                        // Optional: if it fails, you could revert the UI by setting local back to props
-                        // setLocalNotifications(notifications); 
                     });
             }
         }
-    }, [isOpen, currentUserID]); // Removed localNotifications from dependencies to prevent re-running loop unnecessarily
+    }, [isOpen, currentUserID, notifications, optimisticReadIds]); // Safe to include notifications now!
 
     const dropdownStyle = {
         position: 'fixed', top: '70px', right: '20px', width: '420px', maxHeight: '80vh',
@@ -159,9 +149,9 @@ export const NotificationDropdown = ({
 
                         {/* 3. LIST */}
                         <div style={{ overflowY: 'auto', padding: '0 0 12px 0' }}>
-                            {/* 🟢 CRITICAL: Make sure to map over localNotifications, NOT props.notifications */}
-                            {localNotifications?.length > 0 ? (
-                                localNotifications.map((group, groupIndex) => (
+                            {/* 🟢 Render directly from the props.notifications array */}
+                            {notifications?.length > 0 ? (
+                                notifications.map((group, groupIndex) => (
                                     <div key={`group-${groupIndex}`}>
                                         <div style={{ padding: '12px 24px 8px', fontSize: '11px', fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                             {group?.date || 'Unknown Date'}
@@ -169,6 +159,10 @@ export const NotificationDropdown = ({
                                         {group?.data?.map((item, itemIndex) => {
                                             const config = getNotificationConfig(item?.notificationType);
                                             const Icon = config.icon;
+                                            
+                                            // 🟢 Determine if it should show the blue dot based on our local ID tracker
+                                            const isCurrentlyUnread = item?.isRead === false && !optimisticReadIds.includes(item?.notificationId);
+
                                             return (
                                                 <div key={item?.notificationId || itemIndex} className="hover:bg-gray-50 transition-colors" style={{ padding: '12px 24px', display: 'flex', gap: '16px', cursor: 'pointer', borderBottom: '1px solid #f9fafb' }}>
                                                     <div style={{ minWidth: '36px', height: '36px', borderRadius: '6px', backgroundColor: config.bg, color: config.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -181,8 +175,9 @@ export const NotificationDropdown = ({
                                                         </div>
                                                         <p style={{ margin: 0, fontSize: '13px', color: '#6B7280', lineHeight: '1.4' }}>{item?.description || 'No description provided.'}</p>
                                                     </div>
-                                                    {/* This will now vanish immediately because item.isRead becomes true locally */}
-                                                    {item?.isRead === false && (
+                                                    
+                                                    {/* 🟢 Render the dot conditionally */}
+                                                    {isCurrentlyUnread && (
                                                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#3B82F6', alignSelf: 'center' }} />
                                                     )}
                                                 </div>
@@ -198,7 +193,7 @@ export const NotificationDropdown = ({
                         </div>
 
                         {/* Footer */}
-                        {localNotifications?.length > 0 && (
+                        {notifications?.length > 0 && (
                             <div style={{ padding: '12px', borderTop: '1px solid #f3f4f6', textAlign: 'center' }}>
                                 <button style={{ background: 'transparent', border: 'none', fontSize: '12px', fontWeight: 500, color: '#4268BD', cursor: 'pointer' }}>
                                     Mark all as read
