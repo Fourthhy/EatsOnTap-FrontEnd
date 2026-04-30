@@ -93,38 +93,38 @@ function TeamPage() {
         .header-container {
             max-width: 1400px;
             margin: 0 auto;
+            padding: clamp(12px, 3vw, 20px) clamp(20px, 5vw, 60px);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 60px;
-            transition: all 0.3s ease;
         }
 
         header {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
+            right: 0;
             z-index: 1000;
-            background: transparent;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             transition: all 0.3s ease;
         }
 
         header.scrolled {
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.98);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         .logo-section {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: clamp(10px, 2vw, 16px);
         }
 
         .logo {
-            width: 48px;
-            height: 48px;
+            width: clamp(36px, 6vw, 48px);
+            height: clamp(36px, 6vw, 48px);
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -139,7 +139,7 @@ function TeamPage() {
         }
 
         .brand-text h3 {
-            font-size: 18px;
+            font-size: clamp(14px, 3vw, 18px);
             color: white;
             font-weight: 700;
             margin-bottom: 2px;
@@ -147,20 +147,21 @@ function TeamPage() {
         }
 
         .brand-text p {
-            font-size: 12px;
+            font-size: clamp(10px, 1.5vw, 12px);
             color: rgba(255, 255, 255, 0.6);
             font-weight: 500;
         }
 
         nav {
-            display: flex;
+            display: none; /* Hidden on mobile */
             gap: 32px;
+            align-items: center;
         }
 
         nav a {
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
-            font-size: 15px;
+            font-size: clamp(13px, 1.5vw, 15px);
             font-weight: 500;
             transition: color 0.3s ease;
         }
@@ -173,10 +174,10 @@ function TeamPage() {
             background: rgba(59, 130, 246, 0.1);
             color: #60a5fa !important;
             border: 1px solid rgba(59, 130, 246, 0.3);
-            padding: 10px 24px;
+            padding: clamp(10px, 2vw, 13px) clamp(20px, 3vw, 24px);
             border-radius: 20px;
             text-decoration: none;
-            font-size: 15px;
+            font-size: clamp(13px, 1.5vw, 15px);
             font-weight: 600;
             transition: all 0.3s ease;
             display: inline-block;
@@ -189,7 +190,7 @@ function TeamPage() {
 
         /* Team Section */
         .team-section {
-            padding: 160px 60px 80px;
+            padding: clamp(100px, 20vw, 160px) clamp(16px, 5vw, 60px) clamp(40px, 10vw, 80px);
             max-width: 1400px;
             margin: 0 auto;
             min-height: calc(100vh - 300px);
@@ -200,28 +201,28 @@ function TeamPage() {
 
         .team-header {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: clamp(40px, 8vw, 60px);
         }
 
         .team-badge {
             display: inline-block;
-            padding: 8px 20px;
+            padding: clamp(6px, 1.5vw, 8px) clamp(16px, 4vw, 20px);
             background: rgba(59, 130, 246, 0.1);
             color: #60a5fa;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: clamp(12px, 2.5vw, 14px);
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: clamp(12px, 3vw, 20px);
         }
 
         .team-header h1 {
-            font-size: 48px;
+            font-size: clamp(28px, 7vw, 48px);
             color: white;
-            margin-bottom: 20px;
+            margin-bottom: clamp(16px, 4vw, 20px);
         }
 
         .team-header p {
-            font-size: 18px;
+            font-size: clamp(15px, 3.5vw, 18px);
             color: rgba(255, 255, 255, 0.6);
             max-width: 600px;
             margin: 0 auto;
@@ -229,16 +230,16 @@ function TeamPage() {
 
         .team-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 40px;
+            grid-template-columns: 1fr; /* Single column on mobile */
+            gap: clamp(24px, 5vw, 40px);
             width: 100%;
         }
 
         .team-card {
             background: linear-gradient(135deg, rgba(30, 58, 138, 0.1) 0%, rgba(15, 23, 42, 0.3) 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 40px;
+            border-radius: clamp(16px, 4vw, 24px);
+            padding: clamp(24px, 5vw, 40px);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -256,7 +257,7 @@ function TeamPage() {
             border-radius: 16px;
             overflow: hidden;
             border: 2px solid rgba(255, 255, 255, 0.1);
-            margin-bottom: 24px;
+            margin-bottom: clamp(16px, 4vw, 24px);
         }
 
         .team-card-image img {
@@ -266,7 +267,7 @@ function TeamPage() {
         }
 
         .team-card h3 {
-            font-size: 22px;
+            font-size: clamp(18px, 4vw, 22px);
             color: white;
             margin-bottom: 8px;
             text-align: center;
@@ -276,7 +277,7 @@ function TeamPage() {
         .team-card p.role {
             color: #60a5fa;
             font-weight: 500;
-            font-size: 15px;
+            font-size: clamp(14px, 3vw, 15px);
             text-align: center;
         }
 
@@ -293,14 +294,14 @@ function TeamPage() {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: clamp(16px, 4vw, 20px);
         }
 
         .modal-card {
             background: #0f172a;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 40px;
+            border-radius: clamp(16px, 4vw, 24px);
+            padding: clamp(24px, 5vw, 40px);
             max-width: 500px;
             width: 100%;
             display: flex;
@@ -313,15 +314,15 @@ function TeamPage() {
 
         .modal-card .team-card-image {
             width: 100%;
-            max-width: 250px;
+            max-width: clamp(150px, 40vw, 250px);
             height: auto;
             aspect-ratio: 3/4;
             border-radius: 16px;
-            margin-bottom: 24px;
+            margin-bottom: clamp(16px, 4vw, 24px);
         }
 
         .modal-card h3 {
-            font-size: 32px;
+            font-size: clamp(24px, 6vw, 32px);
             color: white;
             margin-bottom: 8px;
         }
@@ -329,26 +330,26 @@ function TeamPage() {
         .modal-card p.role {
             color: #60a5fa;
             font-weight: 600;
-            font-size: 18px;
-            margin-bottom: 24px;
+            font-size: clamp(16px, 4vw, 18px);
+            margin-bottom: clamp(16px, 4vw, 24px);
         }
 
         .modal-card p.desc {
             color: rgba(255, 255, 255, 0.7);
             line-height: 1.6;
-            font-size: 16px;
+            font-size: clamp(14px, 3vw, 16px);
         }
 
         .social-links {
             display: flex;
-            gap: 16px;
-            margin-top: 24px;
+            gap: clamp(12px, 3vw, 16px);
+            margin-top: clamp(16px, 4vw, 24px);
             justify-content: center;
         }
 
         .social-link {
-            width: 40px;
-            height: 40px;
+            width: clamp(36px, 8vw, 40px);
+            height: clamp(36px, 8vw, 40px);
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.05);
             display: flex;
@@ -367,57 +368,40 @@ function TeamPage() {
 
         .team-signature {
             text-align: center;
-            padding-top: 60px;
+            padding-top: clamp(40px, 8vw, 60px);
             color: rgba(255, 255, 255, 0.3);
-            font-size: 18px;
+            font-size: clamp(14px, 3vw, 18px);
             font-weight: 600;
-            letter-spacing: 2px;
+            letter-spacing: clamp(1px, 0.5vw, 2px);
         }
 
-        @media (max-width: 1200px) {
+        /* ========================================================================
+           RESPONSIVE BREAKPOINTS
+           ======================================================================== */
+
+        /* ========== Very small screens (< 375px, e.g. Galaxy Fold) ========== */
+        @media (max-width: 374px) {
+            .logo {
+                width: 32px;
+                height: 32px;
+            }
+            .brand-text h3 {
+                font-size: 12px;
+            }
+        }
+
+        /* ========== Mobile only (< 1024px) ========== */
+        @media (max-width: 1023px) {
+            /* Hide nav elements on mobile */
+            .menu-toggle { display: none !important; }
+            nav { display: none !important; }
+        }
+
+        /* ========== 1024px — laptops ========== */
+        @media (min-width: 1024px) {
+            nav { display: flex; }
             .team-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 30px;
-            }
-        }
-
-        @media (max-width: 968px) {
-            .team-section {
-                padding: 120px 30px 60px;
-            }
-            .team-header h1 {
-                font-size: 36px;
-            }
-            .team-header p {
-                font-size: 16px;
-            }
-            nav {
-                display: none;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .team-grid {
-                grid-template-columns: 1fr;
-                gap: 24px;
-                max-width: 400px;
-                margin: 0 auto;
-            }
-            .team-section {
-                padding: 100px 20px 40px;
-            }
-            .team-card {
-                padding: 30px;
-            }
-            .team-card h3 {
-                font-size: 20px;
-            }
-            .team-header h1 {
-                font-size: 28px;
-            }
-            .team-signature {
-                font-size: 14px;
-                letter-spacing: 1px;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             }
         }
           `
