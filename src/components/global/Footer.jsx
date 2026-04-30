@@ -1,14 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 function Footer() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const scrollToSection = (e, sectionId) => {
     // If not on landing page, let the standard link behavior take over or redirect to landing page
     if (location.pathname !== '/') {
-       window.location.href = `/#${sectionId}`;
+       navigate(`/#${sectionId}`);
        return;
     }
     e.preventDefault();

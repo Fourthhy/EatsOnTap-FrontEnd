@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion'; // 🟢 Added framer-motion
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Footer from './components/global/Footer';
 
 function LandingPage() {
@@ -9,6 +9,7 @@ function LandingPage() {
   const [showTopBtn, setShowTopBtn] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
@@ -90,6 +91,26 @@ function LandingPage() {
       }
     };
   }, []);
+
+  // Handle hash scroll on mount and hash change
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace('#', '');
+      setTimeout(() => {
+        const target = document.getElementById(id);
+        if (target) {
+          const headerOffset = 88;
+          const elementPosition = target.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+          });
+        }
+      }, 100);
+    }
+  }, [location.hash]);
 
   // Custom scroll function to account for the fixed header height
   const scrollToSection = (e, sectionId) => {
