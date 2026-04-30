@@ -390,6 +390,13 @@ function TeamPage() {
             }
         }
 
+        /* ========== Tablets (640px and up) ========== */
+        @media (min-width: 640px) {
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2x2 grid on tablets to avoid orphaned cards */
+            }
+        }
+
         /* ========== Mobile only (< 1024px) ========== */
         @media (max-width: 1023px) {
             /* Hide nav elements on mobile */
@@ -400,8 +407,13 @@ function TeamPage() {
         /* ========== 1024px — laptops ========== */
         @media (min-width: 1024px) {
             nav { display: flex; }
+            /* team-grid stays 2x2 here because 4 cards won't comfortably fit until wider screens */
+        }
+
+        /* ========== Large Desktop (1280px and up) ========== */
+        @media (min-width: 1280px) {
             .team-grid {
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                grid-template-columns: repeat(4, 1fr); /* 4x1 grid on large screens */
             }
         }
           `
