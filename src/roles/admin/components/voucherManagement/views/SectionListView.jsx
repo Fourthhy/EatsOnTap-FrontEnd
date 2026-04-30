@@ -16,13 +16,13 @@ import { useData } from "../../../../../context/DataContext";
 const mapDepartmentToTabId = (deptString) => {
     if (!deptString) return 'unknown';
     const map = {
-        'Preschool': 'preschool',
-        'Basic Education': 'primaryEducation',
-        'Primary Education': 'primaryEducation',
-        'Intermediate': 'intermediate',
-        'Junior High School': 'juniorHighSchool',
-        'Senior High School': 'seniorHighSchool',
-        'Higher Education': 'higherEducation'
+        'PRESCHOOL': 'preschool',
+        'BASIC EDUCATION': 'primaryEducation',
+        'PRIMARY EDUCATION': 'primaryEducation',
+        'INTERMEDIATE': 'intermediate',
+        'JUNIOR HIGH SCHOOL': 'juniorHighSchool',
+        'SENIOR HIGH SCHOOL': 'seniorHighSchool',
+        'HIGHER EDUCATION': 'higherEducation'
     };
     return map[deptString] || 'unknown';
 };

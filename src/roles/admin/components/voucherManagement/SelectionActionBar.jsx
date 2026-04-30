@@ -142,9 +142,10 @@ export const SelectionActionBar = ({
                 onClick={(e) => { e.stopPropagation(); handleToggle('archive'); }}
                 style={styles.whiteButton}
             >
-                <Archive size={16} /> Archive <ChevronDown size={14} />
+                <Archive size={16} /> Archive 
+                {/* <ChevronDown size={14} /> */}
             </button>
-            {currentDropdown === 'archive' && (
+            {/* {currentDropdown === 'archive' && (
                 <div style={styles.dropdownMenu}>
                     {['Graduate', 'Transfer', 'Drop'].map(opt => (
                         <button
@@ -162,7 +163,7 @@ export const SelectionActionBar = ({
                         </button>
                     ))}
                 </div>
-            )}
+            )} */}
         </div>
     );
 
