@@ -38,6 +38,7 @@ function HeaderBar({
     hasNotification = false,
     notificationList,
     simulationSignal = 0,
+    onRefresh // 🟢 1. Add this prop
 }) {
     const context = useOutletContext() || {};
     const [isExpanded, setIsExpanded] = useState(context.isSidebarOpen || false);
@@ -48,20 +49,21 @@ function HeaderBar({
     const [triggerShake, setTriggerShake] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-    // 🟢 NEW: State to hold the dynamic user data
     const [userData, setUserData] = useState({
+        userID: null, // 🟢 2a. Add userID to state
         fullName: 'Loading...',
         role: 'USER',
         email: 'user@laverdad.edu.ph',
         photoURL: null
     });
 
-    // 🟢 NEW: Fetch the real user data from local storage when Header loads
     useEffect(() => {
         const storedInfo = localStorage.getItem('userInformation');
         if (storedInfo) {
             const parsedInfo = JSON.parse(storedInfo);
             setUserData({
+                // 🟢 2b. Grab the ID. (Check if your DB uses _id, id, or userID and adjust accordingly)
+                userID: parsedInfo._id || parsedInfo.userID || null,
                 fullName: parsedInfo.fullName || `${parsedInfo.first_name} ${parsedInfo.last_name}`,
                 role: parsedInfo.role ? parsedInfo.role.replace('-', ' ') : 'USER',
                 email: parsedInfo.email || '',
@@ -174,11 +176,12 @@ function HeaderBar({
                 isOpen={isProfileOpen}
                 onClose={() => setIsProfileOpen(false)}
                 notifications={notificationList}
-                // 🟢 THE FIX: Pass dynamic data to the Dropdown
                 userName={userData.fullName}
                 userRole={userData.role}
                 userEmail={userData.email}
                 userAvatar={avatarSrc}
+                currentUserID={userData.userID} // 🟢 3a. Pass the user ID
+                onRefresh={onRefresh}           // 🟢 3b. Pass the refresh function
             />
 
             {/* --- 3. FLOATING AVATAR (SCENARIO B - Scrolled) --- */}

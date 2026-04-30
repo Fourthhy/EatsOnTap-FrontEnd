@@ -202,6 +202,7 @@ export default function AdminDashboard() {
                     headerTitle={"Dashboard"}
                     notificationList={notifcations}
                     simulationSignal={headerSignal}
+                    onRefresh={fetchNotificationsData}
                 />
 
                 <div className="w-full">
