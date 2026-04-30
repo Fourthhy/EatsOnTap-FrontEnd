@@ -1,5 +1,5 @@
-const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
+const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const BASE_URL = VITE_BASE_URL;
 
@@ -9,28 +9,37 @@ const BASE_URL = VITE_BASE_URL;
  * @param {string} userID - The ID of the current user to check 'isRead' status
  */
 export async function getNotifications(role, userID) {
-    try {
-        // Construct the URL with query parameters
-        const url = new URL(`${BASE_URL}/api/fetch/fetchNotifications`);
-        
-        if (role) url.searchParams.append('role', role);
-        if (userID) url.searchParams.append('userID', userID);
+    // ⚠️ IMPORTANT: No query parameters needed for a POST request.
+    const targetUrl = `${BASE_URL}/api/fetch/fetchNotifications`;
 
-        const response = await fetch(url.toString(), {
-            method: 'GET',
+    try {
+        const response = await fetch(targetUrl, {
+            method: 'POST', // Changed to POST
             headers: {
                 'Content-Type': 'application/json',
-                // If you use JWT tokens, add the Authorization header here:
                 // 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
+            // Send the data inside the body as a JSON string
+            body: JSON.stringify({ role, userID }), 
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to fetch notifications');
+        // 🟢 DEBUGGING: Read text first to catch HTML errors (e.g., 404s)
+        const responseText = await response.text();
+
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (jsonError) {
+            console.error("❌ CRITICAL ERROR: Server returned HTML instead of JSON.");
+            console.error("Response Body:", responseText);
+            throw new Error(`Server returned invalid format (HTML). Check your API URL: ${targetUrl}`);
         }
 
-        return await response.json();
+        if (!response.ok) {
+            throw new Error(result.message || 'Failed to fetch notifications');
+        }
+
+        return result;
     } catch (error) {
         console.error("Error in getNotifications API helper:", error);
         throw error;

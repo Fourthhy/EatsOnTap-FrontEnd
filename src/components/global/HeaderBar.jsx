@@ -36,7 +36,7 @@ const NOTIFICATION_TEMPLATE = [
 function HeaderBar({ 
     headerTitle, 
     hasNotification = false,
-    notificationList = NOTIFICATION_TEMPLATE
+    notificationList
 }) {
     const context = useOutletContext() || {};
     const [isExpanded, setIsExpanded] = useState(context.isSidebarOpen || false);
