@@ -11,7 +11,7 @@ import { useData } from "../../context/DataContext";
 import { useClassAdviser } from "../../context/ClassAdviserContext";
 
 // 🟢 FUNCTIONS
-import { SubmitStudentMealList } from "../../functions/classAdviser/SubmitStudentMealList";
+import { submitStudentMealList } from "../../functions/classAdviser/SubmitStudentMealList";
 import { isStudentMealSubmitted } from "../../functions/classAdviser/isStudentMealSubmitted";
 import { isSettingActive } from '../../functions/isSettingActive';
 
@@ -261,7 +261,7 @@ export default function SubmitMealList() {
             // Get IDs where value is explicitly 'Absent'
             const forAbsent = Object.keys(exceptions).filter(id => exceptions[id] === 'Absent');
             
-            await SubmitStudentMealList(userID, section, forEligible, forAbsent);
+            await submitStudentMealList(userID, section, forEligible, forAbsent);
             setIsSubmitted(true);
             setShowModal(false);
         } catch (error) {
