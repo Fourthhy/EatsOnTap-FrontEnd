@@ -77,7 +77,7 @@ const TableActionsMenu = ({ onAdd, onUpdate, onAddSection }) => {
                                 <ArrowUpFromLine size={16} style={{ color: '#059669' }} />
                                 Update Records
                             </button>
-                            <button
+                            {/* <button
                                 onClick={() => { setIsOpen(false); onAddSection(); }}
                                 style={{
                                     width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px',
@@ -89,7 +89,7 @@ const TableActionsMenu = ({ onAdd, onUpdate, onAddSection }) => {
                             >
                                 <UsersRound size={16} style={{ color: '#965a05' }} />
                                 Add Section
-                            </button>
+                            </button> */}
                         </motion.div>
                     </>
                 )}
@@ -311,7 +311,7 @@ const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
             {/* 🟢 MODALS */}
             <AddStudentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
             <UpdateRecordsModal isOpen={isUpdateModalOpen} onClose={() => setIsUpdateModalOpen(false)} />
-            <AddSectionModal isOpen={isAddSectionOpen} onClose={() => setIsAddSectionOpen(false)}/>
+            {/* <AddSectionModal isOpen={isAddSectionOpen} onClose={() => setIsAddSectionOpen(false)}/> */}
 
             <GenericTable
                 title={drilldownContext ? `Students in ${drilldownContext.level} - ${drilldownContext.sectionName}` : "Student Master List"}
@@ -333,7 +333,7 @@ const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
                             <TableActionsMenu
                                 onAdd={() => setIsAddModalOpen(true)}
                                 onUpdate={() => setIsUpdateModalOpen(true)}
-                                onAddSection={() => setIsAddSectionOpen(true)}
+                                // onAddSection={() => setIsAddSectionOpen(true)}
                             />
                         )}
                     </div>
