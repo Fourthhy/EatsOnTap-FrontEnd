@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { PanelLeftOpen, PanelRightOpen, RotateCcw } from "lucide-react"; 
+import { PanelLeftOpen, PanelRightOpen, RotateCcw } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion"; 
+import { motion, AnimatePresence } from "framer-motion";
 import { NotificationDropdown } from './NotificationDropdown';
 
 // --- MOCK DATA ---
@@ -28,24 +28,25 @@ const NOTIFICATION_TEMPLATE = [
             { notificationType: "Event Credit Allottment", description: "Meal Credits has been allotted in the 'Higher Education Graduation' event", time: "12:00 AM" },
             { notificationType: "Update Student Registry", description: "Maria Leonora Teresa has been added to student registry", time: "12:00 AM" },
             { notificationType: "Update Student Registry", description: "720 Students has been added through csv input", time: "12:00 AM" },
-            
+
         ]
     }
 ];
 
-function HeaderBar({ 
-    headerTitle, 
+function HeaderBar({
+    headerTitle,
     hasNotification = false,
-    notificationList
+    notificationList,
+    simulationSignal = 0,
 }) {
     const context = useOutletContext() || {};
     const [isExpanded, setIsExpanded] = useState(context.isSidebarOpen || false);
     const handleToggleSidebar = context.handleToggleSidebar || (() => console.warn("Sidebar toggle not available"));
 
     const [isScrolled, setIsScrolled] = useState(false);
-    const [isSimulating, setIsSimulating] = useState(false); 
-    const [triggerShake, setTriggerShake] = useState(false); 
-    const [isProfileOpen, setIsProfileOpen] = useState(false); 
+    const [isSimulating, setIsSimulating] = useState(false);
+    const [triggerShake, setTriggerShake] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
 
     // 🟢 NEW: State to hold the dynamic user data
     const [userData, setUserData] = useState({
@@ -70,6 +71,18 @@ function HeaderBar({
     }, []);
 
     useEffect(() => {
+        if (simulationSignal > 0) {
+            setIsSimulating(true); // Turn on the orange dot
+
+            // Trigger the shake animation just like your toggle function did
+            setTriggerShake(true);
+            const timer = setTimeout(() => setTriggerShake(false), 500);
+
+            return () => clearTimeout(timer);
+        }
+    }, [simulationSignal]); // Runs every time the parent updates the signal
+
+    useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 10);
         };
@@ -85,8 +98,8 @@ function HeaderBar({
 
     const handleSimulationToggle = () => {
         setTriggerShake(true);
-        setTimeout(() => setTriggerShake(false), 500); 
-        setIsSimulating(prev => !prev); 
+        setTimeout(() => setTriggerShake(false), 500);
+        setIsSimulating(prev => !prev);
     };
 
     const handleProfileClick = () => {
@@ -101,7 +114,7 @@ function HeaderBar({
     const [greeting, setGreeting] = useState('');
 
     useEffect(() => {
-        if (animationPhase === 'swap') return; 
+        if (animationPhase === 'swap') return;
 
         const hour = new Date().getHours();
         if (hour < 12) setGreeting("Good Morning,");
@@ -111,7 +124,7 @@ function HeaderBar({
         const timer1 = setTimeout(() => setAnimationPhase('hold'), 100);
         const timer2 = setTimeout(() => {
             setAnimationPhase('swap');
-            sessionStorage.setItem('has_shown_greeting', 'true'); 
+            sessionStorage.setItem('has_shown_greeting', 'true');
         }, 3000);
 
         return () => { clearTimeout(timer1); clearTimeout(timer2); };
@@ -130,18 +143,18 @@ function HeaderBar({
         transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s',
         transform: animationPhase === 'swap' ? 'translateY(0)' : 'translateY(-20px)',
         opacity: animationPhase === 'swap' ? 1 : 0,
-        minWidth: '150px', 
+        minWidth: '150px',
         justifyContent: 'flex-end'
     };
 
     const isNotified = hasNotification || isSimulating;
-    
+
     // 🟢 THE FIX: Use the Google photo if it exists, otherwise fallback to your default image
-    const avatarSrc = userData.photoURL || "/default_image.png"; 
+    const avatarSrc = userData.photoURL || "/default_image.png";
 
     return (
         <div style={{ height: '60px', width: '100%' }}>
-            
+
             <style>
                 {`
                     @keyframes bounceProfile {
@@ -157,9 +170,9 @@ function HeaderBar({
                 `}
             </style>
 
-            <NotificationDropdown 
-                isOpen={isProfileOpen} 
-                onClose={() => setIsProfileOpen(false)} 
+            <NotificationDropdown
+                isOpen={isProfileOpen}
+                onClose={() => setIsProfileOpen(false)}
                 notifications={notificationList}
                 // 🟢 THE FIX: Pass dynamic data to the Dropdown
                 userName={userData.fullName}
@@ -169,7 +182,7 @@ function HeaderBar({
             />
 
             {/* --- 3. FLOATING AVATAR (SCENARIO B - Scrolled) --- */}
-            <div 
+            <div
                 style={{
                     position: 'fixed', top: '10px', right: '20px', zIndex: 8000,
                     pointerEvents: (isScrolled && !isProfileOpen) ? 'auto' : 'none',
@@ -180,30 +193,30 @@ function HeaderBar({
             >
                 <AnimatePresence>
                     {!isProfileOpen && (
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
                             onClick={handleProfileClick}
                             style={{ position: 'relative', cursor: 'pointer' }}
                         >
-                            <img 
-                                src={avatarSrc} alt="Profile" 
-                                style={{ 
-                                    width: '40px', height: '40px', 
+                            <img
+                                src={avatarSrc} alt="Profile"
+                                style={{
+                                    width: '40px', height: '40px',
                                     borderRadius: '12px',
                                     objectFit: 'cover',
                                     border: '2px solid white', boxShadow: '0 4px 12px rgba(255,255,255,0.1)',
-                                    animation: triggerShake 
-                                        ? 'shake 0.4s ease-in-out' 
+                                    animation: triggerShake
+                                        ? 'shake 0.4s ease-in-out'
                                         : (isNotified && isScrolled) ? 'bounceProfile 2s infinite' : 'none'
-                                }} 
+                                }}
                             />
                             {isNotified && (
                                 <div style={{
-                                    position: 'absolute', bottom: -2, right: -2, width: '12px', height: '12px', 
-                                    backgroundColor: isSimulating ? '#F68A3A' : '#EF4444', 
-                                    borderRadius: '50%', border: '2px solid white' 
+                                    position: 'absolute', bottom: -2, right: -2, width: '12px', height: '12px',
+                                    backgroundColor: isSimulating ? '#F68A3A' : '#EF4444',
+                                    borderRadius: '50%', border: '2px solid white'
                                 }} />
                             )}
                         </motion.div>
@@ -223,14 +236,14 @@ function HeaderBar({
                 }}
             >
                 <div className="flex-1 flex items-center gap-4 justify-between" style={{ height: '100%' }}>
-                    
+
                     <div className="w-auto h-auto flex gap-2">
-                        <div style={{ 
-                            width: '30px', height: '20px', 
-                            paddingLeft: isExpanded ? "290px" : "80px", 
-                            transition: "padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)" 
+                        <div style={{
+                            width: '30px', height: '20px',
+                            paddingLeft: isExpanded ? "290px" : "80px",
+                            transition: "padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                         }}></div>
-                        <p style={{ fontWeight: '500' }} className="font-geist text-[2vh]"> 
+                        <p style={{ fontWeight: '500' }} className="font-geist text-[2vh]">
                             {headerTitle}
                         </p>
                     </div>
@@ -249,14 +262,14 @@ function HeaderBar({
                                     <motion.div
                                         initial={{ opacity: 0, x: 10 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: 10 }} 
+                                        exit={{ opacity: 0, x: 10 }}
                                         transition={{ duration: 0.2 }}
                                         style={{ display: 'flex', flexDirection: 'row', gap: '12px', alignItems: 'center' }}
                                     >
-                                        <div 
-                                            onClick={handleProfileClick} 
-                                            className="w-auto h-auto flex items-center justify-center" 
-                                            style={{ 
+                                        <div
+                                            onClick={handleProfileClick}
+                                            className="w-auto h-auto flex items-center justify-center"
+                                            style={{
                                                 position: 'relative', cursor: 'pointer',
                                                 animation: (isNotified && !isScrolled && animationPhase === 'swap') ? 'bounceProfile 2s infinite' : 'none'
                                             }}
@@ -268,9 +281,9 @@ function HeaderBar({
                                             />
                                             {isNotified && (
                                                 <div style={{
-                                                    position: 'absolute', bottom: -2, right: -2, width: '12px', height: '12px', 
-                                                    backgroundColor: isSimulating ? '#F68A3A' : '#EF4444', 
-                                                    borderRadius: '50%', border: '2px solid white' 
+                                                    position: 'absolute', bottom: -2, right: -2, width: '12px', height: '12px',
+                                                    backgroundColor: isSimulating ? '#F68A3A' : '#EF4444',
+                                                    borderRadius: '50%', border: '2px solid white'
                                                 }} />
                                             )}
                                         </div>

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { io } from "socket.io-client";
 import { motion } from "framer-motion";
 
 // --- CONTEXT IMPORTS ---
@@ -31,6 +32,7 @@ const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
 export default function AdminDashboard() {
     const [selectedTab, setSelectedTab] = useState(1);
     const [notifcations, setNotifications] = useState([])
+    const [headerSignal, setHeaderSignal] = useState(0);
     const { selectedDate } = useDate();
     const { isLoading } = useLoader();
     const { dashboardData = {}, eventMealRequest = [], userInformation = {} } = useData();
@@ -59,17 +61,39 @@ export default function AdminDashboard() {
 
         try {
             const data = await getNotifications(userRole, userID);
-            setNotifications(data);
+            setNotifications(data); // React updates the UI seamlessly!
         } catch (error) {
             console.error("Failed to load notifications:", error);
             // Optional: setNotifications([]) on error to prevent undefined states
         }
     }, [userRole, userID]); // Re-creates only if user info changes
 
-    // 2. Trigger on mount
+    // 1. Effect for Initial Load
     useEffect(() => {
         fetchNotificationsData();
     }, [fetchNotificationsData]);
+
+    // 2. Effect for Real-Time Socket Connection
+    useEffect(() => {
+        // Initialize socket once when the component mounts
+        const socket = io(import.meta.env.VITE_BASE_URL);
+
+        socket.on('connect', () => {
+            console.log('Socket connected for notifications');
+        });
+
+        // When a meal request happens, trigger a fresh pull of the grouped data
+        socket.on('meal-request-submit', () => {
+            fetchNotificationsData();
+            setHeaderSignal(Date.now());
+        });
+
+        // Cleanup: Disconnect and remove listeners when component unmounts
+        return () => {
+            socket.off('meal-request-submit'); // Good practice to remove specific listeners
+            socket.disconnect();
+        };
+    }, [fetchNotificationsData]); // Socket effect depends on the stable callback
 
     const getChartData = (chartKey) => {
         if (!dashboardData || isLoading) return [];
@@ -177,6 +201,7 @@ export default function AdminDashboard() {
                     userAvatar={USER_AVATAR}
                     headerTitle={"Dashboard"}
                     notificationList={notifcations}
+                    simulationSignal={headerSignal}
                 />
 
                 <div className="w-full">
