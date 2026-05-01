@@ -1,6 +1,6 @@
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
-const BASE_URL = VITE_LOCALHOST; 
+const BASE_URL = VITE_BASE_URL; 
 
 /**
  * Marks an array of notifications as read for a specific user.
