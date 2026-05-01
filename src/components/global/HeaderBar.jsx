@@ -38,7 +38,7 @@ function HeaderBar({
     hasNotification = false,
     notificationList,
     simulationSignal = 0,
-    onRefresh // 🟢 1. Add this prop
+    onRefresh
 }) {
     const context = useOutletContext() || {};
     const [isExpanded, setIsExpanded] = useState(context.isSidebarOpen || false);
@@ -180,8 +180,8 @@ function HeaderBar({
                 userRole={userData.role}
                 userEmail={userData.email}
                 userAvatar={avatarSrc}
-                currentUserID={userData.userID} // 🟢 3a. Pass the user ID
-                onRefresh={onRefresh}           // 🟢 3b. Pass the refresh function
+                currentUserID={userData.userID} 
+                onRefresh={onRefresh}           
             />
 
             {/* --- 3. FLOATING AVATAR (SCENARIO B - Scrolled) --- */}
