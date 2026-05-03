@@ -46,12 +46,18 @@ const MealOrdersTable = () => {
             if (!status) return 'Pending';
             return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
         };
+
+        // 🟢 FIX 1: Safely handle "System Generated" or invalid date strings
         const formatTime = (dateInput) => {
             if (!dateInput) return '--:--';
-            return new Date(dateInput).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            if (dateInput === "System Generated") return "Auto-Generated";
+
+            const parsedDate = new Date(dateInput);
+            if (isNaN(parsedDate.getTime())) return "N/A"; // Catch-all for any other invalid dates
+
+            return parsedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         };
 
-        // Basic Ed is already an array, so this maps perfectly
         const basic = (basicEducationMealRequest || []).map(item => ({
             id: item.eligibilityID,
             sectionProgram: item.section,
@@ -66,7 +72,7 @@ const MealOrdersTable = () => {
             rawDate: item.timeStamp
         }));
 
-        // 🟢 FIX: Safely extract the array from the `data` property if it exists
+        // 🟢 FIX 2: Safely extract the array from the higher education object
         const higherEdArray = Array.isArray(higherEducationMealRequest)
             ? higherEducationMealRequest
             : higherEducationMealRequest?.data || [];
@@ -78,11 +84,12 @@ const MealOrdersTable = () => {
             recipientCount: item.forEligible?.length || 0,
             waivedCount: item.forWaived?.length || 0,
             absentCount: item.forAbsent?.length || 0,
-            timeSent: formatTime(item.timeStamp),
+            timeSent: 'System Generated',
             type: 'Regular',
             category: 'Higher Education',
             status: normalizeStatus(item.status),
-            rawDate: item.timeStamp
+            // 🟢 FIX 3: Give the sorter a valid date to do math against if it says "System Generated"
+            rawDate: item.timeStamp === "System Generated" ? new Date() : item.timeStamp
         }));
 
         const events = (eventMealRequest || []).map(item => ({
