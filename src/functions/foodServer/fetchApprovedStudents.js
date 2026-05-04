@@ -1,8 +1,9 @@
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 
+const BASE_URL = VITE_BASE_URL
 export async function fetchApprovedStudents() {
-    const targetUrl = `${VITE_BASE_URL}/api/fetch/getApprovedStudentsToday`;
+    const targetUrl = `${BASE_URL}/api/fetch/getApprovedStudentsToday`;
     try {
         const response = await fetch(targetUrl, {
             method: 'GET',

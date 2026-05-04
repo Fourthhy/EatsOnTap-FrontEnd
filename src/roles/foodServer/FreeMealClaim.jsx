@@ -159,7 +159,7 @@ export default function FreeMealClaim() {
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentDateTime(new Date());
-        }, 1000);
+        }, 3500);
 
         // Only try to steal focus if the system is actually active
         if (inputRef.current && isSystemActive) {
