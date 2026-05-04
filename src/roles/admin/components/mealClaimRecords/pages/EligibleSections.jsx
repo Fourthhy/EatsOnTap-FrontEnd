@@ -8,7 +8,7 @@ import { useData } from '../../../../../context/DataContext';
 import { motion } from 'framer-motion';
 
 // 🟢 Import your helper
-import { extractSchoolHierarchy } from '../../../../../functions/admin/schoolHeirarchy'; 
+import { extractSchoolHierarchy } from '../../../../../functions/admin/schoolHeirarchy';
 
 // 🟢 Switcher Button (Unchanged)
 const SwitcherButton = ({ mode, currentMode, icon, label, onClick }) => {
@@ -58,15 +58,15 @@ export const EligibleSections = ({ switchView, currentView }) => {
     } = useData();
 
     const [searchTerm, setSearchTerm] = useState('');
-    
+
     // 🟢 YOUR TABS (These act as the "Master Labels")
     const tabs = [
-        'All', 
-        'Preschool', 
-        'Primary Education', 
-        'Intermediate', 
-        'Junior High School', 
-        'Senior High School', 
+        'All',
+        'Preschool',
+        'Primary Education',
+        'Intermediate',
+        'Junior High School',
+        'Senior High School',
         'Higher Education'
     ].map(t => ({ id: t, label: t }));
 
@@ -121,20 +121,14 @@ export const EligibleSections = ({ switchView, currentView }) => {
 
         // 1. Basic Education Mapping
         const basic = basicEducationMealRequest.filter(isApproved).map(item => {
-            // Find the section in our hierarchy
             const match = flatSections.find(s => s.section === item.section);
-            
-            // Get the raw ID (e.g., "juniorHighSchool")
             const rawCategory = match ? match.category : 'Basic Education';
-            
-            // 🟢 FIX: Convert Raw ID to Nice Label using the Map
-            // If not found in map, fallback to the raw value
             const niceCategory = CATEGORY_MAP[rawCategory] || rawCategory;
 
             return {
                 id: item.eligibilityID || item._id,
                 sectionProgram: item.section,
-                category: niceCategory, // Now equals "Junior High School"
+                category: niceCategory,
                 recipientCount: item.forEligible?.length || 0,
                 timeApproved: formatTime(item.timeStamp),
                 status: normalizeStatus(item.status),
@@ -143,8 +137,13 @@ export const EligibleSections = ({ switchView, currentView }) => {
             };
         });
 
-        // 2. Higher Education Mapping
-        const higher = higherEducationMealRequest.filter(isApproved).map(item => ({
+        // 🟢 FIX: Safely extract the array whether it's wrapped in an object or not
+        const higherEdArray = Array.isArray(higherEducationMealRequest)
+            ? higherEducationMealRequest
+            : (higherEducationMealRequest?.data || []);
+
+        // 2. Higher Education Mapping (Using the safely extracted array)
+        const higher = higherEdArray.filter(isApproved).map(item => ({
             id: item.eligibilityID || item._id,
             sectionProgram: `${item.program} ${item.year}`,
             category: 'Higher Education',
@@ -183,7 +182,7 @@ export const EligibleSections = ({ switchView, currentView }) => {
     // 🟢 TAB FILTERING
     const filteredData = useMemo(() => {
         if (activeTab === 'All') return approvedData;
-        
+
         // Exact match now works because we normalized the data above
         return approvedData.filter(item => item.category === activeTab);
     }, [approvedData, activeTab]);

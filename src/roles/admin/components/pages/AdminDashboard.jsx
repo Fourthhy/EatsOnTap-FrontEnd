@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from "react"; 
+import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { io } from "socket.io-client";
 import { motion } from "framer-motion";
 
 // --- CONTEXT IMPORTS ---
@@ -11,7 +12,7 @@ import { BandedChartTADMC } from "../charts/BandedChartTADMC";
 import { BandedChartCUR } from "../charts/BandedChartCUR";
 import { BandedChartOCF } from "../charts/BandedChartOCF";
 
-import { LineChartBox } from "../charts/LineChartBox"; 
+import { LineChartBox } from "../charts/LineChartBox";
 import { DailyExpensesChart } from "../charts/DailyExpensesChart";
 import { CustomStatsCard } from "../dashboard/CustomStatsCard";
 import { StatsCardGroup } from "../dashboard/StatsCardGroup";
@@ -24,21 +25,25 @@ import { AnalyticTabs } from "../dashboard/AnalyticTabs";
 import { MealOverridePanel } from "../dashboard/MealOverridePanel";
 import { HeaderBar } from "../../../../components/global/HeaderBar";
 import { Skeleton } from "../../../../components/global/Skeleton";
+import { getNotifications } from "../../../../functions/admin/getNotifications";
 
 const USER_AVATAR = "https://randomuser.me/api/portraits/lego/3.jpg";
 
 export default function AdminDashboard() {
     const [selectedTab, setSelectedTab] = useState(1);
+    const [notifcations, setNotifications] = useState([])
+    const [headerSignal, setHeaderSignal] = useState(0);
     const { selectedDate } = useDate();
     const { isLoading } = useLoader();
     const { dashboardData = {}, eventMealRequest = [], userInformation = {} } = useData();
 
     // Safe User Info
-    const userEmail = userInformation?.email || "No Email";
-    const userName = (userInformation?.last_name && userInformation?.first_name)
-        ? `${userInformation.last_name}, ${userInformation.first_name}`
-        : "Admin User";
+    // const userEmail = userInformation?.email || "No Email";
+    // const userName = (userInformation?.last_name && userInformation?.first_name)
+    //     ? `${userInformation.last_name}, ${userInformation.first_name}`
+    //     : "Admin User";
     const userRole = userInformation?.role || "Guest";
+    const userID = userInformation?.userID || "userID";
 
     // 🟢 timeframeKey dynamically updates based on the selected tab
     const timeframeKey = useMemo(() => {
@@ -50,9 +55,46 @@ export default function AdminDashboard() {
         }
     }, [selectedTab]);
 
-    // =========================================================================
-    // 🟢 THE UPDATED CHART DATA FETCHER & TRANSLATOR
-    // =========================================================================
+    const fetchNotificationsData = useCallback(async () => {
+        // Only fetch if we have the required information
+        if (!userRole || !userID) return;
+
+        try {
+            const data = await getNotifications(userRole, userID);
+            setNotifications(data); // React updates the UI seamlessly!
+        } catch (error) {
+            console.error("Failed to load notifications:", error);
+            // Optional: setNotifications([]) on error to prevent undefined states
+        }
+    }, [userRole, userID]); // Re-creates only if user info changes
+
+    // 1. Effect for Initial Load
+    useEffect(() => {
+        fetchNotificationsData();
+    }, [fetchNotificationsData]);
+
+    // 2. Effect for Real-Time Socket Connection
+    useEffect(() => {
+        // Initialize socket once when the component mounts
+        const socket = io(import.meta.env.VITE_BASE_URL);
+
+        socket.on('connect', () => {
+            console.log('Socket connected for notifications');
+        });
+
+        // When a meal request happens, trigger a fresh pull of the grouped data
+        socket.on('meal-request-submit', () => {
+            fetchNotificationsData();
+            setHeaderSignal(Date.now());
+        });
+
+        // Cleanup: Disconnect and remove listeners when component unmounts
+        return () => {
+            socket.off('meal-request-submit'); // Good practice to remove specific listeners
+            socket.disconnect();
+        };
+    }, [fetchNotificationsData]); // Socket effect depends on the stable callback
+
     const getChartData = (chartKey) => {
         if (!dashboardData || isLoading) return [];
 
@@ -67,9 +109,9 @@ export default function AdminDashboard() {
         if (chartKey === 'trendsData' && rawData.length > 0) {
             return rawData.map(item => ({
                 dataSpan: item.dataSpan,
-                Meals: item["Customized Order"] || 0,     
-                Snacks: item["Pre-packed Food"] || 0,     
-                Unclaimed: item["Unused vouchers"] ? Math.round(item["Unused vouchers"] / 60) : 0   
+                Meals: item["Customized Order"] || 0,
+                Snacks: item["Pre-packed Food"] || 0,
+                Unclaimed: item["Unused vouchers"] ? Math.round(item["Unused vouchers"] / 60) : 0
             }));
         }
 
@@ -90,7 +132,7 @@ export default function AdminDashboard() {
             absent: stats.absentStudentCount || 0,
             waived: stats.waivedStudentCount || 0,
             eligible: eligible,
-            claimed: claimed, 
+            claimed: claimed,
             acceptedRate,
             rejectedRate
         };
@@ -129,7 +171,7 @@ export default function AdminDashboard() {
 
             const startMonthIdx = months.indexOf(event.startMonth);
             const endMonthIdx = months.indexOf(event.endMonth);
-            
+
             const startDate = new Date(currentYear, startMonthIdx, event.startDay);
             const endDate = new Date(currentYear, endMonthIdx, event.endDay, 23, 59, 59, 999);
 
@@ -158,9 +200,9 @@ export default function AdminDashboard() {
                 <HeaderBar
                     userAvatar={USER_AVATAR}
                     headerTitle={"Dashboard"}
-                    userEmail={userEmail}
-                    userName={userName}
-                    userRole={userRole}
+                    notificationList={notifcations}
+                    simulationSignal={headerSignal}
+                    onRefresh={fetchNotificationsData}
                 />
 
                 <div className="w-full">

@@ -1,12 +1,14 @@
 const VITE_LOCALHOST = import.meta.env.VITE_LOCALHOST;
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 
+const BASE_URL = VITE_BASE_URL;
+
 // 🟢 Function to submit the Section/Program
 const addSectionProgram = async (sectionData) => {
 
     // ⚠️ IMPORTANT: Ensure this matches your actual Route definition in backend
     // Example: router.post('/add', addSectionProgram) inside /api/sectionProgram routes
-    const targetUrl = `${VITE_BASE_URL}/api/sectionprogram/addSectionProgram`;
+    const targetUrl = `${BASE_URL}/api/sectionprogram/addSectionProgram`;
 
     try {
         const response = await fetch(targetUrl, {

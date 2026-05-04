@@ -1,17 +1,19 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, ArrowLeft, User, Pencil, MoreVertical } from 'lucide-react'; 
-import { AnimatePresence, motion } from 'framer-motion'; 
+import { Plus, ArrowLeft, User, Pencil, MoreVertical, ArrowUpFromLine, UsersRound } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import { GenericTable } from '../../../../../components/global/table/GenericTable';
 import { SelectionActionBar } from '../SelectionActionBar';
 import { useData } from "../../../../../context/DataContext";
-import { AddStudentModal } from '../AddStudentModal';
 import { CustomEditDropdown } from '../components/CustomEditDropdown';
 import { LinkStatusBadge } from '../LinkStatusBadge';
+
+import { AddStudentModal } from '../AddStudentModal';
 import { UpdateRecordsModal } from '../components/UpdateRecordsModal';
+import { AddSectionModal } from '../components/AddSectionModal';
 
 // --- 🟢 NEW: 3-DOT ACTION MENU COMPONENT ---
-const TableActionsMenu = ({ onAdd, onUpdate }) => {
+const TableActionsMenu = ({ onAdd, onUpdate, onAddSection }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -20,7 +22,7 @@ const TableActionsMenu = ({ onAdd, onUpdate }) => {
                 onClick={() => setIsOpen(!isOpen)}
                 style={{
                     padding: '8px', backgroundColor: 'white', border: '1px solid #d1d5db',
-                    borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', 
+                    borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center',
                     justifyContent: 'center', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', color: '#374151',
                     transition: 'background-color 0.2s'
                 }}
@@ -35,7 +37,7 @@ const TableActionsMenu = ({ onAdd, onUpdate }) => {
                     <>
                         {/* Invisible overlay to catch clicks outside the dropdown */}
                         <div style={{ position: 'fixed', inset: 0, zIndex: 40 }} onClick={() => setIsOpen(false)} />
-                        
+
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95, y: -5 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -43,7 +45,7 @@ const TableActionsMenu = ({ onAdd, onUpdate }) => {
                             transition={{ duration: 0.15 }}
                             style={{
                                 position: 'absolute', top: '100%', right: 0, marginTop: '8px',
-                                backgroundColor: 'white', borderRadius: '6px', 
+                                backgroundColor: 'white', borderRadius: '6px',
                                 boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                                 border: '1px solid #e5e7eb', zIndex: 50, minWidth: '180px', overflow: 'hidden',
                                 display: 'flex', flexDirection: 'column'
@@ -53,7 +55,7 @@ const TableActionsMenu = ({ onAdd, onUpdate }) => {
                                 onClick={() => { setIsOpen(false); onAdd(); }}
                                 style={{
                                     width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px',
-                                    fontSize: '0.875rem', fontWeight: '500', color: '#374151', backgroundColor: 'transparent', 
+                                    fontSize: '0.875rem', fontWeight: '500', color: '#374151', backgroundColor: 'transparent',
                                     border: 'none', borderBottom: '1px solid #f3f4f6', cursor: 'pointer', textAlign: 'left'
                                 }}
                                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
@@ -66,15 +68,28 @@ const TableActionsMenu = ({ onAdd, onUpdate }) => {
                                 onClick={() => { setIsOpen(false); onUpdate(); }}
                                 style={{
                                     width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px',
-                                    fontSize: '0.875rem', fontWeight: '500', color: '#374151', backgroundColor: 'transparent', 
+                                    fontSize: '0.875rem', fontWeight: '500', color: '#374151', backgroundColor: 'transparent',
                                     border: 'none', cursor: 'pointer', textAlign: 'left'
                                 }}
                                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             >
-                                <Pencil size={16} style={{ color: '#059669' }} />
+                                <ArrowUpFromLine size={16} style={{ color: '#059669' }} />
                                 Update Records
                             </button>
+                            {/* <button
+                                onClick={() => { setIsOpen(false); onAddSection(); }}
+                                style={{
+                                    width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px',
+                                    fontSize: '0.875rem', fontWeight: '500', color: '#374151', backgroundColor: 'transparent',
+                                    border: 'none', cursor: 'pointer', textAlign: 'left'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                            >
+                                <UsersRound size={16} style={{ color: '#965a05' }} />
+                                Add Section
+                            </button> */}
                         </motion.div>
                     </>
                 )}
@@ -83,7 +98,7 @@ const TableActionsMenu = ({ onAdd, onUpdate }) => {
     );
 };
 
-export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
+const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
     // 🟢 1. GET THE UNIFIED DATA
     const { schoolData } = useData();
 
@@ -91,7 +106,8 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
     const [activeTab, setActiveTab] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // 🟢 Moved this here!
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
 
     // Selection & Actions
     const [selectedItem, setSelectedItem] = useState(null);
@@ -153,7 +169,7 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
             let list = drilldownContext.students || [];
             if (searchTerm) {
                 const lower = searchTerm.toLowerCase();
-                list = list.filter(s => 
+                list = list.filter(s =>
                     (s.name || "").toLowerCase().includes(lower) ||
                     (s.studentId || "").toLowerCase().includes(lower)
                 );
@@ -181,7 +197,7 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
 
     // --- HANDLERS ---
     const handleEditSave = () => { setSelectedItem(editFormData); setIsEditing(false); };
-    
+
     const handleStudentClick = (student) => {
         if (isEditing) return;
         if (selectedItem?.id === student.id) setSelectedItem(null);
@@ -190,12 +206,12 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
 
     // --- RENDER ROW ---
     const cellStyle = { fontSize: '12px', color: '#4b5563', borderBottom: '1px solid #f3f4f6', height: '44px', verticalAlign: 'middle' };
-    
+
     // 🟢 NEW: Inline styles for Edit Inputs
     const inputStyle = {
         width: '100%',
         padding: '6px',
-        border: '1px solid #e5e7eb', 
+        border: '1px solid #e5e7eb',
         borderRadius: '4px',
         fontSize: '12px',
         color: '#111827',
@@ -210,34 +226,34 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
                         <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#3b82f6', margin: '0 auto' }} />
                     </td>
                     <td style={cellStyle}>
-                        <input 
-                            style={inputStyle} 
-                            value={editFormData.name} 
-                            onChange={e => setEditFormData({ ...editFormData, name: e.target.value })} 
+                        <input
+                            style={inputStyle}
+                            value={editFormData.name}
+                            onChange={e => setEditFormData({ ...editFormData, name: e.target.value })}
                         />
                     </td>
                     <td style={cellStyle}>
-                        <input 
-                            style={inputStyle} 
-                            value={editFormData.studentId} 
-                            onChange={e => setEditFormData({ ...editFormData, studentId: e.target.value })} 
+                        <input
+                            style={inputStyle}
+                            value={editFormData.studentId}
+                            onChange={e => setEditFormData({ ...editFormData, studentId: e.target.value })}
                         />
                     </td>
                     <td style={cellStyle}>
-                        <CustomEditDropdown 
-                            value={editFormData.type} 
-                            options={['Regular', 'Irregular']} 
-                            onChange={v => setEditFormData({ ...editFormData, type: v })} 
+                        <CustomEditDropdown
+                            value={editFormData.type}
+                            options={['Regular', 'Irregular']}
+                            onChange={v => setEditFormData({ ...editFormData, type: v })}
                         />
                     </td>
                     <td style={cellStyle}>
                         <span style={{ color: '#6b7280', fontSize: '12px' }}>{student.gradeLevel}</span>
                     </td>
                     <td style={cellStyle}>
-                        <input 
-                            style={inputStyle} 
-                            value={editFormData.program} 
-                            onChange={e => setEditFormData({ ...editFormData, program: e.target.value })} 
+                        <input
+                            style={inputStyle}
+                            value={editFormData.program}
+                            onChange={e => setEditFormData({ ...editFormData, program: e.target.value })}
                         />
                     </td>
                     <td style={cellStyle}>
@@ -248,7 +264,7 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
         }
 
         const isSelected = selectedItem?.id === student.id;
-        
+
         return (
             <tr key={student.id} onClick={() => handleStudentClick(student)} className="hover:bg-gray-50 transition-colors cursor-pointer" style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}>
                 <td style={{ ...cellStyle, textAlign: 'center', width: '48px' }} onClick={e => e.stopPropagation()}>
@@ -276,15 +292,15 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
         <AnimatePresence>
             {shouldShowActions && (
                 <SelectionActionBar
-                    key="bar" 
+                    key="bar"
                     variant="student"
                     selectedItem={selectedItem}
                     onClearSelection={() => { setSelectedItem(null); setIsEditing(false); }}
-                    isEditing={isEditing} 
-                    onEditStudent={() => { setEditFormData({ ...selectedItem }); setIsEditing(true); }} 
-                    onSaveStudent={handleEditSave} 
+                    isEditing={isEditing}
+                    onEditStudent={() => { setEditFormData({ ...selectedItem }); setIsEditing(true); }}
+                    onSaveStudent={handleEditSave}
                     onCancelEdit={() => { setIsEditing(false); setEditFormData({}); }}
-                    selectedCount={selectedIds.length} 
+                    selectedCount={selectedIds.length}
                 />
             )}
         </AnimatePresence>
@@ -295,43 +311,50 @@ export const StudentListView = ({ switcher, drilldownContext, onGoBack }) => {
             {/* 🟢 MODALS */}
             <AddStudentModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
             <UpdateRecordsModal isOpen={isUpdateModalOpen} onClose={() => setIsUpdateModalOpen(false)} />
-            
+            {/* <AddSectionModal isOpen={isAddSectionOpen} onClose={() => setIsAddSectionOpen(false)}/> */}
+
             <GenericTable
                 title={drilldownContext ? `Students in ${drilldownContext.level} - ${drilldownContext.sectionName}` : "Student Master List"}
                 subtitle={drilldownContext ? "Manage students in this section" : "Manage all student records"}
-                
+
                 tabs={!drilldownContext ? [
                     { label: 'All', id: 'all' }, { label: 'Preschool', id: 'preschool' }, { label: 'Primary Education', id: 'primaryEducation' },
                     { label: 'Intermediate', id: 'intermediate' }, { label: 'Junior High School', id: 'juniorHighSchool' }, { label: 'Senior High School', id: 'seniorHighSchool' }, { label: 'Higher Education', id: 'higherEducation' }
                 ] : []}
-                
-                activeTab={activeTab} onTabChange={setActiveTab} 
-                searchTerm={searchTerm} onSearchChange={setSearchTerm} 
-                
+
+                activeTab={activeTab} onTabChange={setActiveTab}
+                searchTerm={searchTerm} onSearchChange={setSearchTerm}
+
                 // 🟢 Inject the 3-dot menu alongside the switcher (only when NOT in drilldown)
                 customActions={
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {!drilldownContext && switcher}
                         {!drilldownContext && (
-                            <TableActionsMenu 
-                                onAdd={() => setIsAddModalOpen(true)} 
-                                onUpdate={() => setIsUpdateModalOpen(true)} // 🟢 Now properly opens the Wizard
+                            <TableActionsMenu
+                                onAdd={() => setIsAddModalOpen(true)}
+                                onUpdate={() => setIsUpdateModalOpen(true)}
+                                // onAddSection={() => setIsAddSectionOpen(true)}
                             />
                         )}
                     </div>
                 }
-                
+
                 overrideHeader={headerVisible ? actionBar : null}
-                
+
                 onPrimaryAction={drilldownContext ? () => onGoBack() : undefined}
-                primaryActionLabel={drilldownContext ? "Go Back" : undefined} 
+                primaryActionLabel={drilldownContext ? "Go Back" : undefined}
                 primaryActionIcon={drilldownContext ? <ArrowLeft size={16} /> : undefined}
-                
+
                 columns={['Student Name', 'Student ID', 'Type', 'Grade Level', getSectionLabel(), 'RFID Link']}
-                data={filteredStudents} 
-                renderRow={renderRow} 
+                data={filteredStudents}
+                renderRow={renderRow}
                 metrics={[{ label: "Total Students", value: filteredStudents.length }]}
             />
         </>
     );
 };
+
+export {
+    TableActionsMenu,
+    StudentListView
+}

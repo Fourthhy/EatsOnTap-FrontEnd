@@ -4,7 +4,11 @@ import { AnimatePresence } from 'framer-motion';
 
 import { GenericTable } from '../../../../../components/global/table/GenericTable';
 import { SelectionActionBar } from '../SelectionActionBar';
+import { TableActionsMenu } from './StudentListView'; // Adjust path if needed
+
 import { AddSectionModal } from '../components/AddSectionModal';
+import { AddStudentModal } from '../AddStudentModal';
+import { UpdateRecordsModal } from '../components/UpdateRecordsModal';
 
 import { useData } from "../../../../../context/DataContext";
 
@@ -12,36 +16,39 @@ import { useData } from "../../../../../context/DataContext";
 const mapDepartmentToTabId = (deptString) => {
     if (!deptString) return 'unknown';
     const map = {
-        'Preschool': 'preschool',
-        'Basic Education': 'primaryEducation',
-        'Primary Education': 'primaryEducation',
-        'Intermediate': 'intermediate',
-        'Junior High School': 'juniorHighSchool',
-        'Senior High School': 'seniorHighSchool',
-        'Higher Education': 'higherEducation'
+        'PRESCHOOL': 'preschool',
+        'BASIC EDUCATION': 'primaryEducation',
+        'PRIMARY EDUCATION': 'primaryEducation',
+        'INTERMEDIATE': 'intermediate',
+        'JUNIOR HIGH SCHOOL': 'juniorHighSchool',
+        'SENIOR HIGH SCHOOL': 'seniorHighSchool',
+        'HIGHER EDUCATION': 'higherEducation'
     };
     return map[deptString] || 'unknown';
 };
 
 export const SectionListView = ({ switcher, onNavigateToStudents }) => {
-    const { schoolData, sectionProgram, fetchSectionPrograms } = useData(); 
+    const { schoolData, sectionProgram, fetchSectionPrograms } = useData();
 
     const [isLoading, setIsLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSection, setSelectedSection] = useState(null);
     const [isActionBarVisible, setIsActionBarVisible] = useState(false);
+
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
 
     const getNameLabel = () => {
         if (activeTab === 'all') return "Section / Program";
         if (activeTab === 'higherEducation') return "Program";
-        return "Section"; 
+        return "Section";
     };
 
     const showAdviserColumn = activeTab !== 'higherEducation';
 
-// --- MERGED & SORTED LOGIC ---
+    // --- MERGED & SORTED LOGIC ---
     const flattenedSections = useMemo(() => {
         const combinedList = [];
         const searchLower = searchTerm.toLowerCase();
@@ -57,7 +64,7 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                     cat.levels.forEach(level => {
                         if (level.sections) {
                             level.sections.forEach(section => {
-                                const currentLevelName = level.levelName || level.gradeLevel || "N/A"; 
+                                const currentLevelName = level.levelName || level.gradeLevel || "N/A";
                                 const currentSectionName = section.section || section.name || "Unnamed";
                                 const currentAdviser = section.adviser || "Unassigned";
 
@@ -74,7 +81,7 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                                         adviser: currentAdviser,
                                         studentCount: section.studentCount || 0,
                                         category: cat.category,
-                                        students: section.students || [] 
+                                        students: section.students || []
                                     });
                                 }
                             });
@@ -85,8 +92,8 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
         }
 
         // 2. PROCESS 'sectionProgram' (Empty Sections)
-        const rawPrograms = Array.isArray(sectionProgram) 
-            ? sectionProgram 
+        const rawPrograms = Array.isArray(sectionProgram)
+            ? sectionProgram
             : (sectionProgram?.data || []);
 
         if (rawPrograms.length > 0) {
@@ -98,7 +105,7 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                 if (activeTab !== 'all' && categoryId !== activeTab) return;
 
                 const currentLevelName = item.year || "N/A";
-                const currentSectionName = item.program || item.section || "Unnamed"; 
+                const currentSectionName = item.program || item.section || "Unnamed";
                 const currentAdviser = item.handleAdviser || "Unassigned";
 
                 const matchesSearch =
@@ -108,13 +115,13 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
 
                 if (matchesSearch) {
                     combinedList.push({
-                        id: item._id, 
+                        id: item._id,
                         level: currentLevelName,
                         sectionName: currentSectionName,
                         adviser: currentAdviser,
-                        studentCount: 0, 
+                        studentCount: 0,
                         category: categoryId,
-                        students: [] 
+                        students: []
                     });
                 }
             });
@@ -126,9 +133,9 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
             // If category is 'higherEducation', give it a weight of 1 (push to bottom). Else 0 (keep at top).
             const isProgramA = a.category === 'higherEducation' ? 1 : 0;
             const isProgramB = b.category === 'higherEducation' ? 1 : 0;
-            
+
             if (isProgramA !== isProgramB) {
-                return isProgramA - isProgramB; 
+                return isProgramA - isProgramB;
             }
 
             // Step B: If both are sections (or both are programs), sort by Level (Numeric-aware)
@@ -136,7 +143,7 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
             if (levelCompare !== 0) {
                 return levelCompare;
             }
-            
+
             // Step C: If levels are the exact same, sort alphabetically by Section/Program Name
             return a.sectionName.localeCompare(b.sectionName);
         });
@@ -192,9 +199,9 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
         </AnimatePresence>
     );
 
-    const columns = ['Level', getNameLabel()]; 
-    columns.push('Student Count'); 
-    if (showAdviserColumn) columns.push('Adviser'); 
+    const columns = ['Level', getNameLabel()];
+    columns.push('Student Count');
+    if (showAdviserColumn) columns.push('Adviser');
 
     if (isLoading) {
         return (
@@ -207,14 +214,15 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
 
     return (
         <>
-            <AddSectionModal
-                isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
+            <AddSectionModal isOpen={isAddSectionOpen} onClose={() => setIsAddSectionOpen(false)}
                 onRefresh={() => {
                     setIsLoading(true);
                     fetchSectionPrograms();
-                }} 
+                }}
             />
+            <AddStudentModal isOpen={isAddModalOpen} onClose={() => {setIsAddModalOpen(false)}} />
+            <UpdateRecordsModal isOpen={isUpdateModalOpen} onClose={() => {setIsUpdateModalOpen(false)}}/>
+
             <GenericTable
                 title={activeTab === 'higherEducation' ? "Program Overview" : "Section Overview"}
                 subtitle={activeTab === 'higherEducation' ? "Manage academic programs" : "Manage academic sections and advisers"}
@@ -231,14 +239,23 @@ export const SectionListView = ({ switcher, onNavigateToStudents }) => {
                 onTabChange={(t) => { setActiveTab(t); setSelectedSection(null); }}
                 searchTerm={searchTerm}
                 onSearchChange={setSearchTerm}
-                customActions={switcher}
+
+                // 🟢 Inject the 3-dot menu alongside the switcher
+                customActions={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {switcher}
+                        <TableActionsMenu
+                            onAdd={() => setIsAddModalOpen(true)}
+                            onUpdate={() => setIsUpdateModalOpen(true)}
+                            onAddSection={() => setIsAddSectionOpen(true)}
+                        />
+                    </div>
+                }
+
                 overrideHeader={isActionBarVisible ? actionBar : null}
                 columns={columns}
                 data={flattenedSections}
                 renderRow={renderSectionRow}
-                onPrimaryAction={() => setIsAddModalOpen(true)}
-                primaryActionLabel={activeTab === 'higherEducation' ? "Add Program" : "Add Section"}
-                primaryActionIcon={<Plus size={16} />}
                 metrics={[{ label: "Total", value: flattenedSections.length }]}
             />
         </>

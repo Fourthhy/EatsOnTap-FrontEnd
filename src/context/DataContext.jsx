@@ -258,12 +258,11 @@ const DataProvider = ({ children }) => {
     }, [fetchAllBasicEducationMealRequest, fetchAllHigherEducationMealRequest]);
 
     useEffect(() => {
-        // Connect to Socket
+        
         const socket = io(import.meta.env.VITE_BASE_URL);
 
         socket.on('connect', () => {});
 
-        // 🟢 LISTEN for the specific event from your backend
         socket.on('update-student-register', (data) => {
             fetchUnifiedSchoolData();
         });
@@ -271,7 +270,24 @@ const DataProvider = ({ children }) => {
         return () => {
             socket.disconnect();
         };
+
     }, [fetchUnifiedSchoolData]); 
+
+    useEffect(() => {
+
+        const socket = io(import.meta.env.VITE_BASE_URL);   
+
+        socket.on('connect', () => {});
+
+        socket.on('add-event', (data) => {
+            fetchAllEvents();
+        })
+
+        return () => {
+            socket.disconnect();
+        }
+
+    }, [fetchAllEvents]);
 
     useEffect(() => {
         const socket = io(import.meta.env.VITE_BASE_URL);

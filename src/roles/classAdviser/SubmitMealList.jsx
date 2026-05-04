@@ -8,10 +8,10 @@ import { ConfirmModal } from "./components/ConfirmModal";
 
 // 🟢 CONTEXTS
 import { useData } from "../../context/DataContext";
-import { useClassAdviser } from "../../context/ClassAdviserContext";
+import { useClassAdviser } from "../../context/ClassAdviserContext"; // <-- Using this to grab the section's year
 
 // 🟢 FUNCTIONS
-import { SubmitStudentMealList } from "../../functions/classAdviser/SubmitStudentMealList";
+import { submitStudentMealList } from "../../functions/classAdviser/SubmitStudentMealList";
 import { isStudentMealSubmitted } from "../../functions/classAdviser/isStudentMealSubmitted";
 import { isSettingActive } from '../../functions/isSettingActive';
 
@@ -170,7 +170,12 @@ export default function SubmitMealList() {
     const isMobile = breakpoint === 'mobile';
     const isTablet = breakpoint === 'tablet';
 
-    const { section, userID } = useParams();
+    // 🟢 1. EXTRACT SECTION YEAR
+    // Grabs the year level from the URL or falls back to the adviser's context data
+    const { section, userID, year } = useParams();
+    const adviserContext = useClassAdviser();
+    const sectionYear = year || adviserContext?.adviserData?.year || adviserContext?.year;
+
     const { schoolData } = useData();
 
     const [selected, setSelected] = useState([]); // Tracks "Eligible" IDs
@@ -257,11 +262,19 @@ export default function SubmitMealList() {
     // --- HANDLE SUBMIT ---
     const handleSubmit = async () => {
         try {
+            // 🟢 2. VALIDATION for Section Year
+            if (!sectionYear) {
+                alert("Error: Missing section year. Cannot submit list.");
+                return;
+            }
+
             const forEligible = selected;
             // Get IDs where value is explicitly 'Absent'
             const forAbsent = Object.keys(exceptions).filter(id => exceptions[id] === 'Absent');
             
-            await SubmitStudentMealList(userID, section, forEligible, forAbsent);
+            // 🟢 3. ADD sectionYear TO PAYLOAD
+            await submitStudentMealList(userID, sectionYear, section, forEligible, forAbsent);
+            
             setIsSubmitted(true);
             setShowModal(false);
         } catch (error) {
@@ -288,23 +301,18 @@ export default function SubmitMealList() {
             }
         };
 
-        // 🟢 FIXED STATUS LOGIC
         let statusDisplay;
         
         if (isSubmitted) {
-            // 🟢 1. Try to use Server Data (If refreshed)
             const serverStatus = student.mealEligibilityStatus;
             
             if (serverStatus) {
-                // If backend data exists, map strictly
                 let type = "Eligible";
                 if (serverStatus === "INELIGIBLE") type = "Waived";
                 else if (serverStatus === "ABSENT") type = "Absent";
                 
                 statusDisplay = <StatusBadge type={type} />;
             } else {
-                // 🟢 2. Fallback to Local State (Immediate View after Click)
-                // This ensures "Absent" stays "Absent" right after submission
                 if (selected.includes(student.studentId)) {
                     statusDisplay = <StatusBadge type="Eligible" />;
                 } else if (exceptions[student.studentId] === 'Absent') {
@@ -314,7 +322,6 @@ export default function SubmitMealList() {
                 }
             }
         } else {
-            // 🟢 Active Editing Mode
             if (isSelected) {
                 statusDisplay = <StatusBadge type="Eligible" />;
             } else {
@@ -475,7 +482,7 @@ export default function SubmitMealList() {
             <div className="flex-1 flex flex-col relative">
                 <GenericTable
                     title="Student Roster"
-                    subtitle={`Manage meal attendance for ${section}`}
+                    subtitle={`Manage meal attendance for ${sectionYear ? `Year ${sectionYear} - ` : ''}${section}`}
                     data={students}
                     columns={isMobile ? [] : columns}
                     renderRow={renderRow}

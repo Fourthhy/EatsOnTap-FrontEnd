@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { io } from 'socket.io-client'; 
 import { User, Mail, Shield, AlertCircle, CheckCircle, XCircle, X, Loader2, Save, RotateCcw, UserPlus, AlertTriangle, Archive } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GenericTable } from '../../../components/global/table/GenericTable';
@@ -245,7 +246,7 @@ const UserManagement = () => {
     const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false); 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
             const [usersResponse, advisersResponse] = await Promise.all([
@@ -267,9 +268,19 @@ const UserManagement = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []); // <-- Empty dependency array
 
-    useEffect(() => { fetchData(); }, []);
+    useEffect(() => { 
+        fetchData(); 
+        const socket = io(import.meta.env.VITE_BASE_URL);
+        socket.on('connect', () => {});
+        socket.on('add-user', (data) => {
+            fetchData();
+        })
+        return () => {
+            socket.disconnect();
+        }
+    }, [fetchData]);
 
     // 🟢 Check if the selected user has a duplicate role
     const hasDuplicateRole = useMemo(() => {

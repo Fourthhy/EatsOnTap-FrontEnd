@@ -54,21 +54,33 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
 
     const currentEvent = events[currentIndex];
 
-    // --- 🟢 3. DYNAMIC DEPARTMENT CLASSIFICATION ---
+    // --- 🟢 3. DYNAMIC DEPARTMENT CLASSIFICATION (BULLETPROOFED) ---
     const getDepartment = (item) => {
-        // Try to reverse-lookup the department using the live structure data
         if (structureData.length > 0) {
             const identifier = item.section || item.program;
             const year = item.year;
 
             for (const cat of structureData) {
+                if (!cat || !Array.isArray(cat.levels)) continue; // Safe check
+
                 for (const level of cat.levels) {
+                    if (!level) continue; // Safe check
+
                     const levelIdentifier = level.levelName || level.gradeLevel;
-                    // String conversion ensures safe comparison between '1' and 1
                     if (String(levelIdentifier) === String(year)) {
-                        const found = level.sections.find(s => 
+                        
+                        // 🟢 THE FIX: Safely extract the array, whether it's Basic Ed or Higher Ed
+                        const itemsArray = Array.isArray(level.sections) 
+                            ? level.sections 
+                            : Array.isArray(level.programs) 
+                                ? level.programs 
+                                : [];
+
+                        // Now .find() is guaranteed to run on a valid array
+                        const found = itemsArray.find(s => 
                             (s.section === identifier) || (s.name === identifier) || (s === identifier)
                         );
+                        
                         if (found) {
                             return formatDeptName(cat.category);
                         }
@@ -94,8 +106,6 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
         if (currentEvent.selectedPrograms) {
             return currentEvent.selectedPrograms.map(item => ({
                 ...item,
-                // 🟢 THE FIX: Strictly use the raw section/program name.
-                // We completely ignore item.display because it contains the ugly "Year - Section" prefix.
                 displayName: item.section || item.program,
                 categoryType: (item.type === 'Basic Ed' || item.categoryType === 'SECTION') ? 'SECTION' : 'PROGRAM',
                 totalEligibleCount: item.totalEligibleCount || 0,
@@ -125,12 +135,10 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
         const baseTabs = [{ id: 'All', label: 'All Departments' }];
         const depts = new Set();
 
-        // Find every unique department in this specific event
         allEligibleGroups.forEach(group => {
             depts.add(getDepartment(group));
         });
 
-        // Generate tabs automatically (No more hardcoded ifs!)
         Array.from(depts).sort().forEach(deptName => {
             if (deptName !== 'All') {
                 baseTabs.push({ id: deptName, label: deptName });
@@ -138,7 +146,7 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
         });
 
         return baseTabs;
-    }, [allEligibleGroups, currentEvent, structureData]); // Depends on structureData to refresh when loaded
+    }, [allEligibleGroups, currentEvent, structureData]);
 
 
     // --- DYNAMIC DATA PROCESSING ---
@@ -147,19 +155,16 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
 
         let filteredGroups = allEligibleGroups;
 
-        // Filter by Department
         if (activeTab !== 'All') {
             filteredGroups = allEligibleGroups.filter(g => getDepartment(g) === activeTab);
         }
 
-        // Search Logic
         if (searchTerm) {
             filteredGroups = filteredGroups.filter(g => 
                 (g.displayName || '').toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
-        // Format for Table
         return filteredGroups.map(g => ({
             id: g._id || Math.random(), 
             name: g.displayName, 
@@ -181,7 +186,6 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
             padding: '12px 24px 12px 0px', borderBottom: '1px solid #f3f4f6'
         };
 
-        // 🟢 MINOR UX FIX: Capitalize "pre" if it shows up in the year column
         const displayYear = String(item.year).toLowerCase() === 'pre' ? 'Pre' : item.year;
 
         return (
@@ -288,7 +292,6 @@ const EventDetailModal = ({ isOpen, onClose, events, initialEventId }) => {
                                         currentEvent.selectedDepartments 
                                         || (currentEvent.eventScope === 'School-Wide' ? ['All'] : ['Departmental'])
                                     }
-                                    // 🟢 We also pass the clean display names here so the preview card matches the table!
                                     selectedPrograms={allEligibleGroups.map(g => g.displayName)}
                                 />
                             </div>

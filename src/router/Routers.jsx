@@ -129,7 +129,7 @@ export default function Routers() {
                     <Route path="dashboard" element={<ChancellorDashboard />} />
                 </Route>
 
-                <Route path="/classAdviser/:section/:userID" element={
+                <Route path="/classAdviser/:section/:userID/:year" element={
                     <ProtectedRoute allowedRoles={['CLASS-ADVISER']}>
                         <DataProvider>
                             <LoaderProvider>

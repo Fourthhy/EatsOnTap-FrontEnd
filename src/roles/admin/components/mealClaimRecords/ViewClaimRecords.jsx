@@ -3,7 +3,10 @@ import { HeaderBar } from "../../../../components/global/HeaderBar";
 import { motion, AnimatePresence } from "framer-motion";
 
 // IMPORTS 
+//NOT USED
 import { DailyClaimRecord } from "./pages/DailyClaimRecord";
+
+//USED
 import { OverallClaimRecord } from "./pages/OverallClaimRecord";
 import { EligibleSections } from "./pages/EligibleSections";
 

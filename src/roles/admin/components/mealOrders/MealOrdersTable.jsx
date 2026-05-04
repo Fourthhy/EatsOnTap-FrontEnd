@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { 
-    Clock, Calendar, CheckCircle, Check, X, 
-    CalendarDays, AlertCircle, User, ArrowLeft, Plus 
+import {
+    Clock, Calendar, CheckCircle, Check, X,
+    CalendarDays, AlertCircle, User, ArrowLeft, Plus
 } from 'lucide-react';
 import { GenericTable } from '../../../../components/global/table/GenericTable';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -18,12 +18,12 @@ import { MealOrdersActionBar } from './components/MealOrderActionBar';
 
 const MealOrdersTable = () => {
     // 🟢 Consume Real Data
-    const { 
-        basicEducationMealRequest = [], 
-        higherEducationMealRequest = [], 
+    const {
+        basicEducationMealRequest = [],
+        higherEducationMealRequest = [],
         eventMealRequest = [],
         classAdvisers = [],
-        schoolData = [], 
+        schoolData = [],
         fetchAllBasicEducationMealRequest,
         fetchAllHigherEducationMealRequest,
         fetchTodayClaimRecord
@@ -37,7 +37,7 @@ const MealOrdersTable = () => {
     const [showActionBar, setShowActionBar] = useState(false);
 
     // --- STUDENT LIST VIEW STATE ---
-    const [viewingSection, setViewingSection] = useState(null); 
+    const [viewingSection, setViewingSection] = useState(null);
     const [selectedStudentIds, setSelectedStudentIds] = useState([]);
 
     // --- DATA NORMALIZATION ---
@@ -46,19 +46,25 @@ const MealOrdersTable = () => {
             if (!status) return 'Pending';
             return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
         };
+
+        // 🟢 FIX 1: Safely handle "System Generated" or invalid date strings
         const formatTime = (dateInput) => {
             if (!dateInput) return '--:--';
-            return new Date(dateInput).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            if (dateInput === "System Generated") return "Auto-Generated";
+
+            const parsedDate = new Date(dateInput);
+            if (isNaN(parsedDate.getTime())) return "N/A"; // Catch-all for any other invalid dates
+
+            return parsedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         };
 
-        const basic = basicEducationMealRequest.map(item => ({
+        const basic = (basicEducationMealRequest || []).map(item => ({
             id: item.eligibilityID,
-            sectionProgram: item.section, 
+            sectionProgram: item.section,
             sender: item.requester,
             recipientCount: item.forEligible?.length || 0,
             waivedCount: item.forTemporarilyWaived?.length || 0,
-            // 🟢 ADDED: Absent Count
-            absentCount: item.forAbsentStudents?.length || 0, 
+            absentCount: item.forAbsentStudents?.length || 0,
             timeSent: formatTime(item.timeStamp),
             type: 'Regular',
             category: 'Basic Education',
@@ -66,30 +72,34 @@ const MealOrdersTable = () => {
             rawDate: item.timeStamp
         }));
 
-        const higher = higherEducationMealRequest.map(item => ({
+        // 🟢 FIX 2: Safely extract the array from the higher education object
+        const higherEdArray = Array.isArray(higherEducationMealRequest)
+            ? higherEducationMealRequest
+            : higherEducationMealRequest?.data || [];
+
+        const higher = higherEdArray.map(item => ({
             id: item.eligibilityID,
-            sectionProgram: `${item.program} ${item.year}`, 
+            sectionProgram: `${item.program} ${item.year}`,
             sender: item.requester,
             recipientCount: item.forEligible?.length || 0,
             waivedCount: item.forWaived?.length || 0,
-            // 🟢 ADDED: Absent Count
             absentCount: item.forAbsent?.length || 0,
-            timeSent: formatTime(item.timeStamp),
+            timeSent: 'System Generated',
             type: 'Regular',
             category: 'Higher Education',
             status: normalizeStatus(item.status),
-            rawDate: item.timeStamp
+            // 🟢 FIX 3: Give the sorter a valid date to do math against if it says "System Generated"
+            rawDate: item.timeStamp === "System Generated" ? new Date() : item.timeStamp
         }));
 
-        const events = eventMealRequest.map(item => ({
-            id: item.eventID, 
+        const events = (eventMealRequest || []).map(item => ({
+            id: item.eventID,
             sectionProgram: item.eventName,
             sender: "Event Organizer",
             recipientCount: (item.forEligibleSection?.length || 0) + (item.forEligibleProgramsAndYear?.length || 0),
             waivedCount: item.forTemporarilyWaived?.length || 0,
-            // 🟢 ADDED: Absent Count (Default to 0 if not applicable for events)
             absentCount: item.forAbsent?.length || 0,
-            timeSent: item.eventSpan?.[0] ? new Date(item.eventSpan[0]).toLocaleDateString() : 'N/A', 
+            timeSent: item.eventSpan?.[0] ? new Date(item.eventSpan[0]).toLocaleDateString() : 'N/A',
             type: 'Event',
             category: 'Event',
             status: normalizeStatus(item.status),
@@ -119,11 +129,11 @@ const MealOrdersTable = () => {
                     .filter(req => {
                         if (!req.timeStamp) return false;
                         const reqDate = new Date(req.timeStamp).toLocaleDateString();
-                        return reqDate === todayStr; 
+                        return reqDate === todayStr;
                     })
                     .map(req => req.section?.trim())
             );
-            
+
             const unsubmitted = classAdvisers
                 .filter(adviser => adviser.section && !submittedSections.has(adviser.section.trim()))
                 .map((adviser, index) => {
@@ -131,7 +141,7 @@ const MealOrdersTable = () => {
                     const fullName = nameParts.filter(Boolean).join(" ");
 
                     return {
-                        id: `unsub-${adviser.userID || index}`, 
+                        id: `unsub-${adviser.userID || index}`,
                         sectionRaw: adviser.section,
                         sectionProgram: adviser.section,
                         sender: fullName || "No Adviser Assigned",
@@ -181,7 +191,7 @@ const MealOrdersTable = () => {
     // --- STUDENT LIST DATA PREP ---
     const sectionStudents = useMemo(() => {
         if (!viewingSection || !schoolData) return [];
-        
+
         const targetSectionName = viewingSection.sectionRaw;
         let foundStudents = [];
 
@@ -192,23 +202,23 @@ const MealOrdersTable = () => {
                         const matchedSection = level.sections.find(
                             s => s.section === targetSectionName
                         );
-                        
+
                         if (matchedSection && matchedSection.students) {
                             foundStudents = matchedSection.students;
-                            break; 
+                            break;
                         }
                     }
                 }
             }
-            if (foundStudents.length > 0) break; 
+            if (foundStudents.length > 0) break;
         }
 
         // Map to table format
         return foundStudents.map(student => ({
-            id: student.id || student._id, 
+            id: student.id || student._id,
             name: student.name,
-            studentId: student.studentId, 
-            status: 'Eligible' 
+            studentId: student.studentId,
+            status: 'Eligible'
         }));
 
     }, [viewingSection, schoolData]);
@@ -225,20 +235,20 @@ const MealOrdersTable = () => {
     const handleBulkApprove = async () => {
         const itemsToProcess = allRequests.filter(item => selectedIds.includes(item.id));
         let basicEdUpdated = false;
-        
+
         await Promise.all(itemsToProcess.map(async (item) => {
             try {
                 if (item.category === 'Basic Education') {
                     await approveMealEligibilityRequest(item.id);
                     basicEdUpdated = true;
-                } 
+                }
             } catch (error) { console.error(error); }
         }));
 
         if (basicEdUpdated) fetchAllBasicEducationMealRequest();
         setSelectedIds([]);
         console.log("DONE APPROVING ALL REQUEST 🥀");
-        setTimeout( async () => {
+        setTimeout(async () => {
             await fetchTodayClaimRecord()
         }, 500);
     };
@@ -249,7 +259,7 @@ const MealOrdersTable = () => {
         const sectionToView = filteredData.find(item => item.id === selectedIds[0]);
         if (sectionToView) {
             setViewingSection(sectionToView);
-            setSelectedIds([]); 
+            setSelectedIds([]);
         }
     };
 
@@ -296,7 +306,7 @@ const MealOrdersTable = () => {
                 if (isSelected) {
                     setSelectedIds([]);
                 } else {
-                    setSelectedIds([item.id]); 
+                    setSelectedIds([item.id]);
                 }
             } else {
                 selection?.toggleSelection();
@@ -309,7 +319,7 @@ const MealOrdersTable = () => {
                 className={`transition-colors duration-200 ${isSelectable ? 'hover:bg-gray-50 cursor-pointer' : ''}`}
                 style={{ backgroundColor: isSelected ? '#eff6ff' : 'transparent' }}
             >
-                <td></td> 
+                <td></td>
                 <td style={{ ...cellStyle, fontWeight: 500, color: '#111827', paddingLeft: '24px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {item.type === 'Event' && <CalendarDays size={14} className="text-purple-500" />}
@@ -321,10 +331,10 @@ const MealOrdersTable = () => {
                     <>
                         <td style={cellStyle}>{item.recipientCount}</td>
                         <td style={cellStyle}>{item.waivedCount}</td>
-                        
+
                         {/* 🟢 ADDED: Absent Cell */}
                         <td style={cellStyle}>{item.absentCount}</td>
-                        
+
                         <td style={cellStyle}>{item.timeSent}</td>
                     </>
                 )}
@@ -336,7 +346,7 @@ const MealOrdersTable = () => {
     const renderStudentRow = (student, index, startIndex, selection) => {
         const cellStyle = { fontFamily: 'geist, sans-serif', fontSize: '12px', color: '#4b5563', borderBottom: '1px solid #f3f4f6', height: '43.5px', verticalAlign: 'middle' };
         const isSelected = selection?.isSelected || false;
-        
+
         return (
             <tr key={student.id}
                 onClick={() => selection?.toggleSelection()}
@@ -381,17 +391,17 @@ const MealOrdersTable = () => {
                     data={sectionStudents}
                     columns={['Student Name', 'Student ID', 'Meal Status']}
                     renderRow={renderStudentRow}
-                    
+
                     selectable={true}
                     selectedIds={selectedStudentIds}
                     onSelectionChange={setSelectedStudentIds}
-                    
-                    primaryKey="studentId" 
+
+                    primaryKey="studentId"
 
                     onPrimaryAction={handleSubmitEligibilityList}
                     primaryActionLabel="Submit List"
                     primaryActionIcon={<Check size={16} />}
-                    
+
                     onSecondaryAction={() => setViewingSection(null)}
                     secondaryActionLabel="Go Back"
                     secondaryActionIcon={<ArrowLeft size={16} />}
@@ -409,15 +419,14 @@ const MealOrdersTable = () => {
     const viewSwitcher = (
         <div style={{ backgroundColor: '#f3f4f6', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px', margin: "5px" }}>
             <SwitcherButton mode="Pending Meal Orders" currentMode={orderType} icon={<Clock size={14} />} label="Pending" onClick={() => { setOrderType('Pending Meal Orders'); setSelectedIds([]); }} />
-            <SwitcherButton mode="Confirmed Meal Orders" currentMode={orderType} icon={<CheckCircle size={14} />} label="History" onClick={() => { setOrderType('Confirmed Meal Orders'); setSelectedIds([]); }} />
-            <SwitcherButton mode="Event Meal Request" currentMode={orderType} icon={<Calendar size={14} />} label="Events" onClick={() => { setOrderType('Event Meal Request'); setSelectedIds([]); }} />
+            <SwitcherButton mode="Confirmed Meal Orders" currentMode={orderType} icon={<CheckCircle size={14} />} label="Accepted" onClick={() => { setOrderType('Confirmed Meal Orders'); setSelectedIds([]); }} />
             <SwitcherButton mode="Unsubmitted Sections" currentMode={orderType} icon={<AlertCircle size={14} />} label="Unsubmitted" onClick={() => { setOrderType('Unsubmitted Sections'); setSelectedIds([]); }} />
         </div>
     );
 
     // 🟢 UPDATED COLUMNS: Added 'Absent'
-    const columns = orderType === "Unsubmitted Sections" 
-        ? ['Section/Program', 'Class Adviser', 'Status'] 
+    const columns = orderType === "Unsubmitted Sections"
+        ? ['Section/Program', 'Class Adviser', 'Status']
         : ['Section/Program', 'Class Adviser', 'Recipient Count', 'Waived', 'Absent', 'Time Sent', 'Status'];
 
     return (
@@ -434,7 +443,7 @@ const MealOrdersTable = () => {
                 onTabChange={(id) => { setActiveTab(id); setSelectedIds([]); }}
 
                 customActions={viewSwitcher}
-                
+
                 overrideHeader={showActionBar ? (
                     <motion.div
                         initial={{ y: -10, opacity: 0 }}
@@ -463,7 +472,7 @@ const MealOrdersTable = () => {
                                 }}>
                                     {selectedIds.length} Section Selected
                                 </span>
-                                <button 
+                                <button
                                     onClick={handleAddToEligibility}
                                     style={{
                                         display: 'flex',
