@@ -300,6 +300,18 @@ const DataProvider = ({ children }) => {
         }
     }, [fetchSectionProgramList])
 
+    useEffect(() => {
+        const socket = io(import.meta.env.VITE_BASE_URL);
+        socket.on('connect', () => {
+            socket.on('update-program-schedule', () => {
+                setProgramSchedule();
+            });
+        return () => {
+            socket.disconnect();
+        }
+        })
+    }, [setProgramSchedule]);
+
 
     return (
         <DataContext.Provider value={{
