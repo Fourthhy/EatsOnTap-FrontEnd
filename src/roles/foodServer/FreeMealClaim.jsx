@@ -10,7 +10,7 @@ import { fetchApprovedStudents } from "../../functions/foodServer/fetchApprovedS
 
 // 🟢 IMPORTS: For the Logout Modal
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Loader2 } from "lucide-react"; 
+import { LogOut, Loader2 } from "lucide-react";
 
 export default function FreeMealClaim() {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -27,7 +27,7 @@ export default function FreeMealClaim() {
     const [systemMessage, setSystemMessage] = useState("");
 
     // 🟢 STATE: For Logout Modal
-    const [isLoggingOut, setIsLoggingOut] = useState(false); 
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     const inputRef = useRef(null);
@@ -35,12 +35,12 @@ export default function FreeMealClaim() {
 
     // 🟢 Async Logout Logic
     const handleLogout = async () => {
-        if (isLoggingOut) return; 
+        if (isLoggingOut) return;
 
-        setIsLoggingOut(true); 
+        setIsLoggingOut(true);
 
         try {
-            await logout(); 
+            await logout();
         } catch (error) {
             console.error("Logout process encountered an error:", error);
         } finally {
@@ -74,24 +74,31 @@ export default function FreeMealClaim() {
                 });
 
                 const updatedStudentList = [...allStudents];
-                
+
                 // 1. Get the student as they exist RIGHT NOW (e.g. ELIGIBLE)
-                const originalStudentData = updatedStudentList[foundIndex]; 
-                
+                const originalStudentData = updatedStudentList[foundIndex];
+
                 // 2. Set the display data immediately using a COPY of the original
-                setMealClaimData({ ...originalStudentData }); 
-                setPageDisplay(""); 
+                setMealClaimData({ ...originalStudentData });
+                setPageDisplay("");
 
                 // 3. Now handle the Logic Update for the next scan
                 const currentStatus = originalStudentData.temporaryClaimStatus;
 
+                // 🟢 NEW: Fire the audio based on the exact status
+                if (currentStatus === "ELIGIBLE") {
+                    playCorrect();
+                } else if (currentStatus === "CLAIMED" || currentStatus === "INELGIBLE") {
+                    playWrong();
+                }
+
                 if (currentStatus === "ELIGIBLE") {
                     // Create a NEW object for the list update to avoid mutating the display data
-                    const updatedStudent = { 
-                        ...originalStudentData, 
-                        temporaryClaimStatus: "CLAIMED" 
+                    const updatedStudent = {
+                        ...originalStudentData,
+                        temporaryClaimStatus: "CLAIMED"
                     };
-                    
+
                     updatedStudentList[foundIndex] = updatedStudent;
                     setAllStudents(updatedStudentList);
                 }
@@ -129,7 +136,7 @@ export default function FreeMealClaim() {
         const checkSystemStatus = async () => {
             try {
                 const statusResponse = await isSettingActive("STUDENT-CLAIM");
-          
+
                 // Handle the response safely, whether it's an object or a boolean
                 if (statusResponse && typeof statusResponse === 'object') {
                     // If backend returns { isActive: false, message: "..." }
@@ -140,11 +147,11 @@ export default function FreeMealClaim() {
                     setIsSystemActive(statusResponse === true);
                     setSystemMessage(statusResponse ? "" : "System is currently disabled.");
                 }
-                
+
             } catch (error) {
                 console.error("Failed to check status:", error);
                 // Fail-safe: If the API crashes, lock the POS terminal
-                setIsSystemActive(false); 
+                setIsSystemActive(false);
                 setSystemMessage("Network Error. Cannot connect to settings.");
             }
         };
@@ -179,14 +186,24 @@ export default function FreeMealClaim() {
         hour: '2-digit', minute: '2-digit', second: '2-digit'
     });
 
+    const correctRef = useRef(null);
+    const wrongRef = useRef(null);
+
+    const playCorrect = () => correctRef.current?.play().catch(e => console.log("Audio blocked", e));
+    const playWrong = () => wrongRef.current?.play().catch(e => console.log("Audio blocked", e));
+
     return (
         <>
+            {/* Hidden Audio Elements */}
+            <audio ref={correctRef} src="/sound/Correct.mp3" preload="auto" />
+            <audio ref={wrongRef} src="/sound/Wrong.mp3" preload="auto" />
+
             {/* 🟢 FLOATING LOGOUT BUTTON: Anchored bottom-right */}
             <div style={{ position: "absolute", bottom: "20px", right: "20px", zIndex: 9000 }}>
-                <Button 
-                    onClick={() => setShowLogoutConfirm(true)} 
+                <Button
+                    onClick={() => setShowLogoutConfirm(true)}
                     disabled={isLoggingOut}
-                    variant="destructive" 
+                    variant="destructive"
                     style={{ boxShadow: "0 4px 6px rgba(0,0,0,0.1)", padding: "5px 10px" }}
                 >
                     Log out
@@ -198,12 +215,12 @@ export default function FreeMealClaim() {
                 {showLogoutConfirm && (
                     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {/* Backdrop */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }} 
-                            onClick={() => !isLoggingOut && setShowLogoutConfirm(false)} 
+                            style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+                            onClick={() => !isLoggingOut && setShowLogoutConfirm(false)}
                         />
-                        
+
                         {/* Modal Box */}
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -214,22 +231,22 @@ export default function FreeMealClaim() {
                             <div style={{ backgroundColor: '#FEE2E2', padding: '12px', borderRadius: '50%', marginBottom: '16px', color: '#DC2626' }}>
                                 <LogOut size={24} />
                             </div>
-                            
+
                             <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1F2937', marginBottom: '8px' }}>Confirm Logout</h3>
                             <p style={{ fontSize: '14px', color: '#4B5563', lineHeight: '1.5', marginBottom: '24px' }}>
                                 Are you sure you want to log out? You will need to sign back in to access your terminal.
                             </p>
 
                             <div style={{ display: 'flex', width: '100%', gap: '12px' }}>
-                                <button 
-                                    onClick={() => setShowLogoutConfirm(false)} 
+                                <button
+                                    onClick={() => setShowLogoutConfirm(false)}
                                     disabled={isLoggingOut}
                                     style={{ flex: 1, padding: '10px 0', borderRadius: '8px', border: '1px solid #D1D5DB', background: 'white', color: '#374151', cursor: isLoggingOut ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 500 }}
                                 >
                                     Cancel
                                 </button>
-                                <button 
-                                    onClick={handleLogout} 
+                                <button
+                                    onClick={handleLogout}
                                     disabled={isLoggingOut}
                                     style={{ flex: 1, padding: '10px 0', borderRadius: '8px', border: 'none', background: '#DC2626', color: 'white', cursor: isLoggingOut ? 'not-allowed' : 'pointer', fontSize: '14px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                 >
@@ -342,15 +359,16 @@ export default function FreeMealClaim() {
 
                     <div style={{ position: "relative", zIndex: 10, height: "100%", width: "100%", display: "flex", flexDirection: "column", justifyContent: "start", alignItems: "center" }}>
 
-                        {mealClaimData.temporaryClaimStatus === "ELIGIBLE" ? (
+                        {/* 🟢 NEW: Cleaner Conditional Rendering using && */}
+                        {mealClaimData.temporaryClaimStatus === "ELIGIBLE" && (
                             <img src="/studentClaim/Eligible_Sinage.svg" alt="Eligible Sinage" style={{ width: "170px", height: "170px" }} />
-                        ) : ""}
-                        {mealClaimData.temporaryClaimStatus === "CLAIMED" ? (
-                            <img src="/studentClaim/ALREADY_CLAIMED.svg" alt="Background" style={{ width: "190px", height: "190px" }} />
-                        ) : ""}
-                        {mealClaimData.temporaryClaimStatus === "INELGIBLE" ? (
-                            <img src="/studentClaim/INELIGIBLE_SINAGE.svg" alt="ineligible sinage" style={{ width: "190px", height: "190px" }} />
-                        ) : ""}
+                        )}
+                        {mealClaimData.temporaryClaimStatus === "CLAIMED" && (
+                            <img src="/studentClaim/ALREADY_CLAIMED.svg" alt="Claimed Sinage" style={{ width: "190px", height: "190px" }} />
+                        )}
+                        {mealClaimData.temporaryClaimStatus === "INELGIBLE" && (
+                            <img src="/studentClaim/INELIGIBLE_SINAGE.svg" alt="Ineligible Sinage" style={{ width: "190px", height: "190px" }} />
+                        )}
 
                         <div style={{ width: "100%", height: "55%", display: "flex", justifyContent: "center", alignItems: "start" }}>
 
@@ -384,14 +402,17 @@ export default function FreeMealClaim() {
                                                     <div style={{ marginLeft: "20px", display: "flex", flexDirection: "column", gap: 20 }} className="h-[100%] flex flex-column justify-start">
                                                         <div>
                                                             <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{mealClaimData.last_name}, {mealClaimData.first_name}</p>
+                                                            {/* <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">Marco, Jusine Jynne Patrice</p> */}
                                                             <p style={{ fontWeight: 350 }} className="font-geist text-xs text-[#999797]">Student Name</p>
                                                         </div>
                                                         <div>
                                                             <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{mealClaimData.section || mealClaimData.program} - {mealClaimData.year}</p>
+                                                            {/* <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">BSIS - 4</p> */}
                                                             <p style={{ fontWeight: 350 }} className="font-geist text-xs text-[#999797]">Section / Year</p>
                                                         </div>
                                                         <div>
                                                             <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{mealClaimData.studentID}</p>
+                                                            {/* <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">25-01867JAM</p> */}
                                                             <p style={{ fontWeight: 350 }} className="font-geist text-xs text-[#999797]">StudentID</p>
                                                         </div>
                                                     </div>
