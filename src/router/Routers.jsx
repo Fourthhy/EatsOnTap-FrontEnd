@@ -45,6 +45,8 @@ import TeamPage from "../../TeamPage";
 
 import EligibilityChecker from "../../EligibilityChecker";
 
+import StudentProfile from "../StudentProfile";
+
 export default function Routers() {
     return (
         <Router>
@@ -57,6 +59,7 @@ export default function Routers() {
                 <Route path="/team" element={<TeamPage />} />
                 <Route path="/loginRegistration/:token/:userEmail" element={<LoginRegistration />} />
                 <Route path="/checker" element={<EligibilityChecker />} />
+                <Route path="/claimHistory" element={<StudentProfile/>} />
 
                 {/* 🔴 SECURE ROUTES: Wrapped in DataProvider -> LoaderProvider AFTER the Auth check */}
                 <Route path="/admin" element={

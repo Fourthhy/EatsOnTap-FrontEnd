@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { db } from "../../utils/db";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +9,9 @@ import { isSettingActive } from "../../functions/isSettingActive";
 import { claimMeal } from "../../functions/foodServer/claimMeal";
 import { fetchApprovedStudents } from "../../functions/foodServer/fetchApprovedStudents";
 
-// 🟢 IMPORTS: For the Logout Modal
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut, Loader2 } from "lucide-react";
+// 🟢 NEW: Imported CheckCircle and AlertTriangle for our Toasts
+import { LogOut, Loader2, XCircle, CheckCircle, AlertTriangle } from "lucide-react";
 
 export default function FreeMealClaim() {
     const [currentDateTime, setCurrentDateTime] = useState(new Date());
@@ -20,25 +21,46 @@ export default function FreeMealClaim() {
     const [allStudents, setAllStudents] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-    // This state acts as the "Search Term" (can be ID or RFID)
     const [inputVal, setInputVal] = useState("");
 
     const [isSystemActive, setIsSystemActive] = useState(true);
     const [systemMessage, setSystemMessage] = useState("");
 
-    // 🟢 STATE: For Logout Modal
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    // 🟢 NEW: Step 3 - Toast Notification States
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState("");
+    const [toastType, setToastType] = useState("success"); // "success" | "warning"
+
+    // 1. Define the dynamic glow style based on the status
+    const status = mealClaimData.temporaryClaimStatus;
+
+    let cardGlowStyle = {};
+    if (status === "ELIGIBLE") {
+        cardGlowStyle = {
+            boxShadow: "0 0 60px 15px rgba(34, 197, 94, 0.5), inset 0 0 20px 5px rgba(34, 197, 94, 0.4)",
+            border: "2px solid rgba(34, 197, 94, 0.8)",
+            overflow: "hidden" // Keeps inner images from covering the inset shadow
+        };
+    } else if (status === "INELIGIBLE" || status === "INELGIBLE" || status === "CLAIMED") {
+        cardGlowStyle = {
+            boxShadow: "0 0 60px 15px rgba(239, 68, 68, 0.5), inset 0 0 20px 5px rgba(239, 68, 68, 0.4)",
+            border: "2px solid rgba(239, 68, 68, 0.8)",
+            overflow: "hidden"
+        };
+    }
 
     const inputRef = useRef(null);
     const navigate = useNavigate();
 
-    // 🟢 Async Logout Logic
     const handleLogout = async () => {
         if (isLoggingOut) return;
-
         setIsLoggingOut(true);
-
         try {
             await logout();
         } catch (error) {
@@ -48,6 +70,26 @@ export default function FreeMealClaim() {
         }
     };
 
+    const testDexieConnection = async () => {
+        try {
+            await db.eligibleStudents.put({
+                studentID: "TEST-123",
+                first_name: "John",
+                last_name: "Doe",
+                temporaryClaimStatus: "ELIGIBLE",
+                syncStatus: "synced"
+            });
+            const retrievedStudent = await db.eligibleStudents.get("TEST-123");
+            console.log("✅ Dexie is working flawlessly! Retrieved:", retrievedStudent);
+            alert("Dexie works! Check your console.");
+        } catch (error) {
+            console.error("❌ Dexie failed to initialize:", error);
+        }
+    };
+
+    // =======================================================================
+    // 🟢 NEW: Step 3 - Refactored handleScan (Offline-First Logic)
+    // =======================================================================
     const handleScan = async (e) => {
         if (!isSystemActive) return;
 
@@ -59,7 +101,9 @@ export default function FreeMealClaim() {
 
             const isRFID = /^\d+$/.test(trimmedInput);
 
-            const foundIndex = allStudents.findIndex(s => {
+            // 1. Search DEXIE instead of just the React State
+            const localStudents = await db.eligibleStudents.toArray();
+            const originalStudentData = localStudents.find(s => {
                 if (isRFID) {
                     return s.rfidTag === trimmedInput;
                 } else {
@@ -67,43 +111,58 @@ export default function FreeMealClaim() {
                 }
             });
 
-            if (foundIndex !== -1) {
-                // Trigger API call in background
-                await claimMeal(trimmedInput).catch((err) => {
-                    console.error("Background API Claim Error:", err);
-                });
+            if (originalStudentData) {
+                const currentStatus = originalStudentData.temporaryClaimStatus;
 
-                const updatedStudentList = [...allStudents];
-
-                // 1. Get the student as they exist RIGHT NOW (e.g. ELIGIBLE)
-                const originalStudentData = updatedStudentList[foundIndex];
-
-                // 2. Set the display data immediately using a COPY of the original
                 setMealClaimData({ ...originalStudentData });
                 setPageDisplay("");
 
-                // 3. Now handle the Logic Update for the next scan
-                const currentStatus = originalStudentData.temporaryClaimStatus;
-
-                // 🟢 NEW: Fire the audio based on the exact status
                 if (currentStatus === "ELIGIBLE") {
                     playCorrect();
+
+                    // 2. INSTANT LOCAL LOCK: Update Dexie immediately so they can't double-tap
+                    await db.eligibleStudents.update(originalStudentData.studentID, {
+                        temporaryClaimStatus: "CLAIMED",
+                        syncStatus: "pending" // Marked pending until API confirms
+                    });
+
+                    // Update UI state to mirror Dexie
+                    setAllStudents(prev => prev.map(s =>
+                        s.studentID === originalStudentData.studentID
+                            ? { ...s, temporaryClaimStatus: "CLAIMED", syncStatus: "pending" }
+                            : s
+                    ));
+
+                    // 3. ATTEMPT CLOUD SYNC
+                    try {
+                        await claimMeal(trimmedInput);
+
+                        // If we reach here, your backend returned Status 200 OK!
+                        await db.eligibleStudents.update(originalStudentData.studentID, {
+                            syncStatus: "synced" // Officially synced!
+                        });
+
+                        // Fire Success Toast
+                        setToastMessage(`Synced! ${originalStudentData.first_name} claimed successfully.`);
+                        setToastType("success");
+                        setShowToast(true);
+
+                    } catch (err) {
+                        console.error("Background API Claim Error:", err);
+
+                        // Fire Offline Warning Toast (But student still gets food!)
+                        setToastMessage(`Offline: Claim saved locally for ${originalStudentData.first_name}.`);
+                        setToastType("warning");
+                        setShowToast(true);
+                    }
+
+                    // Hide toast after 3 seconds
+                    setTimeout(() => setShowToast(false), 3000);
+
                 } else if (currentStatus === "CLAIMED" || currentStatus === "INELGIBLE") {
                     playWrong();
                 }
 
-                if (currentStatus === "ELIGIBLE") {
-                    // Create a NEW object for the list update to avoid mutating the display data
-                    const updatedStudent = {
-                        ...originalStudentData,
-                        temporaryClaimStatus: "CLAIMED"
-                    };
-
-                    updatedStudentList[foundIndex] = updatedStudent;
-                    setAllStudents(updatedStudentList);
-                }
-
-                // Reset UI
                 setInputVal("");
 
                 setTimeout(() => {
@@ -111,25 +170,62 @@ export default function FreeMealClaim() {
                 }, 3000);
 
             } else {
-                alert(isRFID ? "RFID Tag not recognized." : "Student ID not found.");
+                if (isRFID) {
+                    setErrorMessage("RFID Tag not recognized.");
+                    playNoRFIDTag();
+                } else {
+                    setErrorMessage("Student ID not found.");
+                    playNoStudentID();
+                }
+
+                setShowErrorModal(true);
                 setInputVal("");
+
+                setTimeout(() => {
+                    setShowErrorModal(false);
+                }, 2000);
             }
         }
     };
 
     // =======================================================================
-    // 🟢 EFFECT 1: Fetch Data and Settings (Runs ONCE when page loads)
+    // Step 2: The Morning Fetch (From previous step)
     // =======================================================================
     useEffect(() => {
         const loadData = async () => {
             try {
                 const students = await fetchApprovedStudents();
+
                 if (Array.isArray(students)) {
-                    setAllStudents(students);
+                    const dexieReadyData = students.map(student => ({
+                        ...student,
+                        syncStatus: 'synced'
+                    }));
+
+                    await db.eligibleStudents.clear();
+                    await db.eligibleStudents.bulkPut(dexieReadyData);
+                    console.log(`✅ Saved ${dexieReadyData.length} students to local database.`);
+
+                    const localStudents = await db.eligibleStudents.toArray();
+                    setAllStudents(localStudents);
                     setIsDataLoaded(true);
                 }
             } catch (error) {
-                console.error("Error fetching students:", error);
+                console.error("❌ Error fetching students from cloud:", error);
+
+                console.log("Attempting to load from local offline storage...");
+                try {
+                    const localStudents = await db.eligibleStudents.toArray();
+                    if (localStudents.length > 0) {
+                        console.log(`✅ Loaded ${localStudents.length} students from offline memory.`);
+                        setAllStudents(localStudents);
+                        setIsDataLoaded(true);
+                    } else {
+                        setSystemMessage("No offline data available. Please connect to internet to sync.");
+                    }
+                } catch (localErr) {
+                    console.error("Local database failed:", localErr);
+                }
             }
         };
 
@@ -137,20 +233,16 @@ export default function FreeMealClaim() {
             try {
                 const statusResponse = await isSettingActive("STUDENT-CLAIM");
 
-                // Handle the response safely, whether it's an object or a boolean
                 if (statusResponse && typeof statusResponse === 'object') {
-                    // If backend returns { isActive: false, message: "..." }
                     setIsSystemActive(statusResponse.isActive === true);
                     setSystemMessage(statusResponse.message || "System is closed.");
                 } else {
-                    // If backend literally just returns the boolean `false`
                     setIsSystemActive(statusResponse === true);
                     setSystemMessage(statusResponse ? "" : "System is currently disabled.");
                 }
 
             } catch (error) {
                 console.error("Failed to check status:", error);
-                // Fail-safe: If the API crashes, lock the POS terminal
                 setIsSystemActive(false);
                 setSystemMessage("Network Error. Cannot connect to settings.");
             }
@@ -158,23 +250,20 @@ export default function FreeMealClaim() {
 
         loadData();
         checkSystemStatus();
-    }, []); // EMPTY ARRAY: Guarantees this only fetches from the DB once!
+    }, []);
 
-    // =======================================================================
-    // 🟢 EFFECT 2: The Clock and Input Focus 
-    // =======================================================================
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentDateTime(new Date());
         }, 3500);
 
-        // Only try to steal focus if the system is actually active
-        if (inputRef.current && isSystemActive) {
+        // Don't steal focus if toast or modals are active
+        if (inputRef.current && isSystemActive && !showErrorModal && !showLogoutConfirm) {
             inputRef.current.focus();
         }
 
         return () => clearInterval(timer);
-    }, [isSystemActive]); // Safely depends on isSystemActive
+    }, [isSystemActive, showErrorModal, showLogoutConfirm]);
 
     const dateString = currentDateTime.toLocaleDateString('en-US', {
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
@@ -188,18 +277,28 @@ export default function FreeMealClaim() {
 
     const correctRef = useRef(null);
     const wrongRef = useRef(null);
+    const noStudentIDRef = useRef(null);
+    const noRFIDTagRef = useRef(null);
 
     const playCorrect = () => correctRef.current?.play().catch(e => console.log("Audio blocked", e));
     const playWrong = () => wrongRef.current?.play().catch(e => console.log("Audio blocked", e));
+    const playNoStudentID = () => noStudentIDRef.current?.play().catch(e => console.log("Audio blocked", e));
+    const playNoRFIDTag = () => noRFIDTagRef.current?.play().catch(e => console.log("Audio blocked", e));
 
     return (
         <>
-            {/* Hidden Audio Elements */}
             <audio ref={correctRef} src="/sound/Correct.mp3" preload="auto" />
             <audio ref={wrongRef} src="/sound/Wrong.mp3" preload="auto" />
+            <audio ref={noStudentIDRef} src='/sound/noStudentIDSound.mp3' preload="auto" />
+            <audio ref={noRFIDTagRef} src='/sound/noRFIDTag.mp3' preload="auto" />
 
-            {/* 🟢 FLOATING LOGOUT BUTTON: Anchored bottom-right */}
-            <div style={{ position: "absolute", bottom: "20px", right: "20px", zIndex: 9000 }}>
+            <div style={{ position: "absolute", bottom: "20px", right: "20px", zIndex: 9000, display: "flex", gap: "10px" }}>
+                <Button
+                    onClick={testDexieConnection}
+                    style={{ background: "#3b82f6", color: "white", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", padding: "5px 10px" }}
+                >
+                    Test Local DB
+                </Button>
                 <Button
                     onClick={() => setShowLogoutConfirm(true)}
                     disabled={isLoggingOut}
@@ -210,18 +309,75 @@ export default function FreeMealClaim() {
                 </Button>
             </div>
 
+            {/* 🟢 NEW: Step 3 - FLOATING SYNC TOAST */}
+            <AnimatePresence>
+                {showToast && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -50 }}
+                        animate={{ opacity: 1, y: 20 }} // Drops down slightly from the top
+                        exit={{ opacity: 0, y: -50 }}
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: '50%',
+                            marginLeft: '-150px', // Center alignment
+                            width: '300px',
+                            zIndex: 10000,
+                            backgroundColor: toastType === "success" ? '#10B981' : '#F59E0B', // Green for success, Orange for offline
+                            color: 'white',
+                            padding: '12px 20px',
+                            borderRadius: '50px',
+                            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '10px',
+                            fontWeight: 600,
+                            fontFamily: 'sans-serif'
+                        }}
+                    >
+                        {toastType === "success" ? <CheckCircle size={20} /> : <AlertTriangle size={20} />}
+                        <span style={{ fontSize: '14px' }}>{toastMessage}</span>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* 🟢 ERROR MODAL */}
+            <AnimatePresence>
+                {showErrorModal && (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                            style={{ backgroundColor: 'white', borderRadius: '12px', padding: '24px', width: '100%', maxWidth: '360px', zIndex: 10, boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
+                        >
+                            <div style={{ backgroundColor: '#FEE2E2', padding: '12px', borderRadius: '50%', marginBottom: '16px', color: '#DC2626' }}>
+                                <XCircle size={32} />
+                            </div>
+                            <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#1F2937', marginBottom: '8px' }}>Not Found</h3>
+                            <p style={{ fontSize: '16px', color: '#4B5563', lineHeight: '1.5' }}>
+                                {errorMessage}
+                            </p>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             {/* 🟢 LOGOUT CONFIRMATION MODAL */}
             <AnimatePresence>
                 {showLogoutConfirm && (
                     <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {/* Backdrop */}
                         <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
                             onClick={() => !isLoggingOut && setShowLogoutConfirm(false)}
                         />
 
-                        {/* Modal Box */}
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0, y: 10 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -357,21 +513,11 @@ export default function FreeMealClaim() {
                         style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0, pointerEvents: "none" }}
                     />
 
-                    <div style={{ position: "relative", zIndex: 10, height: "100%", width: "100%", display: "flex", flexDirection: "column", justifyContent: "start", alignItems: "center" }}>
+                    <div style={{ position: "relative", zIndex: 10, height: "100%", width: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", ...cardGlowStyle }}>
 
-                        {/* 🟢 NEW: Cleaner Conditional Rendering using && */}
-                        {mealClaimData.temporaryClaimStatus === "ELIGIBLE" && (
-                            <img src="/studentClaim/Eligible_Sinage.svg" alt="Eligible Sinage" style={{ width: "170px", height: "170px" }} />
-                        )}
-                        {mealClaimData.temporaryClaimStatus === "CLAIMED" && (
-                            <img src="/studentClaim/ALREADY_CLAIMED.svg" alt="Claimed Sinage" style={{ width: "190px", height: "190px" }} />
-                        )}
-                        {mealClaimData.temporaryClaimStatus === "INELGIBLE" && (
-                            <img src="/studentClaim/INELIGIBLE_SINAGE.svg" alt="Ineligible Sinage" style={{ width: "190px", height: "190px" }} />
-                        )}
+                        <div style={{ width: "100%", height: "55%", display: "flex", justifyContent: "center", alignItems: "end" }}>
 
-                        <div style={{ width: "100%", height: "55%", display: "flex", justifyContent: "center", alignItems: "start" }}>
-
+                            {/* 2. Apply the dynamic ...cardGlowStyle here */}
                             <div style={{ position: "relative", width: "90%", height: "90%" }}>
 
                                 {mealClaimData.section === 'BSIS' ? (
@@ -402,28 +548,25 @@ export default function FreeMealClaim() {
                                                     <div style={{ marginLeft: "20px", display: "flex", flexDirection: "column", gap: 20 }} className="h-[100%] flex flex-column justify-start">
                                                         <div>
                                                             <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{mealClaimData.last_name}, {mealClaimData.first_name}</p>
-                                                            {/* <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">Marco, Jusine Jynne Patrice</p> */}
                                                             <p style={{ fontWeight: 350 }} className="font-geist text-xs text-[#999797]">Student Name</p>
                                                         </div>
                                                         <div>
                                                             <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{mealClaimData.section || mealClaimData.program} - {mealClaimData.year}</p>
-                                                            {/* <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">BSIS - 4</p> */}
                                                             <p style={{ fontWeight: 350 }} className="font-geist text-xs text-[#999797]">Section / Year</p>
                                                         </div>
                                                         <div>
                                                             <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">{mealClaimData.studentID}</p>
-                                                            {/* <p style={{ fontWeight: 400 }} className="font-geist text-xl text-white">25-01867JAM</p> */}
                                                             <p style={{ fontWeight: 350 }} className="font-geist text-xs text-[#999797]">StudentID</p>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div>
                                                     {mealClaimData.section === 'ACT' ? (
-                                                        <img src="/studentClaim/logo-ACT.svg" alt='bsis-logo' style={{ width: "170px", height: "170px", paddingBottom: "10px" }} />
+                                                        <img src="/studentClaim/logo-ACT.svg" alt='act-logo' style={{ width: "170px", height: "170px", paddingBottom: "10px" }} />
 
                                                     ) : mealClaimData.section === 'BSIS' ? (
                                                         <img src="/studentClaim/logo-BSIS.svg" alt='bsis-logo' style={{ width: "170px", height: "170px", paddingBottom: "10px" }} />
-                                                    ) : <img src="lv-logo.svg" alt='bsis-logo' style={{ width: "170px", height: "170px", paddingBottom: "10px", paddingRight: "10px" }} />}
+                                                    ) : <img src="lv-logo.svg" alt='lv-logo' style={{ width: "170px", height: "170px", paddingBottom: "10px", paddingRight: "10px" }} />}
                                                 </div>
                                             </div>
                                         </div>
@@ -435,6 +578,18 @@ export default function FreeMealClaim() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div>
+                            {mealClaimData.temporaryClaimStatus === "ELIGIBLE" && (
+                                <img src="/studentClaim/Eligible_Sinage.svg" alt="Eligible Sinage" style={{ width: "170px", height: "170px" }} />
+                            )}
+                            {mealClaimData.temporaryClaimStatus === "CLAIMED" && (
+                                <img src="/studentClaim/ALREADY_CLAIMED.svg" alt="Claimed Sinage" style={{ width: "190px", height: "190px" }} />
+                            )}
+                            {/* 3. Added fallback for the typo here as well just to be safe */}
+                            {(mealClaimData.temporaryClaimStatus === "INELIGIBLE" || mealClaimData.temporaryClaimStatus === "INELGIBLE") && (
+                                <img src="/studentClaim/INELIGIBLE_SINAGE.svg" alt="Ineligible Sinage" style={{ width: "190px", height: "190px" }} />
+                            )}
                         </div>
                     </div>
                 </div>
