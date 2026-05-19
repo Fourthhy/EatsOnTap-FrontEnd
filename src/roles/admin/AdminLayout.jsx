@@ -115,7 +115,7 @@ const AdminLayoutContent = () => {
 
             <Sidebar
                 menuItems={menuItems}
-                quickActions={quickActions}
+                // quickActions={quickActions}
                 settingMenu={settingMenu}
             />
 

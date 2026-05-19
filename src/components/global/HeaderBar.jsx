@@ -9,6 +9,7 @@ const NOTIFICATION_TEMPLATE = [
     {
         date: "Today",
         data: [
+            { notificationType: "Double Claim Alert", description: "22-00041XYZ abused a double claim", time: "10:23 AM" },
             { notificationType: "Meal Request", description: "Ms. Santos submitted a meal request for 1-Luke", time: "10:23 AM" },
             { notificationType: "Event Creation", description: "A new event 'Joji conert' has been scheduled", time: "09:00 AM" }
         ]
@@ -36,7 +37,7 @@ const NOTIFICATION_TEMPLATE = [
 function HeaderBar({
     headerTitle,
     hasNotification = false,
-    notificationList,
+    notificationList = NOTIFICATION_TEMPLATE,
     simulationSignal = 0,
     onRefresh
 }) {

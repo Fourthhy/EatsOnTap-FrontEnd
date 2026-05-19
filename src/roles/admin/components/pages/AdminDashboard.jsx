@@ -200,7 +200,7 @@ export default function AdminDashboard() {
                 <HeaderBar
                     userAvatar={USER_AVATAR}
                     headerTitle={"Dashboard"}
-                    notificationList={notifcations}
+                    // notificationList={notifcations}
                     simulationSignal={headerSignal}
                     onRefresh={fetchNotificationsData}
                 />
@@ -255,7 +255,7 @@ export default function AdminDashboard() {
                                                 </div>
 
                                                 {/* DAILY EXPENSES CHART */}
-                                                <div className="flex h-[350px] w-[98%] border-[#D9D9D9] border-[1px] my-2 rounded-xl" style={{ margin: 10 }}>
+                                                {/* <div className="flex h-[350px] w-[98%] border-[#D9D9D9] border-[1px] my-2 rounded-xl" style={{ margin: 10 }}>
                                                     <div className="h-full w-full" style={{ padding: 20 }}>
                                                         <p className="font-geist text-sm text-gray-800">Meal Value Spending Chart</p>
                                                         {isLoading ? <Skeleton className="w-full h-full rounded-lg" /> :
@@ -268,7 +268,7 @@ export default function AdminDashboard() {
                                                             />
                                                         }
                                                     </div>
-                                                </div>
+                                                </div> */}
 
                                                 {/* BAR CHART */}
                                                 <div className="flex h-full w-[98%] border-[#D9D9D9] border-[1px] my-2 rounded-xl" style={{ margin: 10 }}>

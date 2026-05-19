@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Utensils, CalendarDays, Wallet, FileDown, Calendar, Clock, Settings, Users, UserRoundPlus } from "lucide-react"; 
+import { X, Utensils, CalendarDays, Wallet, FileDown, Calendar, Clock, Settings, Users, UserRoundPlus, TriangleAlert } from "lucide-react"; 
 
 import { markNotificationsAsRead } from '../../functions/markNotificationAsRead'; 
 
@@ -16,6 +16,7 @@ const getNotificationConfig = (type) => {
         case 'Update Student Registry': return { icon: Users, color: '#8B5CF6', bg: '#F5F3FF' };
         case 'Event Credit Allottment': return { icon: Wallet, color: '#F68A3A', bg: '#FFF7ED' };
         case 'Add Section Request': return { icon: UserRoundPlus, color: '#3B82F6', bg: '#EFF6FF'};
+        case 'Double Claim Alert': return { icon: TriangleAlert, color: '#f63b3b', bg: '#ffefef'}
         default: return { icon: Clock, color: '#6B7280', bg: '#F3F4F6' };
     }
 };
