@@ -204,8 +204,6 @@ export default function FreeMealClaim() {
 
                     await db.eligibleStudents.clear();
                     await db.eligibleStudents.bulkPut(dexieReadyData);
-                    console.log(`✅ Saved ${dexieReadyData.length} students to local database.`);
-
                     const localStudents = await db.eligibleStudents.toArray();
                     setAllStudents(localStudents);
                     setIsDataLoaded(true);
